@@ -2,6 +2,20 @@
 
 This project was begun as a way to learn Polymer.
 
+## Installation
+
+- download via git clone or equivalent
+- navigate to root folder and open command prompt
+- install polymer if not already installed
+	+ npm install -g polymer-cli
+- install bower
+	+ npm install -g bower
+- install polymer runtime
+	+ bower install
+- run polymer server
+	+ polymer serve
+- click the `run-demo.bat` file in root folder or open browser to `localhost:8081/demo/`
+
 ## Elements
 
 The package contains two distinct types of elements:
