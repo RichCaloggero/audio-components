@@ -152,7 +152,6 @@ There seems to be no good solution for this annoyance at present.
 
 #### Example 1
 
-```Produeces a tone in left channel only.
 Both the oscillator and output gain have UI controls.
 The empty series inside split simply passes input to output with unity gain.
 
@@ -160,7 +159,7 @@ The empty series inside split simply passes input to output with unity gain.
 <audio-context><audio-series>
 <audio-oscillator label="my oscillator" frequency="220.0"></audio-oscillator>
 
-<audio-split><audio-series></audio-series></audio-split>
+<audio-split><audio-gain></audio-gain></audio-split>
 
 <audio-gain label="master volume" gain=".2"></audio-gain>
 
@@ -176,7 +175,7 @@ Same as above, but puts signal only in right channel at destination.
 <audio-context><audio-series>
 <audio-oscillator label="my oscillator" frequency="220.0"></audio-oscillator>
 
-<audio-split swap-outputs><audio-series></audio-series></audio-split>
+<audio-split swap-outputs><audio-gain></audio-gain></audio-split>
 
 <audio-gain label="master volume" gain=".2"></audio-gain>
 
@@ -184,3 +183,4 @@ Same as above, but puts signal only in right channel at destination.
 </audio-series></audio-context>
 ```
 
+See `demo/index.html` for a more complex example.
