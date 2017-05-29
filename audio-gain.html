@@ -1,0 +1,82 @@
+<!--<link rel="import" href="../polymer/lib/elements/dom-if.html">-->
+<!--<link rel="import" href="../polymer/lib/elements/dom-repeat.html">-->
+
+<dom-module id="audio-gain">
+<template>
+<style>
+:host {
+display: block;
+}
+
+:host .field {
+display: inline;
+}
+</style>
+
+<div class="audio-gain" role="region" aria-label$="{{label}}">
+<span class="label">[[label]]</span>
+
+<div class="row">
+<div class="field" data-name="gain">
+<label>Gain:</label>
+<br><input class="gain" value="{{gain::change}}" type="number" min="-2.0" max="2.0" step="0.1">
+</div>
+</div><!-- .row -->
+
+</div>
+</template>
+
+<script>
+"use strict";
+
+(function () {
+var instanceCount  = 0;
+
+class AudioGain extends _AudioContext_ {
+static get is() { return "audio-gain"; }
+
+static get properties () {
+return {
+label: {
+type: String,
+value: ""
+}, // label
+
+gain: {
+type: Number,
+value: 1.0,
+notify: true,
+observer: "gainChanged"
+} // gain
+}; // return
+} // get properties
+
+
+constructor () {
+super ();
+instanceCount += 1;
+this._id = AudioGain.is + instanceCount;
+if (this._debug) this.label = this._id;
+
+this._init (audio.createGain());
+//this._audioNode.channelCountMode = "explicit";
+} // constructor
+
+connectedCallback () {
+super.connectedCallback ();
+if (this.contextCheck(AudioGain.is)) {
+this.debugElementCreation (`${this.label}: created ${this._audioIn}`);
+this.addFieldLabels ();
+} // if
+} // connectedCallback
+
+gainChanged (value) {
+this._audioNode.gain.value = value;
+} // gainChanged
+
+} // class AudioGain
+
+window.customElements.define(AudioGain.is, AudioGain);
+})();
+</script>
+</dom-module>

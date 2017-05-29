@@ -1,0 +1,154 @@
+<link rel="import" href="bower_components/polymer/lib/elements/dom-repeat.html">
+<!--<link rel="import" href="../polymer/lib/elements/dom-if.html">-->
+
+<dom-module id="audio-pan">
+<template>
+<style>
+:host {
+display: block;
+}
+</style>
+
+<div class="audio-pan" role="region" aria-label$="{{label}}">
+<span class="label">{{label}}</span>
+
+<template is="dom-repeat" items="{{ui}}">
+<div class="field" name$="{{item.name}}">
+<label for$="{{item.value.id}}">{{item.name}}</label>
+<br><input id$="{{item.value.id}}" type="number" value="{{item.name::change}}">
+</div>
+</template>
+
+</div>
+</template>
+
+<script>
+"use strict";
+
+(function () {
+var instanceCount  = 0;
+
+class AudioPan extends _AudioContext_ {
+static get is() { return "audio-pan"; }
+
+static get properties () {
+return {
+ui: {
+type: Array,
+value() {let properties = _AudioContext_.uiProperties(this, this._id); console.log("properties: ", JSON.stringify(properties)); return properties;} 
+}, // ui
+
+label: {
+type: String,
+//value: "3D pan"
+}, // label
+
+x: {
+ui: true,
+type: Number,
+value: 0.0,
+notify: true,
+observer: "xChanged"
+}, // x
+
+y: {
+ui: true,
+type: Number,
+value: 0.0,
+notify: true,
+observer: "yChanged"
+}, // y
+
+z: {
+ui: true,
+type: Number,
+value: 0.0,
+notify: true,
+observer: "zChanged"
+}, // z
+
+coneInnerAngle: {
+ui: true,
+type: Number,
+value: 0.0,
+notify: true,
+observer: "coneInnerAngleChanged"
+}, // coneInnerAngle
+coneOuterAngle: {
+ui: true,
+type: Number,
+value: 360.0,
+notify: true,
+observer: "coneOuterAngleChanged"
+}, // coneOuterAngle
+coneOuterGain: {
+ui: true,
+type: Number,
+value: 0.0,
+notify: true,
+observer: "coneOuterGainChanged"
+}, // coneOuterGain
+
+distanceModel: String,
+maxDistance: Number,
+refDistance: Number,
+rolloffFactor: Number,
+
+orientationX: Number,
+orientationY: Number,
+orientationZ: Number,
+
+}; // return
+} // get properties
+
+static get observers () {
+return [
+
+]; // return
+} // get observers
+
+constructor () {
+super ();
+instanceCount += 1;
+this._id = AudioPan.is + instanceCount;
+console.log ("creating ", this._id);
+this._audioIn = this._audioOut =  audio.createPanner ();
+this._in = audio.createGain();
+this._out = audio.createGain();
+
+this._audioIn.panningModel = "HRTF";
+this._audioIn.distanceModel = "inverse";
+this._audioIn.maxDistance = 10.0;
+this._audioIn.coneInnerAngle = 0.0;
+this._audioIn.coneOuterAngle = 360.0;
+this._audioIn.coneOuterGain = 0.0;
+} // constructor
+
+connectedCallback () {
+super.connectedCallback ();
+if (this.contextCheck(AudioPan.is)) {
+this.addFieldLabels ();
+this._connect ();
+this.debugElementCreation (`created ${this._audioIn}`);
+} // if
+} // connectedCallback
+
+xChanged (value) {
+this._audioIn.positionX.value = value;
+} // xChanged
+
+yChanged (value) {
+this._audioIn.positionY.value = value;
+} // yChanged
+
+zChanged (value) {
+this._audioIn.positionZ.value = value;
+} // zChanged
+
+} // class AudioPan
+
+
+window.customElements.define(AudioPan.is, AudioPan);
+})(); // module
+</script>
+</dom-module>

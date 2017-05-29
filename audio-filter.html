@@ -1,0 +1,171 @@
+<!--<link rel="import" href="../polymer/lib/elements/dom-repeat.html">-->
+
+<dom-module id="audio-filter">
+<template>
+<style>
+:host {
+display: block;
+}
+
+:host .field {
+display: inline;
+}
+</style>
+
+<div class="audio-filter" role="region" aria-label$="{{label}}">
+<div class="row">
+<span class="label">[[label]]</span>
+
+<div class="field" data-name="bypass">
+<label>bypass</label>
+<br><input type="checkbox" checked="{{bypass::change}}" accesskey="x">
+</div>
+
+</div><div class="row">
+
+<div class="field" data-name="type">
+<label>Type:</label>
+<br><select class="type" size="1" value="{{type::change}}">
+<option value="allpass">all pass</option>
+<option value="lowpass">low pass</option>
+<option value="highpass">high pass</option>
+<option value="bandpass">band pass</option>
+<option value="lowshelf">low shelf</option>
+<option value="highshelf">high shelf</option>
+<option value="notch">notch</option>
+<option value="peaking">peaking</option>
+</select></div>
+
+<div class="field" data-name="frequency">
+<label>Frequency</label>
+<br><input class="frequency" value="{{frequency::change}}" type="number" min="20.0" max="20000.0" step="10.0"></label>
+</div>
+
+<div class="field" data-name="detune">
+<label>Detune</label>
+<br><input class="detune" value="{{detune::change}}" type="number" min="0.0" max="1.0" step="0.01"></label>
+</div>
+
+</div><div class="row">
+
+<div class="field" data-name="q">
+<label>Q</label>
+<br><input class="q" value="{{q::change}}" type="number" min="0.01" max="20.0" step="0.05"></label>
+</div>
+
+<div class="field" data-name="gain">
+<label>Gain</label>
+<br><input class="gain" value="{{gain::change}}" type="number" min="-30.0" max="30.0" step="0.1"></label>
+</div>
+
+</div><!-- .row -->
+
+</div>
+</template>
+
+<script>
+"use strict";
+
+//(function () {
+var instanceCount = 0;
+
+
+class AudioFilter extends _AudioContext_ {
+static get is() { return "audio-filter"; }
+
+static get properties () {
+return {
+bypass: {
+type: Boolean,
+value: false,
+notify: true,
+observer: "_bypass"
+}, // bypass
+label: {
+type: String,
+value: ""
+}, // label
+
+type: {
+type: String,
+value: "allpass",
+notify: true,
+observer: "typeChanged"
+}, //type
+
+frequency: {
+type: Number,
+value: 400.0,
+notify: true,
+observer: "frequencyChanged"
+}, // frequency
+
+q: {
+type: Number,
+value: 0.76,
+notify: true,
+observer: "qChanged"
+}, // q
+
+detune: {
+type: Number,
+value: 0.0,
+notify: true,
+observer: "detuneChanged"
+}, // detune
+
+gain: {
+type: Number,
+value: 1.0,
+notify: true,
+observer: "gainChanged"
+} // gain
+
+}; // return
+} // get properties
+
+constructor () {
+super ();
+instanceCount += 1;
+this._id = AudioFilter.is + instanceCount;
+if (this._debug) this.label = this._id;
+
+this._init (audio.createBiquadFilter ());
+} // constructor
+
+connectedCallback () {
+super.connectedCallback ();
+if (this.contextCheck(AudioFilter.is)) {
+this.debugElementCreation (`${this.label}: created ${this._audioIn}`);
+this.addFieldLabels ();
+} // if
+} // connectedCallback
+
+
+typeChanged (value) {
+this._audioNode.type = value;
+} // typeChanged
+
+gainChanged (value) {
+this._audioNode.gain.value = value;
+} // gainChanged
+
+qChanged (value) {
+this._audioNode.Q.value = value;
+} // qChanged
+
+frequencyChanged (value) {
+this._audioNode.frequency.value = value;
+} // frequencyChanged
+
+detuneChanged (value) {
+this._audioNode.detune.value = value;
+} // detuneChanged
+
+
+} // class AudioFilter
+
+window.customElements.define(AudioFilter.is, AudioFilter);
+//})();
+</script>
+</dom-module>

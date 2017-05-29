@@ -1,0 +1,68 @@
+<!--<link rel="import" href="../polymer/lib/elements/dom-if.html">-->
+<!--<link rel="import" href="../polymer/lib/elements/dom-repeat.html">-->
+
+<dom-module id="ui-field">
+<template>
+<style>
+:host {
+display: block;
+}
+</style>
+
+<div class="ui-field" role="region">
+<span class="label">[[label]]</span>
+<br><input class="{{name}}" value="{{gain::change}}" type="number" min="0.0" max="2.0" step="0.1">
+</div>
+
+</template>
+
+<script>
+"use strict";
+
+(function () {
+var instanceCount  = 0;
+
+class UIField extends _AudioContext_ {
+static get is() { return "ui-field"; }
+
+static get properties () {
+return {
+label: {
+type: String,
+value: "gain"
+}, // label
+gain: {
+type: Number,
+value: 1.0,
+notify: true,
+observer: "gainChanged"
+} // gain
+}; // return
+} // get properties
+
+
+constructor () {
+super ();
+instanceCount += 1;
+this._id = `${UIField.is + instanceCount}`;
+this.audioNode = audio.createGain();
+if (this._debug) alert (`created ${this.audioNode}`);
+} // constructor
+
+connectedCallback () {
+super.connectedCallback ();
+if (this.contextCheck(UIField.is)) {
+this.addFieldLabels ();
+} // if
+} // connectedCallback
+
+gainChanged (value) {
+if (this.audioNode) this.audioNode.gain.value = value;
+} // gainChanged
+
+} // class UIField
+
+window.customElements.define(UIField.is, UIField);
+})();
+</script>
+</dom-module>

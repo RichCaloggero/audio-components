@@ -1,0 +1,230 @@
+<!--<link rel="import" href="bower_components/polymer/lib/elements/dom-repeat.html">-->
+<!--<link rel="import" href="../polymer/lib/elements/dom-if.html">-->
+
+<dom-module id="audio-pan">
+<template>
+<style>
+:host {
+display: block;
+}
+
+:host .field {
+display: inline;
+float: left;
+}
+</style>
+
+<div class="audio-pan" role="region" aria-label$="{{label}}">
+<div class="row">
+<span class="label">{{label}}</span>
+
+<div class="field" data-name="bypass">
+<label>bypass</label>
+<br><input type="checkbox" checked="{{bypass::change}}">
+</div>
+
+</div><div class="row">
+
+<div class="field" data-name="x">
+<label>x</label>
+<br><input type="number" value="{{x::change}}">
+</div>
+
+<div class="field" data-name="y">
+<label>y</label>
+<br><input type="number" value="{{y::change}}">
+</div>
+
+<div class="field" data-name="z">
+<label>z</label>
+<br><input type="number" value="{{z::change}}">
+</div>
+
+</div><div class="row">
+
+<div class="field" data-name="mmaxDistance">
+<label>max distance</label>
+<br><input type="number" value="{{maxDistance::change}}">
+</div>
+
+<div class="field" data-name="refDistance">
+<label>ref distance</label>
+<br><input type="number" value="{{refDistance::change}}">
+</div>
+
+<div class="field" data-name="rolloffFactor">
+<label>rolloff factor</label>
+<br><input type="number" value="{{rolloffFactor::change}}">
+</div>
+
+<div class="field" data-name="coneInnerAngle">
+<label>cone inner angle</label>
+<br><input type="number" value="{{coneInnerAngle::change}}">
+</div>
+
+<div class="field" data-name="coneOuterAngle">
+<label>cone outer angle</label>
+<br><input type="number" value="{{coneOuterAngle::change}}">
+</div>
+
+<div class="field" data-name="coneOuterGain">
+<label>cone outer gain</label>
+<br><input type="number" value="{{coneOuterGain::change}}">
+</div>
+
+</div><!-- .row -->
+
+</div>
+</template>
+
+<script>
+"use strict";
+
+(function () {
+var instanceCount  = 0;
+
+class AudioPan extends _AudioContext_ {
+static get is() { return "audio-pan"; }
+
+static get properties () {
+return {
+bypass: {
+type: Boolean,
+value: false,
+notify: true,
+observer: "_bypass"
+}, // bypass
+
+label: {
+type: String,
+value: ""
+}, // label
+
+x: {
+ui: true,
+type: Number,
+value: 0.0,
+notify: true,
+observer: "xChanged"
+}, // x
+
+y: {
+ui: true,
+type: Number,
+value: 0.0,
+notify: true,
+observer: "yChanged"
+}, // y
+
+z: {
+ui: true,
+type: Number,
+value: 0.0,
+notify: true,
+observer: "zChanged"
+}, // z
+
+coneInnerAngle: {
+ui: true,
+type: Number,
+value: 0.0,
+notify: true,
+observer: "coneInnerAngleChanged"
+}, // coneInnerAngle
+coneOuterAngle: {
+ui: true,
+type: Number,
+value: 360.0,
+notify: true,
+observer: "coneOuterAngleChanged"
+}, // coneOuterAngle
+coneOuterGain: {
+ui: true,
+type: Number,
+value: 0.0,
+notify: true,
+observer: "coneOuterGainChanged"
+}, // coneOuterGain
+
+distanceModel: {
+type: String,
+value: "inverse"
+} , // distanceModel
+
+maxDistance: {
+type: Number,
+value: 1.0,
+notify: true,
+observer: "maxDistanceChanged"
+}, // maxDistance
+
+refDistance: {
+type: Number,
+value: 1.0,
+notify: true,
+observer: "refDistanceChanged"
+}, // refDistance
+
+rolloffFactor: {
+type: Number,
+value: 1.0,
+notify: true,
+observer: "rolloffFactorChanged"
+}, // rolloffFactor
+
+orientationX: Number,
+orientationY: Number,
+orientationZ: Number,
+
+}; // return
+} // get properties
+
+
+constructor () {
+super ();
+instanceCount += 1;
+this._id = AudioPan.is + instanceCount;
+console.log ("creating ", this._id);
+
+this._init (audio.createPanner ());
+this._audioIn.panningModel = "HRTF";
+} // constructor
+
+connectedCallback () {
+super.connectedCallback ();
+if (this.contextCheck(AudioPan.is)) {
+this.addFieldLabels ();
+} // if
+} // connectedCallback
+
+xChanged (value) {
+this._audioNode.positionX.value = value;
+} // xChanged
+
+yChanged (value) {
+this._audioNode.positionY.value = value;
+} // yChanged
+
+zChanged (value) {
+this._audioNode.positionZ.value = value;
+} // zChanged
+
+maxDistanceChanged (value) {
+this._audioNode.maxDistance = value;
+} // maxDistanceChanged
+
+refDistanceChanged (value) {
+this._audioNode.refDistance = value;
+} // refDistanceChanged
+
+rolloffFactorChanged(value) {
+this._audioNode.rolloffFactor = value;
+} // rolloffFactorChanged
+
+} // class AudioPan
+
+
+window.customElements.define(AudioPan.is, AudioPan);
+})(); // module
+</script>
+</dom-module>
