@@ -1,4 +1,4 @@
-# Webaudio Components
+# Audio Components
 
 This project was begun as a way to learn Polymer.
 
@@ -22,6 +22,7 @@ The audio processing elements currently include:
 - audio-filter
 - audio-delay
 - audio-pan
+- audio-oscillator
 
 ## declarative rather than imperative
 
