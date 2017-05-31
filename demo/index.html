@@ -67,20 +67,20 @@ The hope is that when heard through speakers, the slightly delayed phase inverte
 <audio-parallel label="crosstalk cancelation" bypass><audio-series>
 
 <!-- this branch passes input to output -->
-<audio-gain></audio-gain>
+<audio-gain gain="1.6"></audio-gain>
 
 </audio-series><audio-series>
 
 <!-- this branch does the phase inversion and delay (invert phase done via thd delay component itself, although it could be implemented in HTML instead, but would be much more verbose (need for abstraction) -->
 
 <audio-split swap-outputs><audio-series>
-<audio-delay label="left delay" delay-time=".0005" invert-phase></audio-delay>
+<audio-delay label="left delay" delay-time=".0008" invert-phase></audio-delay>
 </audio-series><audio-series>
-<audio-delay label="right delay" delay-time="0.0005" invert-phase></audio-delay>
+<audio-delay label="right delay" delay-time="0.0008" invert-phase></audio-delay>
 </audio-series></audio-split>
 
-<audio-filter type="highpass" frequency="100.0" q="1.0"></audio-filter>
-<audio-gain label="inverted level" gain="1.3"></audio-gain>
+<audio-filter label="frequency correction" type="bandpass" frequency="700.0" q="2.0"></audio-filter>
+<audio-gain label="inverted level" gain="0.6"></audio-gain>
 </audio-series></audio-parallel>
 
 <!-- this network allows you to control sum and difference (mid / side) separately -->
