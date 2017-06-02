@@ -188,21 +188,24 @@ alert (e);
 addFieldLabels () {
 let groupLabel = this.shadowRoot.querySelector (".label, legend");
 let hide = !(groupLabel && groupLabel.textContent);
+
+if (groupLabel) {
 let level = this.ancestors()
-.filter ((e) => e.hasAttribute("label"))
+.filter ((e) => e && e.hasAttribute("label"))
 .length;
 console.log (`${this.constructor.is} (${groupLabel.textContent}): level ${level}, add labels to ${hide? "hidden" : "visible"} fields`);
 
 groupLabel.setAttribute ("role", "heading");
 groupLabel.setAttribute ("aria-level", level+1);
-Array.from(this.shadowRoot.querySelectorAll (".field"))
+} // if
+
+Array.from(this.shadowRoot.querySelectorAll (".field, ui-number .field"))
 .forEach ((field) => {
-var name, control, label, id;
-name = field.getAttribute("data-name") || field.getAttribute("field-name") || field.getAttribute("name");
-label = field.querySelector("label");
-control = field.querySelector("input, select, textarea");
-id = this._id + "-" + name;
-//console.log(`field: ${name} ${field} ${control} ${label}`);
+let name = field.getAttribute("data-name") || field.getAttribute("field-name") || field.getAttribute("name");
+let label = field.querySelector("label");
+let control = field.querySelector("input, select, textarea");
+let id = this._id + "-" + name;
+console.log(`- field: ${name} ${field} ${control} ${label}`);
 control.setAttribute("id", id);
 //control.setAttribute ("role", "application");
 label.setAttribute ("for", id);
@@ -213,16 +216,17 @@ if (hide && !_debugUI) field.setAttribute ("style", "display:none");
 ancestors (top) {
 let result = [];
 
-if (! this.shadowRoot) throw new Error("element not connected or -- shadowRoot is null");
+if (! this.shadowRoot) throw new Error("ancestors: element not connected or -- shadowRoot is null");
 
 let e = this.shadowRoot.host;
+if (! e) throw new Error ("ancestors: no host found");
 
 if (!top || !top.nodeType || top.nodeType !== 1) {
 top = e.closest("audio-context") || document.querySelector("body");
 } // if
 
 //console.log ("top: ", top);
-while (e !== top) {
+while (e && e !== top) {
 //console.log ("e: ", e);
 result.push (e);
 e = e.parentElement;
