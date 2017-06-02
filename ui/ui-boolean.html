@@ -1,8 +1,9 @@
-<dom-module id="ui-number">
+<dom-module id="ui-boolean">
 <template>
-<div  class="ui-number">
-<label>{{label}}</label>
-<br><input type="number" value="{{value::change}}" min="{{min}}" max="{{max}}" step="{{step::change}}"
+<div  class="ui-boolean">
+<label>{{label}}
+<br><input type="checkbox" checked="{{value::change}}">
+</label>
 </div>
 </template>
 
@@ -12,8 +13,8 @@
 (function () {
 var instanceCount  = 0;
 
-class UINumber extends _AudioContext_ {
-static get is() { return "ui-number"; }
+class UIBoolean extends _AudioContext_ {
+static get is() { return "ui-boolean"; }
 
 
 static get properties () {
@@ -53,7 +54,7 @@ observer: "valueChanged"
 constructor () {
 super ();
 instanceCount += 1;
-this._id = "ui-number" + instanceCount;
+this._id = "ui-boolean" + instanceCount;
 console.log ("constructor...");
 } // constructor
 
@@ -63,15 +64,11 @@ super._attachDom(dom);
 } // _attachDom
 
 connectedCallback () {
-if (! this.name) {
-throw new Error ("ui-number: no name given");
-} // if
-
-let _id = idGen (this.name);
 super.connectedCallback ();
-console.log ("connectedCallback...");
-this.shadowRoot.querySelector("label").setAttribute("for", _id);
-this.shadowRoot.querySelector("input").setAttribute("id", _id);
+if (! this.name) {
+throw new Error ("ui-boolean: no name given");
+} // if
+//console.log ("connectedCallback...");
 } // connectedCallback
 
 ready () {
@@ -94,10 +91,10 @@ if (! this.label) this.label = value;
 } // class Xt
 
 function idGen (name) {
-return "ui-number" + instanceCount + "-" + name;
+return "ui-boolean" + instanceCount + "-" + name;
 } // idGen
 
-window.customElements.define(UINumber.is, UINumber);
+window.customElements.define(UIBoolean.is, UIBoolean);
 })();
 </script>
 </dom-module>

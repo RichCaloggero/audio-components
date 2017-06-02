@@ -19,8 +19,10 @@
 <link rel="import" href="../audio-gain.html">
 <link rel="import" href="../audio-filter.html">
 <link rel="import" href="audio-delay.html">
-<link rel="import" href="ui-number.html">
 <link rel="import" href="../audio-pan.html">
+
+<link rel="import" href="ui-number.html">
+<link rel="import" href="ui-boolean.html">
 
 </head>
 <body>
@@ -29,7 +31,12 @@
 <audio-context><audio-series>
 <audio-player src="music.mp3"></audio-player>
 
+<audio-parallel><audio-series>
+<audio-gain></audio-gain>
+</audio-series><audio-series>
 <audio-delay label="delay"></audio-delay>
+<audio-gain gain=".7"></audio-gain>
+</audio-series></audio-parallel>
 
 <audio-destination></audio-destination>
 </audio-series></audio-context>
