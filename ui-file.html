@@ -8,6 +8,7 @@
 </template>
 
 <script>
+// ui-file
 "use strict";
 
 (function () {
@@ -35,7 +36,6 @@ value: ""
 
 value: {
 type: Object,
-observer: "valueChanged"
 } // value
 }; // return
 } // get properties
@@ -49,8 +49,8 @@ console.log ("constructor...");
 } // constructor
 
 _attachDom(dom) {
-super._attachDom(dom);
 this.shadowRoot = this.attachShadow({mode: 'open', delegatesFocus: true});
+super._attachDom(dom);
 } // _attachDom
 
 
@@ -73,7 +73,6 @@ throw new Error ("cannot initialize reader");
 } // if
 
 reader[this.type] (file);
-
 reader.addEventListener ("load", function () {
 this.valueChanged ({type: type, buffer: reader.result});
 }); // on load

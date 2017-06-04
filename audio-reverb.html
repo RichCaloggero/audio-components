@@ -12,7 +12,6 @@ display: block;
 display: inline;
 }
 </style>
-
 <div class="audio-reverb" role="region" aria-label$="{{label}}">
 <div class="row">
 <span class="label">[[label]]</span>
@@ -21,17 +20,14 @@ display: inline;
 
 </div><div class="row">
 
-<ui-number name="level" label="level" value="{{level}}" min="0.0" max="1.0" step="0.0001"></ui-number>
-
-<ui-file name="buffer" label="impulse" type="readAsText" value="{{value}}"></ui-file>
-</label>
+<ui-file name="buffer" label="impulse" type="readAsText"></ui-file>
 </div><!-- .row -->
 
 </div>
-
 </template>
 
 <script>
+// audio-reverb
 "use strict";
 
 (function () {
@@ -61,12 +57,11 @@ notify: true,
 observer: "_invertPhase"
 }, // invertPhase
 
-delayTime: {
-type: Number,
-value: 0.0,
-notify: true,
-observer: "delayTimeChanged"
-} // delayTime
+value: {
+type: String,
+value: ""
+} // value
+
 }; // return
 } // get properties
 
@@ -88,9 +83,9 @@ this.whenAllChildrenLoaded (this.addFieldLabels);
 } // if
 } // connectedCallback
 
-delayTimeChanged (value) {
-this._audioNode.delayTime.value = value;
-} // delayTimeChanged
+valueChanged (value) {
+console.log (`new value: ${value.type], ${value.buffer}`);
+} // valueChanged
 
 } // class AudioReverb
 
