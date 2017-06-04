@@ -17,13 +17,22 @@ display: inline;
 <div class="row">
 <span class="label">[[label]]</span>
 
-<ui-boolean name="bypass" label="bypass" value="{{bypass}}"></ui-boolean>
+<div class="field" data-name="bypass">
+<label>bypass</label>
+<br><input type="checkbox" checked="{{bypass::change}}" accesskey="x">
+</div>
 
 </div><div class="row">
 
-<ui-number name="delayTime" label="delay time" value="{{delayTime}}" min="0.0" max="1.0" step="0.0001"></ui-number>
+<div class="field" data-name="delayTime">
+<label>delay time</label>
+<br><input class="delayTime" value="{{delayTime::change}}" type="number" min="0.0" max="1.0" step="0.0001">
+</div>
 
-<ui-boolean name="invertPhase" label="invert phase" value="{{invertPhase}}"></ui-boolean>
+<div class="field" data-name="invertPhase">
+<label>invert phase</label>
+<br><input type="checkbox" checked="{{invertPhase::change}}">
+</div>
 
 </div><!-- .row -->
 
@@ -84,7 +93,7 @@ this._audioIn.channelCountMode = this._in.channelCountMode = this._audioOut.chan
 connectedCallback () {
 super.connectedCallback ();
 if (this.contextCheck(AudioDelay.is)) {
-this.whenAllChildrenLoaded (this.addFieldLabels);
+this.addFieldLabels ();
 } // if
 } // connectedCallback
 

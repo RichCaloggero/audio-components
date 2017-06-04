@@ -21,11 +21,15 @@
 <link rel="import" href="../audio-delay.html">
 <link rel="import" href="../audio-pan.html">
 
+<link rel="import" href="../ui-number.html">
+<link rel="import" href="../ui-boolean.html">
+
 </head>
 <body>
 <h1>audio component demo</h1>
 
-<p>This takes a signal from the specified URL and pipes it through a panner,
+<p>This takes a signal from the specified URL 
+//and pipes it through a panner,
 to a network that attempts to do crosstalk cancelation (<a href="https://www.ideals.illinois.edu/bitstream/handle/2142/47443/ECE499-Fa2013-anushiravani.pdf?sequence=2">https://www.ideals.illinois.edu/bitstream/handle/2142/47443/ECE499-Fa2013-anushiravani.pdf?sequence=2</a>),
 to a network that does mid-side processing (<a href="http://www.masteringhouse.com/masteringtips/midside.html">http://www.masteringhouse.com/masteringtips/midside.html</a>),
 and finally to output.
@@ -44,20 +48,24 @@ Unlike other components, audio-player always produces a UI(no need for label att
 
 <audio-player src="music.mp3"></audio-player>
 
+<audio-series label="demo">
+
 <!-- convert to mono before 3D panner.
 Check the bypass in UI to send original stereo signal to panner
 -->
-<audio-series label="mono" bypass>
+<!--<audio-series label="mono" bypass>
 <audio-merge></audio-merge>
 </audio-series>
+-->
 
 <!-- webaudio's 3D panner (works great through headphones, but when heard through loudspeakers, the effect is diminished due to crosstalk.
 These values are random -- just for demonstration...
 -->
-<audio-pan label="3D panner" bypass
+<!--<audio-pan label="3D panner" bypass
 x="3" z="-5"
 max-distance="100" ref-distance="60" 
 rolloff-factor=".0"></audio-pan>
+-->
 
 <!-- simple XTC:
 take each channel, invert phase, and feed it with delay to the opposite channel.
@@ -74,12 +82,12 @@ The hope is that when heard through speakers, the slightly delayed phase inverte
 <!-- this branch does the phase inversion and delay (invert phase done via thd delay component itself, although it could be implemented in HTML instead, but would be much more verbose (need for abstraction) -->
 
 <audio-split swap-outputs><audio-series>
-<audio-delay label="left delay" delay-time=".0008" invert-phase></audio-delay>
+<audio-delay label="left delay" delay-time="0.002" invert-phase></audio-delay>
 </audio-series><audio-series>
-<audio-delay label="right delay" delay-time="0.0008" invert-phase></audio-delay>
+<audio-delay label="right delay" delay-time="0.0018" invert-phase></audio-delay>
 </audio-series></audio-split>
 
-<audio-filter label="frequency correction" type="bandpass" frequency="700.0" q="2.0"></audio-filter>
+<audio-filter label="frequency correction" type="bandpass" frequency="300.0" q="2.0"></audio-filter>
 <audio-gain label="inverted level" gain="0.6"></audio-gain>
 </audio-series></audio-parallel>
 
@@ -146,6 +154,7 @@ or 2R = (L+R) - (L-R) = L + R - L +R
 </audio-series>
 
 <audio-gain label="master volume"></audio-gain>
+</audio-series><!-- demo -->
 
 <audio-destination></audio-destination>
 </audio-series>

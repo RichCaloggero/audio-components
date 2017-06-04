@@ -1,7 +1,7 @@
 <!--<link rel="import" href="../polymer/lib/elements/dom-if.html">-->
 <!--<link rel="import" href="../polymer/lib/elements/dom-repeat.html">-->
 
-<dom-module id="audio-delay">
+<dom-module id="audio-reverb">
 <template>
 <style>
 :host {
@@ -13,7 +13,7 @@ display: inline;
 }
 </style>
 
-<div class="audio-delay" role="region" aria-label$="{{label}}">
+<div class="audio-reverb" role="region" aria-label$="{{label}}">
 <div class="row">
 <span class="label">[[label]]</span>
 
@@ -21,10 +21,10 @@ display: inline;
 
 </div><div class="row">
 
-<ui-number name="delayTime" label="delay time" value="{{delayTime}}" min="0.0" max="1.0" step="0.0001"></ui-number>
+<ui-number name="level" label="level" value="{{level}}" min="0.0" max="1.0" step="0.0001"></ui-number>
 
-<ui-boolean name="invertPhase" label="invert phase" value="{{invertPhase}}"></ui-boolean>
-
+<ui-file name="buffer" label="impulse" type="readAsText" value="{{value}}"></ui-file>
+</label>
 </div><!-- .row -->
 
 </div>
@@ -37,8 +37,8 @@ display: inline;
 (function () {
 var instanceCount  = 0;
 
-class AudioDelay extends _AudioContext_ {
-static get is() { return "audio-delay"; }
+class AudioReverb extends _AudioContext_ {
+static get is() { return "audio-reverb"; }
 
 static get properties () {
 return {
@@ -73,7 +73,7 @@ observer: "delayTimeChanged"
 constructor () {
 super ();
 instanceCount += 1;
-this._id = AudioDelay.is + instanceCount;
+this._id = AudioReverb.is + instanceCount;
 if (this.__debug()) this.label = this._id;
 
 this._init (audio.createDelay());
@@ -83,7 +83,7 @@ this._audioIn.channelCountMode = this._in.channelCountMode = this._audioOut.chan
 
 connectedCallback () {
 super.connectedCallback ();
-if (this.contextCheck(AudioDelay.is)) {
+if (this.contextCheck(AudioReverb.is)) {
 this.whenAllChildrenLoaded (this.addFieldLabels);
 } // if
 } // connectedCallback
@@ -92,9 +92,47 @@ delayTimeChanged (value) {
 this._audioNode.delayTime.value = value;
 } // delayTimeChanged
 
-} // class AudioDelay
+} // class AudioReverb
 
-window.customElements.define(AudioDelay.is, AudioDelay);
+window.customElements.define(AudioReverb.is, AudioReverb);
+
+
+/*function getData(url) {
+source = audioCtx.createBufferSource();
+var request = new XMLHttpRequest();
+request.open("GET", url, true);
+request.responseType = 'arraybuffer';
+
+request.onload = function() {
+var audioData = request.response;
+
+audioCtx.decodeAudioData(audioData).then (function(buffer) {
+source.buffer = buffer;
+
+},
+
+function(e){ console.log("Error with decoding audio data" + e.err); });
+
+}
+
+request.send();
+}
+
+// wire up buttons to stop and play audio
+
+play.onclick = function() {
+getData();
+source.start(0);
+play.setAttribute('disabled', 'disabled');
+}
+
+stop.onclick = function() {
+source.stop(0);
+play.removeAttribute('disabled');
+}
+*/
+
+
 })();
 </script>
 </dom-module>

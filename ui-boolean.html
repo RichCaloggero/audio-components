@@ -1,0 +1,100 @@
+<dom-module id="ui-boolean">
+<template>
+<div  class="ui-boolean">
+<label>{{label}}
+<br><input type="checkbox" checked="{{value::change}}">
+</label>
+</div>
+</template>
+
+<script>
+"use strict";
+
+(function () {
+var instanceCount  = 0;
+
+class UIBoolean extends _AudioContext_ {
+static get is() { return "ui-boolean"; }
+
+
+static get properties () {
+return {
+name: {
+type: String,
+value: "",
+notify: true,
+observer: "nameChanged"
+}, // name
+
+label: {
+type: String,
+value: ""
+}, // label
+
+min: Number,
+max: Number,
+
+step: {
+type: Number,
+value: 1.0,
+notify: true,
+observer: "stepChanged"
+}, // step
+
+value: {
+type: Number,
+value: 0.0,
+notify: true,
+observer: "valueChanged"
+} // value
+}; // return
+} // get properties
+
+
+constructor () {
+super ();
+instanceCount += 1;
+this._id = "ui-boolean" + instanceCount;
+console.log ("constructor...");
+} // constructor
+
+_attachDom(dom) {
+this.shadowRoot = this.attachShadow({mode: 'open', delegatesFocus: true});
+super._attachDom(dom);
+} // _attachDom
+
+connectedCallback () {
+super.connectedCallback ();
+if (! this.name) {
+throw new Error ("ui-boolean: no name given");
+} // if
+//console.log ("connectedCallback...");
+} // connectedCallback
+
+ready () {
+super.ready();
+console.log ("ready...");
+} // ready
+
+valueChanged (value) {
+console.log (`new value: ${value}`);
+} // valueChanged
+
+stepChanged (value) {
+console.log (`new step: ${value}`);
+} // stepChanged
+
+nameChanged (value) {
+if (! this.label) this.label = value;
+} // nameChanged
+
+} // class Xt
+
+function idGen (name) {
+return "ui-boolean" + instanceCount + "-" + name;
+} // idGen
+
+window.customElements.define(UIBoolean.is, UIBoolean);
+})();
+</script>
+</dom-module>
