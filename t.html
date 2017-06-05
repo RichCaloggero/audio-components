@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+<title>Test</title>
+
+</head>
+<body>
+<h1>Test</h1>
+
+<script>
+
+function loadImpulse (url, convolver, callback) {
+var request = new XMLHttpRequest();
+request.open("GET", url, true);
+request.responseType = "arraybuffer";
+
+request.onload = function () {
+decodeAndSetupBuffer(convolver, arrayBuffer, callback)} // onload
+request.send();
+
+function decodeAndSetupBuffer(node, arrayBuffer, callback) {
+audioContext.decodeAudioData(arrayBuffer, function (audioBuffer) {
+console.log('Finished decoding audio data.');
+node.buffer = audioBuffer;
+if (typeof callback === "function" && audioBuffer !== null) {
+callback(node);
+}
+}, function (e) {
+console.log('Could not decode audio data: ' + e);
+});
+} // decodeAndSetupBuffer
+} // loadImpulse
+
+</script>
+</body>
+</html>
