@@ -94,7 +94,7 @@ this.addFieldLabels ();
 
 impulseUrlChanged (value) {
 console.log (`impulseUrlChanged: ${value}`);
-loadImpulse (value, function (buffer) {
+loadImpulse (value, (buffer) => {
 console.log ("- loaded...");
 this.impulse = buffer;
 this._audioNode.buffer = buffer;
@@ -125,17 +125,14 @@ throw new Error(`Could not decode audio data: ${e}`);
 
 function loadImpulse (url, callback) {
 var request = new XMLHttpRequest();
-//request.responseType = "text/plain";
+request.responseType = "arraybuffer";
 request.open("GET", url, true);
 console.log (`requesting ${url}...`);
 
 request.addEventListener("load", function () {
-//request.onreadystatechange = function () {
-//if (request.readyState === 4 && request.status === 200) {
 console.log ("- loaded...");
 if (request.response) {
-let buff = buffer.Buffer.from (request.response, "base64");
-decodeBuffer(buff.buffer, callback);
+decodeBuffer(request.response, callback);
 } else {
 throw new Error ("loadImpulse: response is null");
 } // if

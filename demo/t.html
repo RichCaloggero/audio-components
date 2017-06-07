@@ -7,7 +7,6 @@
 <title>audio component test</title>
 
 <script src="../bower_components/webcomponentsjs/webcomponents-loader.js"></script>
-<script src="../buffer.js"></script>
 
 <link rel="import" href="../audio-context.html">
 <link rel="import" href="../audio-series.html">
@@ -37,7 +36,8 @@
 <audio-parallel><audio-series>
 <audio-gain></audio-gain>
 </audio-series><audio-series>
-<audio-reverb label="reverb" impulse-url="impulse.base64"></audio-reverb>
+<audio-reverb label="reverb" impulse-url="impulse.wav"></audio-reverb>
+<audio-gain label="reverb level" gain="0.5"></audio-gain>
 </audio-series></audio-parallel>
 
 <audio-gain label="master volume"></audio-gain>
