@@ -12,15 +12,13 @@ display: block;
 display: inline;
 }
 </style>
+
 <div class="audio-reverb" role="region" aria-label$="{{label}}">
 <div class="row">
 <span class="label">[[label]]</span>
 
 <ui-boolean name="bypass" label="bypass" value="{{bypass}}"></ui-boolean>
 
-</div><div class="row">
-
-<ui-file name="buffer" label="impulse" type="readAsText"></ui-file>
 </div><!-- .row -->
 
 </div>
@@ -43,6 +41,20 @@ type: String,
 value: ""
 }, // label
 
+impulseUrl: {
+type: String,
+value: "",
+notify: true,
+observer: "impulseUrlChanged"
+}, // impulseUrl
+
+/*impulse: {
+type: ArrayBuffer,
+value: null,
+notify: true,
+observer: "impulseChanged"
+}, // impulse
+*/
 bypass: {
 type: Boolean,
 value: false,
@@ -55,12 +67,7 @@ type: Boolean,
 value: false,
 notify: true,
 observer: "_invertPhase"
-}, // invertPhase
-
-value: {
-type: String,
-value: ""
-} // value
+} // invertPhase
 
 }; // return
 } // get properties
@@ -70,64 +77,128 @@ super ();
 instanceCount += 1;
 this._id = AudioReverb.is + instanceCount;
 if (this.__debug()) this.label = this._id;
+console.log (`creating ${this._id}`);
 
-this._init (audio.createDelay());
-this._audioIn.channelCount = this._in.channelCount = this._audioOut.channelCount = this._out.channelCount = this._audioNode.channelCount = 1;
-this._audioIn.channelCountMode = this._in.channelCountMode = this._audioOut.channelCountMode = this._out.channelCountMode = this._audioNode.channelCountMode = "explicit";
+this._init (audio.createConvolver());
+//this._audioIn.channelCount = this._in.channelCount = this._audioOut.channelCount = this._out.channelCount = this._audioNode.channelCount = 2;
+//this._audioIn.channelCountMode = this._in.channelCountMode = this._audioOut.channelCountMode = this._out.channelCountMode = this._audioNode.channelCountMode = "explicit";
 } // constructor
+
 
 connectedCallback () {
 super.connectedCallback ();
 if (this.contextCheck(AudioReverb.is)) {
-this.whenAllChildrenLoaded (this.addFieldLabels);
+this.addFieldLabels ();
 } // if
 } // connectedCallback
 
-valueChanged (value) {
-console.log (`new value: ${value.type], ${value.buffer}`);
-} // valueChanged
+impulseUrlChanged (value) {
+console.log (`impulseUrlChanged: ${value}`);
+loadImpulse (value, function (buffer) {
+console.log ("- loaded...");
+this.impulse = buffer;
+this._audioNode.buffer = buffer;
+}); // load
+} // impulseUrlChanged
+
+impulseChanged (buffer) {
+console.log (`impulseChanged: ${buffer.size}`);
+this._audioNode.buffer = buffer;
+} // impulseChanged
+
 
 } // class AudioReverb
 
-window.customElements.define(AudioReverb.is, AudioReverb);
 
+function decodeBuffer(arrayBuffer, callback) {
+audio.decodeAudioData(arrayBuffer, function (audioBuffer) {
+console.log("Finished decoding audio data.");
+if (typeof callback === "function" && audioBuffer !== null) {
+callback(audioBuffer);
+} else {
+throw new Error ("loadImpulse: missing callback");
+} // if
+}, function (e) {
+throw new Error(`Could not decode audio data: ${e}`);
+}); // decode
+} // decodeBuffer
 
-/*function getData(url) {
-source = audioCtx.createBufferSource();
+function loadImpulse (url, callback) {
 var request = new XMLHttpRequest();
+//request.responseType = "text/plain";
 request.open("GET", url, true);
-request.responseType = 'arraybuffer';
+console.log (`requesting ${url}...`);
 
-request.onload = function() {
-var audioData = request.response;
-
-audioCtx.decodeAudioData(audioData).then (function(buffer) {
-source.buffer = buffer;
-
-},
-
-function(e){ console.log("Error with decoding audio data" + e.err); });
-
-}
-
+request.addEventListener("load", function () {
+//request.onreadystatechange = function () {
+//if (request.readyState === 4 && request.status === 200) {
+console.log ("- loaded...");
+if (request.response) {
+decodeBuffer(toByteArray(request.response), callback);
+} else {
+throw new Error ("loadImpulse: response is null");
+} // if
+//} // if
+//}; // onreadstatechange
+}); // load
 request.send();
+} // loadImpulse
+
+function base64ToArrayBuffer(input) {
+function encodedValue(input, index) {
+var encodedCharacter, x = input.charCodeAt(index);
+if (index < input.length) {
+if (x >= 65 && x <= 90) {
+encodedCharacter = x - 65;
+} else if (x >= 97 && x <= 122) {
+encodedCharacter = x - 71;
+} else if (x >= 48 && x <= 57) {
+encodedCharacter = x + 4;
+} else if (x === 43) {
+encodedCharacter = 62;
+} else if (x === 47) {
+encodedCharacter = 63;
+} else if (x !== 61) {
+console.log('base64 encountered unexpected character code: ' + x);
+}
+}
+return encodedCharacter;
 }
 
-// wire up buttons to stop and play audio
-
-play.onclick = function() {
-getData();
-source.start(0);
-play.setAttribute('disabled', 'disabled');
+if (input.length === 0 || (input.length % 4) > 0) {
+console.log('base64 encountered unexpected length: ' + input.length);
+return;
 }
 
-stop.onclick = function() {
-source.stop(0);
-play.removeAttribute('disabled');
+var padding = input.match(/[=]*$/)[0].length,
+decodedLength = input.length * 3 / 4 - padding,
+buffer = new ArrayBuffer(decodedLength),
+bufferView = new Uint8Array(buffer),
+encoded = [],
+d = 0,
+e = 0,
+i;
+
+while (d < decodedLength) {
+for (i = 0; i < 4; i += 1) {
+encoded[i] = encodedValue(input, e);
+e += 1;
 }
-*/
+bufferView[d] = (encoded[0] * 4) + Math.floor(encoded[1] / 16);
+d += 1;
+if (d < decodedLength) {
+bufferView[d] = ((encoded[1] % 16) * 16) + Math.floor(encoded[2] / 4);
+d += 1;
+}
+if (d < decodedLength) {
+bufferView[d] = ((encoded[2] % 4) * 64) + encoded[3];
+d += 1;
+}
+}
+return buffer;
+} // decodeBase64ToArrayBuffer
 
-
+window.customElements.define(AudioReverb.is, AudioReverb);
 })();
 </script>
 </dom-module>
