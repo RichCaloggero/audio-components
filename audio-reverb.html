@@ -94,14 +94,9 @@ connectedCallback () {
 super.connectedCallback ();
 if (this.contextCheck(AudioReverb.is)) {
 this.addFieldLabels ();
-moveElements (this.shadowRoot.querySelector(".impulseNames"), this.shadowRoot.querySelector (".impulse"));
+moveElements (this.shadowRoot.querySelector(".impulseNames").assignedNodes(), this.shadowRoot.querySelector (".impulse"));
+this.shadowRoot.querySelector (".impulse").dispatchEvent (new CustomEvent("change"));
 } // if
-
-function moveElements (source, destination) {
-Array.from(source.assignedNodes())
-.filter (x => x.nodeType === 1)
-.forEach (e => destination.appendChild(e));
-} // moveImpulseNames
 } // connectedCallback
 
 impulseChanged (value) {
@@ -152,6 +147,11 @@ throw new Error ("loadImpulse: response is null");
 }); // load
 request.send();
 } // loadImpulse
+
+function moveElements (source, destination) {
+source.filter (x => x.nodeType === 1)
+.forEach (e => destination.appendChild(e));
+} // moveElements
 
 window.customElements.define(AudioReverb.is, AudioReverb);
 })();
