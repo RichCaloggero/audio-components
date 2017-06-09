@@ -19,8 +19,15 @@ display: inline;
 
 <ui-boolean name="bypass" label="bypass" value="{{bypass}}"></ui-boolean>
 
-</div><!-- .row -->
+</div><div class="row">
+<div class="field" data-name="impulse">
+<label>impulse</label>
+<select class="impulse" value="{{impulseUrl::change}}">
+</select>
+</div><!-- .field -->
+</div><!-- row -->
 
+<slot class="impulseNames" style="display:none"></slot>
 </div>
 </template>
 
@@ -41,6 +48,11 @@ type: String,
 value: ""
 }, // label
 
+impulseLibrary: {
+type: String,
+value: ""
+}, // impulseLibrary
+
 impulseUrl: {
 type: String,
 value: "",
@@ -48,13 +60,6 @@ notify: true,
 observer: "impulseUrlChanged"
 }, // impulseUrl
 
-/*impulse: {
-type: ArrayBuffer,
-value: null,
-notify: true,
-observer: "impulseChanged"
-}, // impulse
-*/
 bypass: {
 type: Boolean,
 value: false,
@@ -89,22 +94,28 @@ connectedCallback () {
 super.connectedCallback ();
 if (this.contextCheck(AudioReverb.is)) {
 this.addFieldLabels ();
+moveElements (this.shadowRoot.querySelector(".impulseNames"), this.shadowRoot.querySelector (".impulse"));
 } // if
+
+function moveElements (source, destination) {
+Array.from(source.assignedNodes())
+.filter (x => x.nodeType === 1)
+.forEach (e => destination.appendChild(e));
+} // moveImpulseNames
 } // connectedCallback
+
+impulseChanged (value) {
+} // impulseChanged
 
 impulseUrlChanged (value) {
 console.log (`impulseUrlChanged: ${value}`);
-loadImpulse (value, (buffer) => {
+if (value) {
+loadImpulse (this.impulseLibrary + "/" + value, (buffer) => {
 console.log ("- loaded...");
-this.impulse = buffer;
 this._audioNode.buffer = buffer;
 }); // load
+} // if
 } // impulseUrlChanged
-
-impulseChanged (buffer) {
-console.log (`impulseChanged: ${buffer.size}`);
-this._audioNode.buffer = buffer;
-} // impulseChanged
 
 
 } // class AudioReverb
