@@ -172,15 +172,15 @@ return customElements.whenDefined (element.localName);
 try {
 Promise.all (loaded)
 .then (() => {
-this.debugConnection (`${this.label}: all ${loaded.length} children loaded`);
+//this.debugConnection (`${this.label}: all ${loaded.length} children loaded`);
 loadedCallback.call (this, children);
 }).catch ((error) => {
-alert (error);
+alert ("whenAllChildrenLoaded promose: " + error);
 throw error;
 });
 
 } catch (e) {
-alert (e);
+alert ("whenAllChildrenLoaded outer: " + e);
 } // try
 } // whenAllChildrenLoaded
 

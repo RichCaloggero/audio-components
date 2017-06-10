@@ -1,7 +1,7 @@
 <!--<link rel="import" href="../polymer/lib/elements/dom-if.html">-->
 <!--<link rel="import" href="../polymer/lib/elements/dom-repeat.html">-->
 
-<dom-module id="audio-reverb">
+<dom-module id="audio-convolver">
 <template>
 <style>
 :host {
@@ -13,7 +13,7 @@ display: inline;
 }
 </style>
 
-<div class="audio-reverb" role="region" aria-label$="{{label}}">
+<div class="audio-convolver" role="region" aria-label$="{{label}}">
 <div class="row">
 <span class="label">[[label]]</span>
 
@@ -32,14 +32,14 @@ display: inline;
 </template>
 
 <script>
-// audio-reverb
+// audio-convolver
 "use strict";
 
 (function () {
 var instanceCount  = 0;
 
-class AudioReverb extends _AudioContext_ {
-static get is() { return "audio-reverb"; }
+class AudioConvolver extends _AudioContext_ {
+static get is() { return "audio-convolver"; }
 
 static get properties () {
 return {
@@ -80,7 +80,7 @@ observer: "_invertPhase"
 constructor () {
 super ();
 instanceCount += 1;
-this._id = AudioReverb.is + instanceCount;
+this._id = AudioConvolver.is + instanceCount;
 if (this.__debug()) this.label = this._id;
 console.log (`creating ${this._id}`);
 
@@ -92,11 +92,11 @@ this._init (audio.createConvolver());
 
 connectedCallback () {
 super.connectedCallback ();
-if (this.contextCheck(AudioReverb.is)) {
+//if (this.contextCheck(AudioConvolver.is)) {
 this.addFieldLabels ();
 moveElements (this.shadowRoot.querySelector(".impulseNames").assignedNodes(), this.shadowRoot.querySelector (".impulse"));
 this.shadowRoot.querySelector (".impulse").dispatchEvent (new CustomEvent("change"));
-} // if
+//} // if
 } // connectedCallback
 
 impulseChanged (value) {
@@ -113,7 +113,7 @@ this._audioNode.buffer = buffer;
 } // impulseUrlChanged
 
 
-} // class AudioReverb
+} // class AudioConvolver
 
 
 function decodeBuffer(arrayBuffer, callback) {
@@ -153,7 +153,7 @@ source.filter (x => x.nodeType === 1)
 .forEach (e => destination.appendChild(e));
 } // moveElements
 
-window.customElements.define(AudioReverb.is, AudioReverb);
+window.customElements.define(AudioConvolver.is, AudioConvolver);
 })();
 </script>
 </dom-module>

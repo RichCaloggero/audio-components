@@ -20,6 +20,7 @@
 <link rel="import" href="../audio-filter.html">
 <link rel="import" href="../audio-delay.html">
 <link rel="import" href="../audio-pan.html">
+<link rel="import" href="../audio-convolver.html">
 <link rel="import" href="../audio-reverb.html">
 
 <link rel="import" href="../ui-number.html">
@@ -32,87 +33,7 @@
 <audio-context><audio-series>
 <audio-player src="music.mp3"></audio-player>
 
-
-<audio-parallel><audio-series>
-<audio-gain></audio-gain>
-</audio-series><audio-series>
-<audio-reverb label="reverb" impulse-library="../impulses"><option>
-In The Silo Revised.wav
-</option><option>
-Cement Blocks 2.wav
-</option><option>
-Cement Blocks 1.wav
-</option><option>
-Chateau de Logne, Outside.wav
-</option><option>
-Conic Long Echo Hall.wav
-</option><option>
-Deep Space.wav
-</option><option>
-Derlon Sanctuary.wav
-</option><option>
-Bottle Hall.wav
-</option><option>
-Direct Cabinet N1.wav
-</option><option>
-Direct Cabinet N2.wav
-</option><option>
-Direct Cabinet N3.wav
-</option><option>
-Direct Cabinet N4.wav
-</option><option>
-French 18th Century Salon.wav
-</option><option>
-Five Columns Long.wav
-</option><option>
-Five Columns.wav
-</option><option>
-Going Home.wav
-</option><option>
-Greek 7 Echo Hall.wav
-</option><option>
-In The Silo.wav
-</option><option>
-Highly Damped Large Room.wav
-</option><option>
-Large Bottle Hall.wav
-</option><option>
-Large Long Echo Hall.wav
-</option><option>
-Large Wide Echo Hall.wav
-</option><option>
-Masonic Lodge.wav
-</option><option>
-Musikvereinsaal.wav
-</option><option>
-Narrow Bumpy Space.wav
-</option><option>
-Nice Drum Room.wav
-</option><option>
-On a Star.wav
-</option><option>
-Parking Garage.wav
-</option><option>
-Rays.wav
-</option><option>
-Right Glass Triangle.wav
-</option><option>
-Ruby Room.wav
-</option><option>
-Scala Milan Opera Hall.wav
-</option><option>
-Small Prehistoric Cave.wav
-</option><option>
-Small Drum Room.wav
-</option><option>
-St Nicolaes Church.wav
-</option><option>
-Trig Room.wav
-</option><option>
-Vocal Duo.wav
-</option></audio-reverb>
-<audio-gain label="reverb level" gain="0.5"></audio-gain>
-</audio-series></audio-parallel>
+<audio-reverb label="reverb"></audio-reverb>
 
 <audio-gain label="master volume"></audio-gain>
 

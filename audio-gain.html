@@ -72,6 +72,7 @@ this.addFieldLabels ();
 
 gainChanged (value) {
 this._audioNode.gain.value = value;
+console.log(`gain ${this.label} changed to ${value}`);
 } // gainChanged
 
 } // class AudioGain

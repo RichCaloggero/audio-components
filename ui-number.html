@@ -74,13 +74,9 @@ this.shadowRoot.querySelector("label").setAttribute("for", _id);
 this.shadowRoot.querySelector("input").setAttribute("id", _id);
 } // connectedCallback
 
-ready () {
-super.ready();
-console.log ("ready...");
-} // ready
 
 valueChanged (value) {
-console.log (`new value: ${value}`);
+console.log (`number ${this.label || this._id}: new value: ${value}`);
 } // valueChanged
 
 stepChanged (value) {
@@ -91,7 +87,7 @@ nameChanged (value) {
 if (! this.label) this.label = value;
 } // nameChanged
 
-} // class Xt
+} // class UINumber
 
 function idGen (name) {
 return "ui-number" + instanceCount + "-" + name;
