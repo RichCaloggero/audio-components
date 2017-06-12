@@ -17,10 +17,7 @@ display: inline;
 <span class="label">[[label]]</span>
 
 <div class="row">
-<div class="field" data-name="gain">
-<label>Gain:</label>
-<br><input class="gain" value="{{gain::change}}" type="number" min="-2.0" max="2.0" step="0.1">
-</div>
+<ui-number name="gain" label="gain" value="{{gain}}" min="{{min}}" max="{{max}}" step="{{step}}"></ui-number>
 </div><!-- .row -->
 
 </div>
@@ -47,7 +44,20 @@ type: Number,
 value: 1.0,
 notify: true,
 observer: "gainChanged"
-} // gain
+}, // gain
+
+min: {
+type: Number, value: -2.0
+}, // min
+
+max: {
+type: Number, value: 2.0
+}, // max
+
+step: {
+type: Number, value: 0.1
+}, // step
+
 }; // return
 } // get properties
 

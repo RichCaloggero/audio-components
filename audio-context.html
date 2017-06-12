@@ -188,6 +188,8 @@ alert ("whenAllChildrenLoaded outer: " + e);
 addFieldLabels () {
 let groupLabel = this.shadowRoot.querySelector (".label, legend");
 let hide = !(groupLabel && groupLabel.textContent);
+let hideControls = this.hasAttribute ("hide-controls")?
+this.getAttribute("hide-controls").split (" ") : [];
 
 if (groupLabel) {
 let level = this.ancestors()
@@ -199,17 +201,21 @@ groupLabel.setAttribute ("role", "heading");
 groupLabel.setAttribute ("aria-level", level+1);
 } // if
 
-Array.from(this.shadowRoot.querySelectorAll (".field, ui-number .field"))
+Array.from(this.shadowRoot.querySelectorAll (".field, ui-number, ui-boolean"))
 .forEach ((field) => {
+let name = field.getAttribute("data-name") || field.getAttribute("field-name") || field.getAttribute("name");
+
+if ((hide && !_debugUI) || hideControls.includes(name)) field.setAttribute ("style", "display:none");
+
+if (field.matches("div.field")) {
 let name = field.getAttribute("data-name") || field.getAttribute("field-name") || field.getAttribute("name");
 let label = field.querySelector("label");
 let control = field.querySelector("input, select, textarea");
 let id = this._id + "-" + name;
 console.log(`- field: ${name} ${field} ${control} ${label}`);
 control.setAttribute("id", id);
-//control.setAttribute ("role", "application");
 label.setAttribute ("for", id);
-if (hide && !_debugUI) field.setAttribute ("style", "display:none");
+} // if
 });
 } // addFieldLabels
 
