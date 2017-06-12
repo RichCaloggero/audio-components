@@ -51,17 +51,19 @@ Unlike other components, audio-player always produces a UI(no need for label att
 
 <audio-series label="demo">
 
-<!-- convert to mono before 3D panner.
+<!--convert to mono before 3D panner.
 Check the bypass in UI to send original stereo signal to panner
 -->
+
 <!--<audio-series label="mono" bypass>
 <audio-merge></audio-merge>
 </audio-series>
 -->
 
-<!-- webaudio's 3D panner (works great through headphones, but when heard through loudspeakers, the effect is diminished due to crosstalk.
+<!--webaudio's 3D panner (works great through headphones, but when heard through loudspeakers, the effect is diminished due to crosstalk.
 These values are random -- just for demonstration...
 -->
+
 <!--<audio-pan label="3D panner" bypass
 x="3" z="-5"
 max-distance="100" ref-distance="60" 
@@ -73,6 +75,7 @@ take each channel, invert phase, and feed it with delay to the opposite channel.
 This is mixed with the original input signal.
 The hope is that when heard through speakers, the slightly delayed phase inverted signal from one speaker will cancel sounds from that speaker heard at the opposite ear.
 -->
+
 <audio-parallel label="crosstalk cancelation" bypass><audio-series>
 
 <!-- this branch passes input to output -->
@@ -89,7 +92,7 @@ The hope is that when heard through speakers, the slightly delayed phase inverte
 </audio-series></audio-split>
 
 <audio-filter label="frequency correction" type="bandpass" frequency="300.0" q="2.0"></audio-filter>
-<audio-gain label="inverted level" gain="0.6"></audio-gain>
+<audio-gain label="inverted level" gain="-0.6"></audio-gain>
 </audio-series></audio-parallel>
 
 <!-- this network allows you to control sum and difference (mid / side) separately -->
