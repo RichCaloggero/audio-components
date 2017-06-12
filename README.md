@@ -18,11 +18,14 @@ This project was begun as a way to learn Polymer.
 
 ## Elements
 
-The package contains two distinct types of elements:
+The package contains four distinct types of elements:
 - connectors
 - audio processing elements
+- UI elements
+- composed elements
 
-The connectors build the connection graph and generally have no UI. They include:
+
+The connectors build the connection graph and the only UI they display is a label. They include:
 - audio-context
 - audio-series
 - audio-parallel
@@ -37,6 +40,14 @@ The audio processing elements currently include:
 - audio-delay
 - audio-pan
 - audio-oscillator
+- audio-convolver
+
+The UI elements handle UI generation and currently include:
+- ui-number
+- ui-boolean
+
+The currently implemented composed elements are:
+- audio-reverb (based on convolver and a set of public domain impulses), and a couple gain elements
 
 ## declarative rather than imperative
 
@@ -48,8 +59,8 @@ For instance, here is a simple webaudio graph which takes an audio signal from a
 ### Javascript example
 
 ```
-// we assume there is an standard HTML audio element in the document (our web components create this on the fly in a shadow tree)
- var audio = new AudioContext ();
+// we assume there is an HTML audio element in the document (our web components create this on the fly in a shadow tree)
+var audio = new AudioContext ();
 var audioElement = document.querySelector("#myAudio");
 var player = audio.createMediaElementSource (audioElement);
 var gain = audio.createGain();
@@ -76,12 +87,7 @@ Here is the same graph created via our audio components:
 
 The player uses the standard browser UI for control (start, stop, seek, volume, etc).
 Our web components automatically add UI for specifying audio source file, as well as for controling the gain.
-
-## All elements
-
-All elements, both connectors and audio processors, are web components. They consist of a custom element and its JS class definition.
-In the javascript domain, all elements are subclasses of AudioContext.
-In the HTML domain, the entire HTML graph needs to be wrapped in a `<audio-context> ... </audio-context>` element.
+If the `label` attribute on the gain element were not present, it's UI would be hidden and it would act as a constant gain whose gain value could be set by a `gain` attribute.
 
 ## Limitations
 
@@ -91,17 +97,25 @@ In the HTML domain, the entire HTML graph needs to be wrapped in a `<audio-conte
 	+ webaudio has notion of channels and destinations which are a bit hard to get my head around
 	+ generally nodes are stereo in and stereo out, but they can be mono as well depending on channelCount, channelCountMode
 	+ filter and delay are explicitly mono, but others can be either depending on what they are connected to
-	
+
+## All elements
+
+All elements, both connectors and audio processors, are web components. They consist of a custom element and its JS class definition.
+
+In the javascript domain, all elements inherrit directly from `_AudioContext_`.
+In the HTML domain, the entire HTML graph needs to be wrapped in a `<audio-context> ... </audio-context>` element.
+
+
 ## Processors
 
 These take input from their previous sibling, process it, and pipe output to their next sibling.
 If a label attribute is supplied, they display a UI; if no label is supplied then they stay hidden.
-All parameters displayed in the UI can be set in the HTML via attributes.
+If they have a `hide-controls` attribute, the value of that attribute is used as a space-separated of field names to hide. Using this, we can display only those fields we need from the element. The `audio-reverb` element uses this to hide the `audio-convolver`'s "bypass" control while still displaying the list of available impulses.
+Most parameters displayed in the UI can be set in the HTML via attributes.
 
 ### Style
 
 No attempt has been made to style anything.
-I tried to break UI up using simple divs.
 
 ### Accessibility
 
