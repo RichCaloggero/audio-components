@@ -1,0 +1,96 @@
+<dom-module id="audio-xtc">
+<template>
+<style>
+:host {
+display: block;
+}
+
+:host .field {
+display: inline;
+}
+</style>
+
+<div class="audio-xtc" role="region" aria-label$="{{label}}">
+<audio-parallel label="crosstalk cancelation" bypass><audio-series>
+
+<!-- this branch passes input to output -->
+<audio-gain gain="1.6"></audio-gain>
+
+</audio-series><audio-series>
+
+<!-- this branch does the phase inversion and delay (invert phase done via thd delay component itself, although it could be implemented in HTML instead, but would be much more verbose (need for abstraction) -->
+
+<audio-split swap-outputs><audio-series>
+<audio-delay label="left delay" delay-time="0.002" invert-phase></audio-delay>
+</audio-series><audio-series>
+<audio-delay label="right delay" delay-time="0.0018" invert-phase></audio-delay>
+</audio-series></audio-split>
+
+<audio-filter label="frequency correction" type="bandpass" frequency="300.0" q="2.0"></audio-filter>
+<audio-gain label="inverted level" gain="-0.6"></audio-gain>
+</audio-series></audio-parallel>
+</div><!-- .audio-xtc -->
+</template>
+
+
+<script>
+// audio-xtc
+
+"use strict";
+
+(function () {
+var instanceCount = 0;
+
+class AudioXtc extends _AudioContext_{
+static get is () {return "audio-xtc";}
+
+static get properties () {
+return {
+label: {
+type: String,
+value: ""
+}, // label
+
+mix: {
+type: Number,
+value: 0.5,
+notify: true,
+observer: "mixChanged"
+} // mix
+
+}; // return
+} // get properties
+
+constructor () {
+super ();
+instanceCount += 1;
+this._id = "audio-xtc" + instanceCount;
+this._init ();
+} // constructor
+
+connectedCallback () {
+super.connectedCallback ();
+this.addFieldLabels ();
+this.connectAll ();
+} // connectedCallback
+
+connectAll () {
+var reverb = this.shadowRoot.querySelector("audio-parallel");
+this._audioIn.connect (reverb._in);
+reverb._out.connect (this._audioOut);
+} // connectAll
+
+mixChanged (value) {
+let self = this.shadowRoot;
+let dry = self.querySelector(".dry-level");
+let wet = self.querySelector (".wet-level");
+wet.gain = value;
+dry.gain = 1 - value;
+} // mixChanged
+
+} // class AudioXtc
+
+window.customElements.define(AudioXtc.is, AudioXtc);
+})();
+</script>
+</dom-module>

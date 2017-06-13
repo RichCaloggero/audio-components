@@ -163,6 +163,24 @@ or 2R = (L+R) - (L-R) = L + R - L +R
 </audio-series>
 </audio-context>
 
+<script>
+let p = document.querySelector ("audio-pan")._audioNode;
+let xx = audio.createOscillator();
+let zz = audio.createOscillator()
+let gx = audio.createGain();
+gz = audio.createGain();
+xx.frequency.value = 1.0;
+zz.frequency.value = .67;
+p.positionX.value = 0;
+p.positionZ.value = 0;
+gx.gain.value = 40;
+gz.gain.value = 33;
+xx.connect(gx).connect(p.positionX);
+zz.connect(gz).connect(p.positionZ);
+xx.start();
+zz.start();
+
+</script>
 
 </body>
 </html>
