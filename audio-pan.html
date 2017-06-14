@@ -25,38 +25,16 @@ float: left;
 
 </div><div class="row">
 
-<div class="field" data-name="x">
-<label>x</label>
-<br><input type="number" value="{{x::change}}">
-</div>
-
-<div class="field" data-name="y">
-<label>y</label>
-<br><input type="number" value="{{y::change}}">
-</div>
-
-<div class="field" data-name="z">
-<label>z</label>
-<br><input type="number" value="{{z::change}}">
-</div>
+<ui-number name="x" value="[[x]]" min="-1000" max="1000" step="1"></ui-number>
+<ui-number name="y" value="[[y]]" min="-1000" max="1000" step="1"></ui-number>
+<ui-number name="z" value="[[z]]" min="-1000" max="1000" step="1"></ui-number>
 
 </div><div class="row">
+<ui-number name="maxDistance" value="[[maxDistance]]" min="0" max="1000" step="1"></ui-number>
+<ui-number name="refDistance" value="[[refDistance]]" min="0" max="1000" step="1"></ui-number>
+<ui-number name="rolloffFactor" value="[[rolloffFactor]]" min="0" max="100" step="0.1"></ui-number>
 
-<div class="field" data-name="mmaxDistance">
-<label>max distance</label>
-<br><input type="number" value="{{maxDistance::change}}">
-</div>
-
-<div class="field" data-name="refDistance">
-<label>ref distance</label>
-<br><input type="number" value="{{refDistance::change}}">
-</div>
-
-<div class="field" data-name="rolloffFactor">
-<label>rolloff factor</label>
-<br><input type="number" value="{{rolloffFactor::change}}">
-</div>
-
+</div><div class="row">
 <div class="field" data-name="coneInnerAngle">
 <label>cone inner angle</label>
 <br><input type="number" value="{{coneInnerAngle::change}}">
@@ -188,6 +166,7 @@ console.log ("creating ", this._id);
 
 this._init (audio.createPanner ());
 this._audioNode.panningModel = "HRTF";
+this._audioNode.setOrientation (0.0,0.0,0.0, 0.0,1.0,0.0);
 } // constructor
 
 connectedCallback () {

@@ -1,0 +1,121 @@
+<!--<link rel="import" href="../polymer/lib/elements/dom-if.html">-->
+<!--<link rel="import" href="../polymer/lib/elements/dom-repeat.html">-->
+
+<dom-module id="audio-control">
+<template>
+<style>
+:host {
+display: block;
+}
+
+:host .field {
+display: inline;
+}
+</style>
+
+<div class="audio-control">
+<h2>controling {{parameter}} as {{value}}</h2>
+</div>
+</template>
+
+<script>
+"use strict";
+
+(function () {
+var instanceCount  = 0;
+
+class AudioControl extends _AudioContext_ {
+static get is() { return "audio-control"; }
+
+static get properties () {
+return {
+parameter: {
+type: String,
+value: "",
+notify: true,
+observer: "parameterChanged"
+}, // parameter
+
+value: {
+type: String,
+value: "",
+notify: true,
+observer: "valueChanged"
+} // value
+}; // return
+} // get properties
+
+
+constructor () {
+super ();
+instanceCount += 1;
+this._id = AudioControl.is + instanceCount;
+console.log (`${this.id} created`);
+} // constructor
+
+/*_attachDom(dom) {
+this.shadowRoot = this.attachShadow({mode: 'open', delegatesFocus: true});
+super._attachDom(dom);
+} // _attachDom
+*/
+
+connectedCallback () {
+super.connectedCallback ();
+console.log (`${this._id} connected to ${this.parentElement.localName}`);
+this.start();
+} // connectedCallback
+
+start () {
+let element = this.parentElement;
+if (this.parameter in element) {
+let interval = this.interval || 200; // milliseconds
+let f = this.compileFunction (this.value, "t");
+let count = 50;
+
+if (f) {
+console.log (`function: ${f}`);
+this.process = setInterval (() => {
+//if (count-- > 0) 
+element[this.parameter] = f(audio.currentTime);
+//else this.stop();
+}, interval);
+} else {
+alert ("invalid function: " + this.value);
+} // if
+
+} else {
+alert (`parameter ${this.parameter} not in ${this.parentElement.localName}`);
+} // if
+} // start
+
+stop () {
+clearInterval (this.process);
+console.log ("stopped.");
+} // stop
+
+parameterChanged (value) {
+console.log(`parameter ${value}`);
+} // parameterChanged
+
+valueChanged (value) {
+console.log(`new value of parameter ${this.parameter} is ${value}`);
+} // valueChanged
+
+compileFunction (text, parameter) {
+try {
+return new Function (parameter, `return ${text};`);
+
+} catch (e) {
+alert (e);
+throw ("error compiling function: " + e);
+} // try
+return null;
+} // compileFunction
+
+} // class AudioControl
+
+
+window.customElements.define(AudioControl.is, AudioControl);
+})();
+</script>
+</dom-module>

@@ -26,20 +26,18 @@
 <link rel="import" href="../ui-number.html">
 <link rel="import" href="../ui-boolean.html">
 
+<link rel="import" href="../audio-control.html">
 </head>
 <body>
 <h1>audio component test</h1>
 
 <audio-context><audio-series>
-<audio-player src="music.mp3"></audio-player>
+<audio-gain>
+<audio-control parameter="x" value="sin(t)">
+</audio-control>
+</audio-gain>
 
-<audio-reverb label="reverb"></audio-reverb>
-
-<audio-gain label="master volume"></audio-gain>
-
-<audio-destination></audio-destination>
-</audio-series>
-</audio-context>
+</audio-series></audio-context>
 
 </body>
 </html>
