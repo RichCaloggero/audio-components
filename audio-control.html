@@ -69,7 +69,7 @@ start () {
 let element = this.parentElement;
 if (this.parameter in element) {
 let interval = this.interval || 200; // milliseconds
-let f = this.compileFunction (this.value, "t");
+let f = this.compileFunction (this.value, "t").bind(this);
 let count = 50;
 
 if (f) {
