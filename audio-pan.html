@@ -166,7 +166,8 @@ console.log ("creating ", this._id);
 
 this._init (audio.createPanner ());
 this._audioNode.panningModel = "HRTF";
-this._audioNode.setOrientation (0.0,0.0,0.0, 0.0,1.0,0.0);
+this._audioNode.setOrientation (0.0,0.0,0.0);
+audio.listener.setOrientation (0.0,0.0,-1.0, 0.0,1.0,0.0);
 } // constructor
 
 connectedCallback () {

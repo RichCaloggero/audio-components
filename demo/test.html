@@ -56,7 +56,7 @@ Unlike other components, audio-player always produces a UI(no need for label att
 Check the bypass in UI to send original stereo signal to panner
 -->
 
-<audio-series label="mono" bypass>
+<audio-series label="mono">
 <audio-merge></audio-merge>
 </audio-series>
 
@@ -64,13 +64,14 @@ Check the bypass in UI to send original stereo signal to panner
 These values are random -- just for demonstration...
 -->
 
-<audio-pan label="3D panner" bypass
+<audio-pan label="3D panner" 
 x="3" z="-5"
 max-distance="100" ref-distance="60" 
 rolloff-factor="0"
 hide-controls="coneInnerAngle coneOuterAngle coneOuterGain">
-<audio-control  parameter="x" value="this.refDistance * Math.cos(t)"></audio-control>
-<audio-control  parameter="z" value="this.refDistance * Math.sin(t)"></audio-control>
+<audio-control  parameter="x" value="10 * Math.cos(t)"></audio-control>
+<audio-control  parameter="y" value="20 * Math.cos(5*t)"></audio-control>
+<audio-control  parameter="z" value="4 * Math.sin(2*t / 3.14)"></audio-control>
 </audio-pan>
 
 <!-- simple XTC:
@@ -161,7 +162,7 @@ or 2R = (L+R) - (L-R) = L + R - L +R
 </audio-series>
 
 
-<audio-gain label="master volume"></audio-gain>
+<audio-gain label="master volume" gain="0.1"></audio-gain>
 </audio-series><!-- demo -->
 
 <audio-destination></audio-destination>
