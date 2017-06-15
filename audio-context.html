@@ -10,7 +10,9 @@ display: block;
 </style>
 
 <div class="audio-context">
-<h1>{{name}}</h1>
+<h1>{{label}}</h1>
+<ui-boolean name="enableAutomation" label="enable automation" value="{{enableAutomation}}"></ui-boolean>
+
 <slot></slot>
 
 <div class="status" role="region" aria-label="Status" aria-live="polite">
@@ -21,6 +23,7 @@ display: block;
 <script>
 "use strict";
 (function () {
+var automationQueue = [];
 var _root = null;
 var _debug = false, _debugConnection = false, _debugInternalConnection = false, _debugElementCreation = false, _debugUI = false;
 
@@ -29,6 +32,18 @@ static get is() { return "audio-context"; }
 
 static get properties() {
 return {
+label: {
+type: String,
+value: ""
+}, // label
+
+enableAutomation: {
+type: Boolean,
+value: true,
+notify: true,
+observer: "_enableAutomation"
+}, // enableAutomation
+
 _debug: {
 type: Boolean,
 value: false
@@ -54,11 +69,6 @@ type: Boolean,
 value: false
 }, // _debugInternalConnection
 
-name: {
-type: String,
-value: "",
-//observer: "nameChanged"
-} // name
 }; // return
 } // get properties
 
@@ -242,6 +252,26 @@ e = e.parentElement;
 //result = (result.length > 0)? result.slice(1) : [];
 return result;
 } // ancestors
+
+addToAutomationQueue () {
+automationQueue.push (this);
+console.log (`added ${this.label || this._id} to automation queue`);
+} // addToAutomationQueue
+
+_enableAutomation (value) {
+if (this.constructor === _AudioContext_) {
+if (value) this.startAllAutomation ();
+else this.stopAllAutomation ();
+} // if
+} // _enableAutomation
+
+startAllAutomation () {
+automationQueue.forEach ((element) => element.start());
+} // startAllAutomation
+
+stopAllAutomation () {
+automationQueue.forEach ((element) => element.stop());
+} // stopAllAutomation
 
 
 

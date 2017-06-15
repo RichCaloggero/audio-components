@@ -43,7 +43,7 @@ All processing is turned off by default, so when first loaded, you should hear t
 See comments in the HTML for more...
 </p>
 
-<audio-context><audio-series>
+<audio-context label="audio control demo"><audio-series>
 <!-- music.mp3 is default URL, but you can specify whatever you like via the UI
 Unlike other components, audio-player always produces a UI(no need for label attribute).
 -->
@@ -67,9 +67,10 @@ These values are random -- just for demonstration...
 <audio-pan label="3D panner" bypass
 x="3" z="-5"
 max-distance="100" ref-distance="60" 
-rolloff-factor="0">
-<audio-control  parameter="x" value="this.parentElement.refDistance * Math.cos(t)"></audio-control>
-<audio-control  parameter="z" value="this.parentElement.refDistance * Math.sin(t)"></audio-control>
+rolloff-factor="0"
+hide-controls="coneInnerAngle coneOuterAngle coneOuterGain">
+<audio-control  parameter="x" value="this.refDistance * Math.cos(t)"></audio-control>
+<audio-control  parameter="z" value="this.refDistance * Math.sin(t)"></audio-control>
 </audio-pan>
 
 <!-- simple XTC:

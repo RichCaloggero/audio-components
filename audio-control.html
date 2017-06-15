@@ -62,35 +62,47 @@ super._attachDom(dom);
 connectedCallback () {
 super.connectedCallback ();
 console.log (`${this._id} connected to ${this.parentElement.localName}`);
-this.start();
+this.setupAutomation();
 } // connectedCallback
 
-start () {
+setupAutomation() {
 let element = this.parentElement;
+
 if (this.parameter in element) {
-let interval = this.interval || 200; // milliseconds
-let f = this.compileFunction (this.value, "t").bind(this);
-let count = 50;
+this._automationInterval = this.interval || 200; // milliseconds
+let f = this.compileFunction (this.value, "t").bind(element);
 
 if (f) {
 console.log (`function: ${f}`);
-this.process = setInterval (() => {
-//if (count-- > 0) 
-element[this.parameter] = f(audio.currentTime);
-//else this.stop();
-}, interval);
+this._automator = f;
+this._automationTarget = element;
+this.addToAutomationQueue ();
+this.start ();
+
 } else {
 alert ("invalid function: " + this.value);
 } // if
 
 } else {
-alert (`parameter ${this.parameter} not in ${this.parentElement.localName}`);
+alert (`parameter ${this.parameter} not in ${element.localName}`);
 } // if
+} // setupAutomation
+
+start () {
+this._automation = setInterval (() => {
+try {
+this._automationTarget[this.parameter] = this._automator(audio.currentTime);
+} catch (e) {
+this.stop ();
+} // catch
+}, this._automationInterval);
+
+console.log (`${this._id}: starting automation for parameter ${this.parameter} of ${this._automationTarget.localName} using interval ${this._automationInterval}`);
 } // start
 
 stop () {
-clearInterval (this.process);
-console.log ("stopped.");
+clearInterval (this._automation);
+console.log (`${this._id}: stopping automation for parameter ${this.parameter} of ${this._automationTarget.localName} using interval ${this._automationInterval}`);
 } // stop
 
 parameterChanged (value) {
