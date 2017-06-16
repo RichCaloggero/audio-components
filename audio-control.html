@@ -14,7 +14,9 @@ display: inline;
 </style>
 
 <div class="audio-control">
-<h2>controling {{parameter}} as {{value}}</h2>
+<label>automating {{parameter}} as
+<br><input type="text" value="{{value::change}}">
+</label>
 </div>
 </template>
 
@@ -50,23 +52,26 @@ constructor () {
 super ();
 instanceCount += 1;
 this._id = AudioControl.is + instanceCount;
+this._automation = null;
+this.label = `controling ${this.parameter}`;
 console.log (`${this.id} created`);
 } // constructor
 
-/*_attachDom(dom) {
+_attachDom(dom) {
 this.shadowRoot = this.attachShadow({mode: 'open', delegatesFocus: true});
 super._attachDom(dom);
 } // _attachDom
-*/
 
 connectedCallback () {
 super.connectedCallback ();
 console.log (`${this._id} connected to ${this.parentElement.localName}`);
-this.setupAutomation();
+this.addFieldLabels ();
 } // connectedCallback
 
 setupAutomation() {
+if (!this.value) return;
 let element = this.parentElement;
+console.log (`setting up automation for ${element._id}`);
 
 if (this.parameter in element) {
 this._automationInterval = this.interval || 200; // milliseconds
@@ -101,8 +106,10 @@ console.log (`${this._id}: starting automation for parameter ${this.parameter} o
 } // start
 
 stop () {
+if (this._automation) {
 clearInterval (this._automation);
 console.log (`${this._id}: stopping automation for parameter ${this.parameter} of ${this._automationTarget.localName} using interval ${this._automationInterval}`);
+} // if
 } // stop
 
 parameterChanged (value) {
@@ -110,7 +117,8 @@ console.log(`parameter ${value}`);
 } // parameterChanged
 
 valueChanged (value) {
-console.log(`new value of parameter ${this.parameter} is ${value}`);
+this.stop ();
+this.setupAutomation ();
 } // valueChanged
 
 compileFunction (text, parameter) {

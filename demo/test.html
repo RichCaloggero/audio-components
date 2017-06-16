@@ -24,6 +24,7 @@
 
 <link rel="import" href="../ui-number.html">
 <link rel="import" href="../ui-boolean.html">
+<link rel="import" href="../ui-text.html">
 
 <link rel="import" href="../audio-control.html">
 </head>
@@ -66,12 +67,12 @@ These values are random -- just for demonstration...
 
 <audio-pan label="3D panner" 
 x="3" z="-5"
-max-distance="100" ref-distance="60" 
-rolloff-factor="0"
+max-distance="100" ref-distance="1" rolloff-factor="1"
 hide-controls="coneInnerAngle coneOuterAngle coneOuterGain">
-<audio-control  parameter="x" value="10 * Math.cos(t)"></audio-control>
-<audio-control  parameter="y" value="20 * Math.cos(5*t)"></audio-control>
-<audio-control  parameter="z" value="4 * Math.sin(2*t / 3.14)"></audio-control>
+
+<audio-control  parameter="x" value="30 * Math.cos(t)"></audio-control>
+<audio-control  parameter="y" value="20 * Math.sin(.3*t+2.5)"></audio-control>
+<audio-control  parameter="z" value="45 * Math.sin(t+4)"></audio-control>
 </audio-pan>
 
 <!-- simple XTC:
