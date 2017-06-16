@@ -71,8 +71,7 @@ max-distance="100" ref-distance="1" rolloff-factor="1"
 hide-controls="coneInnerAngle coneOuterAngle coneOuterGain">
 
 <audio-control  parameter="x" value="30 * Math.cos(t)"></audio-control>
-<audio-control  parameter="y" value="20 * Math.sin(.3*t+2.5)"></audio-control>
-<audio-control  parameter="z" value="45 * Math.sin(t+4)"></audio-control>
+<audio-control  parameter="z" value="30 * Math.sin(t)"></audio-control>
 </audio-pan>
 
 <!-- simple XTC:
@@ -81,7 +80,7 @@ This is mixed with the original input signal.
 The hope is that when heard through speakers, the slightly delayed phase inverted signal from one speaker will cancel sounds from that speaker heard at the opposite ear.
 -->
 
-<audio-parallel label="crosstalk cancelation" bypass><audio-series>
+<audio-parallel label="crosstalk cancelation"><audio-series>
 
 <!-- this branch passes input to output -->
 <audio-gain gain="1.6"></audio-gain>
@@ -91,13 +90,13 @@ The hope is that when heard through speakers, the slightly delayed phase inverte
 <!-- this branch does the phase inversion and delay (invert phase done via thd delay component itself, although it could be implemented in HTML instead, but would be much more verbose (need for abstraction) -->
 
 <audio-split swap-outputs><audio-series>
-<audio-delay label="left delay" delay-time="0.002" invert-phase></audio-delay>
+<audio-delay label="left delay" delay-time="0.00008" invert-phase></audio-delay>
 </audio-series><audio-series>
-<audio-delay label="right delay" delay-time="0.0018" invert-phase></audio-delay>
+<audio-delay label="right delay" delay-time="0.00008" invert-phase></audio-delay>
 </audio-series></audio-split>
 
-<audio-filter label="frequency correction" type="bandpass" frequency="300.0" q="2.0"></audio-filter>
-<audio-gain label="inverted level" gain="-0.6"></audio-gain>
+<audio-filter label="frequency correction" hide-controls="detune gain" type="allpass" frequency="2000.0" q="0.16"></audio-filter>
+<audio-gain label="inverted level" gain="0.5"></audio-gain>
 </audio-series></audio-parallel>
 
 <!-- this network allows you to control sum and difference (mid / side) separately -->
@@ -163,7 +162,7 @@ or 2R = (L+R) - (L-R) = L + R - L +R
 </audio-series>
 
 
-<audio-gain label="master volume" gain="0.1"></audio-gain>
+<audio-gain label="master volume" gain="0.7"></audio-gain>
 </audio-series><!-- demo -->
 
 <audio-destination></audio-destination>
