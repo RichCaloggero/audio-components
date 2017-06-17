@@ -1,0 +1,64 @@
+<!--<link rel="import" href="../polymer/lib/elements/dom-if.html">-->
+<!--<link rel="import" href="../polymer/lib/elements/dom-repeat.html">-->
+
+<dom-module id="ui-number">
+<template>
+<div class="ui-field">
+<label>{{label}}</label>
+<br><input class="{{label}}" value="{{value::change}}" type="number" min="{{min::change}}" max="{{max::change}}" step="{{step::change}}">
+</div>
+</template>
+
+<script>
+"use strict";
+
+(function () {
+var instanceCount  = 0;
+
+class UINumber extends _AudioContext_ {
+static get is() { return "ui-number"; }
+
+static get properties () {
+return {
+min: Number,
+max: Number,
+step: Number,
+
+value: {
+type: Number,
+value: 0.0,
+notify: true,
+observer: valueChanged
+}, // value
+
+label: {
+type: String,
+value: ""
+} // label
+}; // return
+} // get properties
+
+constructor () {
+super ();
+instanceCount += 1;
+this._id = "number-" + instanceCount;
+
+console.log (`ui-number ${this._id} created`);
+} // constructor
+
+connectedCallback () {
+super.connectedCallback ();
+this.shadowRoot.querySelector("label").setAttribute ("for", this._id);
+this.shadowRoot.querySelector("input").setAttribute ("id", this._id);
+} // connectedCallback
+
+
+valueChanged (value) {
+} // valueChanged
+
+} // class UINumber
+
+window.customElements.define(UINumber.is, UINumber);
+})();
+</script>
+</dom-module>
