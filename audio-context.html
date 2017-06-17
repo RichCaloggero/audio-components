@@ -10,7 +10,9 @@ display: block;
 </style>
 
 <div class="audio-context">
-<h1>{{name}}</h1>
+<h1>{{label}}</h1>
+<ui-boolean name="enableAutomation" label="enable automation" value="{{enableAutomation}}"></ui-boolean>
+
 <slot></slot>
 
 <div class="status" role="region" aria-label="Status" aria-live="polite">
@@ -21,6 +23,7 @@ display: block;
 <script>
 "use strict";
 (function () {
+var automationQueue = [];
 var _root = null;
 var _debug = false, _debugConnection = false, _debugInternalConnection = false, _debugElementCreation = false, _debugUI = false;
 
@@ -29,6 +32,18 @@ static get is() { return "audio-context"; }
 
 static get properties() {
 return {
+label: {
+type: String,
+value: ""
+}, // label
+
+enableAutomation: {
+type: Boolean,
+value: true,
+notify: true,
+observer: "_enableAutomation"
+}, // enableAutomation
+
 _debug: {
 type: Boolean,
 value: false
@@ -54,11 +69,6 @@ type: Boolean,
 value: false
 }, // _debugInternalConnection
 
-name: {
-type: String,
-value: "",
-//observer: "nameChanged"
-} // name
 }; // return
 } // get properties
 
@@ -172,15 +182,15 @@ return customElements.whenDefined (element.localName);
 try {
 Promise.all (loaded)
 .then (() => {
-this.debugConnection (`${this.label}: all ${loaded.length} children loaded`);
+//this.debugConnection (`${this.label}: all ${loaded.length} children loaded`);
 loadedCallback.call (this, children);
 }).catch ((error) => {
-alert (error);
+alert ("whenAllChildrenLoaded promose: " + error);
 throw error;
 });
 
 } catch (e) {
-alert (e);
+alert ("whenAllChildrenLoaded outer: " + e);
 } // try
 } // whenAllChildrenLoaded
 
@@ -188,41 +198,51 @@ alert (e);
 addFieldLabels () {
 let groupLabel = this.shadowRoot.querySelector (".label, legend");
 let hide = !(groupLabel && groupLabel.textContent);
+let hideControls = this.hasAttribute ("hide-controls")?
+this.getAttribute("hide-controls").split (" ") : [];
+
+if (groupLabel) {
 let level = this.ancestors()
-.filter ((e) => e.hasAttribute("label"))
+.filter ((e) => e && e.hasAttribute("label"))
 .length;
 console.log (`${this.constructor.is} (${groupLabel.textContent}): level ${level}, add labels to ${hide? "hidden" : "visible"} fields`);
 
 groupLabel.setAttribute ("role", "heading");
 groupLabel.setAttribute ("aria-level", level+1);
-Array.from(this.shadowRoot.querySelectorAll (".field"))
+} // if
+
+Array.from(this.shadowRoot.querySelectorAll (".field, ui-number, ui-boolean, ui-text"))
 .forEach ((field) => {
-var name, control, label, id;
-name = field.getAttribute("data-name") || field.getAttribute("field-name") || field.getAttribute("name");
-label = field.querySelector("label");
-control = field.querySelector("input, select, textarea");
-id = this._id + "-" + name;
-//console.log(`field: ${name} ${field} ${control} ${label}`);
+let name = field.getAttribute("data-name") || field.getAttribute("field-name") || field.getAttribute("name");
+
+if ((hide && !_debugUI) || hideControls.includes(name)) field.setAttribute ("style", "display:none");
+
+if (field.matches("div.field")) {
+let name = field.getAttribute("data-name") || field.getAttribute("field-name") || field.getAttribute("name");
+let label = field.querySelector("label");
+let control = field.querySelector("input, select, textarea");
+let id = this._id + "-" + name;
+console.log(`- field: ${name} ${field} ${control} ${label}`);
 control.setAttribute("id", id);
-//control.setAttribute ("role", "application");
 label.setAttribute ("for", id);
-if (hide && !_debugUI) field.setAttribute ("style", "display:none");
+} // if
 });
 } // addFieldLabels
 
 ancestors (top) {
 let result = [];
 
-if (! this.shadowRoot) throw new Error("element not connected or -- shadowRoot is null");
+if (! this.shadowRoot) throw new Error("ancestors: element not connected or -- shadowRoot is null");
 
 let e = this.shadowRoot.host;
+if (! e) throw new Error ("ancestors: no host found");
 
 if (!top || !top.nodeType || top.nodeType !== 1) {
 top = e.closest("audio-context") || document.querySelector("body");
 } // if
 
 //console.log ("top: ", top);
-while (e !== top) {
+while (e && e !== top) {
 //console.log ("e: ", e);
 result.push (e);
 e = e.parentElement;
@@ -232,6 +252,28 @@ e = e.parentElement;
 //result = (result.length > 0)? result.slice(1) : [];
 return result;
 } // ancestors
+
+addToAutomationQueue () {
+automationQueue.push (this);
+console.log (`added ${this.label || this._id} to automation queue`);
+} // addToAutomationQueue
+
+_enableAutomation (value) {
+if (this.constructor === _AudioContext_) {
+if (value) this.startAllAutomation ();
+else this.stopAllAutomation ();
+} // if
+} // _enableAutomation
+
+startAllAutomation () {
+automationQueue.forEach ((element) => element.start());
+} // startAllAutomation
+
+stopAllAutomation () {
+automationQueue.forEach ((element) => element.stop());
+} // stopAllAutomation
+
+
 
 /// debugging
 __debug () {return _debug;}

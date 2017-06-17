@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+<title>audio component test</title>
+
+<script src="../bower_components/webcomponentsjs/webcomponents-loader.js"></script>
+
+<link rel="import" href="../audio-context.html">
+<link rel="import" href="../audio-series.html">
+<link rel="import" href="../audio-parallel.html">
+<link rel="import" href="../audio-split.html">
+<link rel="import" href="../audio-merge.html">
+
+<link rel="import" href="../audio-player.html">
+<link rel="import" href="../audio-destination.html">
+<link rel="import" href="../audio-gain.html">
+<link rel="import" href="../audio-filter.html">
+<link rel="import" href="../audio-delay.html">
+<link rel="import" href="../audio-pan.html">
+<link rel="import" href="../audio-convolver.html">
+<link rel="import" href="../audio-reverb.html">
+
+<link rel="import" href="../ui-number.html">
+<link rel="import" href="../ui-boolean.html">
+
+<link rel="import" href="../audio-control.html">
+</head>
+<body>
+<h1>audio component test</h1>
+
+<audio-context><audio-series>
+<audio-gain>
+<audio-control parameter="x" value="sin(t)">
+</audio-control>
+</audio-gain>
+
+</audio-series></audio-context>
+
+</body>
+</html>
