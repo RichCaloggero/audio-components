@@ -204,7 +204,10 @@ this.getAttribute("hide-controls").split (" ") : [];
 if (groupLabel) {
 let level = this.ancestors()
 .filter ((e) => e && e.hasAttribute("label"))
-.length;
+.map ((e) => {
+console.log (`- ancestor: ${this.elementName(e)}`);
+return e;
+}).length;
 console.log (`${this.constructor.is} (${groupLabel.textContent}): level ${level}, add labels to ${hide? "hidden" : "visible"} fields`);
 
 groupLabel.setAttribute ("role", "heading");
@@ -232,26 +235,38 @@ label.setAttribute ("for", id);
 ancestors (top) {
 let result = [];
 
-if (! this.shadowRoot) throw new Error("ancestors: element not connected or -- shadowRoot is null");
-
-let e = this.shadowRoot.host;
+let e = this;
 if (! e) throw new Error ("ancestors: no host found");
+
+//if (! this.shadowRoot) throw new Error("ancestors: element not connected or -- shadowRoot is null");
+//let e = this.shadowRoot.host;
+
 
 if (!top || !top.nodeType || top.nodeType !== 1) {
 top = e.closest("audio-context") || document.querySelector("body");
 } // if
 
-//console.log ("top: ", top);
+console.log (`ancestors: top=${this.elementName(top)}`);
+
 while (e && e !== top) {
-//console.log ("e: ", e);
+console.log (`- ancestors: e=${this.elementName(e)}`);
 result.push (e);
-e = e.parentElement;
+
+e = e.parentElement || e.parentNode.host;
 } // while
 //console.log("elements found: ", result.length);
 
 //result = (result.length > 0)? result.slice(1) : [];
 return result;
 } // ancestors
+
+elementName (e) {
+if (e) {
+return `${e.nodeName} (${e.label || e._id || e.className || ""})`;
+} else {
+return "[unnamed element]";
+} // if
+} // elementName
 
 addToAutomationQueue () {
 automationQueue.push (this);

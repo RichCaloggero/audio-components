@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
-<title>audio component test</title>
+<!--<title>audio component test</title>
 
 <script src="../bower_components/webcomponentsjs/webcomponents-loader.js"></script>
 
@@ -26,15 +26,19 @@
 
 <link rel="import" href="../ui-number.html">
 <link rel="import" href="../ui-boolean.html">
+-->
 
 </head>
 <body>
 <h1>audio component test</h1>
+<div id="myElement" p1="foo" p2="bar" p1="taz">
+</div>
 
-<audio-context><audio-series>
-<audio-control parameter="x" value="sin(t)"></audio-control>
+<script>
+var e = document.querySelector("#myElement");
+alert (`p1: ${e.getAttribute("p1")}, attributes: ${e.attributes.join(" ")}`);
 
-</audio-series></audio-context>
+</script>
 
 </body>
 </html>

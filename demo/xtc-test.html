@@ -21,10 +21,10 @@
 <link rel="import" href="../audio-delay.html">
 <link rel="import" href="../audio-pan.html">
 <link rel="import" href="../audio-reverb.html">
+<link rel="import" href="../audio-xtc.html">
 
 <link rel="import" href="../ui-number.html">
 <link rel="import" href="../ui-boolean.html">
-<link rel="import" href="../ui-text.html">
 
 <link rel="import" href="../audio-control.html">
 </head>
@@ -44,7 +44,7 @@ All processing is turned off by default, so when first loaded, you should hear t
 See comments in the HTML for more...
 </p>
 
-<audio-context label="audio control demo"><audio-series>
+<audio-context label="audio components demo"><audio-series>
 <!-- music.mp3 is default URL, but you can specify whatever you like via the UI
 Unlike other components, audio-player always produces a UI(no need for label attribute).
 -->
@@ -70,8 +70,9 @@ x="3" z="-5"
 max-distance="100" ref-distance="1" rolloff-factor="1"
 hide-controls="coneInnerAngle coneOuterAngle coneOuterGain">
 
-<audio-control  parameter="x" value="30 * Math.cos(t)"></audio-control>
-<audio-control  parameter="z" value="30 * Math.sin(t)"></audio-control>
+<audio-control  parameter="x" value="30 * Math.cos(.5*(t+2.4))"></audio-control>
+<audio-control  parameter="y" value=""></audio-control>
+<audio-control  parameter="z" value="30 * Math.sin(.5*(t+2.9))"></audio-control>
 </audio-pan>
 
 <!-- simple XTC:
@@ -80,24 +81,7 @@ This is mixed with the original input signal.
 The hope is that when heard through speakers, the slightly delayed phase inverted signal from one speaker will cancel sounds from that speaker heard at the opposite ear.
 -->
 
-<audio-parallel label="crosstalk cancelation"><audio-series>
-
-<!-- this branch passes input to output -->
-<audio-gain gain="1.6"></audio-gain>
-
-</audio-series><audio-series>
-
-<!-- this branch does the phase inversion and delay (invert phase done via thd delay component itself, although it could be implemented in HTML instead, but would be much more verbose (need for abstraction) -->
-
-<audio-split swap-outputs><audio-series>
-<audio-delay label="left delay" delay-time="0.005" invert-phase></audio-delay>
-</audio-series><audio-series>
-<audio-delay label="right delay" delay-time="0.005" invert-phase></audio-delay>
-</audio-series></audio-split>
-
-<audio-filter label="frequency correction" hide-controls="detune gain" type="allpass" frequency="2000.0" q="0.16"></audio-filter>
-<audio-gain label="inverted level" gain="0.5"></audio-gain>
-</audio-series></audio-parallel>
+<audio-xtc label="crosstalk cancelation"></audio-xtc>
 
 <!-- this network allows you to control sum and difference (mid / side) separately -->
 <audio-series label="stereo widener"  bypass>
