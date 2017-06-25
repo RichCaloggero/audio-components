@@ -1,7 +1,7 @@
 {
 "fragments": ["audio-context.html"],
 "sources": ["*.html"],
-"entrypoint": "demo/xtc-test.html",
+"entrypoint": "demo/index.html",
 "builds": [{
 "bundle": true,
 "js": {"minify": false},
