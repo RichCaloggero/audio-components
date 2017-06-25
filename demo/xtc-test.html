@@ -51,13 +51,13 @@ Unlike other components, audio-player always produces a UI(no need for label att
 
 <audio-player src="music.mp3"></audio-player>
 
-<audio-series label="demo">
+<audio-series label="demo" bypass>
 
 <!--convert to mono before 3D panner.
 Check the bypass in UI to send original stereo signal to panner
 -->
 
-<audio-series label="mono">
+<audio-series label="mono" bypass>
 <audio-merge></audio-merge>
 </audio-series>
 
@@ -65,7 +65,7 @@ Check the bypass in UI to send original stereo signal to panner
 These values are random -- just for demonstration...
 -->
 
-<audio-pan label="3D panner" 
+<audio-pan label="3D panner" bypass
 x="3" z="-5"
 max-distance="100" ref-distance="1" rolloff-factor="1"
 hide-controls="coneInnerAngle coneOuterAngle coneOuterGain">
@@ -81,12 +81,12 @@ This is mixed with the original input signal.
 The hope is that when heard through speakers, the slightly delayed phase inverted signal from one speaker will cancel sounds from that speaker heard at the opposite ear.
 -->
 
-<audio-xtc label="crosstalk cancelation"></audio-xtc>
+<audio-xtc label="crosstalk cancelation" bypass></audio-xtc>
 
 <!-- this network allows you to control sum and difference (mid / side) separately -->
+
 <audio-series label="stereo widener"  bypass>
-<!-- left channel will be sum, right channel will be difference
--->
+<!-- left channel will be sum, right channel will be difference-->
 <audio-parallel><audio-series>
 
 <!-- sum the two channels -->
