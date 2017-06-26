@@ -25,8 +25,9 @@ display: inline;
 
 (function () {
 var instanceCount  = 0;
+var automationQueue = [];
 
-class AudioControl extends _AudioContext_ {
+window.AudioControl = class AudioControl extends _AudioContext_ {
 static get is() { return "audio-control"; }
 
 static get properties () {
@@ -81,7 +82,7 @@ if (f) {
 console.log (`function: ${f}`);
 this._automator = f;
 this._automationTarget = element;
-this.addToAutomationQueue ();
+addToAutomationQueue (this);
 this.start ();
 
 } else {
@@ -94,11 +95,15 @@ alert (`parameter ${this.parameter} not in ${element.localName}`);
 } // setupAutomation
 
 start () {
+this.stop ();
 this._automation = setInterval (() => {
 try {
 this._automationTarget[this.parameter] = this._automator(audio.currentTime);
 } catch (e) {
+alert (e);
+this.value = "";
 this.stop ();
+removeFromAutomationQueue (this);
 } // catch
 }, this._automationInterval);
 
@@ -112,6 +117,15 @@ console.log (`${this._id}: stopping automation for parameter ${this.parameter} o
 } // if
 } // stop
 
+static startAllAutomation () {
+automationQueue.forEach ((element) => element.start());
+} // startAllAutomation
+
+static stopAllAutomation () {
+automationQueue.forEach ((element) => element.stop());
+} // stopAllAutomation
+
+
 parameterChanged (value) {
 console.log(`parameter ${value}`);
 } // parameterChanged
@@ -123,17 +137,29 @@ this.setupAutomation ();
 
 compileFunction (text, parameter) {
 try {
-return new Function (parameter, `return ${text};`);
+return new Function (parameter,
+`with (Math) {return ${text};}`);
 
 } catch (e) {
 alert (e);
-throw ("error compiling function: " + e);
-} // try
 return null;
+} // try
 } // compileFunction
 
 } // class AudioControl
 
+function addToAutomationQueue (element) {
+automationQueue.push (element);
+console.log (`added ${element.label || element._id} to automation queue`);
+} // addToAutomationQueue
+
+function removeFromAutomationQueue (element) {
+let found = automationQueue.indexOf(element);
+if (found >= 0) {
+automationQueue.splice (found, 1);
+console.log (`removed ${element.label || element._id} from automation queue`);
+} // if
+} // removeFromAutomationQueue
 
 window.customElements.define(AudioControl.is, AudioControl);
 })();

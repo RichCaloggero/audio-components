@@ -23,7 +23,6 @@ display: block;
 <script>
 "use strict";
 (function () {
-var automationQueue = [];
 var _root = null;
 var _debug = false, _debugConnection = false, _debugInternalConnection = false, _debugElementCreation = false, _debugUI = false;
 
@@ -268,25 +267,14 @@ return "[unnamed element]";
 } // if
 } // elementName
 
-addToAutomationQueue () {
-automationQueue.push (this);
-console.log (`added ${this.label || this._id} to automation queue`);
-} // addToAutomationQueue
 
 _enableAutomation (value) {
 if (this.constructor === _AudioContext_) {
-if (value) this.startAllAutomation ();
-else this.stopAllAutomation ();
+if (value) AudioControl.startAllAutomation ();
+else AudioControl.stopAllAutomation ();
 } // if
 } // _enableAutomation
 
-startAllAutomation () {
-automationQueue.forEach ((element) => element.start());
-} // startAllAutomation
-
-stopAllAutomation () {
-automationQueue.forEach ((element) => element.stop());
-} // stopAllAutomation
 
 
 
