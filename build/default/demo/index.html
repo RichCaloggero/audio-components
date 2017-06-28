@@ -144,9 +144,9 @@ These values are random -- just for demonstration...
 
 <audio-pan label="3D panner" bypass="" x="3" z="-5" max-distance="100" ref-distance="1" rolloff-factor="1" hide-controls="coneInnerAngle coneOuterAngle coneOuterGain">
 
-<audio-control parameter="x" value="30 * Math.cos(.5*(t+2.4))"></audio-control>
+<audio-control parameter="x" value="30 * cos(t)"></audio-control>
 <audio-control parameter="y" value=""></audio-control>
-<audio-control parameter="z" value="30 * Math.sin(.5*(t+2.9))"></audio-control>
+<audio-control parameter="z" value="30 * sin(t)"></audio-control>
 </audio-pan>
 
 <!-- simple XTC:
