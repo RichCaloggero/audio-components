@@ -1,3 +1,1 @@
-webserver_headers:
-  "Access-Control-Allow-Origin": "*"
 theme: jekyll-theme-minimal
