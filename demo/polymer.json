@@ -1,0 +1,17 @@
+{
+"root": "..",
+"fragments": ["audio-context.html"],
+"sources": ["*.html"],
+"entrypoint": "demo/index.html",
+"builds": [{
+"bundle": true,
+"js": {"minify": false},
+"css": {"minify": false},
+"html": {"minify": false}
+}],
+"lint": {
+"rules": [
+"polymer-2"
+]
+}
+}

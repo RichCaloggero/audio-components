@@ -1,0 +1,11 @@
+<audio-context label="experiment"><audio-series>
+<audio-player src="music.mp3"></audio-player>
+
+<audio-parallel><audio-series>
+<audio-gain></audio-gain>
+</audio-series><audio-series>
+<audio-delay delay-time="0.5"></audio-delay>
+</audio-series></audio-parallel>
+
+<audio-destination></audio-destination>
+</audio-series></audio-context>

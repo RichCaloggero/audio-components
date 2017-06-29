@@ -1,0 +1,89 @@
+<!--<link rel="import" href="../polymer/lib/elements/dom-if.html">--><!--<link rel="import" href="../polymer/lib/elements/dom-repeat.html">--><dom-module id="audio-series">
+<template>
+<style>
+:host {
+display: block;
+}
+</style>
+
+<div class="audio-series" role="region" aria-label$="{{label}}">
+<span class="label">{{label}}</span>
+
+<div class="field" data-name="bypass">
+<label>Bypass</label>
+<br><input type="checkbox" checked="{{bypass::change}}">
+</div>
+
+<slot></slot>
+</div>
+
+</template>
+
+<script>
+"use strict";
+
+(function () {
+var instanceCount = 0;
+
+class AudioSeries extends _AudioContext_ {
+static get is() { return "audio-series"; }
+
+static get properties () {
+return {
+label: {
+type: String,
+value: ""
+}, // label
+
+bypass: {
+type: Boolean,
+value: false,
+notify: true,
+observer: "_bypass"
+} // bypass
+}; // return
+} // get properties
+
+constructor () {
+super ();
+instanceCount += 1;
+this._id = AudioSeries.is + instanceCount;
+//if (this.__debug()) this.label = this._id;
+
+this._init ();
+} // constructor
+
+connectedCallback () {
+super.connectedCallback ();
+this.whenAllChildrenLoaded (this.connectAll);
+this.addFieldLabels ();
+} // connectedCallback
+
+connectAll (nodes) {
+if (nodes.length < 1) return;
+
+if (this.firstElementChild._in) {
+this._audioIn.connect (this.firstElementChild._in);
+} // if
+
+for (var i=0; i<nodes.length-1; i++) {
+let e1 = nodes[i], e2 = nodes[i+1];
+
+this.debugConnection (`${this.label}: connecting ${e1.label} ${e1._out} to ${e2.label} ${e2._in}`);
+e1._out.connect (e2._in);
+} // for
+
+if (this.lastElementChild._out) {
+this.lastElementChild._out.connect (this._audioOut);
+} // if
+
+this.debugElementCreation (`created ${this.label}`);
+} // connectAll
+
+
+} // class AudioSeries
+
+window.customElements.define(AudioSeries.is, AudioSeries);
+})(); // module
+</script>
+</dom-module>

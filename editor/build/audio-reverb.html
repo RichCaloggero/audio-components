@@ -1,0 +1,168 @@
+<dom-module id="audio-reverb">
+<template>
+<style>
+:host {
+display: block;
+}
+
+:host .field {
+display: inline;
+}
+</style>
+
+<div class="audio-reverb" role="region" aria-label$="{{label}}">
+<span class="label">{{label}}</span>
+
+
+<div class="row">
+<ui-boolean name="bypass" label="bypass" value="{{bypass}}"></ui-boolean>
+<ui-number name="mix" label="mix" min="0.0" max="1.0" step="0.1" value="{{mix}}"></ui-number>
+</div><!-- .row -->
+
+<audio-parallel><audio-series>
+<audio-gain class="dry-level" gain="0.5"></audio-gain>
+</audio-series><audio-series>
+<audio-convolver label="convolver" impulse-library="../impulses" hide-controls="bypass"><option>
+In The Silo Revised.wav
+</option><option>
+Cement Blocks 2.wav
+</option><option>
+Cement Blocks 1.wav
+</option><option>
+Chateau de Logne, Outside.wav
+</option><option>
+Conic Long Echo Hall.wav
+</option><option>
+Deep Space.wav
+</option><option>
+Derlon Sanctuary.wav
+</option><option>
+Bottle Hall.wav
+</option><option>
+Direct Cabinet N1.wav
+</option><option>
+Direct Cabinet N2.wav
+</option><option>
+Direct Cabinet N3.wav
+</option><option>
+Direct Cabinet N4.wav
+</option><option>
+French 18th Century Salon.wav
+</option><option>
+Five Columns Long.wav
+</option><option>
+Five Columns.wav
+</option><option>
+Going Home.wav
+</option><option>
+Greek 7 Echo Hall.wav
+</option><option>
+In The Silo.wav
+</option><option>
+Highly Damped Large Room.wav
+</option><option>
+Large Bottle Hall.wav
+</option><option>
+Large Long Echo Hall.wav
+</option><option>
+Large Wide Echo Hall.wav
+</option><option>
+Masonic Lodge.wav
+</option><option>
+Musikvereinsaal.wav
+</option><option>
+Narrow Bumpy Space.wav
+</option><option>
+Nice Drum Room.wav
+</option><option>
+On a Star.wav
+</option><option>
+Parking Garage.wav
+</option><option>
+Rays.wav
+</option><option>
+Right Glass Triangle.wav
+</option><option>
+Ruby Room.wav
+</option><option>
+Scala Milan Opera Hall.wav
+</option><option>
+Small Prehistoric Cave.wav
+</option><option>
+Small Drum Room.wav
+</option><option>
+St Nicolaes Church.wav
+</option><option>
+Trig Room.wav
+</option><option>
+Vocal Duo.wav
+</option></audio-convolver>
+
+<audio-gain class="wet-level" gain="0.5"></audio-gain>
+</audio-series></audio-parallel>
+
+</div><!-- .audio-reverb -->
+</template>
+
+
+<script>
+// audio-reverb
+
+"use strict";
+
+(function () {
+var instanceCount = 0;
+
+class AudioReverb extends _AudioContext_{
+static get is () {return "audio-reverb";}
+
+static get properties () {
+return {
+label: {
+type: String,
+value: ""
+}, // label
+
+mix: {
+type: Number,
+value: 0.5,
+notify: true,
+observer: "mixChanged"
+} // mix
+
+}; // return
+} // get properties
+
+constructor () {
+super ();
+instanceCount += 1;
+this._id = "audio-reverb" + instanceCount;
+this._init ();
+} // constructor
+
+connectedCallback () {
+super.connectedCallback ();
+this.addFieldLabels ();
+this.connectAll ();
+} // connectedCallback
+
+connectAll () {
+var reverb = this.shadowRoot.querySelector("audio-parallel");
+this._audioIn.connect (reverb._in);
+reverb._out.connect (this._audioOut);
+} // connectAll
+
+mixChanged (value) {
+let self = this.shadowRoot;
+let dry = self.querySelector(".dry-level");
+let wet = self.querySelector (".wet-level");
+wet.gain = value;
+dry.gain = 1 - value;
+} // mixChanged
+
+} // class AudioReverb
+
+window.customElements.define(AudioReverb.is, AudioReverb);
+})();
+</script>
+</dom-module>
