@@ -14,8 +14,11 @@ Think of this as the body of your audio app, similar to the body html element.
 <!-- the audio-series element is one of the two main ways of connecting audio components together.
 This acts as a container for other components.
 Its job is to connect all of the components inside it in series, i.e. output of one goes to input of next one.
+As with most elements, we can add a label to it to show a user interface specific to that element.
+Most elements generate a bypass control by default, and most will generate other UI controls as well.
+The connector elements such as series and parallel generally only generate bypass controls and a heading if a they are labeled.
 -->
-<audio-series>
+<audio-series label="audio-components example">
 
 <!-- the audio-player is currently the only way of getting a signal into the network.
 It leverages the html5 audio element to grab data from a given URL.
