@@ -1,11 +1,58 @@
-<audio-context label="experiment"><audio-series>
+<!--Here is a very simple processing network.
+It generates a simple delay by splitting the incoming audio into a dry and wet signal,
+passing the dry signal directly to the output,
+while the wet signal is passed through a delay.
+The delay time can be adjusted by the user.
+-->
+
+<!-- all audio components must be inside an audio-context container.
+Adding a label to the audio-context element generates an h1 containing the label text.
+Think of this as the body of your audio app, similar to the body html element.
+-->
+<audio-context label="experiment">
+
+<!-- the audio-series element is one of the two main ways of connecting audio components together.
+This acts as a container for other components.
+Its job is to connect all of the components inside it in series, i.e. output of one goes to input of next one.
+-->
+<audio-series>
+
+<!-- the audio-player is currently the only way of getting a signal into the network.
+It leverages the html5 audio element to grab data from a given URL.
+-->
 <audio-player src="https://dl.dropboxusercontent.com/u/8529048/slow%20down%20jack.mp3"></audio-player>
 
-<audio-parallel><audio-series>
+<!-- The audio-parallel is another connector element.
+It takes audio from it's input and sends it to all of the elements inside of it.
+The output of each of the child elements is then mixed and sent to the output of the audio-parallel block.
+If this parallel block is inside a series block, as is done here, then that mixed output is then sent along to the next thing in the series, which in this case is the output (speakers or headphones).
+The most common use is to be able to process wet and dry signals separately as is done here.
+-->
+<audio-parallel>
+
+<!-- This parallel block contains two elements, both of which are audio-series.
+We could have eliminated these audio-series blocks since they only contain a single element each, but since this is such a common pattern, thought it would be good to show it here.
+-->
+<audio-series>
+
+<!-- The gain element here simply passes its input to its output, and modifies the gain (volume) by the given gain attribute.
+In this case, it drops the gain by half.
+This is the dry signal, and as we'll see, it gets piped directly to the output.
+Because it has no label, no user interface is produced, thus this gain is fixed at 1.0 (the default since no gain parameter is specified) and can only be modified by modifying this source.
+-->
 <audio-gain></audio-gain>
+
 </audio-series><audio-series>
-<audio-delay delay-time="0.5"></audio-delay>
+
+<!-- This second series block inside the parallel block contains a simple delay component.
+The delay here is specified by the parameter and is fixed at 0.5 seconds.
+As with all of the components, if we include a label, the label is rendered as a heading (h1, h2, etc) and if the element is an audio processor like delay or gain, then the system automatically generates user interface controls to allow you to manipulate these parameters.
+If an element lacks a label, then no user interface is generated and the parameters remain fixed at whatever value is specified in the source (or at default values if parameter is not specified).
+-->
+<audio-delay label="delay time" delay-time="0.5"></audio-delay>
 </audio-series></audio-parallel>
 
+<!-- Finally, the audio-destination element sends data to your computer's default audio out, typically speakers or headphones.
+-->
 <audio-destination></audio-destination>
 </audio-series></audio-context>
