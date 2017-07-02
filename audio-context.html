@@ -21,6 +21,7 @@ display: block;
 </template>
 
 <script>
+// audio-context
 "use strict";
 (function () {
 var _root = null;
@@ -162,11 +163,12 @@ this._audioOut.disconnect ();
 contextCheck (name) {
 var parentName = this.parentNode.localName;
 //alert ("parentName: " + parentName);
-if (parentName !== "audio-series" && parentName !== "audio-parallel" && parentName !== "audio-split") {
+/*if (parentName !== "audio-series" && parentName !== "audio-parallel" && parentName !== "audio-split") {
 alert (`${name} : element must be child of audio-parallel or audio-series to participate in audio graph`);
 //throw new Error ("audio graph error");
 return false;
 } // if
+*/
 
 return true;
 } // contextCheck

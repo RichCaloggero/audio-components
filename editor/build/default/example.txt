@@ -52,7 +52,10 @@ The delay here is specified by the parameter and is fixed at 0.5 seconds.
 As with all of the components, if we include a label, the label is rendered as a heading (h1, h2, etc) and if the element is an audio processor like delay or gain, then the system automatically generates user interface controls to allow you to manipulate these parameters.
 If an element lacks a label, then no user interface is generated and the parameters remain fixed at whatever value is specified in the source (or at default values if parameter is not specified).
 -->
-<audio-delay label="delay time" delay-time="0.5"></audio-delay>
+
+<audio-feedback label="feedback">
+<audio-delay id="myDelay" label="delay time" delay-time="0.5"></audio-delay>
+</audio-feedback>
 </audio-series></audio-parallel>
 
 <!-- Finally, the audio-destination element sends data to your computer's default audio out, typically speakers or headphones.

@@ -21,6 +21,7 @@
 <link rel="import" href="../audio-convolver.html">
 <link rel="import" href="../audio-reverb.html">
 <link rel="import" href="../audio-xtc.html">
+<link rel="import" href="../audio-feedback.html">
 
 <link rel="import" href="../ui-number.html">
 <link rel="import" href="../ui-boolean.html">
@@ -28,15 +29,26 @@
 <link rel="import" href="../audio-control.html">
 </head>
 <body>
-<h1>audio component demo</h1>
+<h1>Audio Component Editor</h1>
 
-<div id="editor">
+<div class="instructions">
+<p>This application allows you to edit and test audio-component networks right from the browser.
+Simply click the edit checkbox and drop your html into the box.
+Optionally, use the file box to load the predefined networks "example.txt" (default)
+or "demo.txt" (same as running <a href="../demo/">demo/</a> directly).
+</p><p>
+Once the file is loaded and editing is complete, uncheck the edit checkbox and the network will be instantiated and available for use.
+</p></div>
+
+<div id="editor" role="region" aria-label="editor">
+<div id="status" aria-live="polite"></div>
 <label>Edit: <input type="checkbox" id="edit"></label>
 <span id="file" style="display:none">
-<label>File: <input type="text" id="fileName" value="demo.txt"></label>
+<label>File: <input type="text" id="fileName" value="example.txt"></label>
 <button id="getFile">go</button>
 </span>
 
+<label for="source">Source:</label>
 <br><textarea id="source" rows="20" cols="132" wrap="off" style="display:none"></textarea>
 </div><!-- editor -->
 
@@ -56,6 +68,8 @@ let html = "";
 getFile.addEventListener ("click", (e) => {
 loadFile (fileName.value, (text) => {
 source.value = text;
+let lines = text.split ("\n");
+statusMessage (`${lines.length} lines to edit`);
 }); // getFile
 }); // listen
 
@@ -88,18 +102,25 @@ demo.innerHTML = html;
 function loadFile (url, callback) {
 var request = new XMLHttpRequest();
 request.responseType = "text/plain";
+//request.withCredentials = true;
 request.open("GET", url, true);
-console.log (`requesting ${url}...`);
+request.send();
 
 request.addEventListener("load", function () {
 console.log ("- loaded...");
 if (request.response) {
 callback (request.response);
+} else {
+alert (`load: ${request.error}`);
 } // if
 }); // load
 
-request.send();
+console.log (`request sent via ${request}, url=${url}`);
 } // loadFile
+
+function statusMessage (text) {
+document.querySelector ("#status").textContent = text;
+} // statusMessage
 
 </script>
 

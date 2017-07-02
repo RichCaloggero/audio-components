@@ -22,6 +22,7 @@
 <link rel="import" href="../audio-pan.html">
 <link rel="import" href="../audio-reverb.html">
 <link rel="import" href="../audio-xtc.html">
+<link rel="import" href="../audio-feedback.html">
 
 <link rel="import" href="../ui-number.html">
 <link rel="import" href="../ui-boolean.html">
@@ -149,9 +150,9 @@ x="3" z="-5"
 max-distance="100" ref-distance="1" rolloff-factor="1"
 hide-controls="coneInnerAngle coneOuterAngle coneOuterGain">
 
-<audio-control  parameter="x" value="30 * cos(.5*(t+2.4))"></audio-control>
+<audio-control  parameter="x" value="30 * cos(t)"></audio-control>
 <audio-control  parameter="y" value=""></audio-control>
-<audio-control  parameter="z" value="30 * sin(.5*(t+2.9))"></audio-control>
+<audio-control  parameter="z" value="30 * sin(t)"></audio-control>
 </audio-pan>
 
 <!-- simple XTC:

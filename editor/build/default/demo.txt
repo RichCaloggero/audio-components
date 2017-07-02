@@ -35,7 +35,7 @@ This is mixed with the original input signal.
 The hope is that when heard through speakers, the slightly delayed phase inverted signal from one speaker will cancel sounds from that speaker heard at the opposite ear.
 -->
 
-<audio-xtc label="crosstalk cancelation" bypass></audio-xtc>
+<audio-xtc id="xtc" label="crosstalk cancelation" bypass></audio-xtc>
 
 <!-- this network allows you to control sum and difference (mid / side) separately -->
 
