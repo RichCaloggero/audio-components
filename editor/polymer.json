@@ -1,7 +1,7 @@
 {
 "root": "..",
 "fragments": ["audio-context.html"],
-"sources": ["*.html","editor/*.txt"],
+"sources": ["*.html","*/*.txt","*/*.md"],
 "entrypoint": "editor/index.html",
 "builds": [{
 "bundle": true,

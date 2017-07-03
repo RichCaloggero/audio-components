@@ -5,6 +5,8 @@
   ],
   "sources": [
     "*.html",
+    "*\\*.txt",
+    "*\\*.md",
     "demo\\index.html",
     "audio-context.html"
   ],
