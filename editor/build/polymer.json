@@ -4,9 +4,11 @@
     "audio-context.html"
   ],
   "sources": [
+    "bower_components\\marked-element\\*",
+    "bower_components\\marked\\*",
     "*.html",
-    "*\\*.txt",
-    "*\\*.md",
+    "editor\\*.txt",
+    "editor\\*.md",
     "editor\\index.html",
     "audio-context.html"
   ],

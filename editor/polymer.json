@@ -1,7 +1,7 @@
 {
 "root": "..",
 "fragments": ["audio-context.html"],
-"sources": ["*.html","*/*.txt","*/*.md"],
+"sources": ["bower_components/marked-element/*","bower_components/marked/*","*.html","editor/*.txt","editor/*.md"],
 "entrypoint": "editor/index.html",
 "builds": [{
 "bundle": true,

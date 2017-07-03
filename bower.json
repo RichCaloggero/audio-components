@@ -1,6 +1,6 @@
 {
   "name": "audio",
-  "main": "audio-player.html",
+  "main": "audio-context.html",
   "dependencies": {
     "polymer": "Polymer/polymer#^2.0.0-rc.2"
   },
