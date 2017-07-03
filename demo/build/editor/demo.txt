@@ -1,50 +1,3 @@
-<!DOCTYPE html><html lang="en"><head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
-
-<title>Audio Components demo</title>
-
-<script src="../bower_components/webcomponentsjs/webcomponents-loader.js"></script>
-
-<link rel="import" href="../bower_components/marked-element/marked-element.html">
-<link rel="import" href="../audio-context.html">
-<link rel="import" href="../audio-series.html">
-<link rel="import" href="../audio-parallel.html">
-<link rel="import" href="../audio-split.html">
-<link rel="import" href="../audio-merge.html">
-
-<link rel="import" href="../audio-player.html">
-<link rel="import" href="../audio-destination.html">
-<link rel="import" href="../audio-gain.html">
-<link rel="import" href="../audio-filter.html">
-<link rel="import" href="../audio-delay.html">
-<link rel="import" href="../audio-pan.html">
-<link rel="import" href="../audio-reverb.html">
-<link rel="import" href="../audio-xtc.html">
-<link rel="import" href="../audio-feedback.html">
-
-<link rel="import" href="../ui-number.html">
-<link rel="import" href="../ui-boolean.html">
-
-<link rel="import" href="../audio-control.html">
-</head>
-<body>
-<h1>audio component demo</h1>
-
-<details id="description">
-<summary>
-<p>This takes a signal from the specified URL 
-and pipes it through a 3D panner,
-to a network that attempts to do crosstalk cancelation,
-to a network that does mid-side processing,
-and finally to output.
-</p></summary>
-<marked-element>
-<div slot="markdown-html"></div>
-<script type="text/markdown" src="instructions.md"></script>
-</marked-element>
-</details>
-
 <audio-context label="demo"><audio-series>
 <!-- music.mp3 is default URL, but you can specify whatever you like via the UI
 Unlike other components, audio-player always produces a UI(no need for label attribute).
@@ -52,13 +5,13 @@ Unlike other components, audio-player always produces a UI(no need for label att
 
 <audio-player src="https://dl.dropboxusercontent.com/u/8529048/slow%20down%20jack.mp3"></audio-player>
 
-<audio-series label="demo" bypass="">
+<audio-series label="demo" bypass>
 
 <!--convert to mono before 3D panner.
 Check the bypass in UI to send original stereo signal to panner
 -->
 
-<audio-series label="mono" bypass="">
+<audio-series label="mono" bypass>
 <audio-merge></audio-merge>
 </audio-series>
 
@@ -66,11 +19,14 @@ Check the bypass in UI to send original stereo signal to panner
 These values are random -- just for demonstration...
 -->
 
-<audio-pan label="3D panner" bypass="" x="3" z="-5" max-distance="100" ref-distance="1" rolloff-factor="1" hide-controls="coneInnerAngle coneOuterAngle coneOuterGain">
+<audio-pan label="3D panner" bypass
+x="3" z="-5"
+max-distance="100" ref-distance="1" rolloff-factor="1"
+hide-controls="coneInnerAngle coneOuterAngle coneOuterGain">
 
-<audio-control parameter="x" value="30 * cos(t)"></audio-control>
-<audio-control parameter="y" value=""></audio-control>
-<audio-control parameter="z" value="30 * sin(t)"></audio-control>
+<audio-control  parameter="x" value="30 * Math.cos(.5*(t+2.4))"></audio-control>
+<audio-control  parameter="y" value=""></audio-control>
+<audio-control  parameter="z" value="30 * Math.sin(.5*(t+2.9))"></audio-control>
 </audio-pan>
 
 <!-- simple XTC:
@@ -79,11 +35,11 @@ This is mixed with the original input signal.
 The hope is that when heard through speakers, the slightly delayed phase inverted signal from one speaker will cancel sounds from that speaker heard at the opposite ear.
 -->
 
-<audio-xtc label="crosstalk cancelation" bypass=""></audio-xtc>
+<audio-xtc id="xtc" label="crosstalk cancelation" bypass></audio-xtc>
 
 <!-- this network allows you to control sum and difference (mid / side) separately -->
 
-<audio-series label="stereo widener" bypass="">
+<audio-series label="stereo widener"  bypass>
 <!-- left channel will be sum, right channel will be difference-->
 <audio-parallel><audio-series>
 
@@ -91,7 +47,7 @@ The hope is that when heard through speakers, the slightly delayed phase inverte
 <audio-merge></audio-merge>
 
 <!-- and put on left output with gain adjustment -->
-<audio-split><audio-gain label="center level" gain="1.5"></audio-gain></audio-split>
+<audio-split><audio-gain  label="center level" gain="1.5"></audio-gain></audio-split>
 
 </audio-series><audio-series>
 <!-- this takes difference -->
@@ -107,7 +63,7 @@ The hope is that when heard through speakers, the slightly delayed phase inverte
 <audio-gain label="side level" gain="2.0"></audio-gain>
 
 <!-- and send to right output -->
-<audio-split swap-outputs=""><audio-gain></audio-gain></audio-split>
+<audio-split swap-outputs><audio-gain></audio-gain></audio-split>
 
 </audio-series></audio-parallel>
 
@@ -139,19 +95,13 @@ or 2R = (L+R) - (L-R) = L + R - L +R
 </audio-split>
 <audio-merge></audio-merge>
 
-<audio-split swap-outputs=""><audio-gain></audio-gain></audio-split>
+<audio-split swap-outputs><audio-gain></audio-gain></audio-split>
 </audio-series></audio-parallel>
 </audio-series>
 
 
-<audio-gain label="master volume" gain="1.0"></audio-gain>
+<audio-gain label="master volume" gain="0.7"></audio-gain>
 </audio-series><!-- demo -->
 
 <audio-destination></audio-destination>
-</audio-series>
-</audio-context>
-
-
-
-
-</body></html>
+</audio-series></audio-context>
