@@ -145,9 +145,10 @@ Numeric controls can also specify min, max, and step, which are passed directly 
 The audio-control element allows one to specify a parameter to be automated, and a function to generate values based on the current time stored in the underlying webaudio context containing the graph.
 The default evaluation intervall is 0.2 seconds.
 The parameter must be specified in the markup, and the element being controled is wrapped within the audio-control element.
+
 The automator function can be specified in markup, and also via the UI.
 It is a simple javascript expression which is evaluated in the context of the controled element (i.e. the "this" keyword references the currently controled element).
-It also references the "Math" object using the javascript "with" statement.
+It references the "Math" object using the javascript "with" statement which allows one to reference Math functions via just their name (i.e. sin(t) instead of Math.sin(t)).
 
 ## Connectors
 
@@ -161,6 +162,10 @@ It also references the "Math" object using the javascript "with" statement.
 
 - _in of the parallel connector connects to _in of all children
 - _out of each child connects to _out of the parallel connector
+
+### Feedback
+
+The audio-feedback element sends its input to the input of its single child, and sends the output of it's child element to the output of the audio-feedback element, as well as sending it back to it's input, through a gain node. 
 
 ### merge
 
@@ -215,3 +220,15 @@ Same as above, but puts signal only in right channel at destination.
 ```
 
 See `demo/index.html` for a more complex example.
+
+## Composed Elements
+
+### XTC
+
+The audio-xtc element wraps a network made from audio-components into a single element.
+This is a good mechanism of abstraction, although it coes require some development setup and understanding of polymer.
+However, following the pattern here can make it fairly simple to develop new elements fairly painlessly.
+
+### Reverb
+
+The audio-reverb element is based on audio-convolver and a publically impulse library which is distributed with this project.
