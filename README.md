@@ -96,8 +96,6 @@ If the `label` attribute on the gain element were not present, it's UI would be 
 
 ## Limitations
 
-- control signals not yet implemented
-- feedback not yet implemented
 - webaudio can deal with more than 2 channels, but this project assumes all elements either 1 or 2 channels
 	+ webaudio has notion of channels and destinations which are a bit hard to get my head around
 	+ generally nodes are stereo in and stereo out, but they can be mono as well depending on channelCount, channelCountMode
@@ -105,22 +103,14 @@ If the `label` attribute on the gain element were not present, it's UI would be 
 
 ## All elements
 
-All elements, both connectors and audio processors, are web components. They consist of a custom element and its JS class definition.
+All elements are implemented as web components. They consist of a custom element and its JS class definition.
 
 In the javascript domain, all elements inherrit directly from `_AudioContext_`.
 In the HTML domain, the entire HTML graph needs to be wrapped in a `<audio-context> ... </audio-context>` element.
 
-
-## Processors
-
-These take input from their previous sibling, process it, and pipe output to their next sibling.
 If a label attribute is supplied, they display a UI; if no label is supplied then they stay hidden.
 If they have a `hide-controls` attribute, the value of that attribute is used as a space-separated of field names to hide. Using this, we can display only those fields we need from the element. The `audio-reverb` element uses this to hide the `audio-convolver`'s "bypass" control while still displaying the list of available impulses.
 Most parameters displayed in the UI can be set in the HTML via attributes.
-
-### Style
-
-No attempt has been made to style anything.
 
 ### Accessibility
 
@@ -136,6 +126,28 @@ We end up with duplicate group label announcement: both the `aria-label` and the
 - if we eliminate the `aria-label` on the group container, we lose group label announcement on focus (i.e. when tab used to move through the UI) and we lose landmark
 
 There seems to be no good solution for this annoyance at present.
+
+## Processors
+
+...
+
+## UI Elements
+
+They generate appropriate input controls (type="number" for ui-number, and type="checkbox" for ui-boolean).
+The label attribute specifies a label for the control.
+The name attribute specifies a name for the control (generally the name of the current element's property which is being exposed.
+The value attribute pipes the result back to the current element's property being manipulated.
+
+Numeric controls can also specify min, max, and step, which are passed directly to the underlying html input element.
+
+## Control Elements
+
+The audio-control element allows one to specify a parameter to be automated, and a function to generate values based on the current time stored in the underlying webaudio context containing the graph.
+The default evaluation intervall is 0.2 seconds.
+The parameter must be specified in the markup, and the element being controled is wrapped within the audio-control element.
+The automator function can be specified in markup, and also via the UI.
+It is a simple javascript expression which is evaluated in the context of the controled element (i.e. the "this" keyword references the currently controled element).
+It also references the "Math" object using the javascript "with" statement.
 
 ## Connectors
 
