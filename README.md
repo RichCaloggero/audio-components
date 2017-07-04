@@ -23,14 +23,15 @@ The package contains four distinct types of elements:
 - audio processing elements
 - UI elements
 - composed elements
+- automation elements
 
-
-The connectors build the connection graph and the only UI they display is a label. They include:
+The connectors build the connection graph and the only UI they display is a label and a bypass control. They include:
 - audio-context
 - audio-series
 - audio-parallel
 - audio-split
 - audio-merge
+- audio-feedback
 
 The audio processing elements currently include:
 - audio-player
@@ -46,13 +47,17 @@ The UI elements handle UI generation and currently include:
 - ui-number
 - ui-boolean
 
+The currently implemented automation element is "audio-control", which modifies specified parameters of it's parent element based on mathematical functions in the time domain.
+The free variable "t" is the current time stored in the webaudio context node which contains the graph.
+
 The currently implemented composed elements are:
 - audio-reverb (based on convolver and a set of public domain impulses), and a couple gain elements
+- audio-xtc (crosstalk cancelation network implemented mostly in audio-components html)
 
 ## declarative rather than imperative
 
-We wrap everything inside an audio-context element. This corresponds directly to web audio's context node.
 The graph is created declaratively based on the given html; no javascript is required.
+We wrap everything inside an audio-context element. This corresponds directly to web audio's context node.
 
 For instance, here is a simple webaudio graph which takes an audio signal from a file and pipes it through a gain node such that volume can be adjusted, and out to the audio out (typically the computer's standard audio outs):
 
