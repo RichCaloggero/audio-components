@@ -202,12 +202,14 @@ let hideControls = this.hasAttribute ("hide-controls")?
 this.getAttribute("hide-controls").split (" ") : [];
 
 if (groupLabel) {
-let level = this.ancestors()
+let ancestors = this.ancestors()
 .filter ((e) => e && e.hasAttribute("label"))
 .map ((e) => {
 console.log (`- ancestor: ${this.elementName(e)}`);
 return e;
-}).length;
+});
+let level = ancestors.length;
+console.log (`ancestors: ${ancestors}`);
 console.log (`${this.constructor.is} (${groupLabel.textContent}): level ${level}, add labels to ${hide? "hidden" : "visible"} fields`);
 
 groupLabel.setAttribute ("role", "heading");
