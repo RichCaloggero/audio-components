@@ -42,10 +42,12 @@ The audio processing elements currently include:
 - audio-pan
 - audio-oscillator
 - audio-convolver
+- audio-compressor
 
 The UI elements handle UI generation and currently include:
 - ui-number
 - ui-boolean
+- ui-list
 
 The currently implemented automation element is "audio-control", which modifies specified parameters of it's parent element based on mathematical functions in the time domain.
 The free variable "t" is the current time stored in the webaudio context node which contains the graph.
