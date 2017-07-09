@@ -75,7 +75,7 @@ let element = this.parentElement;
 console.log (`setting up automation for ${element._id}`);
 
 if (this.parameter in element) {
-this._automationInterval = this.interval || 100; // milliseconds
+this._automationInterval = this.interval || 200; // milliseconds
 let f = this.compileFunction (this.value, "t").bind(element);
 
 if (f) {
