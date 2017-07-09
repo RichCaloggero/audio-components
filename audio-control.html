@@ -21,6 +21,7 @@ display: inline;
 </template>
 
 <script>
+// audio-control
 "use strict";
 
 (function () {
@@ -70,12 +71,11 @@ this.addFieldLabels ();
 } // connectedCallback
 
 setupAutomation() {
-if (!this.value) return;
+if (! this.value) return;
 let element = this.parentElement;
 console.log (`setting up automation for ${element._id}`);
 
 if (this.parameter in element) {
-this._automationInterval = this.interval || 200; // milliseconds
 let f = this.compileFunction (this.value, "t").bind(element);
 
 if (f) {
@@ -95,6 +95,66 @@ alert (`parameter ${this.parameter} not in ${element.localName}`);
 } // setupAutomation
 
 start () {
+let self = this;
+let resolution = (this.resolution || .01); // milliseconds
+let count = 100;
+
+if (this.parameter in this._automationTarget._audioNode) {
+this._audioParam = this._automationTarget._audioNode[this.parameter];
+this.automation = true;
+_tick ();
+console.log (`${this._id}: starting automation for parameter ${this.parameter} of ${this._automationTarget._id} using resolution ${resolution}`);
+
+} else {
+alert (`parameter ${this.parameter} not in ${this._automationTarget._id}`);
+} // if
+
+function _tick () {
+if (self.automation) {
+scheduleParameterChanges (self._audioParam, resolution, count, self._automator);
+setTimeout (_tick, 1000 * resolution * count);
+
+} else {
+self.stop ();
+} // if
+
+function scheduleParameterChanges (parameter, resolution, count, automator) {
+let t = audio.currentTime;
+for (let i=0; i<count; i++) {
+t += resolution;
+try {
+parameter.setValueAtTime (automator(t), t);
+} catch (e) {
+alert (`scheduleParameterChanges: ${e}`);
+self.value = "";
+self.stop ();
+removeFromAutomationQueue (self);
+} // try
+} // for
+} // scheduleParameterChanges
+} // _tick
+} // start
+
+stop () {
+if (! this._automationTarget) return;
+
+console.log (`${this._id}: stopping automation for parameter ${this.parameter} of ${this._automationTarget._id}`);
+this.automation = false;
+
+if (this._audioParam) {
+this._audioParam.cancelScheduledValues (audio.currentTime);
+console.log ("- canceled scheduled values");
+} // if
+
+if (this._tick) {
+clearTimeout (this._tick);
+this._tick = null;
+console.log ("- cleared timeout");
+} // if
+} // stop
+
+
+_start () {
 this.stop ();
 this._automation = setInterval (() => {
 try {
@@ -108,14 +168,14 @@ removeFromAutomationQueue (this);
 }, this._automationInterval);
 
 console.log (`${this._id}: starting automation for parameter ${this.parameter} of ${this._automationTarget.localName} using interval ${this._automationInterval}`);
-} // start
+} // _start
 
-stop () {
+_stop () {
 if (this._automation) {
 clearInterval (this._automation);
 console.log (`${this._id}: stopping automation for parameter ${this.parameter} of ${this._automationTarget.localName} using interval ${this._automationInterval}`);
 } // if
-} // stop
+} // _stop
 
 static startAllAutomation () {
 automationQueue.forEach ((element) => element.start());

@@ -182,7 +182,6 @@ return customElements.whenDefined (element.localName);
 try {
 Promise.all (loaded)
 .then (() => {
-//this.debugConnection (`${this.label}: all ${loaded.length} children loaded`);
 loadedCallback.call (this, children);
 }).catch ((error) => {
 alert ("whenAllChildrenLoaded promose: " + error);
@@ -190,7 +189,8 @@ throw error;
 });
 
 } catch (e) {
-alert ("whenAllChildrenLoaded outer: " + e);
+alert (`whenAllChildrenLoaded outer: ${e}`);
+throw (e);
 } // try
 } // whenAllChildrenLoaded
 
@@ -205,11 +205,11 @@ if (groupLabel) {
 let ancestors = this.ancestors()
 .filter ((e) => e && e.hasAttribute("label"))
 .map ((e) => {
-console.log (`- ancestor: ${this.elementName(e)}`);
+//console.log (`- ancestor: ${this.elementName(e)}`);
 return e;
 });
 let level = ancestors.length;
-console.log (`ancestors: ${ancestors}`);
+//console.log (`ancestors: ${ancestors}`);
 console.log (`${this.constructor.is} (${groupLabel.textContent}): level ${level}, add labels to ${hide? "hidden" : "visible"} fields`);
 
 groupLabel.setAttribute ("role", "heading");
@@ -251,7 +251,7 @@ top = e.closest("audio-context") || document.querySelector("body");
 console.log (`ancestors: top=${this.elementName(top)}`);
 
 while (e && e !== top) {
-console.log (`- ancestors: e=${this.elementName(e)}`);
+//console.log (`- ancestors: e=${this.elementName(e)}`);
 result.push (e);
 
 e = e.parentElement || e.parentNode.host;
