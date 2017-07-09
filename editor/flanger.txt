@@ -1,5 +1,5 @@
-<audio-context label="chorus"><audio-series>
-<audio-player src="music.mp3"></audio-player>
+<audio-context label="flanger"><audio-series>
+<audio-player src="https://dl.dropboxusercontent.com/u/8529048/slow%20down%20jack.mp3"></audio-player>
 
 <audio-parallel><audio-series>
 <audio-gain></audio-gain>
@@ -8,11 +8,11 @@
 
 <audio-split><audio-series>
 <audio-delay label="left delay">
-<audio-control parameter="delayTime" value=".01 * abs(sin(t/2)) + .001"></audio-control>
+<audio-control parameter="delayTime" value=".001 * abs(sin(t)) + .0001"></audio-control>
 </audio-delay>
 </audio-series><audio-series>
 <audio-delay label="right delay">
-<audio-control parameter="delayTime" value=".01 * abs(cos(t/2)) + .001"></audio-control>
+<audio-control parameter="delayTime" value=".001 * abs(cos(t)) + .0001"></audio-control>
 </audio-delay>
 </audio-series></audio-split>
 

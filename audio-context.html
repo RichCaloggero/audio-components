@@ -184,7 +184,7 @@ Promise.all (loaded)
 .then (() => {
 loadedCallback.call (this, children);
 }).catch ((error) => {
-alert ("whenAllChildrenLoaded promose: " + error);
+alert (`whenAllChildrenLoaded: ${this._id} -- a child element could not be instantiated`);
 throw error;
 });
 

@@ -129,6 +129,7 @@ alert (`scheduleParameterChanges: ${e}`);
 self.value = "";
 self.stop ();
 removeFromAutomationQueue (self);
+return;
 } // try
 } // for
 } // scheduleParameterChanges
@@ -142,7 +143,7 @@ console.log (`${this._id}: stopping automation for parameter ${this.parameter} o
 this.automation = false;
 
 if (this._audioParam) {
-this._audioParam.cancelScheduledValues (audio.currentTime);
+this._audioParam.cancelScheduledValues (0);
 console.log ("- canceled scheduled values");
 } // if
 
@@ -153,29 +154,6 @@ console.log ("- cleared timeout");
 } // if
 } // stop
 
-
-_start () {
-this.stop ();
-this._automation = setInterval (() => {
-try {
-this._automationTarget[this.parameter] = this._automator(audio.currentTime);
-} catch (e) {
-alert (e);
-this.value = "";
-this.stop ();
-removeFromAutomationQueue (this);
-} // catch
-}, this._automationInterval);
-
-console.log (`${this._id}: starting automation for parameter ${this.parameter} of ${this._automationTarget.localName} using interval ${this._automationInterval}`);
-} // _start
-
-_stop () {
-if (this._automation) {
-clearInterval (this._automation);
-console.log (`${this._id}: stopping automation for parameter ${this.parameter} of ${this._automationTarget.localName} using interval ${this._automationInterval}`);
-} // if
-} // _stop
 
 static startAllAutomation () {
 automationQueue.forEach ((element) => element.start());

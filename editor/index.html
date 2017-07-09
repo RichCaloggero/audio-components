@@ -100,6 +100,7 @@ save ();
 
 
 function save () {
+AudioControl.stopAllAutomation ();
 html = source.value;
 container.innerHTML = "";
 container.innerHTML = html;
