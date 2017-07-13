@@ -11,12 +11,23 @@ display: block;
 :host .field {
 display: inline;
 }
+
+.lfo-ui {display:none;}
 </style>
 
 <div class="audio-control">
+<ui-list name="type" label="automation type" value="{{type}}" values='["function","wave"]'></ui-list>
+
 <label>automating {{parameter}} as
 <br><input type="text" value="{{value::change}}">
 </label>
+
+<div class="field lfo-ui" role="region" aria-label="LFO">
+<ui-number name="frequency" value="{{frequency}}" min="0" max="20.0"></ui-number>
+<ui-number name="gain" value="{{lfoGain}}" min="-1.0" max="1.0"></ui-number>
+<ui-number name="center" value="{{center}}" min="0.0" max="999.0"></ui-number>
+</div><!-- .lfo-ui -->
+
 </div>
 </template>
 
@@ -36,7 +47,7 @@ parameter: {
 type: String,
 value: "",
 notify: true,
-observer: "parameterChanged"
+//observer: "parameterChanged"
 }, // parameter
 
 value: {
@@ -44,7 +55,14 @@ type: String,
 value: "",
 notify: true,
 observer: "valueChanged"
-} // value
+}, // value
+
+type: {
+type: String,
+value: "function",
+notify: true,
+observer: "typeChanged"
+} // type
 }; // return
 } // get properties
 
@@ -74,7 +92,22 @@ if (!this.value) return;
 let element = this.parentElement;
 console.log (`setting up automation for ${element._id}`);
 
-if (this.parameter in element) {
+if (!(this.parameter in element)) {
+alert (`setupAutomation: parameter ${this.parameter} not in ${element.localName}`);
+return;
+} // if
+
+if (this.type === "wave") {
+this._audioParam = getAudioParam(this.parameter, element);
+if (typeof(this._audioParam) === "string" || this._audioParam instanceof String) {
+alert (`parameter ${parameter} not automatable via wave - change type to 'function' and try again`);
+return;
+} // if
+
+this._wave = createWave (this.value);
+this.startOscillator ();
+
+} else {
 this._automationInterval = this.interval || 100; // milliseconds
 let f = this.compileFunction (this.value, "t").bind(element);
 
@@ -88,10 +121,7 @@ this.start ();
 } else {
 alert ("invalid function: " + this.value);
 } // if
-
-} else {
-alert (`parameter ${this.parameter} not in ${element.localName}`);
-} // if
+} // automation type
 } // setupAutomation
 
 start () {
@@ -111,6 +141,11 @@ console.log (`${this._id}: starting automation for parameter ${this.parameter} o
 } // start
 
 stop () {
+if (this.oscillator && this.type === "wave") {
+this.oscillator.stop ();
+return;
+} // if
+
 if (this._automation) {
 clearInterval (this._automation);
 console.log (`${this._id}: stopping automation for parameter ${this.parameter} of ${this._automationTarget.localName} using interval ${this._automationInterval}`);
@@ -135,6 +170,15 @@ this.stop ();
 this.setupAutomation ();
 } // valueChanged
 
+typeChanged (value) {
+console.log (`typeChange: ${value}`);
+this.stop ();
+this.shadowRoot.querySelector(".lfo-ui").style.display = (this.type === "wave")?
+"block" : "none";
+
+this.setupAutomation ();
+} // typeChanged
+
 compileFunction (text, parameter) {
 try {
 return new Function (parameter,
@@ -145,6 +189,23 @@ alert (e);
 return null;
 } // try
 } // compileFunction
+
+startOscillator () {
+let oscillator = audio.createOscillator ();
+oscillator.setPeriodicWave (this._wave);
+oscillator.frequency.value = this.frequency || 1.0;
+
+let lfoGain = audio.createGain ();
+lfoGain.gain.value = this.lfoGain || 0.5;
+if (this.center) this._audioParam.value = this.center;
+
+oscillator.connect (lfoGain).connect (this._audioParam);
+oscillator.start ();
+console.log (`- oscillator started`);
+
+this.oscillator = oscillator;
+addToAutomationQueue (oscillator);
+} // startOscillator
 
 } // class AudioControl
 
@@ -160,6 +221,33 @@ automationQueue.splice (found, 1);
 console.log (`removed ${element.label || element._id} from automation queue`);
 } // if
 } // removeFromAutomationQueue
+
+function getAudioParam (parameter, element) {
+var properties = element.constructor.properties;
+return element._audioNode[properties[parameter].audioParam] || parameter;
+} // getAudioParam
+
+function createWave (_wave) {
+let freqs = _wave.split (",");
+if (! freqs || !(freqs instanceof Array)) {
+alert (`createWave: invalid value  ${_wave} - must be numbers separated by comma`);
+throw ("invalid value");
+} // if
+
+console.log (`createWave: freqs=${freqs}`);
+let real = new Float32Array(freqs.length+1);
+let imaginary = new Float32Array(freqs.length+1);
+
+freqs.forEach ((freq,i) => {
+let values = freq.trim().split(" ");
+real[i] = values[0];
+imaginary[i] = (values.length === 2)?
+values[1] : 0.0;
+}); // forEach
+
+console.log (`createWave: ${real} ${imaginary}`);
+return audio.createPeriodicWave (real, imaginary);
+} // getWave
 
 window.customElements.define(AudioControl.is, AudioControl);
 })();
