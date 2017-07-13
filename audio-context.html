@@ -210,13 +210,13 @@ return e;
 });
 let level = ancestors.length;
 //console.log (`ancestors: ${ancestors}`);
-console.log (`${this.constructor.is} (${groupLabel.textContent}): level ${level}, add labels to ${hide? "hidden" : "visible"} fields`);
+console.log (`addFieldLabels: ${this.constructor.is} (${groupLabel.textContent}): level ${level}, add labels to ${hide? "hidden" : "visible"} fields`);
 
 groupLabel.setAttribute ("role", "heading");
 groupLabel.setAttribute ("aria-level", level+1);
 } // if
 
-Array.from(this.shadowRoot.querySelectorAll (".field, ui-number, ui-boolean, ui-text"))
+Array.from(this.shadowRoot.querySelectorAll (".field, ui-number, ui-boolean, ui-list"))
 .forEach ((field) => {
 let name = field.getAttribute("data-name") || field.getAttribute("field-name") || field.getAttribute("name");
 

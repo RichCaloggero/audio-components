@@ -16,16 +16,19 @@ display: inline;
 </style>
 
 <div class="audio-control">
+<span class="label">[[label]]</span>
 <ui-list name="type" label="automation type" value="{{type}}" values='["function","wave"]'></ui-list>
 
+<div class="field" data-name="value">
 <label>automating {{parameter}} as
 <br><input type="text" value="{{value::change}}">
 </label>
+</div>
 
-<div class="field lfo-ui" role="region" aria-label="LFO">
-<ui-number name="frequency" value="{{frequency}}" min="0" max="20.0"></ui-number>
-<ui-number name="gain" value="{{lfoGain}}" min="-1.0" max="1.0"></ui-number>
-<ui-number name="center" value="{{center}}" min="0.0" max="999.0"></ui-number>
+<div class="lfo-ui" role="region" aria-label="LFO">
+<ui-number name="frequency" label="frequency" value="{{frequency}}" min="0" max="20.0"></ui-number>
+<ui-number name="gain" label="gain" value="{{lfoGain}}" min="-1.0" max="1.0"></ui-number>
+<ui-number name="center" label="center" value="{{center}}" min="0.0" max="999.0"></ui-number>
 </div><!-- .lfo-ui -->
 
 </div>
