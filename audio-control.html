@@ -16,12 +16,12 @@ display: inline;
 </style>
 
 <div class="audio-control" role="region" aria-label$="[[label]]">
-<span class="label">[[label]]</span>
+<span class="label">automating [[parameter]] as</span>
 
 <ui-list name="type" label="automation type" value="{{type}}" values='["function","wave"]'></ui-list>
 
 <div class="field" data-name="value">
-<label>automating {{parameter}} as</label>
+<label>function</label>
 <br><input type="text" value="{{value::change}}">
 </div>
 
@@ -84,6 +84,13 @@ value: "function",
 notify: true,
 observer: "typeChanged"
 }, // type
+
+frequency: {
+type: Number,
+value: 1.0,
+notify: true,
+observer: "frequencyChanged"
+}, // frequency
 
 center: {
 type: Number,
@@ -159,7 +166,7 @@ alert ("invalid function: " + this.value);
 
 start () {
 if (this.type === "wave") this._startWaveAutomation ();
-else this.startFunctionalAutomation ();
+else this._startFunctionalAutomation ();
 } // start
 
 _startWaveAutomation () {
@@ -233,6 +240,8 @@ typeChanged (value) {
 console.log (`typeChange: ${value}`);
 this.stop ();
 this.shadowRoot.querySelector(".lfo-ui").style.display = (value === "wave")?
+"block" : "none";
+this.shadowRoot.querySelector(".field[data-name=value]").style.display = (value === "function")?
 "block" : "none";
 
 this.setupAutomation ();
