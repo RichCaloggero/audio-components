@@ -8,12 +8,18 @@ Unfortunately these are the same, so arrowing through the interface produces som
 The heading level indicates how deeply nested in the component hierarchy the component is.
 
 All numeric controls use html input controls with type set to "number".
-On some machines, this does not work as expected with Firefox and NVDA.
-If you attempt to use up / down arrow keys to adjust the value of the number and the focus jumps out of the field, you need to press NVDAKey+spacebar to force application mode before using arrows to adjust the value.
+If these controls don't seem to be working properly for you when using NVDA, then follow these steps to reconfigure the screen reader:
+
+1. press NVDAKey+n and choose "preferences" from the popup menu
+2. choose "browse mode" from the tree
+3. uncheck "automatic focus mode for caret movement"
+4. click ok
+
 You can use normal text editing commands to change the value of the number as well, and this works on all machines tested.
 
 Each component has a bypass checkbox just following its heading.
 If it is checked, the component is removed from the signal flow, if unchecked the component is allowed to process the signal and you will hear the results.
+Note that UI controls are still visible when component is bypassed.
 
 ## How to Test
 There is a default music file already loaded and ready to go; just hit the play button.

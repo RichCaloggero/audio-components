@@ -24,9 +24,9 @@ x="3" z="-5"
 max-distance="100" ref-distance="1" rolloff-factor="1"
 hide-controls="coneInnerAngle coneOuterAngle coneOuterGain">
 
-<audio-control  parameter="x" value="30 * Math.cos(.5*(t+2.4))"></audio-control>
-<audio-control  parameter="y" value=""></audio-control>
-<audio-control  parameter="z" value="30 * Math.sin(.5*(t+2.9))"></audio-control>
+<audio-control  label="automate x" parameter="x" value="30 * cos(t)"></audio-control>
+<audio-control  label="automate y" parameter="y" value=""></audio-control>
+<audio-control  label="automate z" parameter="z" value="30 * sin(t)"></audio-control>
 </audio-pan>
 
 <!-- simple XTC:
@@ -35,7 +35,7 @@ This is mixed with the original input signal.
 The hope is that when heard through speakers, the slightly delayed phase inverted signal from one speaker will cancel sounds from that speaker heard at the opposite ear.
 -->
 
-<audio-xtc id="xtc" label="crosstalk cancelation" bypass></audio-xtc>
+<audio-xtc label="crosstalk cancelation" bypass></audio-xtc>
 
 <!-- this network allows you to control sum and difference (mid / side) separately -->
 
@@ -100,7 +100,8 @@ or 2R = (L+R) - (L-R) = L + R - L +R
 </audio-series>
 
 
-<audio-gain label="master volume" gain="0.7"></audio-gain>
+<audio-gain label="master volume" gain="1.0"></audio-gain>
+<audio-compressor label="compressor"></audio-compressor>
 </audio-series><!-- demo -->
 
 <audio-destination></audio-destination>
