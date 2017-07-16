@@ -16,7 +16,7 @@ display: inline;
 </style>
 
 <div class="audio-control" role="region" aria-label$="[[label]]">
-<span class="label">automating [[parameter]] as</span>
+<span class="label">[[label]]</span>
 
 <ui-list name="type" label="automation type" value="{{type}}" values='["function","wave"]'></ui-list>
 
@@ -31,9 +31,9 @@ display: inline;
 <br><input type="text" value="{{wave::change}}">
 </div>
 
-<ui-number name="frequency" label="frequency" value="{{frequency}}" min="0.0" max="20.0"></ui-number>
-<ui-number name="lfoGain" label="gain" value="{{lfoGain}}" min="-1.0" max="1.0"></ui-number>
-<ui-number name="center" label="center" value="{{center}}" min="0.0" max="999.0"></ui-number>
+<ui-number name="frequency" label="frequency" value="{{frequency}}" min="0.1" max="10.0" step="0.1"></ui-number>
+<ui-number name="lfoGain" label="gain" value="{{lfoGain}}" min="-100.0" max="100.0"></ui-number>
+<ui-number name="center" label="center" value="{{center}}" min="-100.0" max="100.0"></ui-number>
 </div><!-- .lfo-ui -->
 
 </div>
@@ -114,7 +114,6 @@ super ();
 instanceCount += 1;
 this._id = AudioControl.is + instanceCount;
 this._automation = null;
-this.label = `controling ${this.parameter}`;
 this._lfoGain = audio.createGain();
 console.log (`constructor: ${this.id} created`);
 } // constructor
@@ -145,10 +144,7 @@ return;
 } // if
 this._automationTarget = element;
 
-if (this.type === "wave") {
-this._startWaveAutomation ();
-
-} else {
+if (this.type === "function") {
 this._automationInterval = this.interval || 100; // milliseconds
 let f = compileFunction (this.value, "t").bind(element);
 
@@ -156,12 +152,14 @@ if (f) {
 console.log (`function: ${f}`);
 this._automator = f;
 addToAutomationQueue (this);
-this._startFunctionalAutomation ();
 
 } else {
 alert ("invalid function: " + this.value);
+return;
 } // if
 } // automation type
+
+this.start ();
 } // setupAutomation
 
 start () {
@@ -183,6 +181,7 @@ this._startOscillator ();
 } // _startWaveAutomation
 
 _startFunctionalAutomation () {
+if (! this._automator) return;
 this._automation = setInterval (() => {
 try {
 this._automationTarget[this.parameter] = this._automator(audio.currentTime);
@@ -201,6 +200,7 @@ stop () {
 console.log (`${this._id}: stopping automation for parameter ${this.parameter} of ${this._automationTarget? this._automationTarget.localName : null}`);
 if (this._oscillator) {
 this._oscillator.stop ();
+removeFromAutomationQueue (this._oscillator);
 this._oscillator = null;
 } // if
 
@@ -216,6 +216,21 @@ automationQueue.forEach ((element) => element.start());
 static stopAllAutomation () {
 automationQueue.forEach ((element) => element.stop());
 } // stopAllAutomation
+
+
+_startOscillator () {
+let oscillator = audio.createOscillator ();
+oscillator.setPeriodicWave (this._wave);
+oscillator.frequency.value = this.frequency || 1.0;
+this._audioParam.value = this.center;
+
+oscillator.connect (this._lfoGain).connect (this._audioParam);
+oscillator.start ();
+console.log (`- oscillator started`);
+
+this._oscillator = oscillator;
+addToAutomationQueue (oscillator);
+} // _startOscillator
 
 
 frequencyChanged (value) {
@@ -254,21 +269,6 @@ this._lfoGain.gain.value = value;
 centerChanged (value) {
 if (this._audioParam) this._audioParam.value = value;
 } // centerChanged
-
-
-_startOscillator () {
-let oscillator = audio.createOscillator ();
-oscillator.setPeriodicWave (this._wave);
-oscillator.frequency.value = this.frequency || 1.0;
-this._audioParam.value = this.center;
-
-oscillator.connect (this._lfoGain).connect (this._audioParam);
-oscillator.start ();
-console.log (`- oscillator started`);
-
-this._oscillator = oscillator;
-addToAutomationQueue (oscillator);
-} // _startOscillator
 
 } // class AudioControl
 
