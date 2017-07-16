@@ -19,12 +19,15 @@
 <link rel="import" href="../audio-delay.html">
 <link rel="import" href="../audio-pan.html">
 <link rel="import" href="../audio-convolver.html">
+<link rel="import" href="../audio-compressor.html">
+<link rel="import" href="../audio-feedback.html">
+
 <link rel="import" href="../audio-reverb.html">
 <link rel="import" href="../audio-xtc.html">
-<link rel="import" href="../audio-feedback.html">
 
 <link rel="import" href="../ui-number.html">
 <link rel="import" href="../ui-boolean.html">
+<link rel="import" href="../ui-list.html">
 
 <link rel="import" href="../audio-control.html">
 </head>
@@ -52,12 +55,12 @@ Once the file is loaded and editing is complete, uncheck the edit checkbox and t
 <br><textarea id="source" rows="20" cols="132" wrap="off" style="display:none"></textarea>
 </div><!-- editor -->
 
-<div id="demo">
+<div id="container">
 </div>
 
 <script>
 let editor = document.querySelector ("#editor");
-let demo = document.querySelector ("#demo");
+let container = document.querySelector ("#container");
 let edit = document.querySelector("#editor #edit");
 let file = document.querySelector("#editor #file");
 let fileName = document.querySelector("#editor #fileName");
@@ -67,6 +70,7 @@ let html = "";
 
 getFile.addEventListener ("click", (e) => {
 loadFile (fileName.value, (text) => {
+source.value = "";
 source.value = text;
 let lines = text.split ("\n");
 statusMessage (`${lines.length} lines to edit`);
@@ -94,9 +98,10 @@ save ();
 
 
 function save () {
+AudioControl.stopAllAutomation ();
 html = source.value;
-demo.innerHTML = "";
-demo.innerHTML = html;
+container.innerHTML = "";
+container.innerHTML = html;
 } // save
 
 function loadFile (url, callback) {

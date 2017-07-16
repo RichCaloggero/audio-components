@@ -2,12 +2,13 @@
 <template>
 <div class="ui-list">
 <label>{{label}}
-<br><input autocomplete="on" list="values" value="{{value::change}}">
-</label><datalist id="values"><slot></slot></datalist>
+<br><select size="1" value="{{value::change}}"></select>
+</label>
 </div>
 </template>
 
 <script>
+// ui-list
 "use strict";
 
 (function () {
@@ -30,6 +31,11 @@ label: {
 type: String,
 value: ""
 }, // label
+
+values: {
+type: String,
+value: ""
+}, // values
 
 value: {
 type: String,
@@ -58,9 +64,44 @@ throw new Error ("ui-list: no name given");
 } // if
 
 super.connectedCallback ();
+this._buildList ();
 console.log ("connectedCallback...");
 } // connectedCallback
 
+_buildList () {
+try {
+let list = this.shadowRoot.querySelector ("select");
+let values = JSON.parse (this.values);
+if (!values || typeof(values) !== "object" || !(values instanceof Array)) throw ("values attribute must be a JSON array");
+
+values.forEach ((value) => {
+let v, t;
+let option = document.createElement ("option");
+if (typeof(value) === "object") {
+if (value instanceof Array) {
+v = value[0];
+t = value[1];
+} else {
+v = value.value;
+t = value.text;
+} // if
+
+} else {
+v = t = value;
+} // if
+
+option.value = v;
+option.text = t;
+list.add (option);
+}); // forEach
+return this.values;
+
+} catch (e) {
+alert (`ui-list: invalid values (${e}) - attribute's value needs to be a JSON array`);
+} // catch
+
+return null;
+} // _buildList
 
 valueChanged (value) {
 console.log (`number ${this.label || this._id}: new value: ${value}`);

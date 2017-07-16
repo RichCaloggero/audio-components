@@ -19,12 +19,15 @@
 <link rel="import" href="../audio-filter.html">
 <link rel="import" href="../audio-delay.html">
 <link rel="import" href="../audio-pan.html">
+<link rel="import" href="../audio-convolver.html">
 <link rel="import" href="../audio-reverb.html">
+<link rel="import" href="../audio-compressor.html">
 <link rel="import" href="../audio-xtc.html">
 <link rel="import" href="../audio-feedback.html">
 
 <link rel="import" href="../ui-number.html">
 <link rel="import" href="../ui-boolean.html">
+<link rel="import" href="../ui-list.html">
 
 <link rel="import" href="../audio-control.html">
 </head>
@@ -143,9 +146,9 @@ These values are random -- just for demonstration...
 
 <audio-pan label="3D panner" bypass="" x="3" z="-5" max-distance="100" ref-distance="1" rolloff-factor="1" hide-controls="coneInnerAngle coneOuterAngle coneOuterGain">
 
-<audio-control parameter="x" value="30 * cos(t)"></audio-control>
-<audio-control parameter="y" value=""></audio-control>
-<audio-control parameter="z" value="30 * sin(t)"></audio-control>
+<audio-control label="automate x" parameter="x" value="30 * cos(t)"></audio-control>
+<audio-control label="automate y" parameter="y" value=""></audio-control>
+<audio-control label="automate z" parameter="z" value="30 * sin(t)"></audio-control>
 </audio-pan>
 
 <!-- simple XTC:
@@ -220,11 +223,11 @@ or 2R = (L+R) - (L-R) = L + R - L +R
 
 
 <audio-gain label="master volume" gain="1.0"></audio-gain>
+<audio-compressor label="compressor"></audio-compressor>
 </audio-series><!-- demo -->
 
 <audio-destination></audio-destination>
-</audio-series>
-</audio-context>
+</audio-series></audio-context>
 
 
 
