@@ -156,9 +156,9 @@ x="3" z="-5"
 max-distance="100" ref-distance="1" rolloff-factor="1"
 hide-controls="coneInnerAngle coneOuterAngle coneOuterGain">
 
-<audio-control  label="automate x" parameter="x" value="30 * cos(t)"></audio-control>
-<audio-control  label="automate y" parameter="y" value=""></audio-control>
-<audio-control  label="automate z" parameter="z" value="30 * sin(t)"></audio-control>
+<audio-control  label="automate x" parameter="x" function="30 * cos(t)" wave="1,1" lfo-gain="20.0" frequency="0.3" center="0.0"></audio-control>
+<audio-control  label="automate y" parameter="y" function=""></audio-control>
+<audio-control  label="automate z" parameter="z" function="30 * sin(t)" wave="0,1" lfo-gain="20.0" frequency="0.3" center="0.0"></audio-control>
 </audio-pan>
 
 <!-- simple XTC:

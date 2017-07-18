@@ -17,9 +17,9 @@ display: inline;
 
 <ui-list name="type" label="automation type" value="{{type}}" values="[&quot;function&quot;,&quot;wave&quot;]"></ui-list>
 
-<div class="field" data-name="value">
+<div class="field" data-name="function">
 <label>function</label>
-<br><input type="text" value="{{value::change}}">
+<br><input type="text" value="{{function::change}}">
 </div>
 
 <div class="lfo-ui" role="region" aria-label="LFO">
@@ -61,11 +61,11 @@ notify: true,
 //observer: "parameterChanged"
 }, // parameter
 
-value: {
+function: {
 type: String,
 value: "",
 notify: true,
-observer: "valueChanged"
+observer: "functionChanged"
 }, // value
 
 wave: {
@@ -126,24 +126,22 @@ console.log (`${this._id} connected to ${this.parentElement.localName}`);
 this.addFieldLabels ();
 } // connectedCallback
 
-setupAutomation() {
+_setupAutomation() {
 this.stop ();
-if (!this.value) {
-return;
-} // if
 
 let element = this.parentElement;
 console.log (`setting up automation for ${element._id}`);
 
 if (! (this.parameter in element)) {
-alert (`setupAutomation: parameter ${this.parameter} not in ${element.localName}`);
+alert (`_setupAutomation: parameter ${this.parameter} not in ${element.localName}`);
 return;
 } // if
 this._automationTarget = element;
 
 if (this.type === "function") {
+if (!this.function) return;
 this._automationInterval = this.interval || 100; // milliseconds
-let f = compileFunction (this.value, "t").bind(element);
+let f = compileFunction (this.function, "t").bind(element);
 
 if (f) {
 console.log (`function: ${f}`);
@@ -157,7 +155,7 @@ return;
 } // automation type
 
 this.start ();
-} // setupAutomation
+} // _setupAutomation
 
 start () {
 if (this.type === "wave") this._startWaveAutomation ();
@@ -178,7 +176,7 @@ this._startOscillator ();
 } // _startWaveAutomation
 
 _startFunctionalAutomation () {
-if (! this._automator) return;
+if (! this._automator || ! this.function) return;
 this._automation = setInterval (() => {
 try {
 this._automationTarget[this.parameter] = this._automator(audio.currentTime);
@@ -238,26 +236,23 @@ parameterChanged (value) {
 console.log(`parameter ${value}`);
 } // parameterChanged
 
-valueChanged (value) {
-this.stop ();
-this.setupAutomation ();
-} // valueChanged
-
-waveChanged (value) {
-this.stop ();
-this.setupAutomation ();
-} // waveChanged
+functionChanged (value) {
+this._setupAutomation ();
+} // functionChanged
 
 typeChanged (value) {
 console.log (`typeChange: ${value}`);
-this.stop ();
 this.shadowRoot.querySelector(".lfo-ui").style.display = (value === "wave")?
 "block" : "none";
-this.shadowRoot.querySelector(".field[data-name=value]").style.display = (value === "function")?
+this.shadowRoot.querySelector(".field[data-name=function]").style.display = (value === "function")?
 "block" : "none";
 
-this.setupAutomation ();
+this._setupAutomation ();
 } // typeChanged
+
+waveChanged (value) {
+this._setupAutomation ();
+} // waveChanged
 
 lfoGainChanged (value) {
 this._lfoGain.gain.value = value;

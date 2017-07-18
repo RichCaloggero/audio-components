@@ -55,6 +55,7 @@ this._out = audio.createGain();
 connectedCallback  () {
 super.connectedCallback();
 this._audioElement = this.shadowRoot.querySelector("audio");
+this._audioElement.addEventListener ("ended", (e) => this.shadowRoot.querySelector(".play").textContent = "play");
 
 if (this.contextCheck(AudioPlayer.is)) {
 this._audioIn = this._audioOut= audio.createMediaElementSource (this._audioElement);
