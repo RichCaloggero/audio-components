@@ -128,6 +128,7 @@ this.addFieldLabels ();
 
 _setupAutomation() {
 this.stop ();
+removeFromAutomationQueue (this);
 
 let element = this.parentElement;
 console.log (`setting up automation for ${element._id}`);
@@ -137,6 +138,7 @@ alert (`_setupAutomation: parameter ${this.parameter} not in ${element.localName
 return;
 } // if
 this._automationTarget = element;
+addToAutomationQueue (this);
 
 if (this.type === "function") {
 if (!this.function) return;
@@ -146,7 +148,6 @@ let f = compileFunction (this.function, "t").bind(element);
 if (f) {
 console.log (`function: ${f}`);
 this._automator = f;
-addToAutomationQueue (this);
 
 } else {
 alert ("invalid function: " + this.value);
@@ -182,20 +183,19 @@ try {
 this._automationTarget[this.parameter] = this._automator(audio.currentTime);
 } catch (e) {
 alert (e);
-this.value = "";
+this.function = "";
 this.stop ();
 removeFromAutomationQueue (this);
 } // catch
 }, this._automationInterval);
 
 console.log (`${this._id}: starting automation for parameter ${this.parameter} of ${this._automationTarget? this._automationTarget.localName : null} using interval ${this._automationInterval}`);
-} // start
+} // startFunctionalAutomation
 
 stop () {
 console.log (`${this._id}: stopping automation for parameter ${this.parameter} of ${this._automationTarget? this._automationTarget.localName : null}`);
 if (this._oscillator) {
 this._oscillator.stop ();
-removeFromAutomationQueue (this._oscillator);
 this._oscillator = null;
 } // if
 
@@ -224,7 +224,6 @@ oscillator.start ();
 console.log (`- oscillator started`);
 
 this._oscillator = oscillator;
-addToAutomationQueue (oscillator);
 } // _startOscillator
 
 
