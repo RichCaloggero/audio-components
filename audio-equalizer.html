@@ -21,17 +21,17 @@ display: inline;
 <ui-number name="q" label="Q" value="{{q}}" min="0.1" max="5.0" step="0.1"></ui-number>
 
 <audio-parallel>
-<audio-filter label="50" frequency="50" q="4.3" type="peaking" gain="0" hide-controls="bypass q type frequency detune"></audio-filter>
-<audio-filter label="100" frequency="100" q="4.3" type="peaking" gain="0" hide-controls="bypass q type frequency detune"></audio-filter>
-<audio-filter label="200" frequency="200" q="4.3" type="peaking" gain="0" hide-controls="bypass q type frequency detune"></audio-filter>
-<audio-filter label="400" frequency="400" q="4.3" type="peaking" gain="0" hide-controls="bypass q type frequency detune"></audio-filter>
-<audio-filter label="800" frequency="800" q="4.3" type="peaking" gain="0" hide-controls="bypass q type frequency detune"></audio-filter>
+<audio-filter label="32" frequency="32" q="{{q}}" type="peaking" gain="0" hide-controls="bypass q type frequency detune"></audio-filter>
+<audio-filter label="64" frequency="64" q="{{q}}" type="peaking" gain="0" hide-controls="bypass q type frequency detune"></audio-filter>
+<audio-filter label="128" frequency="128" q="{{q}}" type="peaking" gain="0" hide-controls="bypass q type frequency detune"></audio-filter>
+<audio-filter label="256" frequency="256" q="{{q}}" type="peaking" gain="0" hide-controls="bypass q type frequency detune"></audio-filter>
+<audio-filter label="512" frequency="512" q="{{q}}" type="peaking" gain="0" hide-controls="bypass q type frequency detune"></audio-filter>
 
-<audio-filter label="1K" frequency="1000" q="4.3" type="peaking" gain="0" hide-controls="bypass q type frequency detune"></audio-filter>
-<audio-filter label="2K" frequency="2000" q="4.3" type="peaking" gain="0" hide-controls="bypass q type frequency detune"></audio-filter>
-<audio-filter label="4K" frequency="4000" q="4.3" type="peaking" gain="0" hide-controls="bypass q type frequency detune"></audio-filter>
-<audio-filter label="8K" frequency="8000" q="4.3" type="peaking" gain="0" hide-controls="bypass q type frequency detune"></audio-filter>
-<audio-filter label="16K" frequency="16000" q="4.3" type="peaking" gain="0" hide-controls="bypass q type frequency detune"></audio-filter>
+<audio-filter label="1024" frequency="1024" q="{{q}}" type="peaking" gain="0" hide-controls="bypass q type frequency detune"></audio-filter>
+<audio-filter label="2048" frequency="2048" q="{{q}}" type="peaking" gain="0" hide-controls="bypass q type frequency detune"></audio-filter>
+<audio-filter label="4096" frequency="4096" q="{{q}}" type="peaking" gain="0" hide-controls="bypass q type frequency detune"></audio-filter>
+<audio-filter label="8192" frequency="8192" q="{{q}}" type="peaking" gain="0" hide-controls="bypass q type frequency detune"></audio-filter>
+<audio-filter label="16384" frequency="16384" q="{{q}}" type="peaking" gain="0" hide-controls="bypass q type frequency detune"></audio-filter>
 </audio-parallel>
 
 </div>
@@ -59,7 +59,14 @@ type: Boolean,
 value: false,
 notify: true,
 observer: "_bypass"
-} // bypass
+}, // bypass
+
+q: {
+type: Number,
+value: 2.4,
+notify: true,
+//observer: "qChanged"
+} // q
 
 }; // return
 } // get properties
@@ -84,6 +91,7 @@ var processor = this.shadowRoot.querySelector("audio-parallel");
 this._audioIn.connect (processor._in);
 processor._out.connect (this._audioOut);
 } // connectAll
+
 
 } // class AudioEqualizer
 

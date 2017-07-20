@@ -2,7 +2,7 @@
 <template>
 <div  class="ui-number">
 <label>{{label}}</label>
-<br><input type="number" value="{{value::change}}" min="[[min]]" max="[[max]]" step="{{step::change}}">
+<br><input type="number" value="{{value::change}}" min="[[min]]" max="[[max]]" step="{{step::change}}" on-keydown="handleKeydown">
 </div>
 </template>
 
@@ -83,11 +83,62 @@ stepChanged (value) {
 //console.log (`new step: ${value}`);
 } // stepChanged
 
+handleKeydown (e) {
+switch (e.key) {
+case "Enter": this.reset();
+return false;
+
+case "Home": this.setMax ();
+return false;
+
+case "End": this.setMin ();
+return false;
+
+case "PageUp": this.increase ();
+return false;
+
+case "PageDown": this.decrease ();
+return false;
+
+} // switch
+
+return true;
+} // handleKeydown
+
+reset () {
+this.value = 0.0;
+} // reset
+
+setMax () {
+this.value = this.max;
+} // setMax
+
+setMin () {
+this.value = this.min;
+} // setMin
+
+increase() {
+let amount = (this.max-this.min) / 10.0;
+this.value = this.clamp(this.value + amount);
+} // increase
+
+decrease() {
+let amount = (this.max-this.min) / 10.0;
+this.value = this.clamp (this.value - amount);
+} // decrease
+
+clamp (value, min = this.min, max = this.max) {
+if (value < min) return min;
+else if (value > max) return max;
+else return value;
+} // clamp
+
 nameChanged (value) {
 if (! this.label) this.label = value;
 } // nameChanged
 
 } // class UINumber
+
 
 function idGen (name) {
 return "ui-number" + instanceCount + "-" + name;
