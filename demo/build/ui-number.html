@@ -106,7 +106,7 @@ return true;
 } // handleKeydown
 
 reset () {
-this.value = 0.0;
+this.value = (this.max - this.min) / 2.0 + this.min;
 } // reset
 
 setMax () {
