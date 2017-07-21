@@ -1,0 +1,29 @@
+https://www.smashingmagazine.com/2015/08/flexible-future-for-web-design-with-flexbox/
+
+We need to tell browsers that these elements will be, um, flexible.
+.flex-container,
+.flex-container header,
+.flex-container footer {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+}
+
+.message {
+  flex-basis: 70%;
+}
+.message-list {
+  flex-basis: 15%;
+}
+.mailbox-list {
+  flex-basis: 15%;
+}
+.flex-container header,
+.flex-container footer {
+  width: 100%;
+  height: 5rem;
+}
+Here, flex-basis is like width — as long as the main axis is horizontal. If we dangle the rope from the top, then flex-basis becomes height automatically. Handy!
+
