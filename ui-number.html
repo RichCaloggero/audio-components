@@ -1,5 +1,10 @@
 <dom-module id="ui-number">
 <template>
+<style include="audio-component-styles">
+.ui-number {
+display: flex;
+}
+</style>
 <div  class="ui-number">
 <label>{{label}}</label>
 <br><input type="number" value="{{value::change}}" min="[[min]]" max="[[max]]" step="{{step::change}}" on-keydown="handleKeydown">
