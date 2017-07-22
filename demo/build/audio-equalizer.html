@@ -1,14 +1,10 @@
-<!--<link rel="import" href="../polymer/lib/elements/dom-if.html">--><!--<link rel="import" href="../polymer/lib/elements/dom-repeat.html">--><dom-module id="audio-equalizer">
+<link rel="import" href="styles.html">
+
+<dom-module id="audio-equalizer">
 <template>
 <style>
-:host {
-display: block;
-}
-
-:host .field {
-display: inline;
-}
-
+.audio-equalizer audio-parallel {display: flex;}
+audio-parallel > audio-filter {display: inline;}
 </style>
 
 <div class="audio-equalizer" role="region" aria-label$="[[label]]">
@@ -16,6 +12,7 @@ display: inline;
 
 <ui-boolean name="bypass" value="{{bypass}}"></ui-boolean>
 <ui-number name="q" label="Q" value="{{q}}" min="0.1" max="5.0" step="0.1"></ui-number>
+<button class="reset" accesskey="r" on-click="resetAll">reset all bands</button>
 
 <audio-parallel>
 <audio-filter label="32" frequency="32" q="{{q}}" type="peaking" gain="0" hide-controls="bypass q type frequency detune"></audio-filter>
@@ -60,7 +57,7 @@ observer: "_bypass"
 
 q: {
 type: Number,
-value: 2.4,
+value: 1.414,
 notify: true,
 //observer: "qChanged"
 } // q
@@ -84,11 +81,18 @@ this.connectAll ();
 } // connectedCallback
 
 connectAll () {
-var processor = this.shadowRoot.querySelector("audio-parallel");
+let processor = this.shadowRoot.querySelector("audio-parallel");
 this._audioIn.connect (processor._in);
 processor._out.connect (this._audioOut);
 } // connectAll
 
+resetAll () {
+let processor = this.shadowRoot.querySelector("audio-parallel");
+Array.from(processor.querySelectorAll("audio-filter"))
+.forEach ((filter) => {
+filter.setAttribute ("gain", "0.0");
+}); // forEach filter
+} // resetAll
 
 } // class AudioEqualizer
 

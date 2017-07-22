@@ -12,7 +12,7 @@
   ],
   "extraDependencies": [
     "bower_components\\**\\*",
-    "demo\\**\\*",
+    "demo\\**",
     "bower_components\\webcomponentsjs\\*.js"
   ],
   "builds": [
