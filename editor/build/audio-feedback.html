@@ -1,13 +1,8 @@
+<link rel="import" href="/styles.html">
+
 <dom-module id="audio-feedback">
 <template>
-<style>
-:host {
-display: block;
-}
-
-:host .field {
-display: inline;
-}
+<style include="audio-component-styles&quot;">
 </style>
 
 <div class="audio-feedback" role="region" aria-label$="{{label}}">
@@ -83,7 +78,7 @@ this.connectFeedback ();
 
 connectFeedback () {
 this._to = this.firstElementChild;
-console.log (`feedback to ${this._to}`);
+//console.log (`feedback to ${this._to}`);
 
 if (! this._to) {
 alert ("feedback: no child element");

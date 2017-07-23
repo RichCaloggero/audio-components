@@ -1,5 +1,9 @@
+<link rel="import" href="/styles.html">
+
 <dom-module id="ui-list">
 <template>
+<style include="audio-component-styles&quot;">
+</style>
 <div class="ui-list">
 <label>{{label}}
 <br><select size="1" value="{{value::change}}"></select>
@@ -65,7 +69,6 @@ throw new Error ("ui-list: no name given");
 
 super.connectedCallback ();
 this._buildList ();
-console.log ("connectedCallback...");
 } // connectedCallback
 
 _buildList () {
@@ -104,7 +107,6 @@ return null;
 } // _buildList
 
 valueChanged (value) {
-console.log (`number ${this.label || this._id}: new value: ${value}`);
 } // valueChanged
 
 nameChanged (value) {

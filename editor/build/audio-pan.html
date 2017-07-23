@@ -1,14 +1,10 @@
-<!--<link rel="import" href="bower_components/polymer/lib/elements/dom-repeat.html">--><!--<link rel="import" href="../polymer/lib/elements/dom-if.html">--><dom-module id="audio-pan">
-<template>
-<style>
-:host {
-display: block;
-}
+<link rel="import" href="/styles.html">
+<!--<link rel="import" href="bower_components/polymer/lib/elements/dom-repeat.html">-->
+<!--<link rel="import" href="../polymer/lib/elements/dom-if.html">-->
 
-:host .field {
-display: inline;
-float: left;
-}
+<dom-module id="audio-pan">
+<template>
+<style include="audio-component-styles&quot;">
 </style>
 
 <div class="audio-pan" role="region" aria-label$="{{label}}">
@@ -158,7 +154,6 @@ constructor () {
 super ();
 instanceCount += 1;
 this._id = AudioPan.is + instanceCount;
-console.log ("creating ", this._id);
 
 this._init (audio.createPanner ());
 this._audioNode.panningModel = "HRTF";

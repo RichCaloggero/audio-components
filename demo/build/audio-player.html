@@ -1,9 +1,8 @@
+<link rel="import" href="/styles.html">
+
 <dom-module id="audio-player">
 <template>
-<style>
-:host {
-display: block;
-}
+<style include="audio-component-styles&quot;">
 </style>
 
 <div class="audio-player">
@@ -46,7 +45,6 @@ constructor () {
 super ();
 instanceCount += 1;
 this._id = AudioPlayer.is + instanceCount;
-if (this._debug) this.label = this._id;
 
 this._audioIn = this._audioOut = null;
 this._out = audio.createGain();

@@ -1,13 +1,10 @@
-<!--<link rel="import" href="../polymer/lib/elements/dom-if.html">--><!--<link rel="import" href="../polymer/lib/elements/dom-repeat.html">--><dom-module id="audio-gain">
-<template>
-<style>
-:host {
-display: block;
-}
+<link rel="import" href="/styles.html">
+<!--<link rel="import" href="../polymer/lib/elements/dom-if.html">-->
+<!--<link rel="import" href="../polymer/lib/elements/dom-repeat.html">-->
 
-:host .field {
-display: inline;
-}
+<dom-module id="audio-gain">
+<template>
+<style include="audio-component-styles&quot;">
 </style>
 
 <div class="audio-gain" role="region" aria-label$="{{label}}">
@@ -65,7 +62,6 @@ constructor () {
 super ();
 instanceCount += 1;
 this._id = AudioGain.is + instanceCount;
-if (this._debug) this.label = this._id;
 
 this._init (audio.createGain());
 //this._audioNode.channelCountMode = "explicit";
@@ -74,14 +70,12 @@ this._init (audio.createGain());
 connectedCallback () {
 super.connectedCallback ();
 if (this.contextCheck(AudioGain.is)) {
-this.debugElementCreation (`${this.label}: created ${this._audioIn}`);
 this.addFieldLabels ();
 } // if
 } // connectedCallback
 
 gainChanged (value) {
 this._audioNode.gain.value = value;
-console.log(`gain ${this.label} changed to ${value}`);
 } // gainChanged
 
 } // class AudioGain

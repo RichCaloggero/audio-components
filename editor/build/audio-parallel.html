@@ -1,9 +1,10 @@
-<!--<link rel="import" href="../polymer/lib/elements/dom-if.html">--><!--<link rel="import" href="../polymer/lib/elements/dom-repeat.html">--><dom-module id="audio-parallel">
+<link rel="import" href="/styles.html">
+<!--<link rel="import" href="../polymer/lib/elements/dom-if.html">-->
+<!--<link rel="import" href="../polymer/lib/elements/dom-repeat.html">-->
+
+<dom-module id="audio-parallel">
 <template>
-<style>
-:host {
-display: block;
-}
+<style include="audio-component-styles&quot;">
 </style>
 
 <div class="audio-parallel" role="region" aria-label$="{{label}}">
@@ -60,11 +61,11 @@ this.addFieldLabels ();
 } // connectedCallback
 
 connectAll (nodes) {
-this.debugConnection (`${this.label}: connecting all ${nodes.length} nodes`);
+//console.log(`${this.label}: connecting all ${nodes.length} nodes`);
 
 for (var i=0; i<nodes.length; i++) {
 let e = nodes[i];
-this.debugConnection (`${this.label}: connecting ${e.label} in parallel`);
+//console.log(`${this.label}: connecting ${e.label} in parallel`);
 this._audioIn.connect (e._in);
 e._out.connect (this._audioOut);
 } // for

@@ -1,9 +1,10 @@
-<!--<link rel="import" href="../polymer/lib/elements/dom-if.html">--><!--<link rel="import" href="../polymer/lib/elements/dom-repeat.html">--><dom-module id="audio-merge">
+<link rel="import" href="/styles.html">
+<!--<link rel="import" href="../polymer/lib/elements/dom-if.html">-->
+<!--<link rel="import" href="../polymer/lib/elements/dom-repeat.html">-->
+
+<dom-module id="audio-merge">
 <template>
-<style>
-:host {
-display: block;
-}
+<style include="audio-component-styles&quot;">
 </style>
 
 <div class="audio-merge" role="region" aria-label$="{{label}}">
@@ -46,7 +47,6 @@ constructor () {
 super ();
 instanceCount += 1;
 this._id = AudioMerge.is + instanceCount;
-if (this.__debug()) this.label = this._id;
 
 this._in = audio.createChannelSplitter (2);
 this._out = audio.createGain ();
@@ -62,7 +62,6 @@ super.connectedCallback ();
 if (this.contextCheck(AudioMerge.is)) {
 this._in.connect (this._left, 0).connect (this._out);
 this._in.connect (this._right, 1).connect (this._out);
-this.debugElementCreation (`created ${this.label}`);
 this.addFieldLabels ();
 } // if
 } // connectedCallback

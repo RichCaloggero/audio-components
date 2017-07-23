@@ -1,9 +1,20 @@
-<div hidden="" by-polymer-bundler=""><link rel="import" href="shared_bundle_1.html"></div><dom-module id="audio-context">
+<div hidden="" by-polymer-bundler=""><link rel="import" href="shared_bundle_1.html"><!-- use import to import this module and reference via include="module-id" in the style tag in the element's template 
+if using document level styles, surround style element in main document with custom-style i.e. <custom-style><style> ... </style></custom-style>
+--><dom-module id="audio-component-styles">
 <template>
 <style>
-:host {
-display: block;
-}
+div {display: flex;}
+slot {display: flex;}
+
+:host {display: flex;}
+
+</style>
+</template>
+</dom-module>
+
+</div><dom-module id="audio-context">
+<template>
+<style include="audio-component-styles&quot;">
 </style>
 
 <div class="audio-context">
@@ -119,7 +130,7 @@ if (this._audioOut && this._audioOut.gain) this._audioOut.gain.value = (value)? 
 
 _bypass (value) {
 if (this._in && this._out && this._audioIn && this._audioOut) {
-console.log(`bypass ${value} on ${this.constructor.is}, ${this._in}, ${this._out}`);
+//console.log(`bypass ${value} on ${this.constructor.is}, ${this._in}, ${this._out}`);
 if (value) {
 this._disconnect ();
 this._in.connect (this._out);
@@ -225,7 +236,7 @@ let name = field.getAttribute("data-name") || field.getAttribute("field-name") |
 let label = field.querySelector("label");
 let control = field.querySelector("input, select, textarea");
 let id = this._id + "-" + name;
-console.log(`- field: ${name} ${field} ${control} ${label}`);
+//console.log(`- field: ${name} ${field} ${control} ${label}`);
 control.setAttribute("id", id);
 label.setAttribute ("for", id);
 } // if
@@ -246,7 +257,6 @@ if (!top || !top.nodeType || top.nodeType !== 1) {
 top = e.closest("audio-context") || document.querySelector("body");
 } // if
 
-console.log (`ancestors: top=${this.elementName(top)}`);
 
 while (e && e !== top) {
 //console.log (`- ancestors: e=${this.elementName(e)}`);
@@ -254,7 +264,6 @@ result.push (e);
 
 e = e.parentElement || e.parentNode.host;
 } // while
-//console.log("elements found: ", result.length);
 
 //result = (result.length > 0)? result.slice(1) : [];
 return result;
@@ -276,6 +285,15 @@ else AudioControl.stopAllAutomation ();
 } // if
 } // _enableAutomation
 
+static _position (element) {
+let p = element.getBoundingClientRect();
+let s = `${element.nodeName}#${element.id}`;
+_AudioContext_.statusMessage (`${s}: ${round(p.left + window.scrollX)}, ${round(p.top + window.scrollY)}`);
+
+function round (x) {
+return Math.round(x*10.0) / 10.0;
+} // round
+} // _position
 
 
 
