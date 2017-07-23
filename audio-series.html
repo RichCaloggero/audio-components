@@ -52,7 +52,6 @@ constructor () {
 super ();
 instanceCount += 1;
 this._id = AudioSeries.is + instanceCount;
-//if (this.__debug()) this.label = this._id;
 
 this._init ();
 } // constructor
@@ -73,7 +72,7 @@ this._audioIn.connect (this.firstElementChild._in);
 for (var i=0; i<nodes.length-1; i++) {
 let e1 = nodes[i], e2 = nodes[i+1];
 
-this.debugConnection (`${this.label}: connecting ${e1.label} ${e1._out} to ${e2.label} ${e2._in}`);
+//console.lolg(`${this.label}: connecting ${e1.label} ${e1._out} to ${e2.label} ${e2._in}`);
 e1._out.connect (e2._in);
 } // for
 
@@ -81,7 +80,7 @@ if (this.lastElementChild._out) {
 this.lastElementChild._out.connect (this._audioOut);
 } // if
 
-this.debugElementCreation (`created ${this.label}`);
+//console.log(`connectAll complete - ${this.label}`);
 } // connectAll
 
 

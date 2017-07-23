@@ -68,7 +68,6 @@ constructor () {
 super ();
 instanceCount += 1;
 this._id = AudioGain.is + instanceCount;
-if (this._debug) this.label = this._id;
 
 this._init (audio.createGain());
 //this._audioNode.channelCountMode = "explicit";
@@ -77,14 +76,12 @@ this._init (audio.createGain());
 connectedCallback () {
 super.connectedCallback ();
 if (this.contextCheck(AudioGain.is)) {
-this.debugElementCreation (`${this.label}: created ${this._audioIn}`);
 this.addFieldLabels ();
 } // if
 } // connectedCallback
 
 gainChanged (value) {
 this._audioNode.gain.value = value;
-console.log(`gain ${this.label} changed to ${value}`);
 } // gainChanged
 
 } // class AudioGain

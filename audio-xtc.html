@@ -31,11 +31,13 @@ display: inline;
 <audio-delay label="right delay" delay-time="0.0002" invert-phase></audio-delay>
 </audio-series></audio-split>
 
-<audio-filter label="frequency correction" bypass type="allpass" frequency="2000.0" q="0.16"></audio-filter>
+<audio-filter label="frequency correction" type="allpass" frequency="2000.0" q="0.55" hide-controls="gain detune"></audio-filter>
 </audio-feedback>
-<audio-gain label="inverted level" gain="0.4"></audio-gain>
+
 <!-- makeup gain -->
 <audio-gain gain="1.5"></audio-gain>
+
+<audio-gain label="wet level" gain="0.4"></audio-gain>
 </audio-series></audio-parallel>
 </div><!-- .audio-xtc -->
 </template>

@@ -49,7 +49,6 @@ constructor () {
 super ();
 instanceCount += 1;
 this._id = AudioMerge.is + instanceCount;
-if (this.__debug()) this.label = this._id;
 
 this._in = audio.createChannelSplitter (2);
 this._out = audio.createGain ();
@@ -65,7 +64,6 @@ super.connectedCallback ();
 if (this.contextCheck(AudioMerge.is)) {
 this._in.connect (this._left, 0).connect (this._out);
 this._in.connect (this._right, 1).connect (this._out);
-this.debugElementCreation (`created ${this.label}`);
 this.addFieldLabels ();
 } // if
 } // connectedCallback

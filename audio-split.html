@@ -38,7 +38,6 @@ constructor () {
 super ();
 instanceCount += 1;
 this._id = AudioSplit.is + instanceCount;
-if (this.__debug()) this.label = this._id;
 
 this._in = audio.createChannelSplitter (2);
 this._out = audio.createChannelMerger (2);
@@ -64,15 +63,6 @@ channel1 = this.firstElementChild;
 channel2 = this.lastElementChild;
 } // if
 
-
-/*this.debugConnection (`split: connecting all ${nodes.length} nodes`);
-if (nodes.length < 1) {
-alert ("empty element ignored");
-return;
-} // if
-*/
-
-//alert (`split: ${this.label} ${this.swapInputs} ${this.swapOutputs}, ${this.swapInputs? 1:0} ${this.swapOutputs? 1:0}`);
 if (channel1) {
 channel1.channelCount = 1;
 channel1.channelCountMode = "explicit";
@@ -81,14 +71,14 @@ channel1._out.connect (this._out, 0, this.swapOutputs? 1 : 0);
 } // if
 
 if (channel2) {
-//alert ("split: channel2");
+//console.log("split: channel2");
 channel2.channelCount = 1;
 channel2.channelCountMode = "explicit";
 this._in.connect (channel2._in, this.swapInputs? 0 : 1, 0);
 channel2._out.connect (this._out, 0, this.swapOutputs? 0 : 1);
 } // if
 
-this.debugElementCreation (`created ${this.label}`);
+//console.log(`connectAll complete - ${this.label}`);
 } // connectAll
 
 } // class AudioSplit

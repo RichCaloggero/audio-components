@@ -75,7 +75,6 @@ constructor () {
 super ();
 instanceCount += 1;
 this._id = AudioDelay.is + instanceCount;
-if (this.__debug()) this.label = this._id;
 
 this._init (audio.createDelay());
 this._audioIn.channelCount = this._in.channelCount = this._audioOut.channelCount = this._out.channelCount = this._audioNode.channelCount = 1;

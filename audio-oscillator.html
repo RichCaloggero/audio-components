@@ -79,7 +79,6 @@ constructor () {
 super ();
 instanceCount += 1;
 this._id = AudioOscillator.is + instanceCount;
-if (this._debug) this.label = this._id;
 
 this._init ();
 } // constructor
@@ -89,7 +88,7 @@ var create = () => {
 var old = this._audioNode;
 this._audioNode = audio.createOscillator ();
 if (old) {
-console.log (`${old}, ${old.frequency.value}, ${old.type}`);
+//console.log (`${old}, ${old.frequency.value}, ${old.type}`);
 this._audioNode.frequency.value = old.frequency.value;
 this._audioNode.type = old.type;
 } // if

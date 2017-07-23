@@ -65,7 +65,6 @@ throw new Error ("ui-list: no name given");
 
 super.connectedCallback ();
 this._buildList ();
-console.log ("connectedCallback...");
 } // connectedCallback
 
 _buildList () {
@@ -104,7 +103,6 @@ return null;
 } // _buildList
 
 valueChanged (value) {
-console.log (`number ${this.label || this._id}: new value: ${value}`);
 } // valueChanged
 
 nameChanged (value) {

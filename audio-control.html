@@ -125,7 +125,7 @@ super._attachDom(dom);
 
 connectedCallback () {
 super.connectedCallback ();
-console.log (`${this._id} connected to ${this.parentElement.localName}`);
+//console.log (`${this._id} connected to ${this.parentElement.localName}`);
 this.addFieldLabels ();
 } // connectedCallback
 
@@ -134,7 +134,7 @@ this.stop ();
 removeFromAutomationQueue (this);
 
 let element = this.parentElement;
-console.log (`setting up automation for ${element._id}`);
+//console.log (`setting up automation for ${element._id}`);
 
 if (! (this.parameter in element)) {
 alert (`_setupAutomation: parameter ${this.parameter} not in ${element.localName}`);
@@ -149,7 +149,7 @@ this._automationInterval = this.interval || 100; // milliseconds
 let f = compileFunction (this.function, "t").bind(element);
 
 if (f) {
-console.log (`function: ${f}`);
+//console.log (`function: ${f}`);
 this._automator = f;
 
 } else {
@@ -192,11 +192,11 @@ removeFromAutomationQueue (this);
 } // catch
 }, this._automationInterval);
 
-console.log (`${this._id}: starting automation for parameter ${this.parameter} of ${this._automationTarget? this._automationTarget.localName : null} using interval ${this._automationInterval}`);
+//console.log (`${this._id}: starting automation for parameter ${this.parameter} of ${this._automationTarget? this._automationTarget.localName : null} using interval ${this._automationInterval}`);
 } // startFunctionalAutomation
 
 stop () {
-console.log (`${this._id}: stopping automation for parameter ${this.parameter} of ${this._automationTarget? this._automationTarget.localName : null}`);
+//console.log (`${this._id}: stopping automation for parameter ${this.parameter} of ${this._automationTarget? this._automationTarget.localName : null}`);
 if (this._oscillator) {
 this._oscillator.stop ();
 this._oscillator = null;
@@ -224,7 +224,7 @@ this._audioParam.value = this.center;
 
 oscillator.connect (this._lfoGain).connect (this._audioParam);
 oscillator.start ();
-console.log (`- oscillator started`);
+//console.log (`- oscillator started`);
 
 this._oscillator = oscillator;
 } // _startOscillator
@@ -235,7 +235,7 @@ if (this._oscillator) this._oscillator.frequency.value = value;
 } // frequencyChanged
 
 parameterChanged (value) {
-console.log(`parameter ${value}`);
+//console.log(`parameter ${value}`);
 } // parameterChanged
 
 functionChanged (value) {
@@ -243,7 +243,6 @@ this._setupAutomation ();
 } // functionChanged
 
 typeChanged (value) {
-console.log (`typeChange: ${value}`);
 this.shadowRoot.querySelector(".lfo-ui").style.display = (value === "wave")?
 "block" : "none";
 this.shadowRoot.querySelector(".field[data-name=function]").style.display = (value === "function")?
@@ -268,14 +267,14 @@ if (this._audioParam) this._audioParam.value = value;
 
 function addToAutomationQueue (element) {
 automationQueue.push (element);
-console.log (`added ${element.label || element._id} to automation queue`);
+//console.log (`added ${element.label || element._id} to automation queue`);
 } // addToAutomationQueue
 
 function removeFromAutomationQueue (element) {
 let found = automationQueue.indexOf(element);
 if (found >= 0) {
 automationQueue.splice (found, 1);
-console.log (`removed ${element.label || element._id} from automation queue`);
+//console.log (`removed ${element.label || element._id} from automation queue`);
 } // if
 } // removeFromAutomationQueue
 
@@ -291,7 +290,6 @@ alert (`createWave: invalid value  ${_wave} - must be numbers separated by comma
 throw ("invalid value");
 } // if
 
-console.log (`createWave: freqs=${freqs}`);
 let real = new Float32Array(freqs.length+1);
 let imaginary = new Float32Array(freqs.length+1);
 
@@ -302,7 +300,7 @@ imaginary[i] = (values.length === 2)?
 values[1] : 0.0;
 }); // forEach
 
-console.log (`createWave: ${real} ${imaginary}`);
+//console.log (`createWave: ${real} ${imaginary}`);
 return audio.createPeriodicWave (real, imaginary, {disableNormalization: true});
 } // createWave
 

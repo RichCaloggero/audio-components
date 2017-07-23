@@ -63,11 +63,11 @@ this.addFieldLabels ();
 } // connectedCallback
 
 connectAll (nodes) {
-this.debugConnection (`${this.label}: connecting all ${nodes.length} nodes`);
+//console.log(`${this.label}: connecting all ${nodes.length} nodes`);
 
 for (var i=0; i<nodes.length; i++) {
 let e = nodes[i];
-this.debugConnection (`${this.label}: connecting ${e.label} in parallel`);
+//console.log(`${this.label}: connecting ${e.label} in parallel`);
 this._audioIn.connect (e._in);
 e._out.connect (this._audioOut);
 } // for

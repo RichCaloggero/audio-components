@@ -107,7 +107,6 @@ constructor () {
 super ();
 instanceCount += 1;
 this._id = AudioFilter.is + instanceCount;
-if (this._debug) this.label = this._id;
 
 this._init (audio.createBiquadFilter ());
 } // constructor
@@ -115,7 +114,6 @@ this._init (audio.createBiquadFilter ());
 connectedCallback () {
 super.connectedCallback ();
 if (this.contextCheck(AudioFilter.is)) {
-this.debugElementCreation (`${this.label}: created ${this._audioIn}`);
 this.addFieldLabels ();
 } // if
 } // connectedCallback

@@ -81,8 +81,6 @@ constructor () {
 super ();
 instanceCount += 1;
 this._id = AudioConvolver.is + instanceCount;
-if (this.__debug()) this.label = this._id;
-console.log (`creating ${this._id}`);
 
 this._init (audio.createConvolver());
 //this._audioIn.channelCount = this._in.channelCount = this._audioOut.channelCount = this._out.channelCount = this._audioNode.channelCount = 2;
@@ -103,10 +101,9 @@ impulseChanged (value) {
 } // impulseChanged
 
 impulseUrlChanged (value) {
-console.log (`impulseUrlChanged: ${value}`);
 if (value) {
 loadImpulse (this.impulseLibrary + "/" + value, (buffer) => {
-console.log ("- loaded...");
+//console.log ("- loaded...");
 this._audioNode.buffer = buffer;
 }); // load
 } // if
@@ -118,7 +115,7 @@ this._audioNode.buffer = buffer;
 
 function decodeBuffer(arrayBuffer, callback) {
 audio.decodeAudioData(arrayBuffer, function (audioBuffer) {
-console.log("Finished decoding audio data.");
+//console.log("Finished decoding audio data.");
 if (typeof callback === "function" && audioBuffer !== null) {
 callback(audioBuffer);
 } else {
@@ -133,10 +130,9 @@ function loadImpulse (url, callback) {
 var request = new XMLHttpRequest();
 request.responseType = "arraybuffer";
 request.open("GET", url, true);
-console.log (`requesting ${url}...`);
 
 request.addEventListener("load", function () {
-console.log ("- loaded...");
+
 if (request.response) {
 decodeBuffer(request.response, callback);
 } else {
