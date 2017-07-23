@@ -1,11 +1,9 @@
 <link rel="import" href="/bower_components/polymer/polymer-element.html">
+<link rel="import" href="/styles.html">
 
 <dom-module id="audio-context">
 <template>
-<style>
-:host {
-display: block;
-}
+<style include=audio-component-styles">
 </style>
 
 <div class="audio-context">
@@ -276,6 +274,15 @@ else AudioControl.stopAllAutomation ();
 } // if
 } // _enableAutomation
 
+static _position (element) {
+let p = element.getBoundingClientRect();
+let s = `${element.nodeName}#${element.id}`;
+_AudioContext_.statusMessage (`${s}: ${round(p.left + window.scrollX)}, ${round(p.top + window.scrollY)}`);
+
+function round (x) {
+return Math.round(x*10.0) / 10.0;
+} // round
+} // _position
 
 
 

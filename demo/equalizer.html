@@ -6,6 +6,7 @@
 
 <title>Audio Components editor</title>
 
+<script src="jquery.min.js"></script>
 <script src="../bower_components/webcomponentsjs/webcomponents-loader.js"></script>
 
 <link rel="import" href="../audio-context.html">
@@ -37,6 +38,9 @@
 <body>
 <h1>Equalizer test</h1>
 
+<div id="message" aria-live="polite">
+</div>
+
 <audio-context label="equalizer"><audio-series>
 <audio-player src="https://dl.dropboxusercontent.com/u/8529048/slow%20down%20jack.mp3"></audio-player>
 
@@ -44,6 +48,24 @@
 
 <audio-destination></audio-destination>
 </audio-series></audio-context>
+
+<!--<script>
+$(document).on ("focusin", function (e) {
+let p = $(e.target).offset();
+let s = `${e.target.nodeName}#${e.target.id}`;
+message (`${s}: ${round(p.left)}, ${round(p.top)}`);
+}); // on
+
+function message (text) {
+$("#message").html (`<p>${text}</p>\n`);
+} // message
+
+function round (x) {
+return Math.round(x*10.0) / 10.0;
+} // round
+ 
+</script>
+-->
 
 </body>
 </html>

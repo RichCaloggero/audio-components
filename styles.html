@@ -4,12 +4,11 @@ if using document level styles, surround style element in main document with cus
 <dom-module id="audio-component-styles">
 <template>
 <style>
-:host {display: block;}
-ui-number, ui-boolean, ui-list {display: inline;}
-ui-number div, ui-boolean div, ui-list div {
-display: flex;
-flex-direction: column;
-}
+:host {display: inline;}
+div {display: inline;}
+slot {display: inline;}
+
+.audio-equalizer filter {display: inline; float: left;}
 </style>
 </template>
 </dom-module>

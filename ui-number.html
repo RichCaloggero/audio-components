@@ -1,13 +1,12 @@
+<link rel="import" href="/styles.html">
+
 <dom-module id="ui-number">
 <template>
 <style include="audio-component-styles">
-.ui-number {
-display: flex;
-}
 </style>
 <div  class="ui-number">
 <label>{{label}}</label>
-<br><input type="number" value="{{value::change}}" min="[[min]]" max="[[max]]" step="{{step::change}}" on-keydown="handleKeydown">
+<br><input type="number" value="{{value::change}}" min="[[min]]" max="[[max]]" step="{{step::change}}" on-keydown="handleKeydown" on-focus="_position">
 </div>
 </template>
 
@@ -141,6 +140,11 @@ else return value;
 nameChanged (value) {
 if (! this.label) this.label = value;
 } // nameChanged
+
+_position (e) {
+//alert ("position");
+_AudioContext_._position (e.target);
+} // _position
 
 } // class UINumber
 

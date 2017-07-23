@@ -1,17 +1,10 @@
-<link rel="import" href="../bower_components/polymer/lib/elements/dom-repeat.html">
+<link rel="import" href="/styles.html">
+<link rel="import" href="/bower_components/polymer/lib/elements/dom-repeat.html">
 <!--<link rel="import" href="../polymer/lib/elements/dom-if.html">-->
 
 <dom-module id="audio-equalizer">
 <template>
-<style>
-:host {
-display: block;
-}
-
-:host .field {
-display: inline;
-}
-
+<style include=audio-component-styles">
 </style>
 
 <div class="audio-equalizer" role="region" aria-label$="[[label]]">
