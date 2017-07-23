@@ -4,7 +4,7 @@
 
 <dom-module id="audio-parallel">
 <template>
-<style include="audio-component-styles&quot;">
+<style include="audio-component-styles">
 </style>
 
 <div class="audio-parallel" role="region" aria-label$="{{label}}">
@@ -15,7 +15,7 @@
 <br><input type="checkbox" checked="{{bypass::change}}" accesskey="x">
 </div>
 
-<slot></slot>
+<slot on-slotchange="handleSlotChange"></slot>
 </div>
 
 </template>
@@ -56,7 +56,13 @@ this._init ();
 
 connectedCallback () {
 super.connectedCallback ();
+
+if (this.firstElementChild.localName !== "dom-repeat") {
+console.log ("direct children so loading now");
 this.whenAllChildrenLoaded (this.connectAll);
+} else {
+console.log ("dom-repeat found so deferring...");
+} // if
 this.addFieldLabels ();
 } // connectedCallback
 
@@ -65,6 +71,7 @@ connectAll (nodes) {
 
 for (var i=0; i<nodes.length; i++) {
 let e = nodes[i];
+if (e.localName === "dom-repeat") continue;
 //console.log(`${this.label}: connecting ${e.label} in parallel`);
 this._audioIn.connect (e._in);
 e._out.connect (this._audioOut);
@@ -72,6 +79,23 @@ e._out.connect (this._audioOut);
 
 this._audioOut.gain.value = 1/nodes.length;
 } // connectAll
+
+/*ready() {
+super.ready();
+setTimeout(function() {
+console.log ("distributed nodes for parallel");
+var distributedNodes = this.$.slot.assignedNodes({flatten: true});
+console.log(distributedNodes);
+}.bind(this), 0);
+} // ready
+*/
+
+handleSlotChange (e) {
+let children = e.target.assignedNodes({flatten:true}).filter(e => e.nodeType===1);
+this.dispatchEvent (new CustomEvent("change", {composed: true, bubbles: true, detail: children}));
+this.connectAll (children);
+} // handleSlotchange
+
 
 } // class AudioParallel
 

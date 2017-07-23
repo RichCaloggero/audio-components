@@ -11,8 +11,10 @@
     "bower_components\\marked-element\\marked-element.html"
   ],
   "extraDependencies": [
+    "styles.html",
     "bower_components\\**\\*",
     "demo\\**",
+    "editor\\**",
     "bower_components\\webcomponentsjs\\*.js"
   ],
   "builds": [

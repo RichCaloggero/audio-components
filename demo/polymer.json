@@ -1,7 +1,7 @@
 {
 "root": "..",
-"fragments": ["styles.html","audio-context.html","bower_components/marked-element/marked-element.html"],
-"extraDependencies": ["bower_components/**/*","demo/**/", editor/**/"],
+"fragments": ["audio-context.html","bower_components/marked-element/marked-element.html"],
+"extraDependencies": ["styles.html","bower_components/**/*","demo/**/","editor/**/"],
 "sources": ["*.html"],
 "entrypoint": "demo/index.html",
 "builds": [{
