@@ -47,18 +47,24 @@ instanceCount += 1;
 this._id = AudioPlayer.is + instanceCount;
 
 this._audioIn = this._audioOut = null;
+this._in = null;
 this._out = audio.createGain();
 } // constructor
 
 connectedCallback  () {
 super.connectedCallback();
+if (!this.shadowRoot) {
+throw Error ("audio-player: not properly initialized");
+return;
+} // if
+
 this._audioElement = this.shadowRoot.querySelector("audio");
 this._audioElement.addEventListener ("ended", (e) => this.shadowRoot.querySelector(".play").textContent = "play");
 
-if (this.contextCheck(AudioPlayer.is)) {
+//if (this.contextCheck(AudioPlayer.is)) {
 this._audioIn = this._audioOut= audio.createMediaElementSource (this._audioElement);
 this._connect ();
-} // if
+//} // if
 } // connectedCallback
 
 play (e) {
