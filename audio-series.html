@@ -15,7 +15,7 @@
 <br><input type="checkbox" checked="{{bypass::change}}">
 </div>
 
-<slot></slot>
+<slot on-slotchange="handleSlotChange"></slot>
 </div>
 
 </template>
@@ -56,25 +56,28 @@ this._init ();
 
 connectedCallback () {
 super.connectedCallback ();
-this.whenAllChildrenLoaded (this.connectAll);
+//this.whenAllChildrenLoaded (this.connectAll);
 this.addFieldLabels ();
 } // connectedCallback
 
 connectAll (nodes) {
 if (nodes.length < 1) return;
+if (nodes[0].localName === "dom-repeat") return;
+let lastChild = nodes[nodes.length-1];
 
-if (this.firstElementChild._in) {
-this._audioIn.connect (this.firstElementChild._in);
+if (nodes[0]._in) {
+this._audioIn.connect (nodes[0]._in);
 } // if
 
 for (var i=0; i<nodes.length-1; i++) {
 let e1 = nodes[i], e2 = nodes[i+1];
 
-//console.lolg(`${this.label}: connecting ${e1.label} ${e1._out} to ${e2.label} ${e2._in}`);
+alert (`trying ${e1.localName} ${e2.localName}`);
+debugger;
 e1._out.connect (e2._in);
 } // for
 
-if (this.lastElementChild._out) {
+if (lastChild._out) {
 this.lastElementChild._out.connect (this._audioOut);
 } // if
 

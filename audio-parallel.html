@@ -56,13 +56,6 @@ this._init ();
 
 connectedCallback () {
 super.connectedCallback ();
-
-if (this.firstElementChild.localName !== "dom-repeat") {
-console.log ("direct children so loading now");
-this.whenAllChildrenLoaded (this.connectAll);
-} else {
-console.log ("dom-repeat found so deferring...");
-} // if
 this.addFieldLabels ();
 } // connectedCallback
 
@@ -80,21 +73,6 @@ e._out.connect (this._audioOut);
 this._audioOut.gain.value = 1/nodes.length;
 } // connectAll
 
-/*ready() {
-super.ready();
-setTimeout(function() {
-console.log ("distributed nodes for parallel");
-var distributedNodes = this.$.slot.assignedNodes({flatten: true});
-console.log(distributedNodes);
-}.bind(this), 0);
-} // ready
-*/
-
-handleSlotChange (e) {
-let children = e.target.assignedNodes({flatten:true}).filter(e => e.nodeType===1);
-this.dispatchEvent (new CustomEvent("change", {composed: true, bubbles: true, detail: children}));
-this.connectAll (children);
-} // handleSlotchange
 
 
 } // class AudioParallel
