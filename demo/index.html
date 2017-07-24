@@ -57,7 +57,7 @@ and finally to output.
 Unlike other components, audio-player always produces a UI(no need for label attribute).
 -->
 
-<audio-player src="https://dl.dropboxusercontent.com/u/8529048/slow%20down%20jack.mp3"></audio-player>
+<audio-player src="https://dl.dropboxusercontent.com/u/8529048/new%20bossa.mp3"></audio-player>
 
 <audio-series label="demo" bypass>
 
@@ -152,10 +152,11 @@ or 2R = (L+R) - (L-R) = L + R - L +R
 <audio-split swap-outputs><audio-gain></audio-gain></audio-split>
 </audio-series></audio-parallel>
 </audio-series>
-
+<audio-equalizer label="equalizer"></audio-equalizer>
+<audio-reverb label="reverb"></audio-reverb>
+<audio-compressor label="compressor"></audio-compressor>
 
 <audio-gain label="master volume" gain="1.0"></audio-gain>
-<audio-compressor label="compressor"></audio-compressor>
 </audio-series><!-- demo -->
 
 <audio-destination></audio-destination>

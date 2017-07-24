@@ -10,10 +10,7 @@
 <div class="audio-series" role="region" aria-label$="{{label}}">
 <span class="label">{{label}}</span>
 
-<div class="field" data-name="bypass">
-<label>Bypass</label>
-<br><input type="checkbox" checked="{{bypass::change}}">
-</div>
+<ui-boolean name="bypass" label="bypass" value="{{bypass}}"></ui-boolean>
 
 <slot on-slotchange="handleSlotChange"></slot>
 </div>
@@ -56,34 +53,35 @@ this._init ();
 
 connectedCallback () {
 super.connectedCallback ();
-//this.whenAllChildrenLoaded (this.connectAll);
 this.addFieldLabels ();
 } // connectedCallback
 
 connectAll (nodes) {
 if (nodes.length < 1) return;
-if (nodes[0].localName === "dom-repeat") return;
+let firstChild = nodes[0];
 let lastChild = nodes[nodes.length-1];
+//alert (`series: firstChild = ${firstChild? firstChild.localName : "null"}`);
+//alert (`series: lastChild = ${lastChild? lastChild.localName : "null"}`);
 
-if (nodes[0]._in) {
-this._audioIn.connect (nodes[0]._in);
+if (firstChild._in) {
+this._audioIn.connect (firstChild._in);
+//alert ("connected to firstChild's in port");
 } // if
 
 for (var i=0; i<nodes.length-1; i++) {
 let e1 = nodes[i], e2 = nodes[i+1];
+window.e1 = e1; window.e2 = e2;
 
-alert (`trying ${e1.localName} ${e2.localName}`);
-debugger;
 e1._out.connect (e2._in);
 } // for
 
 if (lastChild._out) {
 this.lastElementChild._out.connect (this._audioOut);
+//alert ("connected from lastChild's out port");
 } // if
 
 //console.log(`connectAll complete - ${this.label}`);
 } // connectAll
-
 
 } // class AudioSeries
 
