@@ -283,7 +283,33 @@ else AudioControl.stopAllAutomation ();
 } // if
 } // _enableAutomation
 
-handleSlotChange (e) {
+_processValues (values) {
+if (values instanceof String || typeof(values) === "string") {
+values = values.trim();
+if (values.charAt(0) !== "[" && values.includes(",") && !values.includes('"')) {
+values = values.split(",")
+.map (value => value.trim());
+} else {
+try {values = JSON.parse(values);
+} catch (e) {values = []} // catch
+} // if
+} // if
+console.log ("intermediate: ", values);
+
+if (values && (values instanceof Array)) {
+values = values.map (value => {
+if (typeof(value) !== "object") value = {value: value, text: value};
+if (value instanceof Array) value = {
+value: values[0], text: value.length > 1? value[1] : value[0]
+};
+return value;
+}).sort ((a,b) => a.text > b.text);
+} // if
+
+return values;
+} // processValues
+
+_handleSlotChange (e) {
 let children = e.target.assignedNodes({flatten:true})
 .filter(e => e.nodeType===1 && e.localName !== "dom-repeat");
 
@@ -301,7 +327,7 @@ this.dispatchEvent (new CustomEvent("change", {composed: true, bubbles: true, de
 this.connectAll (children);
 }, 0);
 } // if
-} // handleSlotchange
+} // _handleSlotChange
 
 static _position (element) {
 let p = element.getBoundingClientRect();

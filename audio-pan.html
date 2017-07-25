@@ -51,6 +51,7 @@
 </template>
 
 <script>
+// audio-pan
 "use strict";
 
 (function () {
@@ -185,6 +186,7 @@ maxDistanceChanged (value) {
 this._audioNode.maxDistance = value;
 } // maxDistanceChanged
 
+
 refDistanceChanged (value) {
 this._audioNode.refDistance = value;
 } // refDistanceChanged
@@ -196,6 +198,8 @@ this._audioNode.rolloffFactor = value;
 coneInnerAngleChanged(value) {
 this._audioNode.coneInnerAngle = value;
 } // coneInnerAngleChanged
+
+
 } // class AudioPan
 
 

@@ -8,20 +8,11 @@
 </style>
 
 <div class="audio-convolver" role="region" aria-label$="{{label}}">
-<div class="row">
 <span class="label">[[label]]</span>
 
 <ui-boolean name="bypass" label="bypass" value="{{bypass}}"></ui-boolean>
 
-</div><div class="row">
-<div class="field" data-name="impulse">
-<label>impulse</label>
-<select class="impulse" value="{{impulseUrl::change}}">
-</select>
-</div><!-- .field -->
-</div><!-- row -->
-
-<slot class="impulseNames" style="display:none"></slot>
+<ui-list name="impulseUrl" label="impulse" value="{{impulseUrl}}" values="{{impulses}}"></ui-list>
 </div>
 </template>
 
@@ -47,12 +38,22 @@ type: String,
 value: ""
 }, // impulseLibrary
 
+impulses: {
+type: String,
+value: ""
+}, // impulses
+
 impulseUrl: {
 type: String,
 value: "",
 notify: true,
 observer: "impulseUrlChanged"
 }, // impulseUrl
+
+defaultExtension: {
+type: String,
+value: ""
+}, // defaultExtension
 
 bypass: {
 type: Boolean,
@@ -86,8 +87,8 @@ connectedCallback () {
 super.connectedCallback ();
 //if (this.contextCheck(AudioConvolver.is)) {
 this.addFieldLabels ();
-moveElements (this.shadowRoot.querySelector(".impulseNames").assignedNodes(), this.shadowRoot.querySelector (".impulse"));
-this.shadowRoot.querySelector (".impulse").dispatchEvent (new CustomEvent("change"));
+//moveElements (this.shadowRoot.querySelector(".impulseNames").assignedNodes(), this.shadowRoot.querySelector (".impulse"));
+//this.shadowRoot.querySelector (".impulse").dispatchEvent (new CustomEvent("change"));
 //} // if
 } // connectedCallback
 
@@ -96,8 +97,7 @@ impulseChanged (value) {
 
 impulseUrlChanged (value) {
 if (value) {
-loadImpulse (this.impulseLibrary + "/" + value, (buffer) => {
-//console.log ("- loaded...");
+loadImpulse (this.impulseLibrary + "/" + value + this.defaultExtension, (buffer) => {
 this._audioNode.buffer = buffer;
 }); // load
 } // if
@@ -109,7 +109,6 @@ this._audioNode.buffer = buffer;
 
 function decodeBuffer(arrayBuffer, callback) {
 audio.decodeAudioData(arrayBuffer, function (audioBuffer) {
-//console.log("Finished decoding audio data.");
 if (typeof callback === "function" && audioBuffer !== null) {
 callback(audioBuffer);
 } else {
@@ -124,6 +123,7 @@ function loadImpulse (url, callback) {
 var request = new XMLHttpRequest();
 request.responseType = "arraybuffer";
 request.open("GET", url, true);
+//console.log (`loadImpulse: get ${url}`);
 
 request.addEventListener("load", function () {
 
