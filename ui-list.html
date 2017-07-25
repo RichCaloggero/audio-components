@@ -39,7 +39,9 @@ value: ""
 
 values: {
 type: String,
-value: ""
+value: "",
+notify: true,
+observer: "valuesChanged"
 }, // values
 
 value: {
@@ -69,7 +71,6 @@ throw new Error ("ui-list: no name given");
 } // if
 
 super.connectedCallback ();
-this._buildList ();
 } // connectedCallback
 
 _buildList () {
@@ -88,6 +89,11 @@ _handleSlotChange (e) {
 this.shadowRoot.querySelector("select").innerHTML = "";
 this._buildList ();
 } // _handleSlotChange
+
+valuesChanged (value) {
+this.shadowRoot.querySelector ("select").innerHTML = "";
+this._buildList ();
+} // valuesChanged
 
 valueChanged (value) {
 } // valueChanged

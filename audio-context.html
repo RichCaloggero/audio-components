@@ -222,12 +222,7 @@ Array.from(this.shadowRoot.querySelectorAll (".field, ui-number, ui-boolean, ui-
 .forEach ((field) => {
 let name = field.getAttribute("data-name") || field.getAttribute("field-name") || field.getAttribute("name");
 
-if (
-hide
-//|| (name !== "bypass" && this.hideOnBypass && this.bypass)
-|| hideControls.includes(name)
-) field.style.display = "none";
-//else field.style.display = "flex";
+if (hide || hideControls.includes(name)) field.style.display = "none";
 
 if (field.matches("div.field")) {
 let name = field.getAttribute("data-name") || field.getAttribute("field-name") || field.getAttribute("name");
@@ -294,7 +289,6 @@ try {values = JSON.parse(values);
 } catch (e) {values = []} // catch
 } // if
 } // if
-console.log ("intermediate: ", values);
 
 if (values && (values instanceof Array)) {
 values = values.map (value => {

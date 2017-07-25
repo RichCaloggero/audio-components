@@ -90,10 +90,10 @@ switch (e.key) {
 case "Enter": this.reset();
 return false;
 
-case "Home": this.setMax ();
+case "Home": if (e.ctrlKey) this.setMax ();
 return false;
 
-case "End": this.setMin ();
+case "End": if(e.ctrlKey) this.setMin ();
 return false;
 
 case "PageUp": this.increase ();
