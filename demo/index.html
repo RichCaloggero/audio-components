@@ -162,6 +162,21 @@ or 2R = (L+R) - (L-R) = L + R - L +R
 <audio-destination></audio-destination>
 </audio-series></audio-context>
 
+<script>
+/*document.body.addEventListener ("focusin", function (e) {
+setTimeout(() => _AudioContext_.statusMessage (`${e.target.localName} ${_position(e.target)}`), 10);
+}); // listener
+
+function _position (element, absolute) {
+let p = element.getBoundingClientRect();
+return `${round((absolute)? p.left + window.scrollX : p.left)}, ${round((absolute)? p.top + window.scrollY : p.top)}`;
+
+function round (x) {
+return Math.round(x*10.0) / 10.0;
+} // round
+} // _position
+*/
+</script>
 
 </body>
 </html>

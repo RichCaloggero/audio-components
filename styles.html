@@ -4,11 +4,10 @@ if using document level styles, surround style element in main document with cus
 <dom-module id="audio-component-styles">
 <template>
 <style>
-div {display: flex;}
-slot {display: flex;}
-
-:host {display: flex;}
-
+:host {all: initial; display: flex; contain: content;}
+div {display: inline-block;}
+/*slot {display: flex;}
+*/
 </style>
 </template>
 </dom-module>

@@ -323,15 +323,6 @@ this.connectAll (children);
 } // if
 } // _handleSlotChange
 
-static _position (element) {
-let p = element.getBoundingClientRect();
-let s = `${element.nodeName}#${element.id}`;
-_AudioContext_.statusMessage (`${s}: ${round(p.left + window.scrollX)}, ${round(p.top + window.scrollY)}`);
-
-function round (x) {
-return Math.round(x*10.0) / 10.0;
-} // round
-} // _position
 
 
 
