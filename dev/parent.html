@@ -26,12 +26,12 @@ constructor () {
 super ();
 instanceCount += 1;
 this._id = `x-parent${instanceCount}`;
-console.log (`${this._id} created`);
+console.log (`Parent (${this._id}) created`);
 } // constructor
 
 connectedCallback () {
 super.connectedCallback ();
-console.log (`${this._id} connected`);
+console.log (`Parent (${this._id}) connected`);
 } // connectedCallback
 
 } // class XParent
