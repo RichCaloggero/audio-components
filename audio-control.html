@@ -110,7 +110,9 @@ observer: "lfoGainChanged"
 
 rampTime: {
 type: Number,
-value: 0.0,
+value: 0.1,
+notify: true,
+observer: "rampTimeChanged"
 }, // rampTime
 
 lineMin: {
@@ -134,6 +136,8 @@ value: 0.0,
 dwellTime: {
 type: Number,
 value: 0.0,
+notify: true,
+observer: "dwellTimeChanged"
 } // dwellTime
 
 }; // return
@@ -189,10 +193,21 @@ else if (this.type === "line") this._startLineAutomation ();
 else if (this.type === "point") this._startPointAutomation ();
 } // start
 
+stop () {
+//console.log (`${this._id}: stopping automation for parameter ${this.parameter} of ${this._automationTarget? this._automationTarget.localName : null}`);
+if (this._oscillator) {
+this._oscillator.stop ();
+this._oscillator = null;
+} // if
+
+if (this._automation) {
+clearInterval (this._automation);
+} // if
+} // stop
+
 _startLfoAutomation () {
 if (! this.wave) return;
 
-this._audioParam = getAudioParam(this.parameter, this._automationTarget);
 if (typeof(this._audioParam) === "string" || this._audioParam instanceof String) {
 alert (`parameter ${parameter} not automatable via wave - change type to 'function' and try again`);
 return;
@@ -205,14 +220,26 @@ this._startOscillator ();
 _startLineAutomation () {
 if (! this._audioParam) return;
 this._automation = setInterval (() => {
+try {
 this._audioParam.linearRampToValueAtTime (random(this.lineMin,this.lineMax), audio.currentTime + this.rampTime);
+} catch (e) {
+alert (`linear automation : ${e}`);
+this.stop ();
+removeFromAutomationQueue (this);
+} // catch
 }, 1000 * this.rampTime);
 } // _startLineAutomation
 
 _startPointAutomation () {
 if (! this._audioParam) return;
 this._automation = setInterval (() => {
+try {
 this._audioParam.value = random(this.pointMin,this.pointMax);
+} catch (e) {
+alert (`point automation : ${e}`);
+this.stop ();
+removeFromAutomationQueue (this);
+} // catch
 }, 1000 * this.dwellTime);
 } // _startPointAutomation
 
@@ -243,17 +270,6 @@ removeFromAutomationQueue (this);
 //console.log (`${this._id}: starting automation for parameter ${this.parameter} of ${this._automationTarget? this._automationTarget.localName : null} using interval ${this._automationInterval}`);
 } // startFunctionalAutomation
 
-stop () {
-//console.log (`${this._id}: stopping automation for parameter ${this.parameter} of ${this._automationTarget? this._automationTarget.localName : null}`);
-if (this._oscillator) {
-this._oscillator.stop ();
-this._oscillator = null;
-} // if
-
-if (this._automation) {
-clearInterval (this._automation);
-} // if
-} // stop
 
 static startAllAutomation () {
 automationQueue.forEach ((element) => element.start());
@@ -315,6 +331,15 @@ centerChanged (value) {
 if (this._audioParam) this._audioParam.value = value;
 } // centerChanged
 
+rampTimeChanged (value) {
+this.stop ();
+this._startLineAutomation ();
+} // rampTimeChanged
+
+pointTimeChanged (value) {
+this.stop ();
+this._startPointAutomation ();
+} // dwellTimeChanged
 
 } // class AudioControl
 
