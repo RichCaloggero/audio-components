@@ -11,7 +11,7 @@
 <div class="audio-control" role="region" aria-label$="[[label]]">
 <span class="label">[[label]]</span>
 
-<ui-list name="type" label="automation type" value="{{type}}" values="function, LFO, line, point"></ui-list>
+<ui-list name="type" label="automation type" value="{{type}}" values="function, lfo, line, point"></ui-list>
 
 <div class="panels">
 <div class="function">
@@ -26,10 +26,14 @@
 </div><!-- .lfo -->
 
 <div class="line">
+<ui-number name="lineMin" label="line min" value="{{lineMin}}"></ui-number>
+<ui-number name="lineMax" label="line max" value="{{lineMax}}"></ui-number>
 <ui-number name="rampTime" label="ramp time" value="{{rampTime}}"></ui-number>
 </div>
 
 <div class="point">
+<ui-number name="lineMin" label="line min" value="{{lineMin}}"></ui-number>
+<ui-number name="lineMax" label="line max" value="{{lineMax}}"></ui-number>
 <ui-number name="dwellTime" label="dwell time" value="{{dwellTime}}"></ui-number>
 </div>
 </div><!-- panels -->
@@ -106,18 +110,31 @@ observer: "lfoGainChanged"
 
 rampTime: {
 type: Number,
-value: "0.0",
-notify: true,
-observer: "rampTimeChanged"
+value: 0.0,
 }, // rampTime
+
+lineMin: {
+type: Number,
+value: 0.0,
+}, // lineMin
+lineMax: {
+type: Number,
+value: 0.0,
+}, // lineMax
+
+pointMin: {
+type: Number,
+value: 0.0,
+}, // pointMin
+pointMax: {
+type: Number,
+value: 0.0,
+}, // pointMax
 
 dwellTime: {
 type: Number,
-value: "0.0",
-notify: true,
-observer: "dwellTimeChanged"
+value: 0.0,
 } // dwellTime
-
 
 }; // return
 } // get properties
@@ -128,6 +145,7 @@ super ();
 instanceCount += 1;
 this._id = AudioControl.is + instanceCount;
 this._automation = null;
+this._automationInterval = this.interval || 100; // milliseconds
 this._lfoGain = audio.createGain();
 console.log (`constructor: ${this.id} created`);
 } // constructor
@@ -141,11 +159,12 @@ connectedCallback () {
 super.connectedCallback ();
 //console.log (`${this._id} connected to ${this.parentElement.localName}`);
 this.addFieldLabels ();
+this._setupAutomation ();
 } // connectedCallback
 
 _setupAutomation() {
-this.stop ();
 removeFromAutomationQueue (this);
+this.stop ();
 
 let element = this.parentElement;
 //console.log (`setting up automation for ${element._id}`);
@@ -156,31 +175,21 @@ return;
 } // if
 this._automationTarget = element;
 addToAutomationQueue (this);
-
-if (this.type === "function") {
-if (!this.function) return;
-this._automationInterval = this.interval || 100; // milliseconds
-let f = compileFunction (this.function, "t").bind(element);
-
-if (f) {
-//console.log (`function: ${f}`);
-this._automator = f;
-
-} else {
-alert ("invalid function: " + this.value);
-return;
-} // if
-} // automation type
+this._audioParam = getAudioParam(this.parameter, this._automationTarget);
 
 this.start ();
 } // _setupAutomation
 
 start () {
-if (this.type === "wave") this._startWaveAutomation ();
-else this._startFunctionalAutomation ();
+this.stop ();
+
+if (this.type === "function") this._startFunctionalAutomation ();
+else if (this.type === "lfo") this._startLfoAutomation ();
+else if (this.type === "line") this._startLineAutomation ();
+else if (this.type === "point") this._startPointAutomation ();
 } // start
 
-_startWaveAutomation () {
+_startLfoAutomation () {
 if (! this.wave) return;
 
 this._audioParam = getAudioParam(this.parameter, this._automationTarget);
@@ -193,8 +202,33 @@ this._wave = createWave (this.wave);
 this._startOscillator ();
 } // _startWaveAutomation
 
+_startLineAutomation () {
+if (! this._audioParam) return;
+this._automation = setInterval (() => {
+this._audioParam.linearRampToValueAtTime (random(this.lineMin,this.lineMax), audio.currentTime + this.rampTime);
+}, 1000 * this.rampTime);
+} // _startLineAutomation
+
+_startPointAutomation () {
+if (! this._audioParam) return;
+this._automation = setInterval (() => {
+this._audioParam.value = random(this.pointMin,this.pointMax);
+}, 1000 * this.dwellTime);
+} // _startPointAutomation
+
 _startFunctionalAutomation () {
-if (! this._automator || ! this.function) return;
+if (! this.function) return;
+let f = compileFunction (this.function, "t").bind(this._automationTarget);
+
+if (f) {
+//console.log (`function: ${f}`);
+this._automator = f;
+
+} else {
+alert ("invalid function: " + this.value);
+return;
+} // if
+
 this._automation = setInterval (() => {
 try {
 this._automationTarget[this.parameter] = this._automator(audio.currentTime);
@@ -266,7 +300,7 @@ _panel.style.display = (_panel === panel)?
 "block" : "none";
 }); // forEach
 
-this._setupAutomation ();
+this.start ();
 } // typeChanged
 
 waveChanged (value) {
@@ -280,6 +314,7 @@ this._lfoGain.gain.value = value;
 centerChanged (value) {
 if (this._audioParam) this._audioParam.value = value;
 } // centerChanged
+
 
 } // class AudioControl
 
@@ -332,6 +367,10 @@ alert (e);
 return null;
 } // try
 } // compileFunction
+
+function random (a,b) {
+return Math.random() * Math.abs(a-b) + Math.min(a,b);
+} // random
 
 window.customElements.define(AudioControl.is, AudioControl);
 })();
