@@ -58,7 +58,7 @@ and finally to output.
 Unlike other components, audio-player always produces a UI(no need for label attribute).
 -->
 
-<audio-player src="https://dl.dropboxusercontent.com/u/8529048/freedom.mp3"></audio-player>
+<audio-player src="https://dl.dropboxusercontent.com/u/8529048/estate.mp3"></audio-player>
 
 <audio-series label="demo" bypass>
 
@@ -79,9 +79,9 @@ x="3" z="-5"
 max-distance="100" ref-distance="1" rolloff-factor="1"
 hide-controls="coneInnerAngle coneOuterAngle coneOuterGain">
 
-<audio-control  label="automate x" parameter="x" function="30 * cos(t)" wave="1,1" lfo-gain="20.0" frequency="0.3" center="0.0"></audio-control>
+<audio-control  label="automate x" parameter="x" function="30 * cos(t)" wave="1,1" lfo-gain="20.0" frequency="0.3" center="0.0" min="-30.0" max="30.0" time="0.75"></audio-control>
 <audio-control  label="automate y" parameter="y" function=""></audio-control>
-<audio-control  label="automate z" parameter="z" function="30 * sin(t)" wave="0,1" lfo-gain="20.0" frequency="0.3" center="0.0"></audio-control>
+<audio-control  label="automate z" parameter="z" function="30 * sin(t)" wave="0,1" lfo-gain="20.0" frequency="0.3" center="0.0" min="-30.0" max="30.0" time="0.75"></audio-control>
 </audio-pan>
 
 <!-- simple XTC:

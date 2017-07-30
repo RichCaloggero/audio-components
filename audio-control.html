@@ -26,15 +26,15 @@
 </div><!-- .lfo -->
 
 <div class="line">
-<ui-number name="lineMin" label="line min" value="{{lineMin}}"></ui-number>
-<ui-number name="lineMax" label="line max" value="{{lineMax}}"></ui-number>
-<ui-number name="rampTime" label="ramp time" value="{{rampTime}}"></ui-number>
+<ui-number name="min" label="min" value="{{min}}"></ui-number>
+<ui-number name="max" label="max" value="{{max}}"></ui-number>
+<ui-number name="time" label="time" value="{{time}}" min="0.0" max="3.0" step="0.05"></ui-number>
 </div>
 
 <div class="point">
-<ui-number name="lineMin" label="line min" value="{{lineMin}}"></ui-number>
-<ui-number name="lineMax" label="line max" value="{{lineMax}}"></ui-number>
-<ui-number name="dwellTime" label="dwell time" value="{{dwellTime}}"></ui-number>
+<ui-number name="min" label="min" value="{{min}}"></ui-number>
+<ui-number name="max" label="max" value="{{max}}"></ui-number>
+<ui-number name="time" label="time" value="{{time}}" min="0.0" max="3.0" step="0.05"></ui-number>
 </div>
 </div><!-- panels -->
 
@@ -108,38 +108,22 @@ notify: true,
 observer: "lfoGainChanged"
 }, // lfoGain
 
-rampTime: {
+time: {
 type: Number,
 value: 0.1,
 notify: true,
-observer: "rampTimeChanged"
-}, // rampTime
+observer: "timeChanged"
+}, // time
 
-lineMin: {
+min: {
 type: Number,
 value: 0.0,
-}, // lineMin
-lineMax: {
-type: Number,
-value: 0.0,
-}, // lineMax
+}, // min
 
-pointMin: {
+max: {
 type: Number,
 value: 0.0,
-}, // pointMin
-pointMax: {
-type: Number,
-value: 0.0,
-}, // pointMax
-
-dwellTime: {
-type: Number,
-value: 0.0,
-notify: true,
-observer: "dwellTimeChanged"
-} // dwellTime
-
+} // max
 }; // return
 } // get properties
 
@@ -221,26 +205,24 @@ _startLineAutomation () {
 if (! this._audioParam) return;
 this._automation = setInterval (() => {
 try {
-this._audioParam.linearRampToValueAtTime (random(this.lineMin,this.lineMax), audio.currentTime + this.rampTime);
+this._audioParam.setTargetAtTime (random(this.min,this.max), audio.currentTime, this.time);
 } catch (e) {
 alert (`linear automation : ${e}`);
 this.stop ();
-removeFromAutomationQueue (this);
 } // catch
-}, 1000 * this.rampTime);
+}, 1000 * this.time);
 } // _startLineAutomation
 
 _startPointAutomation () {
 if (! this._audioParam) return;
 this._automation = setInterval (() => {
 try {
-this._audioParam.value = random(this.pointMin,this.pointMax);
+this._audioParam.value = random(this.min,this.max);
 } catch (e) {
 alert (`point automation : ${e}`);
 this.stop ();
-removeFromAutomationQueue (this);
 } // catch
-}, 1000 * this.dwellTime);
+}, 1000 * this.time);
 } // _startPointAutomation
 
 _startFunctionalAutomation () {
@@ -252,7 +234,7 @@ if (f) {
 this._automator = f;
 
 } else {
-alert ("invalid function: " + this.value);
+alert ("invalid function: " + this.function);
 return;
 } // if
 
@@ -261,9 +243,8 @@ try {
 this._automationTarget[this.parameter] = this._automator(audio.currentTime);
 } catch (e) {
 alert (e);
-this.function = "";
+//this.function = "";
 this.stop ();
-removeFromAutomationQueue (this);
 } // catch
 }, this._automationInterval);
 
@@ -303,7 +284,7 @@ parameterChanged (value) {
 } // parameterChanged
 
 functionChanged (value) {
-this._setupAutomation ();
+this.start ();
 } // functionChanged
 
 typeChanged (value) {
@@ -320,7 +301,7 @@ this.start ();
 } // typeChanged
 
 waveChanged (value) {
-this._setupAutomation ();
+this.start ();
 } // waveChanged
 
 lfoGainChanged (value) {
@@ -331,15 +312,9 @@ centerChanged (value) {
 if (this._audioParam) this._audioParam.value = value;
 } // centerChanged
 
-rampTimeChanged (value) {
-this.stop ();
-this._startLineAutomation ();
-} // rampTimeChanged
-
-pointTimeChanged (value) {
-this.stop ();
-this._startPointAutomation ();
-} // dwellTimeChanged
+timeChanged (value) {
+this.start ();
+} // timeChanged
 
 } // class AudioControl
 
