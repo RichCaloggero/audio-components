@@ -5,33 +5,33 @@
 <dom-module id="audio-control">
 <template>
 <style include="audio-component-styles">
-.lfo-ui {display:none;}
+.panel {display:none;}
 </style>
 
 <div class="audio-control" role="region" aria-label$="[[label]]">
 <span class="label">[[label]]</span>
 
-<ui-list name="type" label="automation type" value="{{type}}" values="function, lfo, line, point"></ui-list>
+<ui-list name="type" label="automation type" value="{{type}}" values="function, LFO, line, point, none"></ui-list>
 
 <div class="panels">
-<div class="function">
+<div class="function panel">
 <ui-text name=:function" label="function" value="{{function}}"></ui-text>
 </div>
 
-<div class="lfo">
+<div class="lfo panel">
 <ui-text name="wave" label="wave" value="{{wave}}"></ui-text>
 <ui-number name="frequency" label="frequency" value="{{frequency}}" min="0.05" max="5.0" step="0.05"></ui-number>
 <ui-number name="lfoGain" label="gain" value="{{lfoGain}}" min="-100.0" max="100.0"></ui-number>
 <ui-number name="center" label="center" value="{{center}}" min="-100.0" max="100.0"></ui-number>
 </div><!-- .lfo -->
 
-<div class="line">
+<div class="line panel">
 <ui-number name="min" label="min" value="{{min}}"></ui-number>
 <ui-number name="max" label="max" value="{{max}}"></ui-number>
 <ui-number name="time" label="time" value="{{time}}" min="0.0" max="3.0" step="0.05"></ui-number>
 </div>
 
-<div class="point">
+<div class="point panel">
 <ui-number name="min" label="min" value="{{min}}"></ui-number>
 <ui-number name="max" label="max" value="{{max}}"></ui-number>
 <ui-number name="time" label="time" value="{{time}}" min="0.0" max="3.0" step="0.05"></ui-number>
@@ -133,7 +133,7 @@ super ();
 instanceCount += 1;
 this._id = AudioControl.is + instanceCount;
 this._automation = null;
-this._automationInterval = this.interval || 100; // milliseconds
+this._automationInterval = this.interval || .1; // seconds
 this._lfoGain = audio.createGain();
 console.log (`constructor: ${this.id} created`);
 } // constructor
@@ -162,8 +162,8 @@ alert (`_setupAutomation: parameter ${this.parameter} not in ${element.localName
 return;
 } // if
 this._automationTarget = element;
-addToAutomationQueue (this);
 this._audioParam = getAudioParam(this.parameter, this._automationTarget);
+addToAutomationQueue (this);
 
 this.start ();
 } // _setupAutomation
@@ -171,14 +171,24 @@ this.start ();
 start () {
 this.stop ();
 
-if (this.type === "function") this._startFunctionalAutomation ();
-else if (this.type === "lfo") this._startLfoAutomation ();
-else if (this.type === "line") this._startLineAutomation ();
-else if (this.type === "point") this._startPointAutomation ();
+switch (this.type.toLowerCase()) {
+case "function": this._startFunctionalAutomation (); break;
+case "lfo": this._startLfoAutomation (); break;
+case "line": this._startLineAutomation (); break;
+case "point": this._startPointAutomation (); break;
+case "none": return;
+default: alert("audio-control.start: invalid type");
+} // switch
+console.log (`audio-control.start: starting ${this.type} automation`);
+
 } // start
 
 stop () {
 //console.log (`${this._id}: stopping automation for parameter ${this.parameter} of ${this._automationTarget? this._automationTarget.localName : null}`);
+if (this._audioParam) {
+this._audioParam.cancelScheduledValues(0);
+} // if
+
 if (this._oscillator) {
 this._oscillator.stop ();
 this._oscillator = null;
@@ -186,44 +196,13 @@ this._oscillator = null;
 
 if (this._automation) {
 clearInterval (this._automation);
+this._automation = null;
+} // if
+
+if (this._automator) {
+this._automator = null;
 } // if
 } // stop
-
-_startLfoAutomation () {
-if (! this.wave) return;
-
-if (typeof(this._audioParam) === "string" || this._audioParam instanceof String) {
-alert (`parameter ${parameter} not automatable via wave - change type to 'function' and try again`);
-return;
-} // if
-
-this._wave = createWave (this.wave);
-this._startOscillator ();
-} // _startWaveAutomation
-
-_startLineAutomation () {
-if (! this._audioParam) return;
-this._automation = setInterval (() => {
-try {
-this._audioParam.setTargetAtTime (random(this.min,this.max), audio.currentTime, this.time);
-} catch (e) {
-alert (`linear automation : ${e}`);
-this.stop ();
-} // catch
-}, 1000 * this.time);
-} // _startLineAutomation
-
-_startPointAutomation () {
-if (! this._audioParam) return;
-this._automation = setInterval (() => {
-try {
-this._audioParam.value = random(this.min,this.max);
-} catch (e) {
-alert (`point automation : ${e}`);
-this.stop ();
-} // catch
-}, 1000 * this.time);
-} // _startPointAutomation
 
 _startFunctionalAutomation () {
 if (! this.function) return;
@@ -246,11 +225,50 @@ alert (e);
 //this.function = "";
 this.stop ();
 } // catch
-}, this._automationInterval);
+}, 1000 * this._automationInterval);
 
 //console.log (`${this._id}: starting automation for parameter ${this.parameter} of ${this._automationTarget? this._automationTarget.localName : null} using interval ${this._automationInterval}`);
 } // startFunctionalAutomation
 
+_startLfoAutomation () {
+if (! this.wave) return;
+if (! this._audioParam) return;
+
+if (typeof(this._audioParam) === "string" || this._audioParam instanceof String) {
+alert (`parameter ${parameter} not automatable via wave - change type to 'function' and try again`);
+return;
+} // if
+
+this._wave = createWave (this.wave);
+this._startOscillator ();
+} // _startWaveAutomation
+
+_startLineAutomation () {
+return;
+if (! this._audioParam) return;
+
+this._automation = setInterval (() => {
+try {
+this._audioParam.setTargetAtTime (random(this.min,this.max), audio.currentTime, this.time);
+} catch (e) {
+alert (`line automation : ${e}`);
+this.stop ();
+} // catch
+}, 1000 * this.time);
+} // _startLineAutomation
+
+_startPointAutomation () {
+if (! this._audioParam) return;
+
+this._automation = setInterval (() => {
+try {
+this._automationTarget[this.parameter] = random(this.min,this.max);
+} catch (e) {
+alert (`point automation : ${e}`);
+this.stop ();
+} // catch
+}, 1000 * this.time);
+} // _startPointAutomation
 
 static startAllAutomation () {
 automationQueue.forEach ((element) => element.start());
@@ -291,7 +309,7 @@ typeChanged (value) {
 value = value.toLowerCase();
 let panels = this.shadowRoot.querySelector (".panels");
 let panel = panels.querySelector (`.${value}`);
-this.shadowRoot.querySelectorAll (".panels > *")
+this.shadowRoot.querySelectorAll (".panels > .panel")
 .forEach ((_panel) => {
 _panel.style.display = (_panel === panel)?
 "block" : "none";
