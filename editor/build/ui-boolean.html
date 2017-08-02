@@ -60,7 +60,6 @@ constructor () {
 super ();
 instanceCount += 1;
 this._id = "ui-boolean" + instanceCount;
-console.log ("constructor...");
 } // constructor
 
 _attachDom(dom) {
@@ -76,24 +75,17 @@ throw new Error ("ui-boolean: no name given");
 //console.log ("connectedCallback...");
 } // connectedCallback
 
-ready () {
-super.ready();
-console.log ("ready...");
-} // ready
-
 valueChanged (value) {
-console.log (`new value: ${value}`);
 } // valueChanged
 
 stepChanged (value) {
-console.log (`new step: ${value}`);
 } // stepChanged
 
 nameChanged (value) {
 if (! this.label) this.label = value;
 } // nameChanged
 
-} // class Xt
+} // class UIBoolean
 
 function idGen (name) {
 return "ui-boolean" + instanceCount + "-" + name;

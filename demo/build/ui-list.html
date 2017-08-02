@@ -6,7 +6,8 @@
 </style>
 <div class="ui-list">
 <label>{{label}}
-<br><select size="1" value="{{value::change}}"></select>
+<br><select size="1" value="{{value::change}}">
+</select>
 </label>
 </div>
 </template>
@@ -38,7 +39,9 @@ value: ""
 
 values: {
 type: String,
-value: ""
+value: "",
+notify: true,
+observer: "valuesChanged"
 }, // values
 
 value: {
@@ -68,43 +71,29 @@ throw new Error ("ui-list: no name given");
 } // if
 
 super.connectedCallback ();
-this._buildList ();
 } // connectedCallback
 
 _buildList () {
-try {
+let values = null;
 let list = this.shadowRoot.querySelector ("select");
-let values = JSON.parse (this.values);
-if (!values || typeof(values) !== "object" || !(values instanceof Array)) throw ("values attribute must be a JSON array");
-
-values.forEach ((value) => {
-let v, t;
+this._processValues (this.values).forEach ((value) => {
 let option = document.createElement ("option");
-if (typeof(value) === "object") {
-if (value instanceof Array) {
-v = value[0];
-t = value[1];
-} else {
-v = value.value;
-t = value.text;
-} // if
-
-} else {
-v = t = value;
-} // if
-
-option.value = v;
-option.text = t;
+option.value = value.value;
+option.text = value.text;
 list.add (option);
 }); // forEach
-return this.values;
-
-} catch (e) {
-alert (`ui-list: invalid values (${e}) - attribute's value needs to be a JSON array`);
-} // catch
-
-return null;
+return values;
 } // _buildList
+
+_handleSlotChange (e) {
+this.shadowRoot.querySelector("select").innerHTML = "";
+this._buildList ();
+} // _handleSlotChange
+
+valuesChanged (value) {
+this.shadowRoot.querySelector ("select").innerHTML = "";
+this._buildList ();
+} // valuesChanged
 
 valueChanged (value) {
 } // valueChanged
@@ -113,7 +102,9 @@ nameChanged (value) {
 if (! this.label) this.label = value;
 } // nameChanged
 
+
 } // class UIList
+
 
 function idGen (name) {
 return "ui-list" + instanceCount + "-" + name;

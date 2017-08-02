@@ -58,7 +58,6 @@ constructor () {
 super ();
 instanceCount += 1;
 this._id = "ui-number" + instanceCount;
-console.log ("constructor...");
 } // constructor
 
 _attachDom(dom) {
@@ -73,7 +72,6 @@ throw new Error ("ui-number: no name given");
 
 let _id = idGen (this.name);
 super.connectedCallback ();
-console.log ("connectedCallback...");
 this.shadowRoot.querySelector("label").setAttribute("for", _id);
 this.shadowRoot.querySelector("input").setAttribute("id", _id);
 } // connectedCallback
@@ -92,10 +90,10 @@ switch (e.key) {
 case "Enter": this.reset();
 return false;
 
-case "Home": this.setMax ();
+case "Home": if (e.ctrlKey) this.setMax ();
 return false;
 
-case "End": this.setMin ();
+case "End": if(e.ctrlKey) this.setMin ();
 return false;
 
 case "PageUp": this.increase ();

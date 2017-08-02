@@ -26,6 +26,7 @@
 <link rel="import" href="../audio-xtc.html">
 <link rel="import" href="../audio-feedback.html">
 
+<link rel="import" href="../ui-text.html">
 <link rel="import" href="../ui-number.html">
 <link rel="import" href="../ui-boolean.html">
 <link rel="import" href="../ui-list.html">
@@ -55,7 +56,7 @@ and finally to output.
 Unlike other components, audio-player always produces a UI(no need for label attribute).
 -->
 
-<audio-player src="https://dl.dropboxusercontent.com/u/8529048/slow%20down%20jack.mp3"></audio-player>
+<audio-player src="https://dl.dropboxusercontent.com/u/8529048/estate.mp3"></audio-player>
 
 <audio-series label="demo" bypass="">
 
@@ -73,9 +74,9 @@ These values are random -- just for demonstration...
 
 <audio-pan label="3D panner" bypass="" x="3" z="-5" max-distance="100" ref-distance="1" rolloff-factor="1" hide-controls="coneInnerAngle coneOuterAngle coneOuterGain">
 
-<audio-control label="automate x" parameter="x" function="30 * cos(t)" wave="1,1" lfo-gain="20.0" frequency="0.3" center="0.0"></audio-control>
+<audio-control label="automate x" parameter="x" function="30 * cos(t)" wave="1,1" lfo-gain="20.0" frequency="0.3" center="0.0" min="-30.0" max="30.0" time="0.75"></audio-control>
 <audio-control label="automate y" parameter="y" function=""></audio-control>
-<audio-control label="automate z" parameter="z" function="30 * sin(t)" wave="0,1" lfo-gain="20.0" frequency="0.3" center="0.0"></audio-control>
+<audio-control label="automate z" parameter="z" function="30 * sin(t)" wave="0,1" lfo-gain="20.0" frequency="0.3" center="0.0" min="-30.0" max="30.0" time="0.75"></audio-control>
 </audio-pan>
 
 <!-- simple XTC:
@@ -147,15 +148,31 @@ or 2R = (L+R) - (L-R) = L + R - L +R
 <audio-split swap-outputs=""><audio-gain></audio-gain></audio-split>
 </audio-series></audio-parallel>
 </audio-series>
-
+<audio-equalizer label="equalizer"></audio-equalizer>
+<audio-reverb label="reverb"></audio-reverb>
+<audio-compressor label="compressor"></audio-compressor>
 
 <audio-gain label="master volume" gain="1.0"></audio-gain>
-<audio-compressor label="compressor"></audio-compressor>
 </audio-series><!-- demo -->
 
 <audio-destination></audio-destination>
 </audio-series></audio-context>
 
+<script>
+/*document.body.addEventListener ("focusin", function (e) {
+setTimeout(() => _AudioContext_.statusMessage (`${e.target.localName} ${_position(e.target)}`), 10);
+}); // listener
+
+function _position (element, absolute) {
+let p = element.getBoundingClientRect();
+return `${round((absolute)? p.left + window.scrollX : p.left)}, ${round((absolute)? p.top + window.scrollY : p.top)}`;
+
+function round (x) {
+return Math.round(x*10.0) / 10.0;
+} // round
+} // _position
+*/
+</script>
 
 
 

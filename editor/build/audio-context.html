@@ -5564,11 +5564,11 @@ if using document level styles, surround style element in main document with cus
 --><dom-module id="audio-component-styles">
 <template>
 <style>
-div {display: flex;}
-slot {display: flex;}
+:host {all: initial; display: flex; contain: content; border: 1px solid; font-size: 26px;}
+:host > div {display: inline;}
+:host select, :host input, :host ui-number, :host ui-list, :host ui-boolean, :host button {display: inline-flex; flex-wrap: wrap; }
 
-:host {display: flex;}
-
+:host ::slotted(*) {display: inline-block;}
 </style>
 </template>
 </dom-module>
@@ -5581,6 +5581,7 @@ slot {display: flex;}
 <div class="audio-context">
 <h1>{{label}}</h1>
 <ui-boolean name="enableAutomation" label="enable automation" value="{{enableAutomation}}"></ui-boolean>
+<!--<ui-boolean name="hideOnBypass" label="hide on bypass" value="{{hideOnBypass}}"></ui-boolean>-->
 
 <slot></slot>
 
@@ -5594,7 +5595,6 @@ slot {display: flex;}
 "use strict";
 (function () {
 var _root = null;
-var _debug = false, _debugConnection = false, _debugInternalConnection = false, _debugElementCreation = false, _debugUI = false;
 
 window._AudioContext_ = class _AudioContext_ extends Polymer.Element {
 static get is() { return "audio-context"; }
@@ -5613,7 +5613,15 @@ notify: true,
 observer: "_enableAutomation"
 }, // enableAutomation
 
-_debug: {
+/*hideOnBypass: {
+type: Boolean,
+value: true,
+notify: true,
+observer: "_hideOnBypass"
+}, // hideOnBypass
+*/
+
+/*_debug: {
 type: Boolean,
 value: false
 }, // _debug
@@ -5637,7 +5645,7 @@ _debugInternalConnection: {
 type: Boolean,
 value: false
 }, // _debugInternalConnection
-
+*/
 }; // return
 } // get properties
 
@@ -5661,11 +5669,6 @@ this.audio = window.audio;
 connectedCallback () {
 super.connectedCallback ();
 if (! _root) _root = this.shadowRoot.querySelector (".audio-context");
-if (this._debug) _debug = true;
-if (this._debugUI) _debugUI = true;
-if (this._debugConnection) _debugConnection = true;
-if (this._debugInternalConnection) _debugInternalConnection = true;
-if (this._debugElementCreation) _debugElementCreation = true;
 } // connectedCallback
 
 
@@ -5700,17 +5703,21 @@ this._disconnect ();
 this._connect ();
 } // if
 } // if
+
+//this.addFieldLabels ();
 } // _bypass
+
+_hideOnBypass (value) {
+//this._bypass (this.bypass);
+} // _hideOnBypass
 
 _connect () {
 if (this._audioIn && this._audioOut) {
 if (this._in) {
-this.debugInternalConnection (`internal connect ${this.label}: input`);
 this._in.connect (this._audioIn);
 } // if
 
 if (this._out) {
-this.debugInternalConnection (`internal connect ${this.label || this._id}: output`);
 this._audioOut.connect (this._out);
 } // if
 } // if
@@ -5719,10 +5726,7 @@ this._audioOut.connect (this._out);
 _disconnect () {
 if (this._audioIn && this._audioOut) {
 if (this._in) {
-this.debugInternalConnection (`internal disconnect: ${this._in} ...`);
 this._in.disconnect ();
-
-this.debugInternalConnection (`internal disconnect: ${this._audioOut} ...`);
 this._audioOut.disconnect ();
 } // if
 } // if
@@ -5790,7 +5794,7 @@ Array.from(this.shadowRoot.querySelectorAll (".field, ui-number, ui-boolean, ui-
 .forEach ((field) => {
 let name = field.getAttribute("data-name") || field.getAttribute("field-name") || field.getAttribute("name");
 
-if ((hide && !_debugUI) || hideControls.includes(name)) field.setAttribute ("style", "display:none");
+if (hide || hideControls.includes(name)) field.style.display = "none";
 
 if (field.matches("div.field")) {
 let name = field.getAttribute("data-name") || field.getAttribute("field-name") || field.getAttribute("name");
@@ -5801,7 +5805,7 @@ let id = this._id + "-" + name;
 control.setAttribute("id", id);
 label.setAttribute ("for", id);
 } // if
-});
+}); // forEach field
 } // addFieldLabels
 
 ancestors (top) {
@@ -5846,49 +5850,53 @@ else AudioControl.stopAllAutomation ();
 } // if
 } // _enableAutomation
 
-static _position (element) {
-let p = element.getBoundingClientRect();
-let s = `${element.nodeName}#${element.id}`;
-_AudioContext_.statusMessage (`${s}: ${round(p.left + window.scrollX)}, ${round(p.top + window.scrollY)}`);
-
-function round (x) {
-return Math.round(x*10.0) / 10.0;
-} // round
-} // _position
-
-
-
-/// debugging
-__debug () {return _debug;}
-__debugElementCreation () {return this.__debug() && _debugElementCreation;}
-__debugConnection () {return this.__debug() && _debugConnection;}
-__debugInternalConnection () {return this.__debug() && _debugInternalConnection;}
-__debugUI () {return this.__debugUI() && _debugUI;}
-
-
-debugElementCreation (message) {
-if (this.__debugElementCreation()) {
-_AudioContext_.statusMessage ("debug: " + message);
+_processValues (values) {
+if (values instanceof String || typeof(values) === "string") {
+values = values.trim();
+if (values.charAt(0) !== "[" && values.includes(",") && !values.includes('"')) {
+values = values.split(",")
+.map (value => value.trim());
+} else {
+try {values = JSON.parse(values);
+} catch (e) {values = []} // catch
 } // if
-} // debugElementCreation
-
-debugConnection (message) {
-if (this.__debugConnection()) {
-_AudioContext_.statusMessage ("debug: " + message);
 } // if
-} // debugConnection
 
-debugInternalConnection (message) {
-if (this.__debugInternalConnection()) {
-_AudioContext_.statusMessage ("debug: " + message);
+if (values && (values instanceof Array)) {
+values = values.map (value => {
+if (typeof(value) !== "object") value = {value: value, text: value};
+if (value instanceof Array) value = {
+value: values[0], text: value.length > 1? value[1] : value[0]
+};
+return value;
+});
 } // if
-} // debugConnection
 
-debugUI (message) {
-if (this.__debugUI()) {
-_AudioContext_.statusMessage ("debug: " + message);
+return values;
+} // processValues
+
+_handleSlotChange (e) {
+let children = e.target.assignedNodes({flatten:true})
+.filter(e => e.nodeType===1 && e.localName !== "dom-repeat");
+
+if (children.length > 0) {
+setTimeout (() => {
+/*console.log (`slotChange: ${this.localName} ${children.length}
+${children.map(e => {
+let _in = e._in, _out = e._out;
+return [e.localName,_in? _in.localName : "null", _out? _out.localName : "null"];
+}) // map
+}`);
+*/
+
+this.dispatchEvent (new CustomEvent("change", {composed: true, bubbles: true, detail: children}));
+this.connectAll (children);
+}, 0);
 } // if
-} // debugUI
+} // _handleSlotChange
+
+
+
 
 static statusMessage (message) {
 var status = _root.querySelector (".audio-context .status");
@@ -5906,10 +5914,6 @@ alert (message);
 
 } // statusMessage
 
-/*_debugChanged (value) {
-this._debug = value;
-} // _debugChanged
-*/
 
 /*nameChanged (value) {
 this.name = value;

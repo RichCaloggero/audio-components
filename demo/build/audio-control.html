@@ -5,29 +5,38 @@
 <dom-module id="audio-control">
 <template>
 <style include="audio-component-styles">
-.lfo-ui {display:none;}
+.panel {display:none;}
 </style>
 
 <div class="audio-control" role="region" aria-label$="[[label]]">
 <span class="label">[[label]]</span>
 
-<ui-list name="type" label="automation type" value="{{type}}" values="[&quot;function&quot;,&quot;wave&quot;]"></ui-list>
+<ui-list name="type" label="automation type" value="{{type}}" values="function, LFO, line, point, none"></ui-list>
 
-<div class="field" data-name="function">
-<label>function</label>
-<br><input type="text" value="{{function::change}}">
+<div class="panels">
+<div class="function panel">
+<ui-text name=":function&quot;" label="function" value="{{function}}"></ui-text>
 </div>
 
-<div class="lfo-ui" role="region" aria-label="LFO">
-<div class="field" data-name="wave">
-<label>wave</label> as
-<br><input type="text" value="{{wave::change}}">
-</div>
-
+<div class="lfo panel">
+<ui-text name="wave" label="wave" value="{{wave}}"></ui-text>
 <ui-number name="frequency" label="frequency" value="{{frequency}}" min="0.05" max="5.0" step="0.05"></ui-number>
 <ui-number name="lfoGain" label="gain" value="{{lfoGain}}" min="-100.0" max="100.0"></ui-number>
 <ui-number name="center" label="center" value="{{center}}" min="-100.0" max="100.0"></ui-number>
-</div><!-- .lfo-ui -->
+</div><!-- .lfo -->
+
+<div class="line panel">
+<ui-number name="min" label="min" value="{{min}}"></ui-number>
+<ui-number name="max" label="max" value="{{max}}"></ui-number>
+<ui-number name="time" label="time" value="{{time}}" min="0.0" max="3.0" step="0.05"></ui-number>
+</div>
+
+<div class="point panel">
+<ui-number name="min" label="min" value="{{min}}"></ui-number>
+<ui-number name="max" label="max" value="{{max}}"></ui-number>
+<ui-number name="time" label="time" value="{{time}}" min="0.0" max="3.0" step="0.05"></ui-number>
+</div>
+</div><!-- panels -->
 
 </div>
 </template>
@@ -97,7 +106,24 @@ type: Number,
 value: "0.0",
 notify: true,
 observer: "lfoGainChanged"
-} // lfoGain
+}, // lfoGain
+
+time: {
+type: Number,
+value: 0.1,
+notify: true,
+observer: "timeChanged"
+}, // time
+
+min: {
+type: Number,
+value: 0.0,
+}, // min
+
+max: {
+type: Number,
+value: 0.0,
+} // max
 }; // return
 } // get properties
 
@@ -107,6 +133,7 @@ super ();
 instanceCount += 1;
 this._id = AudioControl.is + instanceCount;
 this._automation = null;
+this._automationInterval = this.interval || .1; // seconds
 this._lfoGain = audio.createGain();
 console.log (`constructor: ${this.id} created`);
 } // constructor
@@ -120,11 +147,12 @@ connectedCallback () {
 super.connectedCallback ();
 //console.log (`${this._id} connected to ${this.parentElement.localName}`);
 this.addFieldLabels ();
+this._setupAutomation ();
 } // connectedCallback
 
 _setupAutomation() {
-this.stop ();
 removeFromAutomationQueue (this);
+this.stop ();
 
 let element = this.parentElement;
 //console.log (`setting up automation for ${element._id}`);
@@ -134,35 +162,78 @@ alert (`_setupAutomation: parameter ${this.parameter} not in ${element.localName
 return;
 } // if
 this._automationTarget = element;
+this._audioParam = getAudioParam(this.parameter, this._automationTarget);
 addToAutomationQueue (this);
 
-if (this.type === "function") {
-if (!this.function) return;
-this._automationInterval = this.interval || 100; // milliseconds
-let f = compileFunction (this.function, "t").bind(element);
+this.start ();
+} // _setupAutomation
+
+start () {
+this.stop ();
+
+switch (this.type.toLowerCase()) {
+case "function": this._startFunctionalAutomation (); break;
+case "lfo": this._startLfoAutomation (); break;
+case "line": this._startLineAutomation (); break;
+case "point": this._startPointAutomation (); break;
+case "none": return;
+default: alert("audio-control.start: invalid type");
+} // switch
+console.log (`audio-control.start: starting ${this.type} automation`);
+
+} // start
+
+stop () {
+//console.log (`${this._id}: stopping automation for parameter ${this.parameter} of ${this._automationTarget? this._automationTarget.localName : null}`);
+if (this._audioParam) {
+this._audioParam.cancelScheduledValues(0);
+} // if
+
+if (this._oscillator) {
+this._oscillator.stop ();
+this._oscillator = null;
+} // if
+
+if (this._automation) {
+clearInterval (this._automation);
+this._automation = null;
+} // if
+
+if (this._automator) {
+this._automator = null;
+} // if
+} // stop
+
+_startFunctionalAutomation () {
+if (! this.function) return;
+let f = compileFunction (this.function, "t").bind(this._automationTarget);
 
 if (f) {
 //console.log (`function: ${f}`);
 this._automator = f;
 
 } else {
-alert ("invalid function: " + this.value);
+alert ("invalid function: " + this.function);
 return;
 } // if
-} // automation type
 
-this.start ();
-} // _setupAutomation
+this._automation = setInterval (() => {
+try {
+this._automationTarget[this.parameter] = this._automator(audio.currentTime);
+} catch (e) {
+alert (e);
+//this.function = "";
+this.stop ();
+} // catch
+}, 1000 * this._automationInterval);
 
-start () {
-if (this.type === "wave") this._startWaveAutomation ();
-else this._startFunctionalAutomation ();
-} // start
+//console.log (`${this._id}: starting automation for parameter ${this.parameter} of ${this._automationTarget? this._automationTarget.localName : null} using interval ${this._automationInterval}`);
+} // startFunctionalAutomation
 
-_startWaveAutomation () {
+_startLfoAutomation () {
 if (! this.wave) return;
+if (! this._audioParam) return;
 
-this._audioParam = getAudioParam(this.parameter, this._automationTarget);
 if (typeof(this._audioParam) === "string" || this._audioParam instanceof String) {
 alert (`parameter ${parameter} not automatable via wave - change type to 'function' and try again`);
 return;
@@ -172,33 +243,32 @@ this._wave = createWave (this.wave);
 this._startOscillator ();
 } // _startWaveAutomation
 
-_startFunctionalAutomation () {
-if (! this._automator || ! this.function) return;
+_startLineAutomation () {
+return;
+if (! this._audioParam) return;
+
 this._automation = setInterval (() => {
 try {
-this._automationTarget[this.parameter] = this._automator(audio.currentTime);
+this._audioParam.setTargetAtTime (random(this.min,this.max), audio.currentTime, this.time);
 } catch (e) {
-alert (e);
-this.function = "";
+alert (`line automation : ${e}`);
 this.stop ();
-removeFromAutomationQueue (this);
 } // catch
-}, this._automationInterval);
+}, 1000 * this.time);
+} // _startLineAutomation
 
-//console.log (`${this._id}: starting automation for parameter ${this.parameter} of ${this._automationTarget? this._automationTarget.localName : null} using interval ${this._automationInterval}`);
-} // startFunctionalAutomation
+_startPointAutomation () {
+if (! this._audioParam) return;
 
-stop () {
-//console.log (`${this._id}: stopping automation for parameter ${this.parameter} of ${this._automationTarget? this._automationTarget.localName : null}`);
-if (this._oscillator) {
-this._oscillator.stop ();
-this._oscillator = null;
-} // if
-
-if (this._automation) {
-clearInterval (this._automation);
-} // if
-} // stop
+this._automation = setInterval (() => {
+try {
+this._automationTarget[this.parameter] = random(this.min,this.max);
+} catch (e) {
+alert (`point automation : ${e}`);
+this.stop ();
+} // catch
+}, 1000 * this.time);
+} // _startPointAutomation
 
 static startAllAutomation () {
 automationQueue.forEach ((element) => element.start());
@@ -232,20 +302,24 @@ parameterChanged (value) {
 } // parameterChanged
 
 functionChanged (value) {
-this._setupAutomation ();
+this.start ();
 } // functionChanged
 
 typeChanged (value) {
-this.shadowRoot.querySelector(".lfo-ui").style.display = (value === "wave")?
+value = value.toLowerCase();
+let panels = this.shadowRoot.querySelector (".panels");
+let panel = panels.querySelector (`.${value}`);
+this.shadowRoot.querySelectorAll (".panels > .panel")
+.forEach ((_panel) => {
+_panel.style.display = (_panel === panel)?
 "block" : "none";
-this.shadowRoot.querySelector(".field[data-name=function]").style.display = (value === "function")?
-"block" : "none";
+}); // forEach
 
-this._setupAutomation ();
+this.start ();
 } // typeChanged
 
 waveChanged (value) {
-this._setupAutomation ();
+this.start ();
 } // waveChanged
 
 lfoGainChanged (value) {
@@ -255,6 +329,10 @@ this._lfoGain.gain.value = value;
 centerChanged (value) {
 if (this._audioParam) this._audioParam.value = value;
 } // centerChanged
+
+timeChanged (value) {
+this.start ();
+} // timeChanged
 
 } // class AudioControl
 
@@ -307,6 +385,10 @@ alert (e);
 return null;
 } // try
 } // compileFunction
+
+function random (a,b) {
+return Math.random() * Math.abs(a-b) + Math.min(a,b);
+} // random
 
 window.customElements.define(AudioControl.is, AudioControl);
 })();

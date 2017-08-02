@@ -29,7 +29,6 @@ this._out = null;
 connectedCallback () {
 super.connectedCallback ();
 if (this.contextCheck (AudioDestination.is)) {
-this.debugElementCreation (`created ${this.label}`);
 this._connect ();
 } // if
 } // connectedCallback
