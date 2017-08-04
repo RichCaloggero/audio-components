@@ -18,14 +18,15 @@ This project was begun as a way to learn Polymer.
 
 ## Elements
 
-The package contains four distinct types of elements:
+The package contains six distinct types of elements:
+- context (from which all others are inherrited, and which directly wraps the webaudio AudioContext node)
 - connectors
 - audio processing elements
 - UI elements
-- composed elements
 - automation elements
+- composed elements
 
-The connectors build the connection graph and the only UI they display is a label and a bypass control. They include:
+The connectors build the connection graph and the only UI they display is a label and a bypass control. They currently include:
 - audio-context
 - audio-series
 - audio-parallel
@@ -33,7 +34,7 @@ The connectors build the connection graph and the only UI they display is a labe
 - audio-merge
 - audio-feedback
 
-The audio processing elements currently include:
+The audio processing elements wrap the webaudio nodes which actually do the heavy lifting, as well as provide a UI by which to control the processing. They currently include:
 - audio-player
 - audio-destination
 - audio-gain
@@ -48,12 +49,16 @@ The UI elements handle UI generation and currently include:
 - ui-number
 - ui-boolean
 - ui-list
+- ui-text
 
 The currently implemented automation element is "audio-control", which modifies specified parameters of it's parent element based on mathematical functions in the time domain.
-The free variable "t" is the current time stored in the webaudio context node which contains the graph.
+The free variable "t" is the current time stored in the webaudio context node which contains the graph.  They also implement several experimental automation techniques:
+- using LFO to automate a webaudio parameter node
+- random automation based on parameter range and user-specified automation interval 
 
-The currently implemented composed elements are:
+Composed elements are ones which leverage other audio-component elements directly. They may use the UI of those elements directly, and/or add some controls of their own. The currently implemented composed elements are:
 - audio-reverb (based on convolver and a set of public domain impulses), and a couple gain elements
+- audio-equalizer (a graphic equalizer implemented as a set of ten audio-filter elements and some additional UI)
 - audio-xtc (crosstalk cancelation network implemented mostly in audio-components html)
 
 ## declarative rather than imperative
@@ -105,7 +110,7 @@ If the `label` attribute on the gain element were not present, it's UI would be 
 
 ## All elements
 
-All elements are implemented as web components. They consist of a custom element and its JS class definition.
+All elements are implemented as web components, and create new HTML elements (known as custom elements in webcomponents parlents). They consist of an html template which generates the UI, and an associated JS class definition.
 
 In the javascript domain, all elements inherrit directly from `_AudioContext_`.
 In the HTML domain, the entire HTML graph needs to be wrapped in a `<audio-context> ... </audio-context>` element.
@@ -116,13 +121,13 @@ Most parameters displayed in the UI can be set in the HTML via attributes.
 
 ### Accessibility
 
-Each component's UI lives in its own region (`role="region"`) and its labeled via `aria-label`.
+Each component's UI lives in its own region (`role="region"`) and is labeled via `aria-label`.
 The group label is specified via HTML `label` attribute on host element.
 Because polymer does not encapsulate components completely, IDs still leak out, so we avoid IDref here in favor of `aria-label`.
 
 We also label the group via span element with `role="heading"` and an `aria-level` corresponding to the nesting level of the host element within the audio context.
 This helps navigate the UI and maintain a better sense of location within the hierarchy.
-We end up with duplicate group label announcement: both the `aria-label` and the visible group label are seen by the screen reader.
+However, we end up with duplicate group label announcement: both the `aria-label` and the visible group label are seen by the screen reader.
 
 - if we eliminate the visible label announcement via `aria-hidden`, we lose the hierarchy info provided by the heading level
 - if we eliminate the `aria-label` on the group container, we lose group label announcement on focus (i.e. when tab used to move through the UI) and we lose landmark
@@ -135,7 +140,7 @@ There seems to be no good solution for this annoyance at present.
 
 ## UI Elements
 
-They generate appropriate input controls (type="number" for ui-number, and type="checkbox" for ui-boolean).
+They generate appropriate input controls (type="number" for ui-number, type="text" for ui-text, and type="checkbox" for ui-boolean). A select element is generated when ui-list is used.
 The label attribute specifies a label for the control.
 The name attribute specifies a name for the control (generally the name of the current element's property which is being exposed.
 The value attribute pipes the result back to the current element's property being manipulated.
@@ -146,7 +151,7 @@ Numeric controls can also specify min, max, and step, which are passed directly 
 
 The audio-control element allows one to specify a parameter to be automated, and a function to generate values based on the current time stored in the underlying webaudio context containing the graph.
 The default evaluation intervall is 0.2 seconds.
-The parameter must be specified in the markup, and the element being controled is wrapped within the audio-control element.
+The parameter must be specified in the markup. The element being controled wraps the `audio-controls` element; if several parameters of an element are to be automated, the element wraps separate instances of `audio-control`, one for each parameter being automated.
 
 The automator function can be specified in markup, and also via the UI.
 It is a simple javascript expression which is evaluated in the context of the controled element (i.e. the "this" keyword references the currently controled element).
@@ -225,12 +230,16 @@ See `demo/index.html` for a more complex example.
 
 ## Composed Elements
 
-### XTC
+### `audio-xtc`
 
-The audio-xtc element wraps a network made from audio-components into a single element.
-This is a good mechanism of abstraction, although it coes require some development setup and understanding of polymer.
+The `audio-xtc` element wraps a network made from audio-components into a single element.
+This is a good mechanism of abstraction, although it does require some development setup and understanding of polymer.
 However, following the pattern here can make it fairly simple to develop new elements fairly painlessly.
 
-### Reverb
+### `audio-equalizer`
 
-The audio-reverb element is based on audio-convolver and a publically impulse library which is distributed with this project.
+This implements a graphic equalizer. It uses `audio-filter`, with type set to "peaking" and all UI controls hidden accept for gain. A reset control is added to quickly reset all bands back to zero gain.
+
+### `audio-reverb`
+
+The audio-reverb element is based on audio-convolver and a public domain impulse library which is distributed with this project.
