@@ -350,8 +350,9 @@ automationQueue.splice (found, 1);
 } // removeFromAutomationQueue
 
 function getAudioParam (parameter, element) {
-var properties = element.constructor.properties;
-return element._audioNode[properties[parameter].audioParam] || parameter;
+let properties = element.constructor.properties;
+
+return element._audioNode[properties[parameter].audioParam || parameter];
 } // getAudioParam
 
 function createWave (_wave) {
