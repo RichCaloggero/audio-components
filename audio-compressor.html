@@ -103,27 +103,27 @@ this.addFieldLabels ();
 
 
 ratioChanged (value) {
-this._audioNode.ratio.value = value;
+this._setParameterValue (this._audioNode.ratio, value);
 this.reduction = this._audioNode.reduction;
 } // ratioChanged
 
 thresholdChanged (value) {
-this._audioNode.threshold.value = value;
+this._setParameterValue (this._audioNode.threshold, value);
 this.reduction = this._audioNode.reduction;
 } // thresholdChanged
 
-/*kneeChanged (value) {
-this._audioNode.knee.value = value;
+kneeChanged (value) {
+this._setParameterValue (this._audioNode.knee, value);
 this.reduction = this._audioNode.reduction;
 } // kneeChanged
-*/
+
 attackChanged (value) {
-this._audioNode.attack.value = value;
+this._setParameterValue (this._audioNode.attack, value);
 this.reduction = this._audioNode.reduction;
 } // attackChanged
 
 releaseChanged (value) {
-this._audioNode.release.value = value;
+this._setParameterValue (this._audioNode.release, value);
 this.reduction = this._audioNode.reduction;
 } // releaseChanged
 

@@ -121,19 +121,19 @@ this._audioNode.type = value;
 } // typeChanged
 
 gainChanged (value) {
-this._audioNode.gain.value = value;
+this._setParameterValue (this._audioNode.gain, value);
 } // gainChanged
 
 qChanged (value) {
-this._audioNode.Q.value = value;
+this._setParameterValue (this._audioNode.Q, value);
 } // qChanged
 
 frequencyChanged (value) {
-this._audioNode.frequency.value = value;
+this._setParameterValue (this._audioNode.frequency, value);
 } // frequencyChanged
 
 detuneChanged (value) {
-this._audioNode.detune.value = value;
+this._setParameterValue (this._audioNode.detune, value);
 } // detuneChanged
 
 

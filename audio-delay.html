@@ -83,7 +83,7 @@ this.whenAllChildrenLoaded (this.addFieldLabels);
 } // connectedCallback
 
 delayTimeChanged (value) {
-this._audioNode.delayTime.value = value;
+this._setParameterValue (this._audioNode.delayTime, value);
 } // delayTimeChanged
 
 } // class AudioDelay

@@ -171,15 +171,15 @@ this.addFieldLabels ();
 } // connectedCallback
 
 xChanged (value) {
-this._audioNode.positionX.value = value;
+this._setParameterValue (this._audioNode.positionX, value);
 } // xChanged
 
 yChanged (value) {
-this._audioNode.positionY.value = value;
+this._setParameterValue (this._audioNode.positionY, value);
 } // yChanged
 
 zChanged (value) {
-this._audioNode.positionZ.value = value;
+this._setParameterValue (this._audioNode.positionZ, value);
 } // zChanged
 
 maxDistanceChanged (value) {

@@ -67,10 +67,11 @@ super._attachDom(dom);
 
 connectedCallback () {
 if (! this.name) {
+alert ("ui-number: no name given");
 throw new Error ("ui-number: no name given");
 } // if
 
-let _id = idGen (this.name);
+let _id = this._id + this.name;
 super.connectedCallback ();
 this.shadowRoot.querySelector("label").setAttribute("for", _id);
 this.shadowRoot.querySelector("input").setAttribute("id", _id);

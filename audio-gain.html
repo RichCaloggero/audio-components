@@ -75,7 +75,7 @@ this.addFieldLabels ();
 } // connectedCallback
 
 gainChanged (value) {
-this._audioNode.gain.value = value;
+this._setParameterValue (this._audioNode.gain, value);
 } // gainChanged
 
 } // class AudioGain

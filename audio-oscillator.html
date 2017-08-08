@@ -107,7 +107,7 @@ this.addFieldLabels ();
 } // connectedCallback
 
 frequencyChanged (value) {
-this._audioNode.frequency.value = value;
+this._setParameterValue (this._audioNode.frequency, value);
 } // frequencyChanged
 
 typeChanged (value) {

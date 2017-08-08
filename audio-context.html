@@ -323,7 +323,17 @@ this.connectAll (children);
 } // if
 } // _handleSlotChange
 
+_setParameterValue (parameter, value) {
+if (! parameter) return;
+if (parameter.setValueAtTime instanceof Function) {
+parameter.setValueAtTime (value, audio.currentTime);
+} else {
+alert (`${this.nodeName}: cannot set value of parameter ${parameter}`);
+throw error ("cannot set value");
+} // if
 
+return parameter;
+} // _setParameterValue
 
 
 static statusMessage (message) {
