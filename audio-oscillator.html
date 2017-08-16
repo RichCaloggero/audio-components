@@ -6,34 +6,18 @@
 </style>
 
 <div class="audio-oscillator" role="region" aria-label$="{{label}}">
-<div class="row">
 <span class="label">{{label}}</span>
-<div class="field" data-name="play">
-<label>play</label>
-<br><input type="checkbox" class="play" checked="{{play::change}}">
-</div>
 
-</div><div class="row">
+<ui-list name="type" label="type" value="{{type}}" values="sine, square, triangle"></ui-list>
+<ui-number name="frequency" label="frequency" value="{{frequency}}" min="0.0" max="20000.0" step="10.0"></ui-number>
+<ui-boolean name="play" label="play" value="{{play}}"></ui-boolean>
 
-<div class="field" data-name="frequency">
-<label>frequency</label>
-<br><input type="number" class="frequency" value="{{frequency::change}}" min="0.1" max="20000.0" step="0.1">
-</div>
-
-<div class="field" data-name="type">
-<label>type</label>
-<br><select class="type" size="1" value="{{type::change}}">
-<option value="sine">sine</option>
-<option value="square">square</option>
-<option value="triangle">triangle</option>
-</select></div>
-
-</div><!-- .row -->
-
+<slot></slot>
 </div>
 </template>
 
 <script>
+// audio-oscillator
 "use strict";
 
 (function () {
@@ -62,7 +46,7 @@ value: 1000.0,
 notify: true,
 observer: "frequencyChanged"
 }, // frequency
-
+	
 play: {
 type: Boolean,
 observer: "playChanged"
@@ -75,35 +59,34 @@ super ();
 instanceCount += 1;
 this._id = AudioOscillator.is + instanceCount;
 
-this._init ();
+this.__init ();
+console.log ("audio-oscillator created");
 } // constructor
 
-_init () {
-var create = () => {
-var old = this._audioNode;
-this._audioNode = audio.createOscillator ();
-if (old) {
-//console.log (`${old}, ${old.frequency.value}, ${old.type}`);
-this._audioNode.frequency.value = old.frequency.value;
-this._audioNode.type = old.type;
-} // if
+__init () {
+this._in = this._audioIn = null;
+this._out = audio.createGain ();
+this._audioOut = audio.createGain ();
+this._audioOut.connect (this._out);
 
-this._audioNode.connect (this._out);
+let create = () => {
+this._audioNode = audio.createOscillator ();
+
+this._audioNode.frequency.value = this.frequency;
+this._audioNode.type = this.type;
+
+this._audioNode.connect (this._audioOut);
 this._audioNode.onended = create;
+console.log (`${this._id} recreated`);
 } // create
 
 console.log (`creating oscillator ${this._id}`);
-this._in = null;
-this._out = audio.createGain();
 create ();
-
 } // _init
 
 connectedCallback  () {
 super.connectedCallback();
-if (this.contextCheck(AudioOscillator.is)) {
 this.addFieldLabels ();
-} // if
 } // connectedCallback
 
 frequencyChanged (value) {
@@ -115,8 +98,13 @@ this._audioNode.type = value;
 } // typeChanged
 
 playChanged (value) {
-if (value) this._audioNode.start();
-else this._audioNode.stop ();
+if (value) {
+this._isPlaying = true;
+this._audioNode.start();
+} else if (this._isPlaying) {
+this._isPlaying = false;
+this._audioNode.stop ();
+} // if
 } // playChanged
 
 } // class AudioOscillator
