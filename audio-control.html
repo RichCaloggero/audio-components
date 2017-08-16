@@ -170,7 +170,6 @@ super ();
 instanceCount += 1;
 this._id = AudioControl.is + instanceCount;
 this._automation = null;
-this._automationInterval = this.dt || .1; // seconds
 this._lfoGain = audio.createGain();
 console.log (`constructor: ${this.id} created`);
 } // constructor
@@ -260,12 +259,11 @@ try {
 this._automationTarget[this.parameter] = this._automator(audio.currentTime + this._offset);
 } catch (e) {
 alert (e);
-//this.function = "";
 this.stop ();
 } // catch
-}, 1000 * this._automationInterval);
+}, 1000 * this.dt);
 
-//console.log (`${this._id}: starting automation for parameter ${this.parameter} of ${this._automationTarget? this._automationTarget.localName : null} using interval ${this._automationInterval}`);
+//console.log (`${this._id}: starting automation for parameter ${this.parameter} of ${this._automationTarget? this._automationTarget.localName : null} using interval ${this.dt}`);
 } // startFunctionalAutomation
 
 _startLfoAutomation () {
@@ -292,7 +290,7 @@ this._audioParam.setTargetAtTime (random(this.min,this.max), audio.currentTime, 
 alert (`line automation : ${e}`);
 this.stop ();
 } // catch
-}, 1000 * this.time);
+}, 1000 * this.dt);
 } // _startLineAutomation
 
 _startPointAutomation () {
@@ -305,7 +303,7 @@ this._automationTarget[this.parameter] = random(this.min,this.max);
 alert (`point automation : ${e}`);
 this.stop ();
 } // catch
-}, 1000 * this.time);
+}, 1000 * this.dt);
 } // _startPointAutomation
 
 static startAllAutomation () {
@@ -363,7 +361,7 @@ this.shadowRoot.querySelector(".clickToStartControls").style.display =
 
 runChanged (value) {
 if (value) {
-this._offset = -1 * audio.currentTime;
+this._offset = -1 * (this.dtMin + audio.currentTime);
 this.start ();
 } else {
 this.stop ();

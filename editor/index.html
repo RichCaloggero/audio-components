@@ -71,6 +71,7 @@ Once the file is loaded and editing is complete, uncheck the edit checkbox and t
 </div>
 
 <script>
+document.addEventListener ("WebComponentsReady", () => {
 let editor = document.querySelector ("#editor");
 let container = document.querySelector ("#container");
 let edit = editor.querySelector("#edit");
@@ -83,6 +84,7 @@ let html = "";
 let parameters = new URLSearchParams (location.search);
 
 if (parameters && parameters.get("source")) {
+//enableEditing ();
 load (parameters.get("source"), save);
 } // if
 
@@ -153,6 +155,7 @@ function statusMessage (text) {
 document.querySelector ("#status").textContent = text;
 } // statusMessage
 
+}); // ready
 </script>
 
 </body>
