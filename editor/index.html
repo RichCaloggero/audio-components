@@ -6,6 +6,10 @@
 
 <title>Audio Components editor</title>
 
+<style>
+#editor #file, #editor #document {display: none;}
+</style>
+
 <script src="../bower_components/webcomponentsjs/webcomponents-loader.js"></script>
 
 <link rel="import" href="../bower_components/marked-element/marked-element.html">
@@ -49,16 +53,18 @@ or "demo.txt" (same as running the demo directly).
 Once the file is loaded and editing is complete, uncheck the edit checkbox and the network will be instantiated and available for use.
 </p></div>
 
-<div id="editor" role="region" aria-label="editor">
 <div id="status" aria-live="polite"></div>
+<div id="editor" role="region" aria-label="editor">
 <label>Edit: <input type="checkbox" id="edit" accesskey="e"></label>
 <span id="file" style="display:none">
 <label>File: <input type="text" id="fileName" value="example.txt"></label>
 <button id="getFile">go</button>
 </span>
 
+<div id="document">
 <label for="source">Source:</label>
-<br><textarea id="source" rows="20" cols="132" wrap="off" style="display:none"></textarea>
+<br><textarea id="source" rows="20" cols="132" wrap="off"></textarea>
+</div>
 </div><!-- editor -->
 
 <div id="container">
@@ -67,18 +73,17 @@ Once the file is loaded and editing is complete, uncheck the edit checkbox and t
 <script>
 let editor = document.querySelector ("#editor");
 let container = document.querySelector ("#container");
-let edit = document.querySelector("#editor #edit");
-let file = document.querySelector("#editor #file");
-let fileName = document.querySelector("#editor #fileName");
-let getFile = document.querySelector("#editor #getFile");
-let source = document.querySelector ("#editor #source");
+let edit = editor.querySelector("#edit");
+let file = editor.querySelector("#file");
+let fileName = file.querySelector("#fileName");
+let getFile = file.querySelector("#getFile");
+let doc = editor.querySelector ("#document");
+let source = doc.querySelector ("#source");
 let html = "";
 let parameters = new URLSearchParams (location.search);
 
 if (parameters && parameters.get("source")) {
-load (parameters.get("source"));
-save ();
-source.focus ();
+load (parameters.get("source"), save);
 } // if
 
 
@@ -96,28 +101,31 @@ disableEditing ();
 
 function enableEditing () {
 file.style.display = "block";
-source.style.display = "block";
+doc.style.display = "block";
+container.style.display = "none";
 } // enableEditing
 
 function disableEditing () {
 file.style.display = "none";
-source.style.display = "none";
+doc.style.display = "none";
 save ();
 } // disableEditing
 
 
-function load (fileName) {
+function load (fileName, callback) {
 loadFile (fileName, (text) => {
+let lines = text.split ("\n");
 source.value = "";
 source.value = text;
-let lines = text.split ("\n");
 statusMessage (`${lines.length} lines to edit`);
+if (callback) callback ();
 }); // getFile
 } // load
 
 function save () {
-AudioControl.stopAllAutomation ();
+if (AudioControl) AudioControl.stopAllAutomation ();
 html = source.value;
+container.style.display = "block";
 container.innerHTML = "";
 container.innerHTML = html;
 } // save
