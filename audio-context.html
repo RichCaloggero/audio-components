@@ -324,20 +324,24 @@ this.connectAll (children);
 } // _handleSlotChange
 
 _setParameterValue (parameter, value) {
+//console.log (`_setParameterValue (${parameter}, ${value}`);
 if (! parameter) return;
-if (typeof(value) === "undefined" || value === "") {
-alert (`setParameterValue (${this._id}): value is null`);
-return parameter;
+
+try {
+if (Number.isNaN(value)) {
+throw new Error ("value not a number");
 } // if
 
-if (parameter.setValueAtTime instanceof Function) {
+if (!(parameter.setValueAtTime instanceof Function)) throw new Error ("first argument must be a valid audioParam");
+
 parameter.setValueAtTime (value, audio.currentTime);
-} else {
-alert (`setParameterValue (${this._id}): first argument not an audioParam -- ${parameter}`);
-throw error ("setParameterValue: first argument is not a valid audioParam");
-} // if
-
 return parameter;
+
+} catch (e) {
+let message = `_setParameterValue (${parameter}, ${value}): ${e}`;
+alert (message);
+alert (e.stack);
+} // catch
 } // _setParameterValue
 
 

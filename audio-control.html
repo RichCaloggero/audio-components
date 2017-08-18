@@ -12,6 +12,12 @@
 <span class="label">[[label]]</span>
 
 <ui-boolean name="clickToStart" label="click to start" value="{{clickToStart}}"></ui-boolean>
+<div class="clickToStartControls">
+<ui-number name="dtMin" label="dt min" value="{{dtMin}}"></ui-number>
+<ui-number name="dtMax" label="dt max" value="{{dtMax}}"></ui-number>
+<ui-boolean name="run" label="run" value="{{run}}" key="r"></ui-boolean>
+</div>
+
 <ui-list name="type" label="automation type" value="{{type}}" values="function, LFO, line, point, none"></ui-list>
 
 <div class="panels">
@@ -46,11 +52,6 @@
 
 <ui-number name="dt" label="dt" value="{{dt}}" min="0.0" max="10.0" step="0.05"></ui-number>
 
-<div class="clickToStartControls">
-<ui-number name="dtMin" label="dt min" value="{{dtMin}}"></ui-number>
-<ui-number name="dtMax" label="dt max" value="{{dtMax}}"></ui-number>
-<ui-boolean name="run" label="run" value="{{run}}"></ui-boolean>
-</div>
 </div>
 </template>
 
@@ -171,13 +172,15 @@ instanceCount += 1;
 this._id = AudioControl.is + instanceCount;
 this._automation = null;
 this._lfoGain = audio.createGain();
+this._offset = 0;
 console.log (`constructor: ${this.id} created`);
 } // constructor
 
-_attachDom(dom) {
+/*_attachDom(dom) {
 this.shadowRoot = this.attachShadow({mode: 'open', delegatesFocus: true});
 super._attachDom(dom);
 } // _attachDom
+*/
 
 connectedCallback () {
 super.connectedCallback ();
@@ -360,7 +363,7 @@ this.shadowRoot.querySelector(".clickToStartControls").style.display =
 } // clickToStartChanged
 
 runChanged (value) {
-if (value) {
+if (value && !Number.isNaN(value)) {
 this._offset = -1 * (this.dtMin + audio.currentTime);
 this.start ();
 } else {
