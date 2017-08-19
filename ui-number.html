@@ -44,6 +44,13 @@ notify: true,
 observer: "stepChanged"
 }, // step
 
+key: {
+type: String,
+value: "",
+notify: true,
+observer: "_keyChanged"
+}, // key
+
 value: {
 type: Number,
 value: 0.0,
@@ -85,6 +92,15 @@ valueChanged (value) {
 stepChanged (value) {
 //console.log (`new step: ${value}`);
 } // stepChanged
+
+_keyChanged (value) {
+if (value) {
+let key = value.charAt(0);
+this.shadowRoot.querySelector ("input[type='number']").setAttribute ("accesskey", key);
+} else {
+this.shadowRoot.querySelector ("input[type='number']").removeAttribute ("accesskey");
+} // if
+} // _keyChanged
 
 handleKeydown (e) {
 switch (e.key) {

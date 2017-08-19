@@ -36,6 +36,13 @@ type: String,
 value: ""
 }, // label
 
+key: {
+type: String,
+value: "",
+notify: true,
+observer: "_keyChanged"
+}, // key
+
 value: {
 type: String,
 value: "",
@@ -63,6 +70,15 @@ if (! this.name) {
 throw new Error ("ui-text: no name given");
 } // if
 } // connectedCallback
+
+_keyChanged (value) {
+if (value) {
+let key = value.charAt(0);
+this.shadowRoot.querySelector ("input[type='text']").setAttribute ("accesskey", key);
+} else {
+this.shadowRoot.querySelector ("input[type='text']").removeAttribute ("accesskey");
+} // if
+} // _keyChanged
 
 valueChanged (value) {
 } // valueChanged

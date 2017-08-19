@@ -40,7 +40,7 @@ key: {
 type: String,
 value: "",
 notify: true,
-observer: "keyChanged"
+observer: "_keyChanged"
 }, // key
 
 value: {
@@ -72,14 +72,14 @@ throw new Error ("ui-boolean: no name given");
 //console.log ("connectedCallback...");
 } // connectedCallback
 
-keyChanged (value) {
+_keyChanged (value) {
 if (value) {
 let key = value.charAt(0);
 this.shadowRoot.querySelector ("input[type='checkbox']").setAttribute ("accesskey", key);
 } else {
 this.shadowRoot.querySelector ("input[type='checkbox']").removeAttribute ("accesskey");
 } // if
-} // key
+} // _keyChanged
 
 valueChanged (value) {
 } // valueChanged

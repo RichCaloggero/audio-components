@@ -37,6 +37,13 @@ type: String,
 value: ""
 }, // label
 
+key: {
+type: String,
+value: "",
+notify: true,
+observer: "_keyChanged"
+}, // key
+
 values: {
 type: String,
 value: "",
@@ -90,10 +97,20 @@ this.shadowRoot.querySelector("select").innerHTML = "";
 this._buildList ();
 } // _handleSlotChange
 
+
 valuesChanged (value) {
 this.shadowRoot.querySelector ("select").innerHTML = "";
 this._buildList ();
 } // valuesChanged
+
+_keyChanged (value) {
+if (value) {
+let key = value.charAt(0);
+this.shadowRoot.querySelector ("select").setAttribute ("accesskey", key);
+} else {
+this.shadowRoot.querySelector ("select").removeAttribute ("accesskey");
+} // if
+} // _keyChanged
 
 valueChanged (value) {
 } // valueChanged
