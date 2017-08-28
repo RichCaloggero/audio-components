@@ -5,7 +5,7 @@ if using document level styles, surround style element in main document with cus
 <template>
 <style>
 :host {all: initial; display: flex; contain: content; border: 1px solid; font-size: 26px;}
-:host > div {display: inline;}
+:host > div {display: inline-flex; flex-wrap: wrap;}
 :host select, :host input, :host ui-number, :host ui-list, :host ui-boolean, :host button {display: inline-flex; flex-wrap: wrap; }
 
 :host ::slotted(*) {display: inline-block;}
