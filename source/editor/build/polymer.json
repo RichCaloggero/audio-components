@@ -1,0 +1,37 @@
+{
+  "entrypoint": "editor\\index.html",
+  "fragments": [
+    "audio-context.html"
+  ],
+  "sources": [
+    "bower_components\\marked-element\\*",
+    "bower_components\\marked\\*",
+    "*.html",
+    "editor\\*.txt",
+    "editor\\*.md",
+    "editor\\index.html",
+    "audio-context.html"
+  ],
+  "extraDependencies": [
+    "bower_components\\webcomponentsjs\\*.js"
+  ],
+  "builds": [
+    {
+      "bundle": true,
+      "js": {
+        "minify": false
+      },
+      "css": {
+        "minify": false
+      },
+      "html": {
+        "minify": false
+      }
+    }
+  ],
+  "lint": {
+    "rules": [
+      "polymer-2"
+    ]
+  }
+}

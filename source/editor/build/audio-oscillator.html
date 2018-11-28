@@ -1,0 +1,127 @@
+<link rel="import" href="/styles.html">
+
+<dom-module id="audio-oscillator">
+<template>
+<style include="audio-component-styles">
+</style>
+
+<div class="audio-oscillator" role="region" aria-label$="{{label}}">
+<div class="row">
+<span class="label">{{label}}</span>
+<div class="field" data-name="play">
+<label>play</label>
+<br><input type="checkbox" class="play" checked="{{play::change}}">
+</div>
+
+</div><div class="row">
+
+<div class="field" data-name="frequency">
+<label>frequency</label>
+<br><input type="number" class="frequency" value="{{frequency::change}}" min="0.1" max="20000.0" step="0.1">
+</div>
+
+<div class="field" data-name="type">
+<label>type</label>
+<br><select class="type" size="1" value="{{type::change}}">
+<option value="sine">sine</option>
+<option value="square">square</option>
+<option value="triangle">triangle</option>
+</select></div>
+
+</div><!-- .row -->
+
+</div>
+</template>
+
+<script>
+"use strict";
+
+(function () {
+var instanceCount = 0;
+
+class AudioOscillator extends _AudioContext_ {
+static get is() { return "audio-oscillator"; }
+
+static get properties() {
+return {
+label: {
+type: String,
+value: ""
+}, // label
+
+type: {
+type: String,
+value: "sine",
+notify: true,
+observer: "typeChanged"
+}, // type
+
+frequency: {
+type: Number,
+value: 1000.0,
+notify: true,
+observer: "frequencyChanged"
+}, // frequency
+
+play: {
+type: Boolean,
+observer: "playChanged"
+} // play
+}; // return
+} // get properties
+
+constructor () {
+super ();
+instanceCount += 1;
+this._id = AudioOscillator.is + instanceCount;
+
+this._init ();
+} // constructor
+
+_init () {
+var create = () => {
+var old = this._audioNode;
+this._audioNode = audio.createOscillator ();
+if (old) {
+//console.log (`${old}, ${old.frequency.value}, ${old.type}`);
+this._audioNode.frequency.value = old.frequency.value;
+this._audioNode.type = old.type;
+} // if
+
+this._audioNode.connect (this._out);
+this._audioNode.onended = create;
+} // create
+
+console.log (`creating oscillator ${this._id}`);
+this._in = null;
+this._out = audio.createGain();
+create ();
+
+} // _init
+
+connectedCallback  () {
+super.connectedCallback();
+if (this.contextCheck(AudioOscillator.is)) {
+this.addFieldLabels ();
+} // if
+} // connectedCallback
+
+frequencyChanged (value) {
+this._audioNode.frequency.value = value;
+} // frequencyChanged
+
+typeChanged (value) {
+this._audioNode.type = value;
+} // typeChanged
+
+playChanged (value) {
+if (value) this._audioNode.start();
+else this._audioNode.stop ();
+} // playChanged
+
+} // class AudioOscillator
+
+window.customElements.define(AudioOscillator.is, AudioOscillator);
+})(); // module
+</script>
+</dom-module>

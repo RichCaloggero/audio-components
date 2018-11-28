@@ -1,0 +1,127 @@
+<link rel="import" href="/styles.html">
+
+<dom-module id="audio-reverb">
+<template>
+<style include="audio-component-styles">
+</style>
+
+<div class="audio-reverb" role="region" aria-label$="{{label}}">
+<span class="label">{{label}}</span>
+
+
+<div class="row">
+<ui-boolean name="bypass" label="bypass" value="{{bypass}}"></ui-boolean>
+<ui-number name="mix" label="mix" min="0.0" max="1.0" step="0.1" value="{{mix}}"></ui-number>
+</div><!-- .row -->
+
+<audio-parallel><audio-series>
+<audio-gain class="dry-level" gain="0.5"></audio-gain>
+</audio-series><audio-series>
+<audio-convolver label="convolver" impulse-library="../impulses" default-extension=".wav" hide-controls="bypass" impulses="[
+&quot;In The Silo Revised&quot;,
+&quot;Cement Blocks 2&quot;,
+&quot;Cement Blocks 1&quot;,
+&quot;Chateau de Logne, Outside&quot;,
+&quot;Conic Long Echo Hall&quot;,
+&quot;Deep Space&quot;,
+&quot;Derlon Sanctuary&quot;,
+&quot;Bottle Hall&quot;,
+&quot;Direct Cabinet N1&quot;,
+&quot;Direct Cabinet N2&quot;,
+&quot;Direct Cabinet N3&quot;,
+&quot;Direct Cabinet N4&quot;,
+&quot;French 18th Century Salon&quot;,
+&quot;Five Columns Long&quot;,
+&quot;Five Columns&quot;,
+&quot;Going Home&quot;,
+&quot;Greek 7 Echo Hall&quot;,
+&quot;In The Silo&quot;,
+&quot;Highly Damped Large Room&quot;,
+&quot;Large Bottle Hall&quot;,
+&quot;Large Long Echo Hall&quot;,
+&quot;Large Wide Echo Hall&quot;,
+&quot;Masonic Lodge&quot;,
+&quot;Musikvereinsaal&quot;,
+&quot;Narrow Bumpy Space&quot;,
+&quot;Nice Drum Room&quot;,
+&quot;On a Star&quot;,
+&quot;Parking Garage&quot;,
+&quot;Rays&quot;,
+&quot;Right Glass Triangle&quot;,
+&quot;Ruby Room&quot;,
+&quot;Scala Milan Opera Hall&quot;,
+&quot;Small Prehistoric Cave&quot;,
+&quot;Small Drum Room&quot;,
+&quot;St Nicolaes Church&quot;,
+&quot;Grig Room&quot;,
+&quot;Vocal Duo&quot;
+]"></audio-convolver>
+
+<audio-gain class="wet-level" gain="0.5"></audio-gain>
+</audio-series></audio-parallel>
+
+</div><!-- .audio-reverb -->
+</template>
+
+
+<script>
+// audio-reverb
+
+"use strict";
+
+(function () {
+var instanceCount = 0;
+
+class AudioReverb extends _AudioContext_{
+static get is () {return "audio-reverb";}
+
+static get properties () {
+return {
+label: {
+type: String,
+value: ""
+}, // label
+
+mix: {
+type: Number,
+value: 0.5,
+notify: true,
+observer: "mixChanged"
+} // mix
+
+}; // return
+} // get properties
+
+constructor () {
+super ();
+instanceCount += 1;
+this._id = "audio-reverb" + instanceCount;
+this._init ();
+} // constructor
+
+connectedCallback () {
+super.connectedCallback ();
+this.addFieldLabels ();
+this.connectAll ();
+} // connectedCallback
+
+connectAll () {
+var reverb = this.shadowRoot.querySelector("audio-parallel");
+this._audioIn.connect (reverb._in);
+reverb._out.connect (this._audioOut);
+} // connectAll
+
+mixChanged (value) {
+let self = this.shadowRoot;
+let dry = self.querySelector(".dry-level");
+let wet = self.querySelector (".wet-level");
+wet.gain = value;
+dry.gain = 1 - value;
+} // mixChanged
+
+} // class AudioReverb
+
+window.customElements.define(AudioReverb.is, AudioReverb);
+})();
+</script>
+</dom-module>

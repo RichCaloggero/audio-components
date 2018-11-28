@@ -1,0 +1,17 @@
+{
+"root": "..",
+"fragments": ["audio-context.html"],
+"sources": ["bower_components/marked-element/*","bower_components/marked/*","*.html","editor/*.txt","editor/*.md"],
+"entrypoint": "editor/index.html",
+"builds": [{
+"bundle": true,
+"js": {"minify": false},
+"css": {"minify": false},
+"html": {"minify": false}
+}],
+"lint": {
+"rules": [
+"polymer-2"
+]
+}
+}
