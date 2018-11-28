@@ -1,7 +1,11 @@
-<link rel="import" href="/bower_components/polymer/polymer-element.html">
-<link rel="import" href="/styles.html">
+import {PolymerElement, html} from "@polymer/polymer";
 
-<dom-module id="audio-context">
+// audio-context
+let _root = null;
+
+window._AudioContext_ = class _AudioContext_ extends Polymer.Element {
+static get template () {
+return html`
 <template>
 <style include="audio-component-styles">
 </style>
@@ -16,15 +20,9 @@
 <div class="status" role="region" aria-label="Status" aria-live="polite">
 </div>
 </div>
-</template>
+`; // html
+} // get template
 
-<script>
-// audio-context
-"use strict";
-(function () {
-var _root = null;
-
-window._AudioContext_ = class _AudioContext_ extends Polymer.Element {
 static get is() { return "audio-context"; }
 
 static get properties() {
@@ -370,6 +368,3 @@ this.name = value;
 } // class _AudioContext_
 
 window.customElements.define(_AudioContext_.is, _AudioContext_);
-})();
-</script>
-</dom-module>
