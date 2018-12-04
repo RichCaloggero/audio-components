@@ -1,4 +1,5 @@
-import {PolymerElement, html} from "@polymer/polymer/polymer-element.js";
+import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
+import {_AudioContext_} from "./audio-context.js";
 
 
 
@@ -81,6 +82,3 @@ this.lastElementChild._out.connect (this._audioOut);
 } // class AudioSeries
 
 window.customElements.define(AudioSeries.is, AudioSeries);
-})(); // module
-</script>
-</dom-module>

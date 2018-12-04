@@ -1,4 +1,5 @@
-import {PolymerElement, html} from "@polymer/polymer/polymer-element.js";
+import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
+import {_AudioContext_} from "./audio-context.js";
 
 let instanceCount = 0;
 

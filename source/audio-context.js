@@ -1,14 +1,12 @@
-import {PolymerElement, html} from "@polymer/polymer/polymer-element.js";
+//import {AudioControl} from "./audio-control.js";
+import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
 
 // audio-context
 let _root = null;
 
-window._AudioContext_ = class _AudioContext_ extends Polymer.Element {
+export class _AudioContext_ extends PolymerElement {
 static get template () {
 return html`
-<template>
-<style include="audio-component-styles">
-</style>
 
 <div class="audio-context">
 <h1>{{label}}</h1>
@@ -271,8 +269,8 @@ return "[unnamed element]";
 
 _enableAutomation (value) {
 if (this.constructor === _AudioContext_) {
-if (value) AudioControl.startAllAutomation ();
-else AudioControl.stopAllAutomation ();
+//if (value) AudioControl.startAllAutomation ();
+//else AudioControl.stopAllAutomation ();
 } // if
 } // _enableAutomation
 
