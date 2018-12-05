@@ -12,6 +12,7 @@ return html`
 </div>
 `; // html
 } // get template
+
 static get is() { return "ui-number"; }
 
 
@@ -63,20 +64,23 @@ this._id = "ui-number" + instanceCount;
 } // constructor
 
 _attachDom(dom) {
-this.shadowRoot = this.attachShadow({mode: 'open', delegatesFocus: true});
-super._attachDom(dom);
+//this.attachShadow({mode: 'open', delegatesFocus: true});
+this.appendChild(dom);
+//super._attachDom(dom);
 } // _attachDom
 
 connectedCallback () {
+super.connectedCallback ();
 if (! this.name) {
 alert ("ui-number: no name given");
 throw new Error ("ui-number: no name given");
 } // if
 
 let _id = this._id + this.name;
-super.connectedCallback ();
-this.shadowRoot.querySelector("label").setAttribute("for", _id);
-this.shadowRoot.querySelector("input").setAttribute("id", _id);
+this.querySelector("label").setAttribute("for", _id);
+this.querySelector("input").setAttribute("id", _id);
+//this.shadowRoot.querySelector("label").setAttribute("for", _id);
+//this.shadowRoot.querySelector("input").setAttribute("id", _id);
 } // connectedCallback
 
 
@@ -91,9 +95,11 @@ stepChanged (value) {
 _keyChanged (value) {
 if (value) {
 let key = value.charAt(0);
-this.shadowRoot.querySelector ("input[type='number']").setAttribute ("accesskey", key);
+this.querySelector ("input[type='number']").setAttribute ("accesskey", key);
+//this.shadowRoot.querySelector ("input[type='number']").setAttribute ("accesskey", key);
 } else {
-this.shadowRoot.querySelector ("input[type='number']").removeAttribute ("accesskey");
+this.querySelector ("input[type='number']").removeAttribute ("accesskey");
+//this.shadowRoot.querySelector ("input[type='number']").removeAttribute ("accesskey");
 } // if
 } // _keyChanged
 

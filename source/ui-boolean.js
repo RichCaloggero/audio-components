@@ -56,7 +56,7 @@ this._id = "ui-boolean" + instanceCount;
 } // constructor
 
 _attachDom(dom) {
-this.shadowRoot = this.attachShadow({mode: 'open', delegatesFocus: true});
+this._shadowRoot = this.attachShadow({mode: 'open', delegatesFocus: true});
 super._attachDom(dom);
 } // _attachDom
 
@@ -71,9 +71,9 @@ throw new Error ("ui-boolean: no name given");
 _keyChanged (value) {
 if (value) {
 let key = value.charAt(0);
-this.shadowRoot.querySelector ("input[type='checkbox']").setAttribute ("accesskey", key);
+this._shadowRoot.querySelector ("input[type='checkbox']").setAttribute ("accesskey", key);
 } else {
-this.shadowRoot.querySelector ("input[type='checkbox']").removeAttribute ("accesskey");
+this._shadowRoot.querySelector ("input[type='checkbox']").removeAttribute ("accesskey");
 } // if
 } // _keyChanged
 

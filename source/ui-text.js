@@ -1,24 +1,20 @@
-<link rel="import" href="/styles.html">
+import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
+import {_AudioContext_} from "./audio-context.js";
 
-<dom-module id="ui-text">
-<template>
-<style include="audio-component-styles">
-</style>
 
+let instanceCount  = 0;
+
+class UIText extends _AudioContext_ {
+static get template () {
+return html`
 <div  class="ui-text">
 <label>{{label}}
 <br><input type="text" value="{{value::change}}">
 </label>
 </div>
-</template>
+`; // html
+} // get template
 
-<script>
-"use strict";
-
-(function () {
-var instanceCount  = 0;
-
-class UIText extends _AudioContext_ {
 static get is() { return "ui-text"; }
 
 
@@ -90,6 +86,3 @@ if (! this.label) this.label = value;
 } // class UIText
 
 window.customElements.define(UIText.is, UIText);
-})();
-</script>
-</dom-module>

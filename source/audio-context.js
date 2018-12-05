@@ -44,32 +44,6 @@ notify: true,
 observer: "_hideOnBypass"
 }, // hideOnBypass
 */
-
-/*_debug: {
-type: Boolean,
-value: false
-}, // _debug
-
-_debugUI: {
-type: Boolean,
-value: false
-}, // _debugUI
-
-_debugElementCreation: {
-type: Boolean,
-value: false
-}, // _debugElementCreation
-
-_debugConnection: {
-type: Boolean,
-value: false
-}, // _debugConnection
-
-_debugInternalConnection: {
-type: Boolean,
-value: false
-}, // _debugInternalConnection
-*/
 }; // return
 } // get properties
 
@@ -84,10 +58,9 @@ return;
 if (window.audio) {
 //alert ("only one audio context per document");
 } else {
-window.audio = new AudioContext();
+window.audio = this.audio = new AudioContext();
 } // if
 
-this.audio = window.audio;
 } // constructor
 
 connectedCallback () {
@@ -273,6 +246,12 @@ if (this.constructor === _AudioContext_) {
 //else AudioControl.stopAllAutomation ();
 } // if
 } // _enableAutomation
+
+_mix (value) {
+if (this._audioIn && this._audioOut) {
+
+} // if
+} // _mix
 
 _processValues (values) {
 if (values instanceof String || typeof(values) === "string") {

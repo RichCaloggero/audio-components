@@ -42,6 +42,7 @@ return html`
 </div>
 `; // html
 } // get template
+
 static get is() { return "audio-filter"; }
 
 static get properties () {
