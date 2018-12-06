@@ -7,8 +7,9 @@ class UINumber extends _AudioContext_ {
 static get template () {
 return html`
 <div  class="ui-number">
-<label>{{label}}</label>
-<br><input type="number" value="{{value::change}}" min="[[min]]" max="[[max]]" step="{{step::change}}" on-keydown="handleKeydown">
+<label>{{label}}
+<input type="range" value="{{value::change}}" min="[[min]]" max="[[max]]" step="{{step::change}}" on-keydown="handleKeydown">
+</label>
 </div>
 `; // html
 } // get template
@@ -64,23 +65,18 @@ this._id = "ui-number" + instanceCount;
 } // constructor
 
 _attachDom(dom) {
-//this.attachShadow({mode: 'open', delegatesFocus: true});
-this.appendChild(dom);
-//super._attachDom(dom);
+this.attachShadow({mode: 'open', delegatesFocus: true});
+//this.appendChild(dom);
+super._attachDom(dom);
 } // _attachDom
 
 connectedCallback () {
-super.connectedCallback ();
 if (! this.name) {
 alert ("ui-number: no name given");
 throw new Error ("ui-number: no name given");
 } // if
 
-let _id = this._id + this.name;
-this.querySelector("label").setAttribute("for", _id);
-this.querySelector("input").setAttribute("id", _id);
-//this.shadowRoot.querySelector("label").setAttribute("for", _id);
-//this.shadowRoot.querySelector("input").setAttribute("id", _id);
+super.connectedCallback ();
 } // connectedCallback
 
 
@@ -95,11 +91,9 @@ stepChanged (value) {
 _keyChanged (value) {
 if (value) {
 let key = value.charAt(0);
-this.querySelector ("input[type='number']").setAttribute ("accesskey", key);
-//this.shadowRoot.querySelector ("input[type='number']").setAttribute ("accesskey", key);
+this.shadowRoot.querySelector ("input").setAttribute ("accesskey", key);
 } else {
-this.querySelector ("input[type='number']").removeAttribute ("accesskey");
-//this.shadowRoot.querySelector ("input[type='number']").removeAttribute ("accesskey");
+this.shadowRoot.querySelector ("input").removeAttribute ("accesskey");
 } // if
 } // _keyChanged
 

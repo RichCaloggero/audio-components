@@ -12,12 +12,15 @@ return html`
 
 <div class="row">
 <ui-number name="gain" label="gain" value="{{gain}}" min="{{min}}" max="{{max}}" step="{{step}}"></ui-number>
+<!--<label>[[label]]
+<input type="range" value="{{gain}}" min="{{min}}" max="{{max}}" step="{{step}}">
+</label>
+-->
 </div><!-- .row -->
 
 
 <slot></slot>
 </div>
-</template>
 `; // html
 } // get template
 

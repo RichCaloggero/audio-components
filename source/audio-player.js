@@ -16,7 +16,7 @@ return html`
 <button class="forward" on-click="forward">forward</button>
 </div><!-- .row -->
 
-<audio tabindex="0" aria-label="Player Controls" src="{{src}}" crossorigin="anonymous">
+<audio  src="{{src}}" crossorigin="anonymous">
 </audio>
 </div>
 `; // html
