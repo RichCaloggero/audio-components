@@ -65,6 +65,10 @@ this._init (audio.createGain());
 //this._audioNode.channelCountMode = "explicit";
 } // constructor
 
+_attachDom(dom) {
+this.appendChild(dom);
+} // _attachDom
+
 connectedCallback () {
 super.connectedCallback ();
 if (this.contextCheck(AudioGain.is)) {

@@ -7,9 +7,8 @@ class UINumber extends _AudioContext_ {
 static get template () {
 return html`
 <div  class="ui-number">
-<label>{{label}}
-<input type="range" value="{{value::change}}" min="[[min]]" max="[[max]]" step="{{step::change}}" on-keydown="handleKeydown">
-</label>
+<label for$="{{id}}">[[label]]</label>
+<br><input id="{{id}}" type="range" value="{{value::change}}" min="[[min]]" max="[[max]]" step="{{step::change}}" on-keydown="handleKeydown">
 </div>
 `; // html
 } // get template
@@ -19,18 +18,7 @@ static get is() { return "ui-number"; }
 
 static get properties () {
 return {
-name: {
-type: String,
-value: "",
-notify: true,
-observer: "nameChanged"
-}, // name
-
-label: {
-type: String,
-value: ""
-}, // label
-
+label: String,
 min: Number,
 max: Number,
 
@@ -52,7 +40,6 @@ value: {
 type: Number,
 value: 0.0,
 notify: true,
-observer: "valueChanged"
 } // value
 }; // return
 } // get properties
@@ -61,21 +48,16 @@ observer: "valueChanged"
 constructor () {
 super ();
 instanceCount += 1;
-this._id = "ui-number" + instanceCount;
+this.id = "ui-number" + instanceCount;
 } // constructor
 
 _attachDom(dom) {
-this.attachShadow({mode: 'open', delegatesFocus: true});
-//this.appendChild(dom);
-super._attachDom(dom);
+//this.attachShadow({mode: 'open', delegatesFocus: true});
+this.appendChild(dom);
+//super._attachDom(dom);
 } // _attachDom
 
 connectedCallback () {
-if (! this.name) {
-alert ("ui-number: no name given");
-throw new Error ("ui-number: no name given");
-} // if
-
 super.connectedCallback ();
 } // connectedCallback
 
@@ -88,7 +70,7 @@ stepChanged (value) {
 //console.log (`new step: ${value}`);
 } // stepChanged
 
-_keyChanged (value) {
+/*_keyChanged (value) {
 if (value) {
 let key = value.charAt(0);
 this.shadowRoot.querySelector ("input").setAttribute ("accesskey", key);
@@ -96,6 +78,7 @@ this.shadowRoot.querySelector ("input").setAttribute ("accesskey", key);
 this.shadowRoot.querySelector ("input").removeAttribute ("accesskey");
 } // if
 } // _keyChanged
+*/
 
 handleKeydown (e) {
 switch (e.key) {

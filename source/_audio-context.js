@@ -101,6 +101,7 @@ this._connect ();
 } // if
 } // if
 
+//this.addFieldLabels ();
 } // _bypass
 
 _hideOnBypass (value) {
@@ -166,7 +167,7 @@ throw (e);
 
 
 addFieldLabels () {
-let groupLabel = (this.shadowRoot || this).querySelector (".label, legend");
+let groupLabel = this.shadowRoot.querySelector (".label, legend");
 let hide = !(groupLabel && groupLabel.textContent);
 let hideControls = this.hasAttribute ("hide-controls")?
 this.getAttribute("hide-controls").split (" ") : [];
@@ -186,7 +187,7 @@ groupLabel.setAttribute ("role", "heading");
 groupLabel.setAttribute ("aria-level", level+1);
 } // if
 
-Array.from((this.shadowRoot || this).querySelectorAll (".field, ui-number, ui-boolean, ui-list"))
+Array.from(this.shadowRoot.querySelectorAll (".field, ui-number, ui-boolean, ui-list"))
 .forEach ((field) => {
 let name = field.getAttribute("data-name") || field.getAttribute("field-name") || field.getAttribute("name");
 

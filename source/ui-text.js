@@ -8,9 +8,8 @@ class UIText extends _AudioContext_ {
 static get template () {
 return html`
 <div  class="ui-text">
-<label>{{label}}
-<br><input type="text" value="{{value::change}}">
-</label>
+<label for$="{{id}}">[[label]]</label>
+<br><input id="{{id}}" type="text" value="{{value::change}}">
 </div>
 `; // html
 } // get template
@@ -20,6 +19,12 @@ static get is() { return "ui-text"; }
 
 static get properties () {
 return {
+id: {
+type: String,
+value: "",
+notify: true
+},
+
 name: {
 type: String,
 value: "",
@@ -27,10 +32,7 @@ notify: true,
 observer: "nameChanged"
 }, // name
 
-label: {
-type: String,
-value: ""
-}, // label
+label: String,
 
 key: {
 type: String,
@@ -52,19 +54,21 @@ observer: "valueChanged"
 constructor () {
 super ();
 instanceCount += 1;
-this._id = "ui-text" + instanceCount;
 } // constructor
 
-_attachDom(dom) {
+/*_attachDom(dom) {
 this.shadowRoot = this.attachShadow({mode: 'open', delegatesFocus: true});
 super._attachDom(dom);
 } // _attachDom
+*/
 
 connectedCallback () {
 super.connectedCallback ();
-if (! this.name) {
+this.id = "ui-text" + instanceCount;
+/*if (! this.name) {
 throw new Error ("ui-text: no name given");
 } // if
+*/
 } // connectedCallback
 
 _keyChanged (value) {
@@ -76,12 +80,6 @@ this.shadowRoot.querySelector ("input[type='text']").removeAttribute ("accesskey
 } // if
 } // _keyChanged
 
-valueChanged (value) {
-} // valueChanged
-
-nameChanged (value) {
-if (! this.label) this.label = value;
-} // nameChanged
 
 } // class UIText
 

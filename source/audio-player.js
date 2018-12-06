@@ -9,7 +9,7 @@ return html`
 <div class="audio-player">
 <h2>Audio Player</h2>
 <div class="row">
-<label>URL: <input type="text" value="{{src::change}}"></label>
+<ui-text name="{{src}}" label="Media URL: "></ui-text>
 </div><div class="row">
 <button class="play" on-click="play">Play</button>
 <button class="back" on-click="back">back</button>
@@ -46,15 +46,21 @@ this._in = null;
 this._out = audio.createGain();
 } // constructor
 
+_attachDom(dom) {
+this.appendChild(dom);
+} // _attachDom
+
 connectedCallback  () {
 super.connectedCallback();
-if (!this.shadowRoot) {
+/*if (!this.shadowRoot) {
 throw Error ("audio-player: not properly initialized");
 return;
 } // if
+*/
+this._root = (this.shadowRoot || this);
 
-this._audioElement = this.shadowRoot.querySelector("audio");
-this._audioElement.addEventListener ("ended", (e) => this.shadowRoot.querySelector(".play").textContent = "play");
+this._audioElement = this._root.querySelector("audio");
+this._audioElement.addEventListener ("ended", (e) => this._root.querySelector(".play").textContent = "play");
 
 //if (this.contextCheck(AudioPlayer.is)) {
 this._audioIn = this._audioOut= audio.createMediaElementSource (this._audioElement);
