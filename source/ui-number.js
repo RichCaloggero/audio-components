@@ -7,8 +7,9 @@ class UINumber extends _AudioContext_ {
 static get template () {
 return html`
 <div  class="ui-number">
-<label for$="{{id}}">[[label]]</label>
-<br><input id="{{id}}" type="range" value="{{value::change}}" min="[[min]]" max="[[max]]" step="{{step::change}}" on-keydown="handleKeydown">
+<label >[[label]]
+<br><input type="range" value="{{value::change}}" min="[[min]]" max="[[max]]" step="{{step::change}}">
+</label>
 </div>
 `; // html
 } // get template
@@ -19,6 +20,7 @@ static get is() { return "ui-number"; }
 static get properties () {
 return {
 label: String,
+value: Number,
 min: Number,
 max: Number,
 
@@ -48,14 +50,15 @@ notify: true,
 constructor () {
 super ();
 instanceCount += 1;
-this.id = "ui-number" + instanceCount;
+this.id = `ui-number-${instanceCount}`;
 } // constructor
 
-_attachDom(dom) {
+/*_attachDom(dom) {
 //this.attachShadow({mode: 'open', delegatesFocus: true});
 this.appendChild(dom);
 //super._attachDom(dom);
 } // _attachDom
+*/
 
 connectedCallback () {
 super.connectedCallback ();
@@ -63,7 +66,7 @@ super.connectedCallback ();
 
 
 valueChanged (value) {
-//console.log (`number ${this.label || this._id}: new value: ${value}`);
+console.log (`number ${this.label || this._id}: new value: ${value}`);
 } // valueChanged
 
 stepChanged (value) {

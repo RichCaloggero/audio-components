@@ -25,12 +25,6 @@ value: "",
 notify: true
 },
 
-name: {
-type: String,
-value: "",
-notify: true,
-observer: "nameChanged"
-}, // name
 
 label: String,
 
@@ -45,7 +39,7 @@ value: {
 type: String,
 value: "",
 notify: true,
-observer: "valueChanged"
+observer: alert.bind(window)
 } // value
 }; // return
 } // get properties
