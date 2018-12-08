@@ -83,7 +83,7 @@ this.shadowRoot.querySelector ("input").removeAttribute ("accesskey");
 } // _keyChanged
 */
 
-handleKeydown (e) {
+/*handleKeydown (e) {
 switch (e.key) {
 case "Enter": this.reset();
 return false;
@@ -104,6 +104,7 @@ return false;
 
 return true;
 } // handleKeydown
+*/
 
 reset () {
 this.value = (this.max - this.min) / 2.0 + this.min;
@@ -138,7 +139,6 @@ if (! this.label) this.label = value;
 } // nameChanged
 
 _position (e) {
-//alert ("position");
 _AudioContext_._position (e.target);
 } // _position
 
