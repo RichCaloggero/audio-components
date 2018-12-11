@@ -10,13 +10,13 @@ class AudioSeries extends _AudioContext_ {
 static get template () {
 return html`
 
-<div class="audio-series" role="region" aria-label$="{{label}}">
-<span class="label">{{label}}</span>
+<fieldset class="audio-series">
+<legend><h2 class="group-label">{{label}}</h2></legend>
 
 <ui-boolean name="bypass" label="bypass" value="{{bypass}}"></ui-boolean>
 
 <slot on-slotchange="_handleSlotChange"></slot>
-</div>
+</fieldset>
 
 `; // html
 } // get template
@@ -47,9 +47,13 @@ this._id = AudioSeries.is + instanceCount;
 this._init ();
 } // constructor
 
+_attachDom (dom) {
+this.appendChild(dom);
+} // _attachDom
+
 connectedCallback () {
 super.connectedCallback ();
-this.addFieldLabels ();
+//this.addFieldLabels ();
 } // connectedCallback
 
 connectAll (nodes) {

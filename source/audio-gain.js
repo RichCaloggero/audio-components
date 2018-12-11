@@ -6,21 +6,10 @@ let instanceCount  = 0;
 class AudioGain extends _AudioContext_ {
 static get template () {
 return html`
-
-<div class="audio-gain" role="region" aria-label$="{{label}}">
-<span class="label">[[label]]</span>
-
-<div class="row">
-<ui-number name="gain" label="gain" value="{{gain}}" min="{{min}}" max="{{max}}" step="{{step}}"></ui-number>
-<!--<label>[[label]]
-<input type="range" value="{{gain}}" min="{{min}}" max="{{max}}" step="{{step}}">
-</label>
--->
-</div><!-- .row -->
-
-
-<slot></slot>
-</div>
+<fieldset>
+<legend><h2>{{label}}</h2></legend>
+<ui-number label="gain" value="{{gain}}" min="{{min}}" max="{{max}}" step="{{step}}"></ui-number>
+</fieldset><!-- .row -->
 `; // html
 } // get template
 
@@ -59,21 +48,20 @@ type: Number, value: 0.1
 constructor () {
 super ();
 instanceCount += 1;
-this._id = AudioGain.is + instanceCount;
+this.id = this.createId(AudioGain.is, instanceCount);
 
 this._init (audio.createGain());
 //this._audioNode.channelCountMode = "explicit";
 } // constructor
 
-/*_attachDom(dom) {
+_attachDom (dom) {
 this.appendChild(dom);
 } // _attachDom
-*/
 
 connectedCallback () {
 super.connectedCallback ();
 if (this.contextCheck(AudioGain.is)) {
-this.addFieldLabels ();
+//this.addFieldLabels ();
 } // if
 } // connectedCallback
 

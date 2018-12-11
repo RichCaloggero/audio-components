@@ -15,8 +15,7 @@ return html`
 
 <slot></slot>
 
-<div class="status" role="region" aria-label="Status" aria-live="polite">
-</div>
+<div class="status" role="region" aria-label="Status" aria-live="polite"></div>
 </div>
 `; // html
 } // get template
@@ -63,9 +62,13 @@ window.audio = this.audio = new AudioContext();
 
 } // constructor
 
+_attachDom (dom) {
+this.appendChild(dom);
+} // _attachDom
+
 connectedCallback () {
 super.connectedCallback ();
-if (! _root) _root = this.shadowRoot.querySelector (".audio-context");
+if (!_root) _root = (this.shadowRoot || this); // .querySelector (".audio-context");
 } // connectedCallback
 
 
@@ -165,71 +168,6 @@ throw (e);
 } // whenAllChildrenLoaded
 
 
-addFieldLabels () {
-let groupLabel = (this.shadowRoot || this).querySelector (".label, legend");
-let hide = !(groupLabel && groupLabel.textContent);
-let hideControls = this.hasAttribute ("hide-controls")?
-this.getAttribute("hide-controls").split (" ") : [];
-
-if (groupLabel) {
-let ancestors = this.ancestors()
-.filter ((e) => e && e.hasAttribute("label"))
-.map ((e) => {
-//console.log (`- ancestor: ${this.elementName(e)}`);
-return e;
-});
-let level = ancestors.length;
-//console.log (`ancestors: ${ancestors}`);
-console.log (`addFieldLabels: ${this.constructor.is} (${groupLabel.textContent}): level ${level}, add labels to ${hide? "hidden" : "visible"} fields`);
-
-groupLabel.setAttribute ("role", "heading");
-groupLabel.setAttribute ("aria-level", level+1);
-} // if
-
-Array.from((this.shadowRoot || this).querySelectorAll (".field, ui-number, ui-boolean, ui-list"))
-.forEach ((field) => {
-let name = field.getAttribute("data-name") || field.getAttribute("field-name") || field.getAttribute("name");
-
-if (hide || hideControls.includes(name)) field.style.display = "none";
-
-if (field.matches("div.field")) {
-let name = field.getAttribute("data-name") || field.getAttribute("field-name") || field.getAttribute("name");
-let label = field.querySelector("label");
-let control = field.querySelector("input, select, textarea");
-let id = this._id + "-" + name;
-//console.log(`- field: ${name} ${field} ${control} ${label}`);
-control.setAttribute("id", id);
-label.setAttribute ("for", id);
-} // if
-}); // forEach field
-} // addFieldLabels
-
-ancestors (top) {
-let result = [];
-
-let e = this;
-if (! e) throw new Error ("ancestors: no host found");
-
-//if (! this.shadowRoot) throw new Error("ancestors: element not connected or -- shadowRoot is null");
-//let e = this.shadowRoot.host;
-
-
-if (!top || !top.nodeType || top.nodeType !== 1) {
-top = e.closest("audio-context") || document.querySelector("body");
-} // if
-
-
-while (e && e !== top) {
-//console.log (`- ancestors: e=${this.elementName(e)}`);
-result.push (e);
-
-e = e.parentElement || e.parentNode.host;
-} // while
-
-//result = (result.length > 0)? result.slice(1) : [];
-return result;
-} // ancestors
-
 elementName (e) {
 if (e) {
 return `${e.nodeName} (${e.label || e._id || e.className || ""})`;
@@ -251,6 +189,10 @@ if (this._audioIn && this._audioOut) {
 
 } // if
 } // _mix
+
+createId (elementName, instanceCount) {
+return `${elementName}-${instanceCount}`;
+} // createId
 
 _processValues (values) {
 if (values instanceof String || typeof(values) === "string") {

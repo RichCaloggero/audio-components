@@ -6,10 +6,10 @@ let instanceCount = 0;
 class AudioPlayer extends _AudioContext_ {
 static get template () {
 return html`
-<div class="audio-player">
-<h2>Audio Player</h2>
+<fieldset class="audio-player">
+<legend><h2>Audio Player</h2></legend>
 <div class="row">
-<ui-text name="{{src}}" label="Media URL: "></ui-text>
+<ui-text label="Media URL" value="{{src}}"></ui-text>
 </div><div class="row">
 <button class="play" on-click="play">Play</button>
 <button class="back" on-click="back">back</button>
@@ -18,7 +18,7 @@ return html`
 
 <audio  src="{{src}}" crossorigin="anonymous">
 </audio>
-</div>
+</fieldset>
 `; // html
 } // get template
 
@@ -31,7 +31,6 @@ src: {
 type: String,
 value: "",
 notify: true,
-//observer: "srcChanged"
 } // src
 }; // return
 } // get properties
@@ -39,16 +38,12 @@ notify: true,
 constructor () {
 super ();
 instanceCount += 1;
-this._id = AudioPlayer.is + instanceCount;
+this.id = this.createId(AudioPlayer.is, instanceCount);
 
 this._audioIn = this._audioOut = null;
 this._in = null;
 this._out = audio.createGain();
 } // constructor
-
-_attachDom(dom) {
-this.appendChild(dom);
-} // _attachDom
 
 connectedCallback  () {
 super.connectedCallback();

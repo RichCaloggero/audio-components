@@ -1,16 +1,16 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {_AudioContext_} from "./audio-context.js";
+import {UI} from "./ui.js";
 
 let instanceCount  = 0;
 
-class UINumber extends _AudioContext_ {
+class UINumber extends UI {
 static get template () {
 return html`
-<div  class="ui-number">
+<fieldset class="ui-number">
 <label >[[label]]
 <br><input type="range" value="{{value::change}}" min="[[min]]" max="[[max]]" step="{{step::change}}">
 </label>
-</div>
+</fieldset>
 `; // html
 } // get template
 
@@ -53,12 +53,9 @@ instanceCount += 1;
 this.id = `ui-number-${instanceCount}`;
 } // constructor
 
-/*_attachDom(dom) {
-//this.attachShadow({mode: 'open', delegatesFocus: true});
+_attachDom (dom) {
 this.appendChild(dom);
-//super._attachDom(dom);
 } // _attachDom
-*/
 
 connectedCallback () {
 super.connectedCallback ();
