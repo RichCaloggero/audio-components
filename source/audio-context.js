@@ -4,7 +4,7 @@ import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
 // audio-context
 let _root = null;
 
-export class _AudioContext_ extends PolymerElement {
+export class _AudioContext_ extends AudioComponent {
 static get template () {
 return html`
 

@@ -38,7 +38,7 @@ notify: true,
 constructor () {
 super ();
 instanceCount += 1;
-this.id = this.createId(AudioPlayer.is, instanceCount);
+this.id = `${AudioPlayer.is}-${instanceCount};
 
 this._audioIn = this._audioOut = null;
 this._in = null;
