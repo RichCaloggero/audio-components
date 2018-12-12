@@ -1,6 +1,4 @@
-import {PolymerElement} from "./@polymer/polymer/polymer-element.js";
-
-export class AudioComponent  extends PolymerElement {
+export class AudioComponent {
 constructor (audio) {
 this.audio = audio;
 this.input = audio.createGain();
@@ -11,6 +9,8 @@ this.dry = audio.createGain();
 this.input.connect(this.dry);
 this.wet.connect(this.output);
 this.dry.connect(this.output);
+
+this.mix(0);
 } // constructor
 
 mix (value) {
@@ -34,8 +34,10 @@ function restoreState () {this.mix(this._mix);} // restoreState
 } // bypass
 
 _connect (input, output) {
-if (input instanceof Component) input = input.input;
-if (output instanceof Component) output = output.input;
+if (input instanceof AudioComponent) input = input.input;
+if (output instanceof AudioComponent) output = output.input;
+
+console.log("connecting ", input, " to ", output);
 return input.connect(output);
 } // _connect
 
@@ -44,11 +46,13 @@ this.output.disconnect();
 } // disconnect
 } // Component
 
-export class Series extends Component {
+export class Series extends AudioComponent {
 constructor (audio, components) {
 super (audio);
 if (components.length < 2) throw new Error("Series: need two or more components");
+console.log("Series: ", components.length, " in series");
 components.forEach((c, i, all) => {
+console.log("- adding ", c);
 c.disconnect();
 if (i < all.length-1) this._connect(c, all[i+1]);
 }); // forEach
@@ -58,7 +62,7 @@ this._connect(components[components.length-1], this.wet);
 } // constructor
 } // class Series
 
-export class Parallel extends Component {
+export class Parallel extends AudioComponent {
 constructor (audio, components) {
 super (audio);
 if (components.length < 2) throw new Error("Parallel: need two or more components");
@@ -75,7 +79,7 @@ output.connect(this.wet);
 } // constructor
 } // class Parallel
 
-export class ReverseStereo extends Component {
+export class ReverseStereo extends AudioComponent {
 constructor (audio) {
 super (audio);
 const s = audio.createChannelSplitter(2);
@@ -87,7 +91,7 @@ m.connect(this.wet);
 } // constructor
 } // class ReverseStereo
 
-export class Binaural extends Component {
+export class Binaural extends AudioComponent {
 constructor (audio) {
 super (audio);
 const s = audio.createChannelSplitter(2);
@@ -117,7 +121,7 @@ this.rightPanner.positionZ.value = r*Math.sin(-1*a-r/3+r/6-r/9);
 
 } // class Binaural
 
-export class Phaser extends Component {
+export class Phaser extends AudioComponent {
 constructor (audio, bandCount = 1) {
 super (audio);
 this.bandCount = bandCount;
@@ -152,7 +156,7 @@ this.filterComponent.connect(this.output);
 
 } // class Phaser
 
-export class Xtc extends Component {
+export class Xtc extends AudioComponent {
 constructor (audio) {
 super (audio);
 const s = audio.createChannelSplitter(2);

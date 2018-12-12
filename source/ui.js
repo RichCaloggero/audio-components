@@ -1,6 +1,31 @@
 import {PolymerElement} from "./@polymer/polymer/polymer-element.js";
 
 export class UI extends PolymerElement {
+static processValues (values) {
+if (values instanceof String || typeof(values) === "string") {
+values = values.trim();
+if (values.charAt(0) !== "[" && values.includes(",") && !values.includes('"')) {
+values = values.split(",")
+.map (value => value.trim());
+} else {
+try {values = JSON.parse(values);
+} catch (e) {values = []} // catch
+} // if
+} // if
+
+if (values && (values instanceof Array)) {
+values = values.map (value => {
+if (typeof(value) !== "object") value = {value: value, text: value};
+if (value instanceof Array) value = {
+value: values[0], text: value.length > 1? value[1] : value[0]
+};
+return value;
+});
+} // if
+
+return values;
+} // processValues
+
 
 
 static addFieldLabels () {

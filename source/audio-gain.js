@@ -1,5 +1,6 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
 import {_AudioContext_} from "./audio-context.js";
+import {AudioComponent} from "./audio-component.js";
 
 let instanceCount  = 0;
 
@@ -48,10 +49,8 @@ type: Number, value: 0.1
 constructor () {
 super ();
 instanceCount += 1;
-this.id = this.createId(AudioGain.is, instanceCount);
-
-this._init (audio.createGain());
-//this._audioNode.channelCountMode = "explicit";
+this.id = `${AudioGain.is}-${instanceCount}`;
+console.log("audio-gain: context is ", this.audio);
 } // constructor
 
 _attachDom (dom) {
@@ -60,13 +59,11 @@ this.appendChild(dom);
 
 connectedCallback () {
 super.connectedCallback ();
-if (this.contextCheck(AudioGain.is)) {
-//this.addFieldLabels ();
-} // if
+this.component = new AudioComponent(this.audio);
 } // connectedCallback
 
 gainChanged (value) {
-this._setParameterValue (this._audioNode.gain, value);
+this._setParameterValue (this.component.input.gain, value);
 } // gainChanged
 
 } // class AudioGain

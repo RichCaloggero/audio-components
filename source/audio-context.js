@@ -4,7 +4,7 @@ import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
 // audio-context
 let _root = null;
 
-export class _AudioContext_ extends AudioComponent {
+export class _AudioContext_ extends PolymerElement {
 static get template () {
 return html`
 
@@ -24,11 +24,7 @@ static get is() { return "audio-context"; }
 
 static get properties() {
 return {
-label: {
-type: String,
-value: ""
-}, // label
-
+label: String,
 enableAutomation: {
 type: Boolean,
 value: true,
@@ -48,7 +44,6 @@ observer: "_hideOnBypass"
 
 constructor () {
 super ();
-
 if (! window.AudioContext) {
 alert ("webaudio not available");
 return;
@@ -56,10 +51,12 @@ return;
 
 if (window.audio) {
 //alert ("only one audio context per document");
+this.audio = window.audio;
 } else {
 window.audio = this.audio = new AudioContext();
+this.audio._name = "my test context";
+console.log("audio-context: creating new AudioContext ", this.audio._name);
 } // if
-
 } // constructor
 
 _attachDom (dom) {
@@ -72,7 +69,7 @@ if (!_root) _root = (this.shadowRoot || this); // .querySelector (".audio-contex
 } // connectedCallback
 
 
-_init (audioNode) {
+/*_init (audioNode) {
 console.log (`initializing ${this.constructor.is} as ${audioNode? "audio processor" : "connector"}`);
 this._in = audio.createGain();
 this._audioIn = audio.createGain();
@@ -130,6 +127,7 @@ this._audioOut.disconnect ();
 } // if
 } // if
 } // _disconnect
+*/
 
 
 contextCheck (name) {
@@ -145,28 +143,17 @@ return false;
 return true;
 } // contextCheck
 
-whenAllChildrenLoaded (loadedCallback) {
-var children = Array.from(this.childNodes).filter ((node) => node.nodeType === 1);
-var loaded = children.map ((element) => {
-//alert ("element: " + element);
-return customElements.whenDefined (element.localName);
-}); // map
-
-try {
-Promise.all (loaded)
-.then (() => {
-loadedCallback.call (this, children);
-}).catch ((error) => {
-alert (`whenAllChildrenLoaded: ${this._id} -- a child element could not be instantiated`);
-throw error;
-});
-
-} catch (e) {
-alert (`whenAllChildrenLoaded outer: ${e}`);
-throw (e);
-} // try
+static async waitForChildren (host) {
+const children = Array.from(host.children);
+await Promise.all(
+children
+//.filter(element => element instanceof _AudioContext_)
+.map(element => {
+console.log("whenLoaded: element is ", element.is);
+return customElements.whenDefined(element.is);
+}) // map
+); // Promise.all
 } // whenAllChildrenLoaded
-
 
 elementName (e) {
 if (e) {
@@ -184,40 +171,6 @@ if (this.constructor === _AudioContext_) {
 } // if
 } // _enableAutomation
 
-_mix (value) {
-if (this._audioIn && this._audioOut) {
-
-} // if
-} // _mix
-
-createId (elementName, instanceCount) {
-return `${elementName}-${instanceCount}`;
-} // createId
-
-_processValues (values) {
-if (values instanceof String || typeof(values) === "string") {
-values = values.trim();
-if (values.charAt(0) !== "[" && values.includes(",") && !values.includes('"')) {
-values = values.split(",")
-.map (value => value.trim());
-} else {
-try {values = JSON.parse(values);
-} catch (e) {values = []} // catch
-} // if
-} // if
-
-if (values && (values instanceof Array)) {
-values = values.map (value => {
-if (typeof(value) !== "object") value = {value: value, text: value};
-if (value instanceof Array) value = {
-value: values[0], text: value.length > 1? value[1] : value[0]
-};
-return value;
-});
-} // if
-
-return values;
-} // processValues
 
 _handleSlotChange (e) {
 let children = e.target.assignedNodes({flatten:true})
