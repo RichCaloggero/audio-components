@@ -22,7 +22,7 @@ static get is() { return "audio-player"; }
 
 static get properties() {
 return {
-src: {type: String, notify: true} // src
+src: {type: String, notify: true, observer: "srcChanged"}
 }; // return
 } // get properties
 
@@ -40,9 +40,11 @@ super.connectedCallback();
 this._root = (this.shadowRoot || this);
 this.audioElement.addEventListener ("ended", (e) => this._root.querySelector(".play").textContent = "play");
 
-this.component = new AudioComponent(this.audio);
+this.component = new AudioComponent(this.audio, "player");
 this.audioSource = this.audio.createMediaElementSource (this.audioElement);
 this.audioSource.connect(this.component.output);
+window.p = this;
+console.log("player connected");
 } // connectedCallback
 
 play (e) {
@@ -68,6 +70,10 @@ let player = this._audioElement;
 if (player.currentTime < player.duration) player.currentTime = player.currentTime + 5.0;
 else player.currentTime = player.duration;
 } // forward
+
+srcChanged (value) {
+this.audioElement.src = value;
+} // srcChanged
 
 } // class AudioPlayer
 

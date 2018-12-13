@@ -35,7 +35,7 @@ key: {
 type: String,
 value: "",
 notify: true,
-observer: "_keyChanged"
+//observer: "_keyChanged"
 }, // key
 
 value: {
