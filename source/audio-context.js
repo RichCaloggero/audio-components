@@ -10,8 +10,6 @@ return html`
 
 <div class="audio-context">
 <h1>{{label}}</h1>
-<ui-boolean name="enableAutomation" label="enable automation" value="{{enableAutomation}}"></ui-boolean>
-<!--<ui-boolean name="hideOnBypass" label="hide on bypass" value="{{hideOnBypass}}"></ui-boolean>-->
 
 <slot></slot>
 
@@ -143,7 +141,7 @@ return false;
 return true;
 } // contextCheck
 
-static async waitForChildren (host) {
+/*static waitForChildren (host) {
 const children = Array.from(host.children);
 await Promise.all(
 children
@@ -154,6 +152,7 @@ return customElements.whenDefined(element.is);
 }) // map
 ); // Promise.all
 } // whenAllChildrenLoaded
+*/
 
 elementName (e) {
 if (e) {

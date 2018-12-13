@@ -26,8 +26,9 @@ console.log("audio-destination: context is ", this.audio._name);
 
 connectedCallback () {
 super.connectedCallback ();
-this.component = new AudioComponent(this.audio);
+this.component = new AudioComponent(this.audio, "speakers");
 this.component.input.connect(this.audio.destination);
+console.log("speakers connected");
 } // connectedCallback
 
 } // class AudioDestination

@@ -5,17 +5,11 @@ import {_AudioContext_} from "./audio-context.js";
 let instanceCount = 0;
 
 class AudioSeries extends _AudioContext_ {
-static get template () {
+/*static get template () {
 return html`
-
-<div class="audio-series">
-
-<slot></slot>
-</div>
-
 `; // html
 } // get template
-
+*/
 static get is() { return "audio-series"; }
 
 static get properties () {
@@ -28,7 +22,6 @@ constructor () {
 super ();
 instanceCount += 1;
 this.id = `${AudioSeries.is}-${instanceCount}`;
-console.log("audio-series: AudioContext ", this.audio._name);
 } // constructor
 
 _attachDom (dom) {
@@ -37,15 +30,15 @@ this.appendChild(dom);
 
 connectedCallback () {
 super.connectedCallback ();
-//_AudioContext_.waitForChildren(this);
-const series = Array.from(this.children).filter(element => element.localName.includes("-"))
-.map(element => {
-//console.log("series: element is ", element, element.component);
-return (element.component || element)
-});
-
+const children = Array.from(this.children).filter(element => element.nodeName.includes("-"));
+console.log("children: ", children.map(e => e.nodeName).join(", "));
+Promise.all(children.map(element => customElements.whenDefined(element)))
+.then((response) => {
+const series = children.map(element => element.component || element);
+console.log("series: ", series);
 this.component = new Series(this.audio, series);
-this.component.mix(1); // all wet
+this.component.mix(0); // all dry
+}).catch(error => console.log(error));
 } // connectedCallback
 
 /*connectAll (nodes) {
