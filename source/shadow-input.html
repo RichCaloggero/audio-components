@@ -8,7 +8,10 @@
 <fieldset><legend>Test One</legend>
 <t-1 shadow>
 <t-2 shadow></t-2>
-<t-3 shadow></t-3>
+<t-3 shadow>
+<t-2></t-2>
+<t-1></t-1>
+</t-3>
 <t-2 shadow></t-2>
 </t-1>
 </fieldset>
@@ -37,8 +40,9 @@ this.id = `t1-${t1count}`;
 } // constructor
 
 connectedCallback () {
-const dom = this.hasAttribute("shadow")? this.attachShadow({mode: "open"}) : this;
+const dom = this.attachShadow({mode: "open"});
 dom.innerHTML = _template.call(this);
+dom.querySelector("slot").addEventListener("slotchange", handleSlotChange.bind(this));
 } // connectedCallback
 } // class T1
 
@@ -54,8 +58,9 @@ this.id = `t2-${t2count}`;
 
 //_attachDom (dom) {this.appendChild(dom);}
 connectedCallback () {
-const dom = this.hasAttribute("shadow")? this.attachShadow({mode: "open"}) : this;
+const dom = this.attachShadow({mode: "open"});
 dom.innerHTML = _template.call(this);
+//dom.querySelector("slot").addEventListener("slotchange", handleSlotChange);
 } // connectedCallback
 } // class T2
 
@@ -71,8 +76,9 @@ this.id = `t3-${t3count}`;
 
 //_attachDom (dom) {this.appendChild(dom);}
 connectedCallback () {
-const dom = this.hasAttribute("shadow")? this.attachShadow({mode: "open"}) : this;
+const dom = this.attachShadow({mode: "open"});
 dom.innerHTML = _template.call(this);
+dom.querySelector("slot").addEventListener("slotchange", handleSlotChange.bind(this));
 } // connectedCallback
 } // class T3
 
@@ -91,6 +97,24 @@ return `
 `; // html
 } // _template
 
+
+function handleSlotChange (e) {
+const children = e.target.assignedNodes(
+//{flatten:true}
+)
+.filter(e => e.nodeType===1 && e.localName !== "dom-repeat");
+
+if (children.length > 0) {
+//setTimeout (() => {
+console.log (`
+slotChange ${this.id}: ${this.localName} ${children.length},
+[${children.map(e => e.localName).join(", ")}]
+`);
+
+//this.dispatchEvent (new CustomEvent("change", {composed: true, bubbles: true, detail: children}));
+//}, 0); // setTimeout
+} // if
+} // handleSlotChange
 
 </script>
 

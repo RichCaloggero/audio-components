@@ -1,6 +1,6 @@
 export class AudioComponent {
 constructor (audio, name) {
-console.log("audioComponent: instantiating ", name);
+//console.log("audioComponent: instantiating ", name);
 this.audio = audio;
 this.name = name;
 this.input = audio.createGain();
@@ -36,7 +36,7 @@ function restoreState () {this.mix(this._mix);} // restoreState
 } // bypass
 
 _connect (input, output) {
-console.log("AudioComponent: connecting ", input.name || input, " to ", output.name || output);
+//console.log("AudioComponent: connecting ", input.name || input, " to ", output.name || output);
 if (input instanceof AudioComponent) input = input.output;
 if (output instanceof AudioComponent) output = output.input;
 return input.connect(output);
@@ -53,10 +53,9 @@ super (audio, "series");
 if (components.length < 2) throw new Error("Series: need two or more components");
 const first = components[0];
 const last = components[components.length-1];
-console.log("Series: ", components.length, " in series");
+//console.log("Series: ", components.length, " in series");
 
 components.forEach((c, i, all) => {
-console.log("- adding ", c);
 c.disconnect();
 if (i < all.length-1) this._connect(c, all[i+1]);
 }); // forEach

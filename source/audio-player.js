@@ -32,23 +32,24 @@ instanceCount += 1;
 this.id = `${AudioPlayer.is}-${instanceCount}`;
 this.audioElement = document.createElement("audio");
 this.audioElement.setAttribute("crossorigin", "anonymous");
-console.log("audio-player: AudioContext ", this.audio._name);
-} // constructor
-
-connectedCallback  () {
-super.connectedCallback();
-this._root = (this.shadowRoot || this);
-this.audioElement.addEventListener ("ended", (e) => this._root.querySelector(".play").textContent = "play");
-
 this.component = new AudioComponent(this.audio, "player");
 this.audioSource = this.audio.createMediaElementSource (this.audioElement);
 this.audioSource.connect(this.component.output);
-window.p = this;
-console.log("player connected");
+
+//console.log("player connected");
+} // constructor
+
+connectedCallback () {
+super.connectedCallback ();
+this.audioElement.addEventListener ("ended", (e) => this.shadowRoot.querySelector(".play").textContent = "play");
 } // connectedCallback
 
+srcChanged (value) {
+this.audioElement.src = value;
+} // srcChanged
+
 play (e) {
-let player = this.audioElement;
+const player = this.audioElement;
 if (player.paused) {
 player.play();
 e.target.textContent = "pause";
@@ -60,13 +61,13 @@ e.target.focus();
 } // play
 
 back (e) {
-let player = this._audioElement;
+const player = this.audioElement;
 if (player.currentTime < 5) player.currentTime = 0;
 else player.currentTime = player.currentTime - 5.0;
 } // back
 
 forward (e) {
-let player = this._audioElement;
+const player = this.audioElement;
 if (player.currentTime < player.duration) player.currentTime = player.currentTime + 5.0;
 else player.currentTime = player.duration;
 } // forward

@@ -37,22 +37,14 @@ constructor () {
 super ();
 instanceCount += 1;
 this.id = `${AudioGain.is}-${instanceCount}`;
-console.log("audio-gain: context is ", this.audio._name);
+
 this.component = new AudioComponent(this.audio, "gain");
+//console.log("audio-gain: connected.");
 } // constructor
 
-_attachDom (dom) {
-this.appendChild(dom);
-} // _attachDom
-
-/*connectedCallback () {
-super.connectedCallback ();
-this.component = new AudioComponent(this.audio, "gain");
-} // connectedCallback
-*/
 
 gainChanged (value) {
-this._setParameterValue (this.component.input.gain, value);
+this._setParameterValue (this.component.output.gain, value);
 } // gainChanged
 
 } // class AudioGain

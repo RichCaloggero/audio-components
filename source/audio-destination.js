@@ -21,14 +21,14 @@ constructor () {
 super ();
 instanceCount += 1;
 this.id = `${AudioDestination.is}-${instanceCount}`;
-console.log("audio-destination: context is ", this.audio._name);
+
+this.component = new AudioComponent(this.audio, "speakers");
+this.component.input.connect(this.audio.destination);
+//console.log("speakers connected");
 } // constructor
 
 connectedCallback () {
 super.connectedCallback ();
-this.component = new AudioComponent(this.audio, "speakers");
-this.component.input.connect(this.audio.destination);
-console.log("speakers connected");
 } // connectedCallback
 
 } // class AudioDestination

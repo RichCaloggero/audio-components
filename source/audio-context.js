@@ -52,23 +52,12 @@ if (window.audio) {
 this.audio = window.audio;
 } else {
 window.audio = this.audio = new AudioContext();
-this.audio._name = "my test context";
-console.log("audio-context: creating new AudioContext ", this.audio._name);
 } // if
 } // constructor
 
-_attachDom (dom) {
-this.appendChild(dom);
-} // _attachDom
-
-connectedCallback () {
-super.connectedCallback ();
-if (!_root) _root = (this.shadowRoot || this); // .querySelector (".audio-context");
-} // connectedCallback
 
 
 /*_init (audioNode) {
-console.log (`initializing ${this.constructor.is} as ${audioNode? "audio processor" : "connector"}`);
 this._in = audio.createGain();
 this._audioIn = audio.createGain();
 this._out = audio.createGain();
@@ -171,25 +160,6 @@ if (this.constructor === _AudioContext_) {
 } // _enableAutomation
 
 
-_handleSlotChange (e) {
-let children = e.target.assignedNodes({flatten:true})
-.filter(e => e.nodeType===1 && e.localName !== "dom-repeat");
-
-if (children.length > 0) {
-setTimeout (() => {
-/*console.log (`slotChange: ${this.localName} ${children.length}
-${children.map(e => {
-let _in = e._in, _out = e._out;
-return [e.localName,_in? _in.localName : "null", _out? _out.localName : "null"];
-}) // map
-}`);
-*/
-
-this.dispatchEvent (new CustomEvent("change", {composed: true, bubbles: true, detail: children}));
-this.connectAll (children);
-}, 0);
-} // if
-} // _handleSlotChange
 
 _setParameterValue (parameter, value) {
 //console.log (`_setParameterValue (${parameter}, ${value}`);
@@ -236,5 +206,24 @@ this.name = value;
 */
 
 } // class _AudioContext_
+
+/// utility functions
+
+export function handleSlotChange (e) {
+let children = e.target.assignedNodes({flatten:true})
+.filter(e => e.nodeType===1 && e.localName !== "dom-repeat");
+
+if (children.length > 0) {
+/*console.log (`slotChange: ${this.localName} ${children.length}
+${children.map(e => {
+let _in = e._in, _out = e._out;
+return [e.localName,_in? _in.localName : "null", _out? _out.localName : "null"];
+}) // map
+}`);
+*/
+
+if (this && this.childrenAvailable) this.childrenAvailable(children);
+} // if
+} // handleSlotChange
 
 window.customElements.define(_AudioContext_.is, _AudioContext_);
