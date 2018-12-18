@@ -10,11 +10,10 @@ return html`
 
 <div class="audio-context">
 <h1>{{label}}</h1>
-
-<slot></slot>
-
 <div class="status" role="region" aria-label="Status" aria-live="polite"></div>
 </div>
+
+<slot></slot>
 `; // html
 } // get template
 
