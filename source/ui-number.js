@@ -6,11 +6,11 @@ let instanceCount  = 0;
 class UINumber extends UI {
 static get template () {
 return html`
-<fieldset class="ui-number">
+<div class="ui-number">
 <label >[[label]]
 <br><input type="range" value="{{value::change}}" min="[[min]]" max="[[max]]" step="{{step::change}}">
 </label>
-</fieldset>
+</div>
 `; // html
 } // get template
 

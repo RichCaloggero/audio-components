@@ -1,6 +1,5 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {_AudioContext_} from "./audio-context.js";
-
+import {UI} from "./ui.js";
 
 let instanceCount  = 0;
 
@@ -20,23 +19,11 @@ static get is() { return "ui-list"; }
 
 static get properties () {
 return {
-name: {
-type: String,
-value: "",
-notify: true,
-observer: "nameChanged"
-}, // name
-
-label: {
-type: String,
-value: ""
-}, // label
-
+label: {type: String, value: ""}, // label
 key: {
 type: String,
 value: "",
 notify: true,
-observer: "_keyChanged"
 }, // key
 
 values: {
@@ -50,7 +37,6 @@ value: {
 type: String,
 value: "",
 notify: true,
-observer: "valueChanged"
 } // value
 }; // return
 } // get properties
@@ -59,21 +45,8 @@ observer: "valueChanged"
 constructor () {
 super ();
 instanceCount += 1;
-this._id = "ui-list" + instanceCount;
+this.id = `${UIList.is}-${instanceCount}`;
 } // constructor
-
-_attachDom(dom) {
-this.shadowRoot = this.attachShadow({mode: 'open', delegatesFocus: true});
-super._attachDom(dom);
-} // _attachDom
-
-connectedCallback () {
-if (! this.name) {
-throw new Error ("ui-list: no name given");
-} // if
-
-super.connectedCallback ();
-} // connectedCallback
 
 _buildList () {
 let values = null;
@@ -106,13 +79,6 @@ this.shadowRoot.querySelector ("select").setAttribute ("accesskey", key);
 this.shadowRoot.querySelector ("select").removeAttribute ("accesskey");
 } // if
 } // _keyChanged
-
-valueChanged (value) {
-} // valueChanged
-
-nameChanged (value) {
-if (! this.label) this.label = value;
-} // nameChanged
 
 
 } // class UIList

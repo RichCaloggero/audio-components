@@ -72,10 +72,6 @@ if (player.currentTime < player.duration) player.currentTime = player.currentTim
 else player.currentTime = player.duration;
 } // forward
 
-srcChanged (value) {
-this.audioElement.src = value;
-} // srcChanged
-
 } // class AudioPlayer
 
 customElements.define(AudioPlayer.is, AudioPlayer);

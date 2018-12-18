@@ -6,12 +6,11 @@ let instanceCount  = 0;
 class UIText extends UI {
 static get template () {
 return html`
-<fieldset class="ui-text">
-<legend><h2>{{label}}</h2></legend>
+<div class="ui-text">
 <label>[[label]]
 <br><input type="text" value="{{value::change}}">
 </label>
-</fieldset>
+</div>
 `; // html
 } // get template
 
@@ -31,10 +30,6 @@ instanceCount += 1;
 this.id = `${UIText.is}-${instanceCount}`;
 } // constructor
 
-_attachDom (dom) {
-this.appendChild(dom);
-} // _attachDom
-
 
 _keyChanged (value) {
 if (value) {
@@ -44,7 +39,6 @@ this.shadowRoot.querySelector ("input[type='text']").setAttribute ("accesskey", 
 this.shadowRoot.querySelector ("input[type='text']").removeAttribute ("accesskey");
 } // if
 } // _keyChanged
-
 
 } // class UIText
 
