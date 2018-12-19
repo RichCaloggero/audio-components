@@ -221,7 +221,12 @@ return [e.localName,_in? _in.localName : "null", _out? _out.localName : "null"];
 }`);
 */
 
-if (this && this.childrenAvailable) this.childrenAvailable(children);
+if (this && this.childrenAvailable) {
+this.childrenAvailable(children);
+} // if
+
+} else {
+//console.log(`handleSlotChange: ${this.id} has no filled slots`);
 } // if
 } // handleSlotChange
 

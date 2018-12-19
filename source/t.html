@@ -3,76 +3,24 @@
 <head>
 <meta charset="utf-8">
 <title>Audio component test</title>
-<script crossorigin="anonymous" src="./@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>
 </head>
 <body>
-<t-1>
-<t-2></t-2>
-<t-3></t-3>
-<t-2></t-2>
-</t-1>
+<label>Media URL: <input type="text"></label>
+<button id="play">Play</button>
 
-<script type="module">
-import {html, PolymerElement} from "./@polymer/polymer/polymer-element.js";
+<script>
+a=document.createElement("audio");
+c = new AudioContext();
+s=c.createMediaElementSource(a);
+s.connect(c.destination);
+a.src="./t1.mp3";
 
-let t1count = 0, t2count = 0, t3count = 0;
-
-class T1 extends PolymerElement {
-static get template () {return _template();}
-
-constructor () {
-super ();
-t1count += 1;
-this.level = 1;
-this.id = `t1-${t1count}`;
-} // constructor
-
-//_attachDom (dom) {this.appendChild(dom);}
-} // class T1
-
-class T2 extends PolymerElement {
-static get template () {return _template();}
-
-constructor () {
-super ();
-t2count += 1;
-this.level = 2;
-this.id = `t2-${t2count}`;
-} // constructor
-
-//_attachDom (dom) {this.appendChild(dom);}
-} // class T2
-
-class T3 extends PolymerElement {
-static get template () {return _template();}
-
-constructor () {
-super ();
-t3count += 1;
-this.level = 3;
-this.id = `t3-${t3count}`;
-} // constructor
-
-//_attachDom (dom) {this.appendChild(dom);}
-} // class T3
-
-
-customElements.define("t-1", T1);
-customElements.define("t-2", T2);
-customElements.define("t-3", T3);
-
-function _template () {
-return html`
-<div>
-<div role="heading" aria-level$="{{level}}">{{id}}</div>
-<label>label {{id}}: <input></label>
-<slot></slot>
-</div>
-`; // html
-} // _template
+document.querySelector("#play").addEventListener("click", () => {
+a.src = document.querySelector("input").value;
+a.play();
+setTimeout(() => a.currentTime = 5, 1000);
+});
 
 </script>
-
-
 </body>
 </html>
