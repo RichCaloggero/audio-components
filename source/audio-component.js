@@ -13,6 +13,7 @@ this.wet.connect(this.output);
 this.dry.connect(this.output);
 
 this.mix(0);
+this._mix = 0;
 } // constructor
 
 mix (value) {
@@ -23,16 +24,13 @@ return value;
 
 bypass (value) {
 if (value) {
-saveState();
+this._mix = this.wet.gain.value;
 this.wet.disconnect();
 this.mix(0);
 } else {
 this.wet.connect(this.output);
-restoreState();
+this.mix(this._mix);
 } // if
-
-function saveState () {this._mix = this.wet.gain.value;} // saveState
-function restoreState () {this.mix(this._mix);} // restoreState
 } // bypass
 
 _connect (input, output) {
@@ -158,8 +156,6 @@ this.filterComponent = new Parallel(this.audio, this.filters);
 this.input.connect(this.filterComponent.input);
 this.filterComponent.connect(this.output);
 } // parallel
-
-
 } // class Phaser
 
 export class Xtc extends AudioComponent {

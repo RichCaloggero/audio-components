@@ -3,7 +3,7 @@ import {UI} from "./ui.js";
 
 let instanceCount  = 0;
 
-class UIList extends _AudioContext_ {
+class UIList extends UI {
 static get template () {
 return html`
 <div  class="ui-list">
@@ -51,7 +51,7 @@ this.id = `${UIList.is}-${instanceCount}`;
 _buildList () {
 let values = null;
 let list = this.shadowRoot.querySelector ("select");
-this._processValues (this.values).forEach ((value) => {
+UI.processValues (this.values).forEach ((value) => {
 let option = document.createElement ("option");
 option.value = value.value;
 option.text = value.text;

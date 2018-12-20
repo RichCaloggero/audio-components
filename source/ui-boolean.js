@@ -7,8 +7,8 @@ class UIBoolean extends UI {
 static get template () {
 return html`
 <div class="ui-boolean">
-<label>[[label]]
-<br><input type="checkbox" checked="{{value::change}}">
+<label >[[label]]
+<br><input type="checkbox" value="{{checked::change}}">
 </label>
 </div>
 `; // html
@@ -16,30 +16,97 @@ return html`
 
 static get is() { return "ui-boolean"; }
 
+
 static get properties () {
 return {
-label: {type: String, notify: true},
-value: {type: String, value: "", notify: true},
-key: {type: String, value: "", notify: true}, // key
+label: String,
+value: {type: Boolean, value: false, notify: true},
 }; // return
 } // get properties
+
 
 constructor () {
 super ();
 instanceCount += 1;
-this.id = `${UIBoolean.is}-${instanceCount}`;
+this.id = `UIBoolean.is}-${instanceCount}`;
 } // constructor
 
 
-_keyChanged (value) {
+
+/*_keyChanged (value) {
 if (value) {
 let key = value.charAt(0);
-this.shadowRoot.querySelector ("input[type='text']").setAttribute ("accesskey", key);
+this.shadowRoot.querySelector ("input").setAttribute ("accesskey", key);
 } else {
-this.shadowRoot.querySelector ("input[type='text']").removeAttribute ("accesskey");
+this.shadowRoot.querySelector ("input").removeAttribute ("accesskey");
 } // if
 } // _keyChanged
+*/
 
-} // class UIBoolean
+/*handleKeydown (e) {
+switch (e.key) {
+case "Enter": this.reset();
+return false;
+
+case "Home": if (e.ctrlKey) this.setMax ();
+return false;
+
+case "End": if(e.ctrlKey) this.setMin ();
+return false;
+
+case "PageUp": this.increase ();
+return false;
+
+case "PageDown": this.decrease ();
+return false;
+
+} // switch
+
+return true;
+} // handleKeydown
+*/
+
+reset () {
+this.value = (this.max - this.min) / 2.0 + this.min;
+} // reset
+
+setMax () {
+this.value = this.max;
+} // setMax
+
+setMin () {
+this.value = this.min;
+} // setMin
+
+increase() {
+let amount = (this.max-this.min) / 10.0;
+this.value = this.clamp(this.value + amount);
+} // increase
+
+decrease() {
+let amount = (this.max-this.min) / 10.0;
+this.value = this.clamp (this.value - amount);
+} // decrease
+
+clamp (value, min = this.min, max = this.max) {
+if (value < min) return min;
+else if (value > max) return max;
+else return value;
+} // clamp
+
+nameChanged (value) {
+if (! this.label) this.label = value;
+} // nameChanged
+
+_position (e) {
+_AudioContext_._position (e.target);
+} // _position
+
+} // class UINumber
+
+
+function idGen (name) {
+return "ui-number" + instanceCount + "-" + name;
+} // idGen
 
 window.customElements.define(UIBoolean.is, UIBoolean);

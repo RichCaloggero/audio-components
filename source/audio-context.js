@@ -75,19 +75,13 @@ _invertPhase (value ) {
 if (this._audioOut && this._audioOut.gain) this._audioOut.gain.value = (value)? -1.0 : 1.0;
 } // _invertPhase
 
-_bypass (value) {
-if (this._in && this._out && this._audioIn && this._audioOut) {
-//console.log(`bypass ${value} on ${this.constructor.is}, ${this._in}, ${this._out}`);
-if (value) {
-this._disconnect ();
-this._in.connect (this._out);
-} else {
-this._disconnect ();
-this._connect ();
-} // if
-} // if
+bypassChanged (value) {
+if (this.component) this.component.bypass(value);
+} // bypassChanged
 
-} // _bypass
+mixChanged (value) {
+if (this.component) this.component.mix(value);
+} // mixChanged
 
 _hideOnBypass (value) {
 //this._bypass (this.bypass);

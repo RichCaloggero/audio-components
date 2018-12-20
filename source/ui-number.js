@@ -53,18 +53,6 @@ instanceCount += 1;
 this.id = `ui-number-${instanceCount}`;
 } // constructor
 
-_attachDom (dom) {
-this.appendChild(dom);
-} // _attachDom
-
-connectedCallback () {
-super.connectedCallback ();
-} // connectedCallback
-
-
-valueChanged (value) {
-console.log (`number ${this.label || this._id}: new value: ${value}`);
-} // valueChanged
 
 stepChanged (value) {
 //console.log (`new step: ${value}`);
