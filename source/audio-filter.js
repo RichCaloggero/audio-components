@@ -42,7 +42,7 @@ label: String,
 type: {type: String, value: "lowpass", notify: true, observer: "typeChanged"},
 
 bypass: {type: Boolean, value: false, notify: true, observer: "bypassChanged"},
-mix: {type: Boolean, value: false, notify: true, observer: "mixChanged"},
+mix: {type: Number, value: 1, notify: true, observer: "mixChanged"},
 frequency: {type: Number, value: 300.0, notify: true, observer: "frequencyChanged"},
 q: {type: Number, value: 1.0, notify: true, observer: "qChanged"},
 gain: {type: Number, value: 1.0, notify: true, observer: "gainChanged"},
@@ -70,10 +70,8 @@ if (this.component) this.component.bypass(value);
 mixChanged (value) {
 if (this.component) this.component.mix(value);
 } // mixChanged
-frequencyChanged (value) {
-console.log(`audio-filter: frequency ${value}`);
-this.filter.frequency.value = value;
-}
+
+frequencyChanged (value) {this.filter.frequency.value = value;}
 qChanged (value) {this.filter.Q.value = value;}
 typeChanged (value) {this.filter.type = value;}
 detuneChanged (value) {this.filter.detune.value = value;}

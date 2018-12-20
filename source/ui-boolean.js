@@ -8,7 +8,7 @@ static get template () {
 return html`
 <div class="ui-boolean">
 <label >[[label]]
-<br><input type="checkbox" value="{{checked::change}}">
+<br><input type="checkbox" checked="{{value::change}}">
 </label>
 </div>
 `; // html

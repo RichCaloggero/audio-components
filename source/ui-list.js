@@ -8,7 +8,7 @@ static get template () {
 return html`
 <div  class="ui-list">
 <label>{{label}}
-<br><select  size="1" value="{{value::change}}">
+<br><select  value="{{value::change}}">
 </select>
 </label>
 </div>
@@ -48,10 +48,10 @@ instanceCount += 1;
 this.id = `${UIList.is}-${instanceCount}`;
 } // constructor
 
-_buildList () {
+_buildList (newList) {
 let values = null;
 let list = this.shadowRoot.querySelector ("select");
-UI.processValues (this.values).forEach ((value) => {
+UI.processValues (newList || this.values).forEach ((value) => {
 let option = document.createElement ("option");
 option.value = value.value;
 option.text = value.text;
@@ -68,7 +68,7 @@ this._buildList ();
 
 valuesChanged (value) {
 this.shadowRoot.querySelector ("select").innerHTML = "";
-this._buildList ();
+this._buildList (value);
 } // valuesChanged
 
 _keyChanged (value) {
@@ -82,10 +82,5 @@ this.shadowRoot.querySelector ("select").removeAttribute ("accesskey");
 
 
 } // class UIList
-
-
-function idGen (name) {
-return "ui-list" + instanceCount + "-" + name;
-} // idGen
 
 window.customElements.define(UIList.is, UIList);

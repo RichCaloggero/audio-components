@@ -75,14 +75,6 @@ _invertPhase (value ) {
 if (this._audioOut && this._audioOut.gain) this._audioOut.gain.value = (value)? -1.0 : 1.0;
 } // _invertPhase
 
-bypassChanged (value) {
-if (this.component) this.component.bypass(value);
-} // bypassChanged
-
-mixChanged (value) {
-if (this.component) this.component.mix(value);
-} // mixChanged
-
 _hideOnBypass (value) {
 //this._bypass (this.bypass);
 } // _hideOnBypass
