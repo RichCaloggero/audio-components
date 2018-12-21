@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <title>UI test</title>
 <script crossorigin="anonymous" src="./@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>
+<script crossorigin="anonymous" src="./resonance-audio.min.js"></script>
 
 <script type="module" crossorigin="anonymous" src="./ui-number.js"></script>
 <script type="module" crossorigin="anonymous" src="./ui-text.js"></script>
@@ -18,17 +19,16 @@
 <script type="module" crossorigin="anonymous" src="./audio-split.js"></script>
 <script type="module" crossorigin="anonymous" src="./audio-filter.js"></script>
 <script type="module" crossorigin="anonymous" src="./audio-delay.js"></script>
+<script type="module" crossorigin="anonymous" src="./audio-resonance.js"></script>
 </head>
 <body>
 <audio-context label="testing..."><audio-series>
-<audio-player src="t1.mp3"></audio-player>
+<audio-player></audio-player>
 
-<audio-filter label="filter"></audio-filter>
-<audio-delay label="delay"></audio-delay>
+<audio-resonance label="Resonance Audio"></audio-resonance>
 <audio-gain label="volume"></audio-gain>
 
 <audio-destination></audio-destination>
-</audio-series>
-</audio-context>
+</audio-series></audio-context>
 </body>
 </html>

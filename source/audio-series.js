@@ -1,6 +1,6 @@
 import {html} from "./@polymer/polymer/polymer-element.js";
 import {AudioComponent, Series} from "./audio-component.js";
-import {_AudioContext_, handleSlotChange} from "./audio-context.js";
+import {_AudioContext_, handleSlotChange, childrenAvailableDelay} from "./audio-context.js";
 
 let instanceCount = 0;
 
@@ -23,19 +23,22 @@ constructor () {
 super ();
 instanceCount += 1;
 this.id = `${AudioSeries.is}-${instanceCount}`;
+
+console.log(`${this.id} created.`);
 } // constructor
 
 connectedCallback () {
 super.connectedCallback();
 this.shadowRoot.querySelector("slot").addEventListener("slotchange", handleSlotChange.bind(this));
+console.log(`${this.id}: DOM created.`);
 } // connectedCallback
 
 childrenAvailable (children) {
 setTimeout(() => {
 const components = children.map(e => e.component? e.component : e);
-//console.log(`childrenAvailable: ${components.length}, [${children.map(e => e.localName)}]`);
+console.log(`childrenAvailable: ${components.length}, [${children.map(e => e.localName)}]`);
 this.component = new Series(this.audio, components);
-}, 1);
+}, childrenAvailableDelay);
 } // childrenAvailabel
 } // class AudioSeries
 

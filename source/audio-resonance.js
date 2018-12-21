@@ -1,33 +1,37 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
 import {_AudioContext_} from "./audio-context.js";
+import {RoomSimulator} from "./room.js";
 
 let instanceCount  = 0;
 
 class AudioResonance extends _AudioContext_ {
 static get template () {
 return html`
+<fieldset class="audio-resonance">
+<legend><h2>{{label}}</h2></legend>
 
-<div class="audio-resonance" role="region" aria-label$="{{label}}">
-<span class="label">[[label]]</span>
+<fieldset>
+<legend><h3>mix</h3></legend>
+<ui-boolean label="bypass" value="{{bypass}}"></ui-boolean>
+<ui-number label="mix" value="{{mix}}" min="0.0" max="1.0" step="0.1"></ui-number>
+</fieldset>
 
-<div class="row" role="region" aria-label="room dimensions">
-<ui-number name="width" label="width" value="{{width}}" min="{{min}}" max="{{max}}" step="{{step}}"></ui-number>
-<ui-number name="depth" label="depth" value="{{depth}}" min="{{min}}" max="{{max}}" step="{{step}}"></ui-number>
-<ui-number name="height" label="height" value="{{height}}" min="{{min}}" max="{{max}}" step="{{step}}"></ui-number>
-</div><!-- .row -->
+<fieldset>
+<legend><h3>room</h3></legend>
+<ui-number label="size" value="{{size}}" min="0" max="500" step=".05"></ui-number>
+<ui-list label="floor" value="{{floor}}" values="{{meterialsList}}"></ui-list>
+<ui-list label="ceiling" value="{{ceiling}}" values="{{meterialsList}}"></ui-list>
+<ui-list label="left wall" value="{{leftWall}}" values="{{meterialsList}}"></ui-list>
+<ui-list label="right wall" value="{{rightWall}}" values="{{meterialsList}}"></ui-list>
+<ui-list label="front wall" value="{{frontWall}}" values="{{meterialsList}}"></ui-list>
+<ui-list label="back wall" value="{{backWall}}" values="{{meterialsList}}"></ui-list>
 
-<div class="row" role="region" aria-label="room materials">
-<ui-list name="leftWall"  label="left wall" values="{{materials}}"></ui-list>
-<ui-list name="rightWall" label="right wall" values="{{materials}}"></ui-list>
-<ui-list name="frontWall" label="front wall" values="{{materials}}"></ui-list>
-<ui-list name="backWall" label="back wall" values="{{materials}}"></ui-list>
-<ui-list name="ceiling" label="ceiling" values="{{materials}}"></ui-list>
-<ui-list name="floor" label="floor" values="{{materials}}"></ui-list>
-</div><!-- .row -->
+</fieldset>
 
-
-<slot></slot>
-</div>
+<fieldset>
+<legend><h3>position</h3></legend>
+</fieldset>
+</fieldset>
 `; // html
 } // get template
 
@@ -35,44 +39,10 @@ static get is() { return "audio-resonance"; }
 
 static get properties () {
 return {
-label: {
-type: String,
-value: ""
-}, // label
-
-width: {
-type: Number,
-value: 1.0,
-notify: true,
-observer: "widthChanged"
-}, // width
-
-depth: {
-type: Number,
-value: 1.0,
-notify: true,
-observer: "depthChanged"
-}, // depth
-
-height: {
-type: Number,
-value: 1.0,
-notify: true,
-observer: "heightChanged"
-}, // height
-
-
-min: {
-type: Number, value: 0.0
-}, // min
-
-max: {
-type: Number, value: 100.0
-}, // max
-
-step: {
-type: Number, value: 0.1
-}, // step
+label: String,
+bypass: {type: Boolean, value: false, notify: true, observer: "bypassChanged"},
+mix: {type: Number, value: 1, notify: true, observer: "mixChanged"},
+room: {type: Object, notify: true, observer: "roomChanged"},
 
 }; // return
 } // get properties
@@ -81,22 +51,43 @@ type: Number, value: 0.1
 constructor () {
 super ();
 instanceCount += 1;
-this._id = AudioResonance.is + instanceCount;
+this.id = `${AudioResonance.is}-${instanceCount}`;
 
-this._init (audio.createGain());
-//this._audioNode.channelCountMode = "explicit";
+this.scene = createScene();
+console.log("- scene created");
+this.component = new RoomSimulator(this.audio, this.scene);
+console.log("- RoomSimulator created");
+console.log(`${this.id} created`);
+
+function createScene (order = 3) {
+const scene = new ResonanceAudio(audio);
+scene.setAmbisonicOrder(order);
+return scene;
+} // createScene
+
+console.log(`${this.id} created.`);
 } // constructor
 
 connectedCallback () {
 super.connectedCallback ();
-if (this.contextCheck(AudioResonance.is)) {
-this.addFieldLabels ();
-} // if
+this.materialsList = RoomSimulator.materialsList();
+console.log(`${this.id}: DOM created.`);
 } // connectedCallback
 
-gainChanged (value) {
-this._setParameterValue (this._audioNode.gain, value);
-} // gainChanged
+
+bypassChanged (value) {
+if (this.component) this.component.bypass(value);
+} // bypassChanged
+
+mixChanged (value) {
+if (this.component) this.component.mix(value);
+} // mixChanged
+
+frequencyChanged (value) {this.filter.frequency.value = value;}
+qChanged (value) {this.filter.Q.value = value;}
+typeChanged (value) {this.filter.type = value;}
+detuneChanged (value) {this.filter.detune.value = value;}
+gainChanged (value) {this.filter.gain.value = value;}
 
 } // class AudioGain
 

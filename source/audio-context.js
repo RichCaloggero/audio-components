@@ -2,7 +2,9 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
 
 // audio-context
+let instanceCount = 0;
 let _root = null;
+export const childrenAvailableDelay = 100; // milliseconds
 
 export class _AudioContext_ extends PolymerElement {
 static get template () {
@@ -17,7 +19,7 @@ return html`
 `; // html
 } // get template
 
-static get is() { return "audio-context"; }
+static get is() { return "audio-context";}
 
 static get properties() {
 return {
@@ -41,6 +43,9 @@ observer: "_hideOnBypass"
 
 constructor () {
 super ();
+instanceCount += 1;
+this.id = `${_AudioContext_.is}-${instanceCount}`;
+
 if (! window.AudioContext) {
 alert ("webaudio not available");
 return;
@@ -49,11 +54,17 @@ return;
 if (window.audio) {
 //alert ("only one audio context per document");
 this.audio = window.audio;
+//console.log(`inherriting from ${this.audio}.`);
 } else {
 window.audio = this.audio = new AudioContext();
+console.log(`${this.id} created.`);
 } // if
+
 } // constructor
 
+connectedCallback () {
+super.connectedCallback();
+} // connectedCallback
 
 
 /*_init (audioNode) {

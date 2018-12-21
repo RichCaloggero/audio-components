@@ -36,12 +36,13 @@ this.component = new AudioComponent(this.audio, "player");
 this.audioSource = this.audio.createMediaElementSource (this.audioElement);
 this.audioSource.connect(this.component.output);
 
-//console.log("player connected");
+console.log(`${this.id} created.`);
 } // constructor
 
 connectedCallback () {
 super.connectedCallback ();
 this.audioElement.addEventListener ("ended", (e) => this.shadowRoot.querySelector(".play").textContent = "play");
+console.log("audio-player: DOM created");
 } // connectedCallback
 
 srcChanged (value) {

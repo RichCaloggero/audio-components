@@ -39,9 +39,13 @@ instanceCount += 1;
 this.id = `${AudioGain.is}-${instanceCount}`;
 
 this.component = new AudioComponent(this.audio, "gain");
-//console.log("audio-gain: connected.");
+console.log(`${this.id} created.`);
 } // constructor
 
+connectedCallback () {
+super.connectedCallback();
+console.log(`${this.id} DOM created.`);
+} // connectedCallback
 
 gainChanged (value) {
 this._setParameterValue (this.component.output.gain, value);

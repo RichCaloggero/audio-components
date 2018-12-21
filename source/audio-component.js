@@ -40,10 +40,18 @@ this.mix(this._mix);
 } // bypass
 
 _connect (input, output) {
-//console.log("AudioComponent: connecting ", input.name || input, " to ", output.name || output);
-if (input instanceof AudioComponent) input = input.output;
-if (output instanceof AudioComponent) output = output.input;
+input = validate(input, "output");
+output = validate(output, "input");
+
 return input.connect(output);
+
+
+function validate (x, p) {
+if (x instanceof AudioNode) return x;
+else if (x instanceof AudioComponent) return x[p];
+else if(x.component) return validate(x.component);
+else throw new Error(`cannot connect: ${x}`);t 
+} // validate
 } // _connect
 
 disconnect () {
@@ -57,11 +65,15 @@ super (audio, "series");
 if (components.length < 2) throw new Error("Series: need two or more components");
 const first = components[0];
 const last = components[components.length-1];
-//console.log("Series: ", components.length, " in series");
+console.log("Series: ", components.length, " in series");
 
 components.forEach((c, i, all) => {
+console.log("component: ", c);
+if (i < all.length-1) {
+const next = all[i+1];
 c.disconnect();
-if (i < all.length-1) this._connect(c, all[i+1]);
+this._connect(c, next);
+} // if
 }); // forEach
 
 this.input.disconnect();
