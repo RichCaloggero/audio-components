@@ -33,7 +33,10 @@ source.input.gain.value = 0;
 
 
 setPosition (...positions) {
-[this.source.left,this.source.right].forEach((source, index) => _set(source, positions[index]));
+[this.source.left,this.source.right]
+.forEach((source, index) => {
+_set(source, positions[index])
+});
 
 function _set (source, position) {
 source.setPosition(position[0],position[1],position[2]);
@@ -89,7 +92,7 @@ const defaultDimensions = {
 width: 4,
 height: 2.2,
 depth: 3.1
-}; // dimensions
+}; // defaultDimensions
 
 const defaultMaterials = {
 // Room wall materials
@@ -101,7 +104,7 @@ back: "transparent",  // 'glass-thin',
 down: "transparent",  // 'grass',
 // Room ceiling
 up: "transparent"  // 'transparent'
-}; // materials
+}; // defaultMaterials
 
 return {dimensions: defaultDimensions, materials: defaultMaterials};
 } // defaultRoom

@@ -30,13 +30,13 @@ console.log(`${this.id} created.`);
 connectedCallback () {
 super.connectedCallback();
 this.shadowRoot.querySelector("slot").addEventListener("slotchange", handleSlotChange.bind(this));
-console.log(`${this.id}: DOM created.`);
+//console.log(`${this.id}: DOM created.`);
 } // connectedCallback
 
 childrenAvailable (children) {
 setTimeout(() => {
 const components = children.map(e => e.component? e.component : e);
-console.log(`childrenAvailable: ${components.length}, [${children.map(e => e.localName)}]`);
+console.log(`- childrenAvailable: ${components.length}, [${children.map(e => e.localName)}]`);
 this.component = new Series(this.audio, components);
 }, childrenAvailableDelay);
 } // childrenAvailabel

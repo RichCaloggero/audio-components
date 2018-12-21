@@ -19,12 +19,12 @@ return html`
 <fieldset>
 <legend><h3>room</h3></legend>
 <ui-number label="size" value="{{size}}" min="0" max="500" step=".05"></ui-number>
-<ui-list label="floor" value="{{floor}}" values="{{meterialsList}}"></ui-list>
-<ui-list label="ceiling" value="{{ceiling}}" values="{{meterialsList}}"></ui-list>
-<ui-list label="left wall" value="{{leftWall}}" values="{{meterialsList}}"></ui-list>
-<ui-list label="right wall" value="{{rightWall}}" values="{{meterialsList}}"></ui-list>
-<ui-list label="front wall" value="{{frontWall}}" values="{{meterialsList}}"></ui-list>
-<ui-list label="back wall" value="{{backWall}}" values="{{meterialsList}}"></ui-list>
+<ui-list label="floor" value="{{floor}}" values="{{materialsList}}"></ui-list>
+<ui-list label="ceiling" value="{{ceiling}}" values="{{materialsList}}"></ui-list>
+<ui-list label="left wall" value="{{leftWall}}" values="{{materialsList}}"></ui-list>
+<ui-list label="right wall" value="{{rightWall}}" values="{{materialsList}}"></ui-list>
+<ui-list label="front wall" value="{{frontWall}}" values="{{materialsList}}"></ui-list>
+<ui-list label="back wall" value="{{backWall}}" values="{{materialsList}}"></ui-list>
 
 </fieldset>
 
@@ -54,9 +54,9 @@ instanceCount += 1;
 this.id = `${AudioResonance.is}-${instanceCount}`;
 
 this.scene = createScene();
-console.log("- scene created");
+//console.log("- scene created");
 this.component = new RoomSimulator(this.audio, this.scene);
-console.log("- RoomSimulator created");
+//console.log("- RoomSimulator created");
 console.log(`${this.id} created`);
 
 function createScene (order = 3) {
@@ -65,13 +65,13 @@ scene.setAmbisonicOrder(order);
 return scene;
 } // createScene
 
-console.log(`${this.id} created.`);
 } // constructor
 
 connectedCallback () {
 super.connectedCallback ();
 this.materialsList = RoomSimulator.materialsList();
 console.log(`${this.id}: DOM created.`);
+debugger;
 } // connectedCallback
 
 

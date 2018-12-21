@@ -7,7 +7,7 @@ class UIList extends UI {
 static get template () {
 return html`
 <div  class="ui-list">
-<label>{{label}}
+<label>[[label]]
 <br><select  value="{{value::change}}">
 </select>
 </label>
@@ -19,7 +19,7 @@ static get is() { return "ui-list"; }
 
 static get properties () {
 return {
-label: {type: String, value: ""}, // label
+label: String,
 key: {
 type: String,
 value: "",
@@ -46,29 +46,39 @@ constructor () {
 super ();
 instanceCount += 1;
 this.id = `${UIList.is}-${instanceCount}`;
+console.log(`${this.id} created.`);
 } // constructor
 
+connectedCallback () {
+super.connectedCallback();
+this.list = this.shadowRoot.querySelector ("select");
+console.log(`${this.id}: dom created, list is ${this.list}`);
+} // connectedCallback
+
 _buildList (newList) {
+console.log(`buildList: ${newList}`);
 let values = null;
-let list = this.shadowRoot.querySelector ("select");
-UI.processValues (newList || this.values).forEach ((value) => {
-let option = document.createElement ("option");
-option.value = value.value;
-option.text = value.text;
+const list = this.list;
+list.innerHTML = "";
+
+UI.processValues(newList || this.values)
+.forEach (pair => {
+const option = document.createElement ("option");
+option.value = pair.value;
+option.text = pair.text;
 list.add (option);
 }); // forEach
-return values;
+
+return list;
 } // _buildList
 
-_handleSlotChange (e) {
-this.shadowRoot.querySelector("select").innerHTML = "";
-this._buildList ();
-} // _handleSlotChange
 
 
 valuesChanged (value) {
-this.shadowRoot.querySelector ("select").innerHTML = "";
-this._buildList (value);
+console.log(`valuesChanged: ${value}`);
+this._buildList (value)
+.querySelector("option").focus();
+console.log(`ui-list: build ${value.length}, this.list.children.length}`);
 } // valuesChanged
 
 _keyChanged (value) {

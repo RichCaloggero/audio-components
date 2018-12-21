@@ -4,7 +4,7 @@ import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
 // audio-context
 let instanceCount = 0;
 let _root = null;
-export const childrenAvailableDelay = 100; // milliseconds
+export const childrenAvailableDelay = 20; // milliseconds
 
 export class _AudioContext_ extends PolymerElement {
 static get template () {
