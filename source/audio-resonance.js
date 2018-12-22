@@ -64,31 +64,19 @@ const scene = new ResonanceAudio(audio);
 scene.setAmbisonicOrder(order);
 return scene;
 } // createScene
-
 } // constructor
 
 connectedCallback () {
 super.connectedCallback ();
 this.materialsList = RoomSimulator.materialsList();
 console.log(`${this.id}: DOM created.`);
-debugger;
 } // connectedCallback
 
 
-bypassChanged (value) {
-if (this.component) this.component.bypass(value);
-} // bypassChanged
+bypassChanged (value) {if (this.component) this.component.bypass(value);}
+mixChanged (value) {if (this.component) this.component.mix(value);}
 
-mixChanged (value) {
-if (this.component) this.component.mix(value);
-} // mixChanged
 
-frequencyChanged (value) {this.filter.frequency.value = value;}
-qChanged (value) {this.filter.Q.value = value;}
-typeChanged (value) {this.filter.type = value;}
-detuneChanged (value) {this.filter.detune.value = value;}
-gainChanged (value) {this.filter.gain.value = value;}
-
-} // class AudioGain
+} // class AudioResonance
 
 window.customElements.define(AudioResonance.is, AudioResonance);

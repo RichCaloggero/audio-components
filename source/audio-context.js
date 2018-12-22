@@ -4,18 +4,19 @@ import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
 // audio-context
 let instanceCount = 0;
 let _root = null;
+export const audio = new AudioContext();
 export const childrenAvailableDelay = 20; // milliseconds
 
 export class _AudioContext_ extends PolymerElement {
 static get template () {
 return html`
-
 <div class="audio-context">
-<h1>{{label}}</h1>
+<h1>[[label]]</h1>
 <div class="status" role="region" aria-label="Status" aria-live="polite"></div>
-</div>
 
 <slot></slot>
+</div>
+
 `; // html
 } // get template
 

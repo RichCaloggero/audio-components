@@ -51,14 +51,30 @@ console.log(`${this.id} created.`);
 
 connectedCallback () {
 super.connectedCallback();
-this.list = this.shadowRoot.querySelector ("select");
+this.list = this.shadowRoot.querySelector("select");
 console.log(`${this.id}: dom created, list is ${this.list}`);
 } // connectedCallback
 
+connectedCallback () {
+super.connectedCallback();
+this.list = this.shadowRoot.querySelector ("select");
+if (!this.list) {
+console.log (`${this.id}: list not created`);
+return;
+} // if
+console.log(`${this.id}: dom created.`);
+} // connectedCallback
+
+
 _buildList (newList) {
 console.log(`buildList: ${newList}`);
-let values = null;
-const list = this.list;
+const list = this.shadowRoot.querySelector("select");
+console.log(`- list: ${list}`);
+if (!list) {
+console.log("- no list to add items to");
+return;
+} // if
+
 list.innerHTML = "";
 
 UI.processValues(newList || this.values)
