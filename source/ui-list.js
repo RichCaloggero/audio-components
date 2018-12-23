@@ -46,22 +46,11 @@ constructor () {
 super ();
 instanceCount += 1;
 this.id = `${UIList.is}-${instanceCount}`;
-console.log(`${this.id} created.`);
+//console.log(`${this.id} created.`);
 } // constructor
 
 connectedCallback () {
 super.connectedCallback();
-this.list = this.shadowRoot.querySelector("select");
-console.log(`${this.id}: dom created, list is ${this.list}`);
-} // connectedCallback
-
-connectedCallback () {
-super.connectedCallback();
-this.list = this.shadowRoot.querySelector ("select");
-if (!this.list) {
-console.log (`${this.id}: list not created`);
-return;
-} // if
 console.log(`${this.id}: dom created.`);
 } // connectedCallback
 
@@ -91,10 +80,8 @@ return list;
 
 
 valuesChanged (value) {
-console.log(`valuesChanged: ${value}`);
-this._buildList (value)
-.querySelector("option").focus();
-console.log(`ui-list: build ${value.length}, this.list.children.length}`);
+console.log(`valuesChanged: ${value.length}`);
+const list = this._buildList (value);
 } // valuesChanged
 
 _keyChanged (value) {

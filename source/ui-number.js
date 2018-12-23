@@ -20,7 +20,7 @@ static get is() { return "ui-number"; }
 static get properties () {
 return {
 label: String,
-value: Number,
+value: {type: Number, value: 0.0, notify: true},
 min: Number,
 max: Number,
 
@@ -38,11 +38,6 @@ notify: true,
 //observer: "_keyChanged"
 }, // key
 
-value: {
-type: Number,
-value: 0.0,
-notify: true,
-} // value
 }; // return
 } // get properties
 

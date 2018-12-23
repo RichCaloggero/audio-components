@@ -19,12 +19,23 @@ return html`
 <fieldset>
 <legend><h3>room</h3></legend>
 <ui-number label="size" value="{{size}}" min="0" max="500" step=".05"></ui-number>
-<ui-list label="floor" value="{{floor}}" values="{{materialsList}}"></ui-list>
-<ui-list label="ceiling" value="{{ceiling}}" values="{{materialsList}}"></ui-list>
-<ui-list label="left wall" value="{{leftWall}}" values="{{materialsList}}"></ui-list>
-<ui-list label="right wall" value="{{rightWall}}" values="{{materialsList}}"></ui-list>
-<ui-list label="front wall" value="{{frontWall}}" values="{{materialsList}}"></ui-list>
-<ui-list label="back wall" value="{{backWall}}" values="{{materialsList}}"></ui-list>
+
+<fieldset>
+<legend><h4>Dimensions</h4></legend>
+<ui-number label="width" value="{{room.dimensions.width}}" min="0.0" max="100.0" step="0.1"></ui-number>
+<ui-number label="depth" value="{{room.dimensions.depth}}" min="0" max="100" step="0.1"></ui-number>
+<ui-number label="height" value="{{room.dimensions.height}}" min="0" max="100" step="0.1"></ui-number>
+</fieldset>
+
+<fielset>
+<legend><h4>Materials</h4></legend>
+<ui-list label="floor" value="{{room.materials.down}}" values="{{materialsList}}"></ui-list>
+<ui-list label="ceiling" value="{{room.materials.up}}" values="{{materialsList}}"></ui-list>
+<ui-list label="left wall" value="{{room.materials.left}}" values="{{materialsList}}"></ui-list>
+<ui-list label="right wall" value="{{room.materials.right}}" values="{{materialsList}}"></ui-list>
+<ui-list label="front wall" value="{{room.materials.front}}" values="{{materialsList}}"></ui-list>
+<ui-list label="back wall" value="{{room.materials.back}}" values="{{materialsList}}"></ui-list>
+</fieldset>
 
 </fieldset>
 
@@ -43,23 +54,30 @@ label: String,
 bypass: {type: Boolean, value: false, notify: true, observer: "bypassChanged"},
 mix: {type: Number, value: 1, notify: true, observer: "mixChanged"},
 room: {type: Object, notify: true, observer: "roomChanged"},
-
 }; // return
 } // get properties
 
+static get observers () {
+return [
+"roomChanged(room.*)"
+]; // return
+} // get observers
 
 constructor () {
 super ();
 instanceCount += 1;
 this.id = `${AudioResonance.is}-${instanceCount}`;
 
-this.scene = createScene();
+this.scene = createScene(this.audio);
 //console.log("- scene created");
 this.component = new RoomSimulator(this.audio, this.scene);
 //console.log("- RoomSimulator created");
+
+this.room = RoomSimulator.defaultRoom();
+this.component.updateRoom(this.room);
 console.log(`${this.id} created`);
 
-function createScene (order = 3) {
+function createScene (audio, order = 3) {
 const scene = new ResonanceAudio(audio);
 scene.setAmbisonicOrder(order);
 return scene;
@@ -76,6 +94,14 @@ console.log(`${this.id}: DOM created.`);
 bypassChanged (value) {if (this.component) this.component.bypass(value);}
 mixChanged (value) {if (this.component) this.component.mix(value);}
 
+roomChanged (data) {
+//console.log(`roomChanged: ${data.toSource()}`);
+
+const room = this.component.updateRoom(data.base? data.base : data);
+const width = room.dimensions.width;
+
+this.component.setPosition([-1*width/2,0,0], [width/2,0,0]);
+} // roomChanged
 
 } // class AudioResonance
 

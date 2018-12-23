@@ -24,7 +24,7 @@ super ();
 instanceCount += 1;
 this.id = `${AudioSeries.is}-${instanceCount}`;
 
-console.log(`${this.id} created.`);
+//console.log(`${this.id} created.`);
 } // constructor
 
 connectedCallback () {

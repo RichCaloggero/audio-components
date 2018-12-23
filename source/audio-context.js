@@ -52,15 +52,16 @@ alert ("webaudio not available");
 return;
 } // if
 
-if (window.audio) {
+if (audio) {
 //alert ("only one audio context per document");
-this.audio = window.audio;
+this.audio = audio;
 //console.log(`inherriting from ${this.audio}.`);
 } else {
-window.audio = this.audio = new AudioContext();
-console.log(`${this.id} created.`);
+alert("initialization failure -- cannot initialize new AudioContext()");
+throw new Error ("cannot initialize");
 } // if
 
+console.log("audio-context created.");
 } // constructor
 
 connectedCallback () {

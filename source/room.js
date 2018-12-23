@@ -6,6 +6,7 @@ super (audio, "ResonanceAudio");
 this.context = audio;
 this.scene = scene;
 this.roomSize = 1.0;
+this.room = null;
 this.source = {};
 const inLeft = this.source.left = scene.createSource();
 const inRight = this.source.right = scene.createSource();
@@ -45,17 +46,22 @@ source.setPosition(position[0],position[1],position[2]);
 
 setRoomSize (value) {
 this.roomSize = value;
-console.log("setRoomSize: ", this.roomSize, value);
+//console.log("setRoomSize: ", this.roomSize, value);
 } // setRoomSize
 
 updateRoom (room) {
+//console.log(`updateRoom: ${room.toSource()}`);
 const scale = this.roomSize;
+const materials = Object.assign({}, room.materials);
 const dimensions = Object.assign({}, room.dimensions);
+
 dimensions.width *= scale;
 dimensions.depth *= scale;
 dimensions.height *= scale;
-this.scene.setRoomProperties(dimensions, room.materials);
-return {dimensions: dimensions, materials: room.materials};
+
+this.scene.setRoomProperties(dimensions, materials);
+this.room = {dimensions: dimensions, materials: materials};
+return this.room;
 } // updateRoom
 
 static materialsList () {
@@ -100,9 +106,7 @@ left: "transparent", // 'brick-bare',
 right: "transparent", // 'curtain-heavy',
 front: "transparent", // 'marble'
 back: "transparent",  // 'glass-thin',
-// Room floor
 down: "transparent",  // 'grass',
-// Room ceiling
 up: "transparent"  // 'transparent'
 }; // defaultMaterials
 
