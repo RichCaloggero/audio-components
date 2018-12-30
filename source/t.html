@@ -31,7 +31,11 @@ this.id = `t-1-${t1count}`;
 connectedCallback () {
 createDom.call(this);
 childrenReady(this)
-.then((children) => console.log(`${children.length} Ready.`));
+.then((children) => {
+console.log(`${this.id}: ${children.length} children added`);
+}).catch((error) => {
+console.log(`${this.id}: ${error}`);
+});
 } // connectedCallback
 } // class T1
 
@@ -67,28 +71,6 @@ customElements.define("t-1", T1);
 customElements.define("t-2", T2);
 customElements.define("t-3", T3);
 
-function elementReady (e, bubbles = true) {
-return e.dispatchEvent(new CustomEvent("elementReady", {detail: e, bubbles: bubbles, composed: true}));
-} // elementReady
-
-
-
-function childrenReady (element) {
-const slot = element.shadowRoot.querySelector("slot");
-if (!slot) return Promise.resolve(null);
-
-return new Promise((resolve, reject) => {
-slot.addEventListener("slotchange", e => {
-const children = slot.assignedNodes().filter(e => e.nodeType === 1);
-console.log(`childrenReady: ${element.id} has ${children.length} children`);
-resolve(Promise.all(children.map(child => childrenReady(child))));
-}); // slotchange
-}); // promise
-} // childrenReady
-
-function waitForChildren () {
-
-} // waitforChildren
 
 function createDom () {
 const root = this.attachShadow({mode: "open"});

@@ -5,15 +5,13 @@ let instanceCount = 0;
 
 
 class AudioDestination extends _AudioContext_ {
-/*static get template () {
+static get template () {
 return html`
-<div class="audio-destination" role="region" aria-label="Audio Destination">
-<span>Speakers</span>
-</div>
-
+<fieldset class="audio-destination">
+<legend><h2>Speakers</h2></legend>
+</fieldset>
 `; // html
 }  // get template
-*/
 
 static get is() { return "audio-destination"; }
 

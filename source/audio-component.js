@@ -68,7 +68,7 @@ const last = components[components.length-1];
 console.log("Series: ", components.length, " in series");
 
 components.forEach((c, i, all) => {
-console.log("component: ", c);
+console.log(`component: ${typeof(c)} ${c.name}`);
 if (i < all.length-1) {
 const next = all[i+1];
 c.disconnect();

@@ -51,14 +51,14 @@ this.id = `${UIList.is}-${instanceCount}`;
 
 connectedCallback () {
 super.connectedCallback();
-console.log(`${this.id}: dom created.`);
+//console.log(`${this.id}: dom created.`);
 } // connectedCallback
 
 
 _buildList (newList) {
-console.log(`buildList: ${newList}`);
+//console.log(`buildList: ${newList}`);
 const list = this.shadowRoot.querySelector("select");
-console.log(`- list: ${list}`);
+//console.log(`- list: ${list}`);
 if (!list) {
 console.log("- no list to add items to");
 return;
@@ -80,7 +80,7 @@ return list;
 
 
 valuesChanged (value) {
-console.log(`valuesChanged: ${value.length}`);
+//console.log(`valuesChanged: ${value.length}`);
 const list = this._buildList (value);
 } // valuesChanged
 

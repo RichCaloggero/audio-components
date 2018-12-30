@@ -1,13 +1,15 @@
 import {html} from "./@polymer/polymer/polymer-element.js";
 import {AudioComponent, Series} from "./audio-component.js";
-import {_AudioContext_, handleSlotChange, childrenAvailableDelay} from "./audio-context.js";
+import {_AudioContext_, childrenReady} from "./audio-context.js";
 
 let instanceCount = 0;
 
 class AudioSeries extends _AudioContext_ {
 /*static get template () {
 return html`
+<!--<div class="audio-series">-->
 <slot></slot>
+<!--</div>-->
 `; // html
 } // get template
 */
@@ -24,13 +26,19 @@ super ();
 instanceCount += 1;
 this.id = `${AudioSeries.is}-${instanceCount}`;
 
-//console.log(`${this.id} created.`);
 } // constructor
 
 connectedCallback () {
 super.connectedCallback();
-this.shadowRoot.querySelector("slot").addEventListener("slotchange", handleSlotChange.bind(this));
-//console.log(`${this.id}: DOM created.`);
+childrenReady(this)
+.then(children => {
+console.log(`- connectedCallback.then: found ${children.length} children`);
+console.log(`- ${children}`);
+const components = children.map(e => e.component? e.component : e);
+this.component = new Series(this.audio, components);
+}).catch(error => {
+console.log(`${this.id}: ${error}`);
+}); // catch
 } // connectedCallback
 
 childrenAvailable (children) {

@@ -87,7 +87,6 @@ return scene;
 connectedCallback () {
 super.connectedCallback ();
 this.materialsList = RoomSimulator.materialsList();
-console.log(`${this.id}: DOM created.`);
 } // connectedCallback
 
 

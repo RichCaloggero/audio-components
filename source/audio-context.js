@@ -61,11 +61,12 @@ alert("initialization failure -- cannot initialize new AudioContext()");
 throw new Error ("cannot initialize");
 } // if
 
-console.log("audio-context created.");
+//console.log(`${this.id} created, shadow = ${this.shadowRoot}`);
 } // constructor
 
 connectedCallback () {
 super.connectedCallback();
+console.log(`${this.id} connected, shadow = ${this.shadowRoot}`);
 } // connectedCallback
 
 
@@ -205,7 +206,28 @@ this.name = value;
 
 } // class _AudioContext_
 
+window.customElements.define(_AudioContext_.is, _AudioContext_);
+
 /// utility functions
+
+export function childrenReady (element) {
+console.log(`childrenReady: ${element.id}`);
+const slot = element.shadowRoot.querySelector("slot");
+if (! slot) {
+console.log(`- slot: ${slot}`);
+return Promise.resolve(element);
+} // if
+
+
+return new Promise((resolve, reject) => {
+slot.addEventListener("slotchange", function (e) {
+const children = Array.from(e.target.assignedNodes())
+.filter(e => e.nodeType === 1);
+console.log(`${this.id}: waiting for ${children.length} children`);
+resolve(Promise.all(children.map(child => childrenReady(child))));
+}); // slotchange listener
+}); // promise
+} // childrenReady
 
 export function handleSlotChange (e) {
 let children = e.target.assignedNodes({flatten:true})
@@ -229,4 +251,11 @@ this.childrenAvailable(children);
 } // if
 } // handleSlotChange
 
-window.customElements.define(_AudioContext_.is, _AudioContext_);
+/*function insertedNodesObserver (element) {
+var observer = new MutationObserver(function(mutations) {
+const insertedNodes = [];
+});
+observer.observe(document, {childList: true });
+console.log(insertedNodes);
+*/
+
