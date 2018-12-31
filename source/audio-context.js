@@ -67,6 +67,12 @@ super.connectedCallback();
 console.log(`${this.id} connected, shadow = ${this.shadowRoot}`);
 } // connectedCallback
 
+components (elements) {
+return elements.map(e => {
+if (e.component) return e.component;
+else throw new Error(`${this.id}: ${e.id}.component is null or invalid -- cannot connect`);
+});
+} // components
 
 _enableAutomation (value) {
 if (this.constructor === _AudioContext_) {
@@ -164,3 +170,4 @@ element._ready = true;
 element.dispatchEvent(new CustomEvent("elementReady"));
 console.log(`signalReady dispatched on ${element.id}`);
 } // signalReady
+

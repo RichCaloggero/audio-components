@@ -9,67 +9,78 @@
 
 <t-1>
 <t-2></t-2>
-<t-2>
-<t-3></t-3>
-</t-2>
 </t-1>
 
 <script type="module">
 let t1count = 0;
 let t2count = 0;
-let t3count = 0;
 
 class T1 extends HTMLElement {
-get template () {return _template(this, 2);} // get template
+get template () {
+return `
+<div class="${this.id}">
+<h2>${this.id}</h2>
+</div>
+
+<slot></slot>
+`;
+} // get template
 
 constructor () {
 super ();
 t1count += 1;
 this.id = `t-1-${t1count}`;
+this.audio = new AudioContext();
 } // constructor
 
 connectedCallback () {
 createDom.call(this);
-childrenReady(this)
-.then((children) => {
-console.log(`${this.id}: ${children.length} children added`);
-}).catch((error) => {
-console.log(`${this.id}: ${error}`);
-});
+console.log(`${this.id} connected`);
 } // connectedCallback
 } // class T1
 
 class T2 extends T1 {
-get template () {return _template(this, 3);} // get template
+get template () {
+return `
+<fieldset class="${this.id}">
+<legend><h3>${this.id}</h3></legend>
+<button id="play">Play</button>
+</fieldset>
+`;
+} // get template
 
 constructor () {
 super();
 t2count += 1;
 this.id = `t-2-${t2count}`;
+
+this.audioElement = document.createElement("audio");
+this.audioSource = this.audio.createMediaElementSource(this.audioElement);
+this.audioSource.connect(this.audio.destination);
+this.audioElement.src = "./t1.mp3";
 } // constructor
 
 connectedCallback () {
 createDom.call(this);
+this.shadowRoot.addEventListener("click", this.play.bind(this));
+console.log(`${this.id} connected`);
 } // connectedCallback
+
+play (e) {
+if (this.audioElement.paused) {
+this.audioElement.play();
+e.target.textContent = "pause";
+} else {
+this.audioElement.pause();
+e.target.textContent = "play";
+} // if
+
+e.target.focus();
+} // play
 } // class T2
-
-class T3 extends T1 {
-get template () {return _template(this, 4);} // get template
-
-constructor () {
-super();
-t3count += 1;
-this.id = `t-3-${t3count}`;
-} // constructor
-
-connectedCallback () {
-createDom.call(this);
-} // connectedCallback
-} // class T3
 
 customElements.define("t-1", T1);
 customElements.define("t-2", T2);
-customElements.define("t-3", T3);
 
 
 function createDom () {

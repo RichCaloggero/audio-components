@@ -18,15 +18,19 @@
 <script type="module" crossorigin="anonymous" src="./audio-gain.js"></script>
 <script type="module" crossorigin="anonymous" src="./audio-filter.js"></script>
 <script type="module" crossorigin="anonymous" src="./audio-delay.js"></script>
+<script type="module" crossorigin="anonymous" src="./audio-split.js"></script>
 <script type="module" crossorigin="anonymous" src="./audio-resonance.js"></script>
 </head>
 <body>
 <audio-context label="testing..."><audio-series>
 <audio-player></audio-player>
 
-<audio-resonance label="Resonance Audio"></audio-resonance>
-<audio-gain label="volume"></audio-gain>
+<audio-split><audio-filter></audio-filter></audio-split>
 
+<!--<audio-resonance label="Resonance Audio"></audio-resonance>
+-->
+
+<audio-gain label="volume"></audio-gain>
 <audio-destination></audio-destination>
 </audio-series></audio-context>
 </body>

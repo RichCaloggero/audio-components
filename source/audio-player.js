@@ -41,7 +41,7 @@ this.audioSource.connect(this.component.output);
 
 connectedCallback () {
 super.connectedCallback ();
-this.audioElement.addEventListener ("ended", (e) => this.shadowRoot.querySelector(".play").textContent = "play");
+this.audioElement.addEventListener ("ended", e => this.shadowRoot.querySelector(".play").textContent = "play");
 signalReady(this);
 } // connectedCallback
 
@@ -61,6 +61,7 @@ e.target.textContent = "play";
 } // if
 
 e.target.focus();
+console.log(`${this.id}: player is ${player.paused? "paused" : "playing"}`);
 } // play
 
 back (e) {

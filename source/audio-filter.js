@@ -1,5 +1,5 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {_AudioContext_} from "./audio-context.js";
+import {_AudioContext_, signalReady} from "./audio-context.js";
 import {AudioComponent} from "./audio-component.js";
 
 let instanceCount  = 0;
@@ -57,11 +57,15 @@ instanceCount += 1;
 this.id = `${AudioFilter.is}-${instanceCount}`;
 
 this.component = new AudioComponent(this.audio, "filter");
-this.filter = audio.createBiquadFilter();
+this.filter = this.audio.createBiquadFilter();
 this.component.input.connect(this.filter);
 this.filter.connect(this.component.wet);
 } // constructor
 
+connectedCallback () {
+super.connectedCallback();
+signalReady(this);
+} // connectedCallback
 
 bypassChanged (value) {
 if (this.component) this.component.bypass(value);

@@ -31,11 +31,7 @@ super.connectedCallback();
 childrenReady(this)
 .then(children => {
 console.log(`- connectedCallback.then: found ${children.length} children`);
-const components = children.map(e => {
-if (e.component) return e.component;
-else throw new Error(`audio-series: e.nodeName.toLowerCase()}.component is null -- cannot connect`);
-});
-this.component = new Series(this.audio, components);
+this.component = new Series(this.audio, this.components(children));
 signalReady(this);
 }).catch(error => {
 console.log(`${this.id}: ${error}`);
