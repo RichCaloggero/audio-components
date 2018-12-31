@@ -1,5 +1,5 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {_AudioContext_} from "./audio-context.js";
+import {_AudioContext_, signalReady} from "./audio-context.js";
 import {AudioComponent} from "./audio-component.js";
 
 let instanceCount  = 0;
@@ -43,6 +43,7 @@ this.component = new AudioComponent(this.audio, "gain");
 
 connectedCallback () {
 super.connectedCallback();
+signalReady(this);
 } // connectedCallback
 
 gainChanged (value) {

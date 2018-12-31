@@ -45,6 +45,7 @@ constructor () {
 super ();
 instanceCount += 1;
 this.id = `${_AudioContext_.is}-${instanceCount}`;
+this._ready = false;
 
 if (! window.AudioContext) {
 alert ("webaudio not available");
@@ -65,7 +66,6 @@ connectedCallback () {
 super.connectedCallback();
 console.log(`${this.id} connected, shadow = ${this.shadowRoot}`);
 } // connectedCallback
-
 
 
 _enableAutomation (value) {
@@ -126,9 +126,8 @@ console.log(`childrenReady: ${element.id}`);
 const slot = (element.shadowRoot || element).querySelector("slot");
 if (! slot) {
 console.log(`- ${element.nodeName.toLowerCase()} ready`);
-return Promise.resolve(element);
+return ready(element);
 } // if
-
 
 return new Promise((resolve, reject) => {
 slot.addEventListener("slotchange", function (e) {
@@ -138,13 +137,30 @@ console.log(`${this.id}: waiting for ${children.length} children`);
 console.log(`- ${children.map(e => e.nodeName.toLowerCase())}`);
 
 if (children.length > 0) {
-Promise.all(children.map(child => childrenReady(child)))
-.then(children => resolve(children));
+resolve(Promise.all(children.map(child => childrenReady(child))));
+//Promise.all(children.map(child => childrenReady(child)))
+//.then(children => resolve(children));
 } else {
-Promise.resolve(element);
+resolve(ready(element));
 } // if
 }); // slotchange listener
 }); // promise
 } // childrenReady
 
+function ready (element) {
+if (element._ready) {
+console.log(`${element.id} is ready.`);
+return element;
+} // if
 
+console.log(`ready: waiting for ${element.id}`);
+return new Promise ((resolve, reject) => {
+element.addEventListener("elementReady", (e) => resolve(e.target));
+});
+} // ready
+
+export function signalReady (element) {
+element._ready = true;
+element.dispatchEvent(new CustomEvent("elementReady"));
+console.log(`signalReady dispatched on ${element.id}`);
+} // signalReady

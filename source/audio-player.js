@@ -1,5 +1,5 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {_AudioContext_} from "./audio-context.js";
+import {_AudioContext_, signalReady} from "./audio-context.js";
 import {AudioComponent} from "./audio-component.js";
 
 let instanceCount = 0;
@@ -42,6 +42,7 @@ this.audioSource.connect(this.component.output);
 connectedCallback () {
 super.connectedCallback ();
 this.audioElement.addEventListener ("ended", (e) => this.shadowRoot.querySelector(".play").textContent = "play");
+signalReady(this);
 } // connectedCallback
 
 srcChanged (value) {

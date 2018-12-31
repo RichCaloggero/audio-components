@@ -1,5 +1,5 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {_AudioContext_} from "./audio-context.js";
+import {_AudioContext_, signalReady} from "./audio-context.js";
 import {AudioComponent} from "./audio-component.js";
 let instanceCount = 0;
 
@@ -27,6 +27,7 @@ this.component.output = null;
 
 connectedCallback () {
 super.connectedCallback ();
+signalReady(this);
 } // connectedCallback
 
 } // class AudioDestination

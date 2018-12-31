@@ -1,6 +1,6 @@
 import {html} from "./@polymer/polymer/polymer-element.js";
 import {AudioComponent, Series} from "./audio-component.js";
-import {_AudioContext_, childrenReady} from "./audio-context.js";
+import {_AudioContext_, childrenReady, signalReady} from "./audio-context.js";
 
 let instanceCount = 0;
 
@@ -36,6 +36,7 @@ if (e.component) return e.component;
 else throw new Error(`audio-series: e.nodeName.toLowerCase()}.component is null -- cannot connect`);
 });
 this.component = new Series(this.audio, components);
+signalReady(this);
 }).catch(error => {
 console.log(`${this.id}: ${error}`);
 alert(`${this.id}: ${error}`);
