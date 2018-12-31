@@ -13,10 +13,9 @@ return html`
 <div class="audio-context">
 <h1>[[label]]</h1>
 <div class="status" role="region" aria-label="Status" aria-live="polite"></div>
-
-<slot></slot>
 </div>
 
+<slot></slot>
 `; // html
 } // get template
 
@@ -60,8 +59,6 @@ this.audio = audio;
 alert("initialization failure -- cannot initialize new AudioContext()");
 throw new Error ("cannot initialize");
 } // if
-
-//console.log(`${this.id} created, shadow = ${this.shadowRoot}`);
 } // constructor
 
 connectedCallback () {
@@ -69,86 +66,6 @@ super.connectedCallback();
 console.log(`${this.id} connected, shadow = ${this.shadowRoot}`);
 } // connectedCallback
 
-
-/*_init (audioNode) {
-this._in = audio.createGain();
-this._audioIn = audio.createGain();
-this._out = audio.createGain();
-this._audioOut = audio.createGain();
-
-if (audioNode) {
-this._audioNode = audioNode;
-this._audioIn.connect (this._audioNode).connect (this._audioOut);
-} else {
-//this._audioIn.connect (this._audioOut);
-} // if
-this._connect ();
-} // _init
-
-_invertPhase (value ) {
-if (this._audioOut && this._audioOut.gain) this._audioOut.gain.value = (value)? -1.0 : 1.0;
-} // _invertPhase
-
-_hideOnBypass (value) {
-//this._bypass (this.bypass);
-} // _hideOnBypass
-
-_connect () {
-if (this._audioIn && this._audioOut) {
-if (this._in) {
-this._in.connect (this._audioIn);
-} // if
-
-if (this._out) {
-this._audioOut.connect (this._out);
-} // if
-} // if
-} // _connect
-
-_disconnect () {
-if (this._audioIn && this._audioOut) {
-if (this._in) {
-this._in.disconnect ();
-this._audioOut.disconnect ();
-} // if
-} // if
-} // _disconnect
-*/
-
-
-contextCheck (name) {
-var parentName = this.parentNode.localName;
-//alert ("parentName: " + parentName);
-/*if (parentName !== "audio-series" && parentName !== "audio-parallel" && parentName !== "audio-split") {
-alert (`${name} : element must be child of audio-parallel or audio-series to participate in audio graph`);
-//throw new Error ("audio graph error");
-return false;
-} // if
-*/
-
-return true;
-} // contextCheck
-
-/*static waitForChildren (host) {
-const children = Array.from(host.children);
-await Promise.all(
-children
-//.filter(element => element instanceof _AudioContext_)
-.map(element => {
-console.log("whenLoaded: element is ", element.is);
-return customElements.whenDefined(element.is);
-}) // map
-); // Promise.all
-} // whenAllChildrenLoaded
-*/
-
-elementName (e) {
-if (e) {
-return `${e.nodeName} (${e.label || e._id || e.className || ""})`;
-} else {
-return "[unnamed element]";
-} // if
-} // elementName
 
 
 _enableAutomation (value) {
@@ -198,12 +115,6 @@ alert (message);
 
 } // statusMessage
 
-
-/*nameChanged (value) {
-this.name = value;
-} // nameChanged
-*/
-
 } // class _AudioContext_
 
 window.customElements.define(_AudioContext_.is, _AudioContext_);
@@ -212,9 +123,9 @@ window.customElements.define(_AudioContext_.is, _AudioContext_);
 
 export function childrenReady (element) {
 console.log(`childrenReady: ${element.id}`);
-const slot = element.shadowRoot.querySelector("slot");
+const slot = (element.shadowRoot || element).querySelector("slot");
 if (! slot) {
-console.log(`- slot: ${slot}`);
+console.log(`- ${element.nodeName.toLowerCase()} ready`);
 return Promise.resolve(element);
 } // if
 
@@ -224,38 +135,16 @@ slot.addEventListener("slotchange", function (e) {
 const children = Array.from(e.target.assignedNodes())
 .filter(e => e.nodeType === 1);
 console.log(`${this.id}: waiting for ${children.length} children`);
-resolve(Promise.all(children.map(child => childrenReady(child))));
+console.log(`- ${children.map(e => e.nodeName.toLowerCase())}`);
+
+if (children.length > 0) {
+Promise.all(children.map(child => childrenReady(child)))
+.then(children => resolve(children));
+} else {
+Promise.resolve(element);
+} // if
 }); // slotchange listener
 }); // promise
 } // childrenReady
 
-export function handleSlotChange (e) {
-let children = e.target.assignedNodes({flatten:true})
-.filter(e => e.nodeType===1 && e.localName !== "dom-repeat");
-
-if (children.length > 0) {
-/*console.log (`slotChange: ${this.localName} ${children.length}
-${children.map(e => {
-let _in = e._in, _out = e._out;
-return [e.localName,_in? _in.localName : "null", _out? _out.localName : "null"];
-}) // map
-}`);
-*/
-
-if (this && this.childrenAvailable) {
-this.childrenAvailable(children);
-} // if
-
-} else {
-//console.log(`handleSlotChange: ${this.id} has no filled slots`);
-} // if
-} // handleSlotChange
-
-/*function insertedNodesObserver (element) {
-var observer = new MutationObserver(function(mutations) {
-const insertedNodes = [];
-});
-observer.observe(document, {childList: true });
-console.log(insertedNodes);
-*/
 

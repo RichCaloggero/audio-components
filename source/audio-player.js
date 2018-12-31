@@ -32,8 +32,10 @@ instanceCount += 1;
 this.id = `${AudioPlayer.is}-${instanceCount}`;
 this.audioElement = document.createElement("audio");
 this.audioElement.setAttribute("crossorigin", "anonymous");
-this.component = new AudioComponent(this.audio, "player");
 this.audioSource = this.audio.createMediaElementSource (this.audioElement);
+
+this.component = new AudioComponent(this.audio, "player");
+this.component.input = null;
 this.audioSource.connect(this.component.output);
 } // constructor
 
@@ -43,18 +45,20 @@ this.audioElement.addEventListener ("ended", (e) => this.shadowRoot.querySelecto
 } // connectedCallback
 
 srcChanged (value) {
-this.audioElement.src = value;
+if (value) this.audioElement.src = value;
 } // srcChanged
 
 play (e) {
 const player = this.audioElement;
 if (player.paused) {
-player.play();
+try {player.play();}
+catch (e) {alert (`audio-player: ${e}`);}
 e.target.textContent = "pause";
 } else {
 player.pause();
 e.target.textContent = "play";
 } // if
+
 e.target.focus();
 } // play
 

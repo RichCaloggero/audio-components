@@ -22,7 +22,7 @@ this.id = `${AudioDestination.is}-${instanceCount}`;
 
 this.component = new AudioComponent(this.audio, "speakers");
 this.component.input.connect(this.audio.destination);
-//console.log("speakers connected");
+this.component.output = null;
 } // constructor
 
 connectedCallback () {

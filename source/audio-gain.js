@@ -39,7 +39,6 @@ instanceCount += 1;
 this.id = `${AudioGain.is}-${instanceCount}`;
 
 this.component = new AudioComponent(this.audio, "gain");
-console.log(`${this.id} created, shadow = ${this.shadowRoot}`);
 } // constructor
 
 connectedCallback () {

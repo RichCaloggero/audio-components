@@ -39,7 +39,7 @@ this.mix(this._mix);
 } // if
 } // bypass
 
-_connect (input, output) {
+/*_connect (input, output) {
 input = validate(input, "output");
 output = validate(output, "input");
 
@@ -57,30 +57,44 @@ else throw new Error(`cannot connect: ${x}`);t
 disconnect () {
 this.output.disconnect();
 } // disconnect
+*/
 } // Component
 
 export class Series extends AudioComponent {
 constructor (audio, components) {
 super (audio, "series");
+console.log("Series: ", components.length, " in series");
 if (components.length < 2) throw new Error("Series: need two or more components");
 const first = components[0];
 const last = components[components.length-1];
-console.log("Series: ", components.length, " in series");
+
+if(first.input) {
+this.input.disconnect();
+this.input.connect(first.input);
+//this._connect(this.input, first);
+console.log(`- connected ${this.name} input to ${first.name}`);
+} // if
 
 components.forEach((c, i, all) => {
-console.log(`component: ${typeof(c)} ${c.name}`);
 if (i < all.length-1) {
 const next = all[i+1];
-c.disconnect();
-this._connect(c, next);
+if (c.output && next.input) {
+c.output.disconnect();
+c.output.connect(next.input);
+//this._connect(c, next);
+console.log(`- connected ${c.name} to ${next.name}`);
+} else {
+throw new Error (`series: ${c.name} and ${next.name} must both be AudioComponents`);
+} // if
 } // if
 }); // forEach
 
-this.input.disconnect();
-this._connect(this.input, first);
-
-last.disconnect();
-this._connect(last, this.output);
+if (last.output) {
+last.output.disconnect();
+last.output.connect(this.output);
+//this._connect(last, this.output);
+console.log(`- connected ${last.name} to ${this.name} output`);
+} // if
 } // constructor
 } // class Series
 
