@@ -26,6 +26,7 @@ instanceCount += 1;
 this.id = `${AudioSplit.is}-${instanceCount}`;
 
 this.component = new AudioComponent(this.audio, "split");
+this.component.mix(1);
 } // constructor
 
 connectedCallback () {
