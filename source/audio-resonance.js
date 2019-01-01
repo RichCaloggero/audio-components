@@ -75,7 +75,6 @@ this.component = new RoomSimulator(this.audio, this.scene);
 
 this.room = RoomSimulator.defaultRoom();
 this.component.updateRoom(this.room);
-console.log(`${this.id} created`);
 
 function createScene (audio, order = 3) {
 const scene = new ResonanceAudio(audio);

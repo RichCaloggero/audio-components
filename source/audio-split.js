@@ -25,13 +25,14 @@ super ();
 instanceCount += 1;
 this.id = `${AudioSplit.is}-${instanceCount}`;
 
-this.component = new AudioComponent(this.audio);
+this.component = new AudioComponent(this.audio, "split");
 } // constructor
 
 connectedCallback () {
 super.connectedCallback();
 childrenReady(this)
-.then(children => this.childrenAvailable(children));
+.then(children => this.childrenAvailable(children))
+.catch(error => alert(`audio-split: cannot connect;\n${error}`));
 } // connectedCallback
 
 childrenAvailable (children) {
@@ -57,7 +58,6 @@ channel1 = components[0];
 channel2 = components[1];
 } // if
 
-try {
 if (channel1) {
 s.connect (channel1.input, this.swapInputs? 1 : 0, 0);
 channel1.output.connect (m, 0, this.swapOutputs? 1 : 0);
@@ -66,17 +66,13 @@ console.log(`- channel1: ${channel1.name} connected`);
 
 if (channel2) {
 s.connect (channel2.input, this.swapInputs? 0 : 1, 0);
-channel2.output.connect (m, 1, this.swapOutputs? 0 : 1);
+channel2.output.connect (m, 0, this.swapOutputs? 0 : 1);
 console.log(`- channel2: ${channel2.name} connected`);
 } // if
 
 this.component.input.connect(s);
 m.connect(this.component.output);
 signalReady(this);
-
-} catch (e) {
-console.log(`audio-split: cannot connect; ${e}\n${e.stack}`);
-} // try
 
 //}, 1); // millisecond timeout
 } // childrenAvailable

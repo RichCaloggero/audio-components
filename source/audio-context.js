@@ -64,7 +64,7 @@ throw new Error ("cannot initialize");
 
 connectedCallback () {
 super.connectedCallback();
-console.log(`${this.id} connected, shadow = ${this.shadowRoot}`);
+//console.log(`${this.id} connected, shadow = ${this.shadowRoot}`);
 } // connectedCallback
 
 components (elements) {
@@ -128,10 +128,10 @@ window.customElements.define(_AudioContext_.is, _AudioContext_);
 /// utility functions
 
 export function childrenReady (element) {
-console.log(`childrenReady: ${element.id}`);
+//console.log(`childrenReady: ${element.id}`);
 const slot = (element.shadowRoot || element).querySelector("slot");
 if (! slot) {
-console.log(`- ${element.nodeName.toLowerCase()} ready`);
+//console.log(`- ${element.nodeName.toLowerCase()} ready`);
 return ready(element);
 } // if
 
@@ -139,7 +139,7 @@ return new Promise((resolve, reject) => {
 slot.addEventListener("slotchange", function (e) {
 const children = Array.from(e.target.assignedNodes())
 .filter(e => e.nodeType === 1);
-console.log(`${this.id}: waiting for ${children.length} children`);
+console.log(`${element.id}: waiting for ${children.length} children`);
 console.log(`- ${children.map(e => e.nodeName.toLowerCase())}`);
 
 if (children.length > 0) {
@@ -159,7 +159,7 @@ console.log(`${element.id} is ready.`);
 return element;
 } // if
 
-console.log(`ready: waiting for ${element.id}`);
+//console.log(`ready: waiting for ${element.id}`);
 return new Promise ((resolve, reject) => {
 element.addEventListener("elementReady", (e) => resolve(e.target));
 });
