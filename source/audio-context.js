@@ -128,20 +128,20 @@ window.customElements.define(_AudioContext_.is, _AudioContext_);
 /// utility functions
 
 export function childrenReady (element) {
-console.log(`childrenReady: ${element.id}`);
+//console.log(`childrenReady: ${element.id}`);
 const children = Array.from(element.children);
 if (!children || children.length === 0) {
 //console.log(`- childrenReady: recursion bottomed out at ${element.id}`);
 return (ready(element));
 } // if
 const undefinedDescendants = Array.from(element.querySelectorAll(":not(:defined)"));
-console.log(`- ${undefinedDescendants.length} undefined descendants`);
+//console.log(`- ${undefinedDescendants.length} undefined descendants`);
 
 return new Promise((resolve, reject) => {
 Promise.all(undefinedDescendants.map(e => customElements.whenDefined(e.localName)))
 .then(x => {
-const undefinedChildren = children.filter(e => e.matches(":not(:defined)"));
-console.log(`childrenReady: ${element} has ${undefinedChildren.length} undefined children`);
+//const undefinedChildren = children.filter(e => e.matches(":not(:defined)"));
+//console.log(`childrenReady: ${element} has ${undefinedChildren.length} undefined children`);
 
 console.log(`
 ${element.id}: waiting for ${children.length} children
@@ -176,7 +176,7 @@ export function signalReady (element) {
 if (element && element instanceof _AudioContext_) {
 element._ready = true;
 element.dispatchEvent(new CustomEvent("elementReady"));
-console.log(`signalReady dispatched on ${element.id}`);
+//console.log(`signalReady dispatched on ${element.id}`);
 } else {
 console.log(`signalReady: ${element} invalid`);
 return;

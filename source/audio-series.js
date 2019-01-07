@@ -30,7 +30,7 @@ connectedCallback () {
 super.connectedCallback();
 childrenReady(this)
 .then(children => {
-console.log(`- connectedCallback.then: found ${children.length} children`);
+//console.log(`- connectedCallback.then: found ${children.length} children`);
 this.component = new Series(this.audio, this.components(children));
 this.component.mix(1);
 signalReady(this);

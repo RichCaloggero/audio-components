@@ -25,14 +25,13 @@ constructor () {
 super ();
 instanceCount += 1;
 this.id = `${AudioSplit.is}-${instanceCount}`;
-console.log(`${this.id} created.`);
 } // constructor
 
 connectedCallback () {
 super.connectedCallback();
 childrenReady(this)
 .then(children => {
-console.log(`- ${this.nodeName}#${this.id}.connectedCallback.then: found ${children.length} children`);
+//console.log(`- ${this.nodeName}#${this.id}.connectedCallback.then: found ${children.length} children`);
 this.component = new Split(this.audio, this.components(children));
 signalReady(this);
 }).catch(error => alert(`audio-split: cannot connect;\n${error}`));
