@@ -23,14 +23,17 @@
 </head>
 <body>
 <audio-context label="testing..."><audio-series>
-<audio-player></audio-player>
+<audio-player label="player"></audio-player>
 
-<audio-split><audio-filter></audio-filter></audio-split>
+<audio-split>
+<audio-filter label="filter"></audio-filter>
+<audio-delay label="delay"></audio-delay>
+</audio-split>
 
 <!--<audio-resonance label="Resonance Audio"></audio-resonance>
 -->
 
-<audio-gain label="volume"></audio-gain>
+<audio-gain label="output volume"></audio-gain>
 <audio-destination></audio-destination>
 </audio-series></audio-context>
 </body>

@@ -69,8 +69,8 @@ super.connectedCallback();
 
 components (elements) {
 return elements.map(e => {
-if (e.component) return e.component;
-else throw new Error(`${this.id}: ${e.id}.component is null or invalid -- cannot connect`);
+if (e && e.component) return e.component;
+else throw new Error(`${this.id}: ${e} is null or invalid -- cannot connect`);
 });
 } // components
 
@@ -128,46 +128,58 @@ window.customElements.define(_AudioContext_.is, _AudioContext_);
 /// utility functions
 
 export function childrenReady (element) {
-//console.log(`childrenReady: ${element.id}`);
-const slot = (element.shadowRoot || element).querySelector("slot");
-if (! slot) {
-//console.log(`- ${element.nodeName.toLowerCase()} ready`);
-return ready(element);
+console.log(`childrenReady: ${element.id}`);
+const children = Array.from(element.children);
+if (!children || children.length === 0) {
+//console.log(`- childrenReady: recursion bottomed out at ${element.id}`);
+return (ready(element));
 } // if
+const undefinedDescendants = Array.from(element.querySelectorAll(":not(:defined)"));
+console.log(`- ${undefinedDescendants.length} undefined descendants`);
 
 return new Promise((resolve, reject) => {
-slot.addEventListener("slotchange", function (e) {
-const children = Array.from(e.target.assignedNodes())
-.filter(e => e.nodeType === 1);
-console.log(`${element.id}: waiting for ${children.length} children`);
-console.log(`- ${children.map(e => e.nodeName.toLowerCase())}`);
+Promise.all(undefinedDescendants.map(e => customElements.whenDefined(e.localName)))
+.then(x => {
+const undefinedChildren = children.filter(e => e.matches(":not(:defined)"));
+console.log(`childrenReady: ${element} has ${undefinedChildren.length} undefined children`);
 
-if (children.length > 0) {
-resolve(Promise.all(children.map(child => childrenReady(child))));
-//Promise.all(children.map(child => childrenReady(child)))
-//.then(children => resolve(children));
-} else {
-resolve(ready(element));
-} // if
-}); // slotchange listener
-}); // promise
+console.log(`
+${element.id}: waiting for ${children.length} children
+- ${children.map(e => e.nodeName.toLowerCase())}
+`);
+resolve(Promise.all(children.map(child => ready(child))));
+}); // Promise.all.then
+}); // new Promise
 } // childrenReady
 
 function ready (element) {
+if (element && element instanceof _AudioContext_) {
 if (element._ready) {
-console.log(`${element.id} is ready.`);
+console.log(`${element.id} is ready (via flag).`);
 return element;
 } // if
 
 //console.log(`ready: waiting for ${element.id}`);
 return new Promise ((resolve, reject) => {
-element.addEventListener("elementReady", (e) => resolve(e.target));
+element.addEventListener("elementReady", e => {
+console.log(`${e.target.id} is ready (via event).`);
+resolve(e.target);
 });
+});
+
+} else {
+console.log(`ready: ${element} ${element && element.nodeName}#${element && element.id} is invalid`);
+} // if
 } // ready
 
 export function signalReady (element) {
+if (element && element instanceof _AudioContext_) {
 element._ready = true;
 element.dispatchEvent(new CustomEvent("elementReady"));
 console.log(`signalReady dispatched on ${element.id}`);
+} else {
+console.log(`signalReady: ${element} invalid`);
+return;
+} // if
 } // signalReady
 

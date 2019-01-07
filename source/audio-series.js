@@ -7,7 +7,7 @@ let instanceCount = 0;
 class AudioSeries extends _AudioContext_ {
 /*static get template () {
 return html`
-<div><slot></slot></div>
+<!--<div><slot></slot></div>-->
 `; // html
 } // get template
 */
@@ -32,21 +32,13 @@ childrenReady(this)
 .then(children => {
 console.log(`- connectedCallback.then: found ${children.length} children`);
 this.component = new Series(this.audio, this.components(children));
+this.component.mix(1);
 signalReady(this);
 }).catch(error => {
-console.log(`${this.id}: ${error}`);
+console.log(`${this.id}: ${error}\n${error.stack}`);
 alert(`${this.id}: ${error}`);
 }); // catch
 } // connectedCallback
-
-/*childrenAvailable (children) {
-setTimeout(() => {
-const components = children.map(e => e.component? e.component : e);
-console.log(`- childrenAvailable: ${components.length}, [${children.map(e => e.localName)}]`);
-this.component = new Series(this.audio, components);
-}, childrenAvailableDelay);
-} // childrenAvailabel
-*/
 } // class AudioSeries
 
 window.customElements.define(AudioSeries.is, AudioSeries);

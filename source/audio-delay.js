@@ -1,5 +1,5 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {_AudioContext_} from "./audio-context.js";
+import {_AudioContext_, signalReady} from "./audio-context.js";
 import {AudioComponent} from "./audio-component.js";
 
 let instanceCount  = 0;
@@ -39,7 +39,14 @@ this.component = new AudioComponent(this.audio, "delay");
 this.delay = this.audio.createDelay();
 this.component.input.connect(this.delay);
 this.delay.connect(this.component.wet);
+this.component.mix(this.mix);
 } // constructor
+
+connectedCallback () {
+super.connectedCallback();
+signalReady(this);
+//console.log(`${this.id} connected`);
+} // connectedCallback
 
 invertPhaseChanged (value) {this.component.invertPhase(value);}
 bypassChanged (value) {this.component.bypass(value);}

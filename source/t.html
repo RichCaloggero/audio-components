@@ -2,104 +2,41 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>test</title>
+<title>UI test</title>
 </head>
 <body>
-<h1>Test</h1>
+<audio-context label="testing..."><audio-series>
+<audio-player label="player"></audio-player>
 
-<t-1>
-<t-2></t-2>
-</t-1>
+<audio-split><audio-series>
+<audio-filter label="filter"></audio-filter>
+<audio-delay label="delay"></audio-delay>
+</audio-series></audio-split>
 
-<script type="module">
-let t1count = 0;
-let t2count = 0;
+<!--<audio-resonance label="Resonance Audio"></audio-resonance>
+-->
 
-class T1 extends HTMLElement {
-get template () {
-return `
-<div class="${this.id}">
-<h2>${this.id}</h2>
-</div>
-
-<slot></slot>
-`;
-} // get template
-
-constructor () {
-super ();
-t1count += 1;
-this.id = `t-1-${t1count}`;
-this.audio = new AudioContext();
-} // constructor
-
-connectedCallback () {
-createDom.call(this);
-console.log(`${this.id} connected`);
-} // connectedCallback
-} // class T1
-
-class T2 extends T1 {
-get template () {
-return `
-<fieldset class="${this.id}">
-<legend><h3>${this.id}</h3></legend>
-<button id="play">Play</button>
-</fieldset>
-`;
-} // get template
-
-constructor () {
-super();
-t2count += 1;
-this.id = `t-2-${t2count}`;
-
-this.audioElement = document.createElement("audio");
-this.audioSource = this.audio.createMediaElementSource(this.audioElement);
-this.audioSource.connect(this.audio.destination);
-this.audioElement.src = "./t1.mp3";
-} // constructor
-
-connectedCallback () {
-createDom.call(this);
-this.shadowRoot.addEventListener("click", this.play.bind(this));
-console.log(`${this.id} connected`);
-} // connectedCallback
-
-play (e) {
-if (this.audioElement.paused) {
-this.audioElement.play();
-e.target.textContent = "pause";
-} else {
-this.audioElement.pause();
-e.target.textContent = "play";
-} // if
-
-e.target.focus();
-} // play
-} // class T2
-
-customElements.define("t-1", T1);
-customElements.define("t-2", T2);
+<audio-gain label="output volume"></audio-gain>
+<audio-destination></audio-destination>
+</audio-series></audio-context>
 
 
-function createDom () {
-const root = this.attachShadow({mode: "open"});
-root.innerHTML = this.template;
-} // createDom
+<script crossorigin="anonymous" src="./@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>
+<!--<script crossorigin="anonymous" src="./resonance-audio.min.js"></script>-->
 
-function _template (element, level) {
-return `
-<div class="${element.id}">
-<h${level}>${element.id}</h${level}>
-<div class="message" aria-live="polite"></div>
-</div>
+<script type="module" crossorigin="anonymous" src="./ui-number.js"></script>
+<script type="module" crossorigin="anonymous" src="./ui-text.js"></script>
+<script type="module" crossorigin="anonymous" src="./ui-list.js"></script>
+<script type="module" crossorigin="anonymous" src="./ui-boolean.js"></script>
 
-${(level < 4)? "<slot></slot>" : ""}
-`;
-} // _template
-
-</script>
-
+<script type="module" crossorigin="anonymous" src="./audio-context.js"></script>
+<script type="module" crossorigin="anonymous" src="./audio-player.js"></script>
+<script type="module" crossorigin="anonymous" src="./audio-destination.js"></script>
+<script type="module" crossorigin="anonymous" src="./audio-series.js"></script>
+<script type="module" crossorigin="anonymous" src="./audio-gain.js"></script>
+<script type="module" crossorigin="anonymous" src="./audio-filter.js"></script>
+<script type="module" crossorigin="anonymous" src="./audio-delay.js"></script>
+<script type="module" crossorigin="anonymous" src="./audio-split.js"></script>
+<script type="module" crossorigin="anonymous" src="./audio-resonance.js"></script>
 </body>
 </html>

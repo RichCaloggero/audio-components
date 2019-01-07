@@ -8,7 +8,7 @@ class AudioPlayer extends _AudioContext_ {
 static get template () {
 return html`
 <fieldset class="audio-player">
-<legend><h2>Audio Player</h2></legend>
+<legend><h2>[[label]]</h2></legend>
 <ui-text label="Media URL" value="{{src}}"></ui-text>
 <button class="play" on-click="play">Play</button>
 <button class="back" on-click="back">back</button>
