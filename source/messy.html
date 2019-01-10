@@ -2,16 +2,26 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>UI test</title>
+<title>Messy</title>
 </head>
 <body>
 <audio-context label="testing..."><audio-series>
 <audio-player label="player"></audio-player>
 
+<audio-parallel>
 <audio-split>
 <audio-gain label="gain"></audio-gain>
 <audio-delay label="right delay"></audio-delay>
 </audio-split>
+
+<audio-series><audio-split swap-outputs>
+<audio-gain></audio-gain>
+<audio-gain></audio-gain>
+</audio-split>
+
+<audio-filter></audio-filter>
+</audio-series></audio-parallel>
+
 
 <audio-gain label="output volume"></audio-gain>
 <audio-destination></audio-destination>
