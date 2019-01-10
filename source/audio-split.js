@@ -16,8 +16,8 @@ static get is() { return "audio-split";}
 static get properties () {
 return {
 label: {type: String, value: ""},
-swapOutputs: Boolean,
-swapInputs: Boolean
+"swap-outputs": Boolean,
+"swap-inputs": Boolean
 }; // return
 } // get properties
 

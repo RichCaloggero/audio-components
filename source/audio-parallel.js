@@ -1,73 +1,42 @@
-import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {_AudioContext_} from "./audio-context.js";
-
+import {html} from "./@polymer/polymer/polymer-element.js";
+import {Parallel} from "./audio-component.js";
+import {_AudioContext_, childrenReady, signalReady} from "./audio-context.js";
 
 let instanceCount = 0;
 
 class AudioParallel extends _AudioContext_ {
-static get template () {
+/*static get template () {
 return html`
-
-<div class="audio-parallel" role="region" aria-label$="{{label}}">
-<span class="label">{{label}}</span>
-
-<div class="field" data-name="bypass">
-<label>bypass</label>
-<br><input type="checkbox" checked="{{bypass::change}}" accesskey="x">
-</div>
-
-<slot on-slotchange="_handleSlotChange"></slot>
-</div>
-
+<!--<div><slot></slot></div>-->
 `; // html
 } // get template
+*/
 static get is() { return "audio-parallel"; }
 
 static get properties () {
 return {
-label: {
-type: String,
-value: ""
-}, // label
-
-bypass: {
-type: Boolean,
-value: false,
-notify: true,
-observer: "_bypass"
-}, // bypass
+label: String
 }; // return
 } // get properties
 
 constructor () {
 super ();
 instanceCount += 1;
-this._id = AudioParallel.is + instanceCount;
-
-this._init ();
+this.id = `${AudioParallel.is}-${instanceCount}`;
 } // constructor
 
 connectedCallback () {
-super.connectedCallback ();
-this.addFieldLabels ();
+super.connectedCallback();
+childrenReady(this)
+.then(children => {
+//console.log(`- connectedCallback.then: found ${children.length} children`);
+this.component = new Parallel(this.audio, this.components(children));
+signalReady(this);
+}).catch(error => {
+console.log(`${this.id}: ${error}\n${error.stack}`);
+alert(`${this.id}: ${error}`);
+}); // catch
 } // connectedCallback
-
-connectAll (nodes) {
-//console.log(`${this.label}: connecting all ${nodes.length} nodes`);
-
-for (var i=0; i<nodes.length; i++) {
-let e = nodes[i];
-if (e.localName === "dom-repeat") continue;
-//console.log(`${this.label}: connecting ${e.label} in parallel`);
-this._audioIn.connect (e._in);
-e._out.connect (this._audioOut);
-} // for
-
-this._audioOut.gain.value = 1/nodes.length;
-} // connectAll
-
-
-
 } // class AudioParallel
 
 window.customElements.define(AudioParallel.is, AudioParallel);

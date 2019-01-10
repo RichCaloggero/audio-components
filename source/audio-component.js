@@ -95,7 +95,7 @@ this.mix(1);
 export class Series extends AudioComponent {
 constructor (audio, components) {
 super (audio, "series");
-console.log("Series: ", components.length, " in series");
+console.log(`Series: connecting ${components.length} components in series:`);
 if (components.length < 2) throw new Error("Series: need two or more components");
 const first = components[0];
 const last = components[components.length-1];
@@ -103,7 +103,6 @@ const last = components[components.length-1];
 if(first.input) {
 this.input.disconnect();
 this.input.connect(first.input);
-//this._connect(this.input, first);
 console.log(`- connected ${this.name} input to ${first.name}`);
 } // if
 
@@ -113,7 +112,6 @@ const next = all[i+1];
 if (c.output && next.input) {
 c.output.disconnect();
 c.output.connect(next.input);
-//this._connect(c, next);
 console.log(`- connected ${c.name} to ${next.name}`);
 } else {
 throw new Error (`series: ${c.name} and ${next.name} must both be AudioComponents`);
@@ -124,26 +122,34 @@ throw new Error (`series: ${c.name} and ${next.name} must both be AudioComponent
 if (last.output) {
 last.output.disconnect();
 last.output.connect(this.output);
-//this._connect(last, this.output);
 console.log(`- connected ${last.name} to ${this.name} output`);
 } // if
+
+this.mix(1);
 } // constructor
 } // class Series
 
 export class Parallel extends AudioComponent {
 constructor (audio, components) {
-super (audio);
+super (audio, "parallel");
 if (components.length < 2) throw new Error("Parallel: need two or more components");
-const output = audio.createGain();
-output.gain.value = 1 / components.length;
 
+console.log(`parallel: connecting ${components.length} components in parallel:`);
 components.forEach((c, i) => {
-c.disconnect();
-this._connect(this.input, c);
-this._connect(c, output);
+if (c.input) {
+this.input.connect(c.input);
+console.log(`- connecting ${this.name}.input to ${c.name}`);
+} // if
+
+if (c.output) {
+c.output.disconnect();
+c.output.connect(this.output);
+console.log(`- connecting ${c.name} to ${this.name}.output`);
+} // if
 }); // forEach
 
-output.connect(this.wet);
+this.output.gain.value = 1 / components.length;
+this.mix(1);
 } // constructor
 } // class Parallel
 
