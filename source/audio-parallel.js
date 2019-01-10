@@ -5,12 +5,11 @@ import {_AudioContext_, childrenReady, signalReady} from "./audio-context.js";
 let instanceCount = 0;
 
 class AudioParallel extends _AudioContext_ {
-/*static get template () {
+static get template () {
 return html`
-<!--<div><slot></slot></div>-->
+<slot></slot>
 `; // html
 } // get template
-*/
 static get is() { return "audio-parallel"; }
 
 static get properties () {

@@ -7,7 +7,7 @@ let instanceCount = 0;
 class AudioSplit extends _AudioContext_ {
 static get template () {
 return html`
-<!--<div><slot></slot></div>-->
+<slot></slot>
 `; // html
 } // get template
 
