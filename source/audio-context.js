@@ -46,6 +46,7 @@ super ();
 instanceCount += 1;
 this.id = `${_AudioContext_.is}-${instanceCount}`;
 this._ready = false;
+this.ui = true;
 
 if (! window.AudioContext) {
 alert ("webaudio not available");
@@ -65,6 +66,7 @@ throw new Error ("cannot initialize");
 connectedCallback () {
 super.connectedCallback();
 //console.log(`${this.id} connected, shadow = ${this.shadowRoot}`);
+this.hidden = this.ui && !this.label;
 } // connectedCallback
 
 components (elements) {
