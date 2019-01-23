@@ -46,24 +46,19 @@ this.label = `controling ${this.parameter}`;
 console.log (`${this.id} created`);
 } // constructor
 
-_attachDom(dom) {
-this.shadowRoot = this.attachShadow({mode: 'open', delegatesFocus: true});
-super._attachDom(dom);
-} // _attachDom
 
 connectedCallback () {
 super.connectedCallback ();
-console.log (`${this._id} connected to ${this.parentElement.localName}`);
-this.addFieldLabels ();
+console.log (`${this.id} connected to ${this.parentElement.localName}`);
 } // connectedCallback
 
 setupAutomation() {
 if (!this.value) return;
 let element = this.parentElement;
-console.log (`setting up automation for ${element._id}`);
+console.log (`setting up automation for ${element.id}`);
 
 if (this.parameter in element) {
-this._automationInterval = this.interval || 200; // milliseconds
+this._automationInterval = this.interval || 100; // milliseconds
 let f = this.compileFunction (this.value, "t").bind(element);
 
 if (f) {
@@ -95,7 +90,7 @@ removeFromAutomationQueue (this);
 } // catch
 }, this._automationInterval);
 
-console.log (`${this._id}: starting automation for parameter ${this.parameter} of ${this._automationTarget.localName} using interval ${this._automationInterval}`);
+console.log (`${this.id}: starting automation for parameter ${this.parameter} of ${this._automationTarget.localName} using interval ${this._automationInterval}`);
 } // start
 
 stop () {
@@ -142,11 +137,7 @@ console.log (`added ${element.label || element._id} to automation queue`);
 } // addToAutomationQueue
 
 function removeFromAutomationQueue (element) {
-let found = automationQueue.indexOf(element);
-if (found >= 0) {
-automationQueue.splice (found, 1);
-console.log (`removed ${element.label || element._id} from automation queue`);
-} // if
+automationQueue = automationQueue.filter(e => e != element);
 } // removeFromAutomationQueue
 
 window.customElements.define(AudioControl.is, AudioControl);
