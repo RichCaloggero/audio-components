@@ -1,4 +1,3 @@
-//import {AudioControl} from "./audio-control.js";
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
 
 // audio-context
@@ -7,12 +6,17 @@ let _root = null;
 export const audio = new AudioContext();
 export const childrenAvailableDelay = 20; // milliseconds
 
+let automationQueue = [];
+const automationInterval = 100; // milliseconds
+let automation = null; // value returned from setInterval
+
 export class _AudioContext_ extends PolymerElement {
 static get template () {
 return html`
 <div class="audio-context">
 <h1>[[label]]</h1>
-<div class="status" role="region" aria-label="Status" aria-live="polite"></div>
+<ui-boolean label="Run automation" value="{{enableAutomation}}"></ui-boolean>
+<div id="statusMessage" aria-live="polite"></div>
 </div>
 
 <slot></slot>
@@ -77,10 +81,8 @@ else throw new Error(`${this.id}: ${e} is null or invalid -- cannot connect`);
 } // components
 
 _enableAutomation (value) {
-if (this.constructor === _AudioContext_) {
-//if (value) AudioControl.startAllAutomation ();
-//else AudioControl.stopAllAutomation ();
-} // if
+//if (value) AudioControl.startAutomation();
+//else AudioControl.stopAutomation();
 } // _enableAutomation
 
 
@@ -184,4 +186,24 @@ console.log(`signalReady: ${element} invalid`);
 return;
 } // if
 } // signalReady
+
+export function startAutomation () {
+automation = setInterval (() => {
+automationQueue.forEach(e => e.automate());
+}, automationInterval);
+} // startAutomation
+
+export function stopAutomation () {
+clearInterval(automation);
+} // stopAutomation
+
+
+export function addToAutomationQueue (element) {
+automationQueue.push (element);
+console.log (`added ${element.label || element._id} to automation queue`);
+} // addToAutomationQueue
+
+export function removeFromAutomationQueue (element) {
+automationQueue = automationQueue.filter(e => e != element);
+} // removeFromAutomationQueue
 

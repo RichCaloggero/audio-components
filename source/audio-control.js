@@ -1,18 +1,20 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {_AudioContext_} from "./audio-context.js";
+import {_AudioContext_, childrenReady, signalReady, addToAutomationQueue, removeFromAutomationQueue} from "./audio-context.js";
+import {AudioComponent} from "./audio-component.js";
 
 
 let instanceCount  = 0;
-let automationQueue = [];
 
-window.AudioControl = class AudioControl extends _AudioContext_ {
+
+class AudioControl extends _AudioContext_ {
 static get template () {
 return html`
-<div class="audio-control">
+<fieldset class="audio-control">
+<legend><h2>[[label]]</h2></legend>
 <label>automating {{parameter}} as
 <br><input type="text" value="{{value::change}}">
 </label>
-</div>
+</fieldset>
 `; // html
 } // get template
 static get is() { return "audio-control"; }
@@ -26,11 +28,11 @@ notify: true,
 observer: "parameterChanged"
 }, // parameter
 
-value: {
+function: {
 type: String,
 value: "",
 notify: true,
-observer: "valueChanged"
+observer: "functionChanged"
 } // value
 }; // return
 } // get properties
@@ -39,83 +41,74 @@ observer: "valueChanged"
 constructor () {
 super ();
 instanceCount += 1;
-this.id = `${this.is}-${instanceCount}`;
+this.id = `${AudioControl.is}-${instanceCount}`;
 
 this._automation = null;
 this.label = `controling ${this.parameter}`;
-console.log (`${this.id} created`);
+this.component = new AudioComponent (this.audio, "control");
+//console.log (`${this.id} created`);
 } // constructor
 
 
 connectedCallback () {
 super.connectedCallback ();
-console.log (`${this.id} connected to ${this.parentElement.localName}`);
+childrenReady(this)
+.then(children => {
+const target = children[0];
+const targetComponent = target.component;
+this.component.input.connect(targetComponent.input);
+targetComponent.output.connect(this.component.output);
+this.setupAutomation(target);
+signalReady(this);
+}).catch(error => alert(`audio-control: cannot connect;\n${error}`));
 } // connectedCallback
 
-setupAutomation() {
-if (!this.value) return;
-let element = this.parentElement;
-console.log (`setting up automation for ${element.id}`);
+setupAutomation(target) {
+if (!target || !this.parameter || !this.function) return;
+console.log (`setting up automation for ${target.id}`);
 
-if (this.parameter in element) {
-this._automationInterval = this.interval || 100; // milliseconds
-let f = this.compileFunction (this.value, "t").bind(element);
+if (this.parameter in target) {
+let f = this.compileFunction (this.function, "t").bind(target);
 
 if (f) {
 console.log (`function: ${f}`);
 this._automator = f;
-this._automationTarget = element;
-addToAutomationQueue (this);
-this.start ();
+this._automationTarget = target;
+this.start();
 
 } else {
-alert ("invalid function: " + this.value);
+alert ("invalid function: " + this.function);
 } // if
 
 } else {
-alert (`parameter ${this.parameter} not in ${element.localName}`);
+alert (`parameter ${this.parameter} not in ${target.localName}`);
 } // if
 } // setupAutomation
 
-start () {
-this.stop ();
-this._automation = setInterval (() => {
-try {
-this._automationTarget[this.parameter] = this._automator(audio.currentTime);
-} catch (e) {
-alert (e);
-this.value = "";
-this.stop ();
-removeFromAutomationQueue (this);
-} // catch
-}, this._automationInterval);
+automate () {
+const parameter = this.parameter;
+const target = this._automationTarget;
+const value = this._automator(this.audio.currentTime);
 
-console.log (`${this.id}: starting automation for parameter ${this.parameter} of ${this._automationTarget.localName} using interval ${this._automationInterval}`);
+if (parameter instanceof AudioParam) target[parameter].value = value;
+else target[parameter] = value;
+} // automate
+
+start () {
+addToAutomationQueue (this);
 } // start
 
 stop () {
-if (this._automation) {
-clearInterval (this._automation);
-console.log (`${this._id}: stopping automation for parameter ${this.parameter} of ${this._automationTarget.localName} using interval ${this._automationInterval}`);
-} // if
+removeFromAutomationQueue(this);
 } // stop
-
-static startAllAutomation () {
-automationQueue.forEach ((element) => element.start());
-} // startAllAutomation
-
-static stopAllAutomation () {
-automationQueue.forEach ((element) => element.stop());
-} // stopAllAutomation
 
 
 parameterChanged (value) {
-console.log(`parameter ${value}`);
+console.log(`audio-control: parameter set to ${value}`);
 } // parameterChanged
 
-valueChanged (value) {
-this.stop ();
-this.setupAutomation ();
+functionChanged (value) {
+console.log(`audio-control: function set to ${value}`);
 } // valueChanged
 
 compileFunction (text, parameter) {
@@ -129,15 +122,8 @@ return null;
 } // try
 } // compileFunction
 
+
 } // class AudioControl
 
-function addToAutomationQueue (element) {
-automationQueue.push (element);
-console.log (`added ${element.label || element._id} to automation queue`);
-} // addToAutomationQueue
 
-function removeFromAutomationQueue (element) {
-automationQueue = automationQueue.filter(e => e != element);
-} // removeFromAutomationQueue
-
-window.customElements.define(AudioControl.is, AudioControl);
+customElements.define(AudioControl.is, AudioControl);

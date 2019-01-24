@@ -20,6 +20,7 @@
 <script type="module" crossorigin="anonymous" src="./audio-delay.js"></script>
 <script type="module" crossorigin="anonymous" src="./audio-split.js"></script>
 <script type="module" crossorigin="anonymous" src="./audio-resonance.js"></script>
+<script type="module" crossorigin="anonymous" src="./audio-control.js"></script>
 </head>
 <body>
 <audio-context label="testing..."><audio-series>
@@ -27,7 +28,9 @@
 
 <audio-split>
 <audio-filter type="lowpass"></audio-filter>
+<audio-control label="control delay time" parameter="delayTime" function="0.01 * sin(t)">
 <audio-delay label="delay"></audio-delay>
+</audio-control>
 </audio-split>
 
 <!--<audio-resonance label="Resonance Audio"></audio-resonance>
