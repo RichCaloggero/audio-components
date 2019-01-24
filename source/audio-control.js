@@ -11,10 +11,10 @@ static get template () {
 return html`
 <fieldset class="audio-control">
 <legend><h2>[[label]]</h2></legend>
-<label>automating {{parameter}} as
-<br><input type="text" value="{{value::change}}">
-</label>
+<ui-text label="automating [[parameter]] as " value="{{function}}"></ui-text>
 </fieldset>
+
+<slot></slot>
 `; // html
 } // get template
 static get is() { return "audio-control"; }
@@ -108,6 +108,7 @@ console.log(`audio-control: parameter set to ${value}`);
 } // parameterChanged
 
 functionChanged (value) {
+this.setupAutomation(this._automationTarget);
 console.log(`audio-control: function set to ${value}`);
 } // valueChanged
 

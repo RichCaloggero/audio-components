@@ -65,6 +65,8 @@ this.audio = audio;
 alert("initialization failure -- cannot initialize new AudioContext()");
 throw new Error ("cannot initialize");
 } // if
+
+startAutomation();
 } // constructor
 
 connectedCallback () {
