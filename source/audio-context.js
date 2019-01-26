@@ -4,7 +4,6 @@ import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
 let instanceCount = 0;
 let _root = null;
 export const audio = new AudioContext();
-export const childrenAvailableDelay = 20; // milliseconds
 
 let automationQueue = [];
 const automationInterval = 100; // milliseconds
@@ -34,6 +33,8 @@ value: true,
 notify: true,
 observer: "_enableAutomation"
 }, // enableAutomation
+
+id: {type: String, notify:true, observer: "setId"},
 
 /*hideOnBypass: {
 type: Boolean,
@@ -83,10 +84,11 @@ else throw new Error(`${this.id}: ${e} is null or invalid -- cannot connect`);
 } // components
 
 _enableAutomation (value) {
-//if (value) AudioControl.startAutomation();
-//else AudioControl.stopAutomation();
+if (value) startAutomation();
+else stopAutomation();
 } // _enableAutomation
 
+setId (value) {this.id = value;}
 
 
 _setParameterValue (parameter, value) {

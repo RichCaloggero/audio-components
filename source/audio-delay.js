@@ -39,7 +39,6 @@ this.component = new AudioComponent(this.audio, "delay");
 this.delay = this.audio.createDelay();
 this.component.input.connect(this.delay);
 this.delay.connect(this.component.wet);
-this.component.mix(this.mix);
 } // constructor
 
 connectedCallback () {

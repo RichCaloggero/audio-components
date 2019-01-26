@@ -22,10 +22,9 @@ this.wet.gain.value = value;
 return value;
 } // mix
 
-invertPhase (value) {
-return this.wet.gain.value = value?
-Math.abs(this.wet.gain.value)
-: -1 * Math.abs(this.wet.gain.value);
+invertPhase (invert) {
+this.output.gain.value = invert? -1 : 1;
+return this.output.gain.value;
 } // invertPhase
 
 bypass (value) {

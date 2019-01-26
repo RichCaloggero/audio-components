@@ -46,7 +46,7 @@ this.id = `${AudioControl.is}-${instanceCount}`;
 this._automation = null;
 this.label = `controling ${this.parameter}`;
 this.component = new AudioComponent (this.audio, "control");
-//console.log (`${this.id} created`);
+console.log (`${this.id} created`);
 } // constructor
 
 
