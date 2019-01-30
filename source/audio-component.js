@@ -38,13 +38,9 @@ this.wet.gain.value < 0;
 bypass (value) {
 if (arguments.length > 0) {
 if (value) {
-//this._mix = this.wet.gain.value;
-//this.mix(0);
 this._bypass = true;
 this.wet.disconnect();
 } else {
-//this.mix(this._mix);
-//this._mix = 0;
 this.wet.connect(this.output);
 this._bypass = false;
 } // if
@@ -53,26 +49,6 @@ this._bypass = false;
 return this._bypass;
 } // if
 } // bypass
-
-/*_connect (input, output) {
-input = validate(input, "output");
-output = validate(output, "input");
-
-return input.connect(output);
-
-
-function validate (x, p) {
-if (x instanceof AudioNode) return x;
-else if (x instanceof AudioComponent) return x[p];
-else if(x.component) return validate(x.component);
-else throw new Error(`cannot connect: ${x}`);t 
-} // validate
-} // _connect
-
-disconnect () {
-this.output.disconnect();
-} // disconnect
-*/
 } // Component
 
 export class Split extends AudioComponent {
