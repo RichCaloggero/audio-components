@@ -9,8 +9,8 @@ static get template () {
 return html`
 <fieldset class="audio-player">
 <legend><h2>[[label]]</h2></legend>
-<ui-text label="Media URL" value="{{src}}"></ui-text>
-<button class="play" on-click="play">Play</button>
+<ui-text label="Media URL" value="{{src}}" key="m"></ui-text>
+<button class="play" accesskey="p" on-click="play">Play</button>
 <button class="back" on-click="back">back</button>
 <button class="forward" on-click="forward">forward</button>
 </fieldset>

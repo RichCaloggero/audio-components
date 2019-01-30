@@ -13,12 +13,12 @@ const key = e.key;
 const input = this.shadowRoot.querySelector("input");
 console.log(`handleKey: ${this.id} ${e.target.nodeName} (${key})`);
 
-if (!input || keys.indexOf(key) < 0) return true;
-else if (input.type === "checkbox") return true;
+if (!input || input.type === "checkbox" || keys.indexOf(key) < 0) return true;
 else if ((key === "1" || key === "0") && input.type !== "range") return true;
 
 if (key === "Enter") input.click();
 else input.value = key;
+input.dispatchEvent(new CustomEvent("change"));
 return false;
 } // handleSpecialKeys
 

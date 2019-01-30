@@ -2,76 +2,23 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>parameter test</title>
-<script src="ui-text.js" type="module"></script>
-<script src="audio-context.js" type="module"></script>
-<script src="audio-parameter.js" type="module"></script>
+<title>accesskey test</title>
 </head>
 <body>
-<audio-context label="test">
-<t-1 id="control" label="controling my element">
-<audio-parameter label="automate p1" name="p1" function="f1"></audio-parameter>
-<audio-parameter label="automate p2" name="p2" function="f2"></audio-parameter>
-<audio-parameter label="automate p3" name="p3" function="f3"></audio-parameter>
-</t-1>
-</audio-context>
+<button accesskey="1">my button in normal dom</button>
+<div>
+</div>
 
-<script type="module">
-import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {_AudioContext_, childrenReady, signalReady} from "./audio-context.js";
+<script>
+const d = document.querySelector("div");
+d.attachShadow({mode: "open"});
+d.shadowRoot.innerHTML = '<button accesskey="2">my button in shadow dom</button>';
+d.shadowRoot.querySelector("button").addEventListener("click", handleClick);
+document.querySelector("button").addEventListener("click", handleClick);
 
-let instanceCount = 0;
-
-class T1 extends _AudioContext_ {
-static get template () {
-return html`
-<slot></slot>
-`;
-} // template
-
-static get properties () {
-return {
-nme: String, function: String
-};
-} // properties
-
-static get observers () {
-return [
-"updateParameter(name, function)"
-];
-} // observers
-
-constructor () {
-super ();
-this.ui = false;
-this.parameters = [];
-} // constructor
-
-connectedCallback () {
-super.connectedCallback ();
-childrenReady(this)
-.then(children => {
-children.forEach(e => this.addParameter(e.name, e.function));
-signalReady(this);
-console.log(`${this.id}: parameter list is ${this.parameters.toSource()}`);
-}).catch(error => alert(error));
-console.log(`${this.id} connected`);
-} // connectedCallback
-
-updateParameter (_name, _function) {
-console.log(`${this.id}: updateParameter ${_name} ${_function}`);
-} // updateParameter
-
-/*ready () {
-super.ready ();
-this.addEventListener("update", e => this.addParameter(e.detail));
-} // ready
-*/
-
-addParameter(_name, _function) {this.parameters.push({name: _name, function: _function});}
-} // class T1
-
-customElements.define("t-1", T1);
+function handleClick (e) {
+alert(e.target.textContent);
+} // handleClick
 </script>
 
 </body>
