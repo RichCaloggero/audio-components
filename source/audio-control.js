@@ -16,7 +16,7 @@ static get is() { return "audio-control"; }
 
 static get properties () {
 return {
-nme: String, function: String
+name: String, function: String
 };
 } // properties
 

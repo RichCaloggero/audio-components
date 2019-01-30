@@ -3,6 +3,7 @@ constructor (audio, name) {
 //console.log("audioComponent: instantiating ", name);
 this.audio = audio;
 this.name = name;
+this._bypass = false;
 this.input = audio.createGain();
 this.output = audio.createGain();
 this.wet = audio.createGain();
@@ -11,30 +12,45 @@ this.dry = audio.createGain();
 this.input.connect(this.dry);
 this.wet.connect(this.output);
 this.dry.connect(this.output);
-
-this.mix(0);
-this._mix = 0;
 } // constructor
 
 mix (value) {
+if (arguments.length > 0) {
 this.dry.gain.value = 1-value;
 this.wet.gain.value = value;
 return value;
+} else {
+return this.wet.gain.value;
+} // if
 } // mix
 
 invertPhase (invert) {
-this.output.gain.value = invert? -1 : 1;
-return this.output.gain.value;
+if (arguments.length > 0) {
+const value = this.wet.gain.value;
+this.wet.gain.value = (invert? -1 * value : Math.abs(value));
+console.log(`${this.name} phase: ${this.wet.gain.value}`);
+return this.wet.gain.value;
+} else {
+this.wet.gain.value < 0;
+} // if
 } // invertPhase
 
 bypass (value) {
+if (arguments.length > 0) {
 if (value) {
-this._mix = this.wet.gain.value;
+//this._mix = this.wet.gain.value;
+//this.mix(0);
+this._bypass = true;
 this.wet.disconnect();
-this.mix(0);
 } else {
+//this.mix(this._mix);
+//this._mix = 0;
 this.wet.connect(this.output);
-this.mix(this._mix);
+this._bypass = false;
+} // if
+
+} else {
+return this._bypass;
 } // if
 } // bypass
 
