@@ -9,11 +9,6 @@ let instanceCount  = 0;
 class AudioControl extends _AudioContext_ {
 static get template () {
 return html`
-<fieldset class="audio-control">
-<legend><h2>[[label]]</h2></legend>
-<ui-text label="automating [[parameter]] as " value="{{function}}"></ui-text>
-</fieldset>
-
 <slot></slot>
 `; // html
 } // get template
@@ -21,31 +16,24 @@ static get is() { return "audio-control"; }
 
 static get properties () {
 return {
-parameter: {
-type: String,
-value: "",
-notify: true,
-observer: "parameterChanged"
-}, // parameter
+nme: String, function: String
+};
+} // properties
 
-function: {
-type: String,
-value: "",
-notify: true,
-observer: "functionChanged"
-} // value
-}; // return
-} // get properties
-
+static get observers () {
+return [
+"updateParameter(name, function)"
+];
+} // observers
 
 constructor () {
 super ();
 instanceCount += 1;
 this.id = `${AudioControl.is}-${instanceCount}`;
-
-this._automation = null;
-this.label = `controling ${this.parameter}`;
+this.ui = false;
 this.component = new AudioComponent (this.audio, "control");
+this.target = null;
+this.parameters = [];
 console.log (`${this.id} created`);
 } // constructor
 
@@ -54,44 +42,45 @@ connectedCallback () {
 super.connectedCallback ();
 childrenReady(this)
 .then(children => {
-const target = children[0];
-const targetComponent = target.component;
+if (children.length < 2) throw new Error(`${this.id}: must have at least one target element and one parameter as children`);
+this.target = children[0];
+const targetComponent = this.target.component;
 this.component.input.connect(targetComponent.input);
 targetComponent.output.connect(this.component.output);
-this.setupAutomation(target);
+children.slice(1).forEach(child => this.updateParameter(child.name, child.function));
+this.start();
 signalReady(this);
 }).catch(error => alert(`audio-control: cannot connect;\n${error}`));
 } // connectedCallback
 
-setupAutomation(target) {
-if (!target || !this.parameter || !this.function) return;
-console.log (`setting up automation for ${target.id}`);
+updateParameter (_name, _text) {
+if (!_name || !_text) return;
+const index = this.parameters.findIndex(p => p.name === _name);
+const parameter = index >= 0? this.parameters[index]
+: {name: _name, text: _text};
 
-if (this.parameter in target) {
-let f = this.compileFunction (this.function, "t").bind(target);
-
-if (f) {
-console.log (`function: ${f}`);
-this._automator = f;
-this._automationTarget = target;
-this.start();
-
+if (parameter.text) {
+parameter.function = compileFunction(parameter.text, "t");
+if (!parameter.function) throw new Error(`${this.id}: automation of parameter ${parameter.name} failed; invalid function;\n${parameter.text}`);
+parameter.function.bind(this.target);
 } else {
-alert ("invalid function: " + this.function);
+parameter.function = null;
 } // if
 
-} else {
-alert (`parameter ${this.parameter} not in ${target.localName}`);
-} // if
-} // setupAutomation
+if (index >= 0) this.parameters[index] = parameter;
+else this.parameters.push(parameter);
+} // updateParameter
+
 
 automate () {
-const parameter = this.parameter;
-const target = this._automationTarget;
-const value = this._automator(this.audio.currentTime);
+this.parameters.forEach(parameter => {
+const target = this.target;
+const p = target[parameter.name];
+const value = parameter.function(this.audio.currentTime);
 
-if (parameter instanceof AudioParam) target[parameter].value = value;
-else target[parameter] = value;
+if (p instanceof AudioParam) p.value = value;
+else target[parameter.name] = value;
+}); // forEach parameters
 } // automate
 
 start () {
@@ -101,18 +90,11 @@ addToAutomationQueue (this);
 stop () {
 removeFromAutomationQueue(this);
 } // stop
+} // class AudioControl
+customElements.define(AudioControl.is, AudioControl);
 
 
-parameterChanged (value) {
-console.log(`audio-control: parameter set to ${value}`);
-} // parameterChanged
-
-functionChanged (value) {
-this.setupAutomation(this._automationTarget);
-console.log(`audio-control: function set to ${value}`);
-} // valueChanged
-
-compileFunction (text, parameter) {
+function compileFunction (text, parameter) {
 try {
 return new Function (parameter,
 `with (Math) {return ${text};}`);
@@ -122,9 +104,3 @@ alert (e);
 return null;
 } // try
 } // compileFunction
-
-
-} // class AudioControl
-
-
-customElements.define(AudioControl.is, AudioControl);

@@ -5,8 +5,8 @@ let instanceCount = 0;
 let _root = null;
 export const audio = new AudioContext();
 
-let automationQueue = [];
 const automationInterval = 100; // milliseconds
+let automationQueue = [];
 let automation = null; // value returned from setInterval
 
 export class _AudioContext_ extends PolymerElement {
@@ -29,7 +29,7 @@ return {
 label: String,
 enableAutomation: {
 type: Boolean,
-value: true,
+value: false,
 notify: true,
 observer: "_enableAutomation"
 }, // enableAutomation
@@ -67,7 +67,7 @@ alert("initialization failure -- cannot initialize new AudioContext()");
 throw new Error ("cannot initialize");
 } // if
 
-startAutomation();
+//startAutomation();
 } // constructor
 
 connectedCallback () {
@@ -84,8 +84,10 @@ else throw new Error(`${this.id}: ${e} is null or invalid -- cannot connect`);
 } // components
 
 _enableAutomation (value) {
+const _message = value? "Automation enabled." : "Automation disabled.";
 if (value) startAutomation();
 else stopAutomation();
+//this.statusMessage(_message);
 } // _enableAutomation
 
 setId (value) {this.id = value;}
@@ -113,11 +115,10 @@ alert (e.stack);
 } // _setParameterValue
 
 
-static statusMessage (message) {
-var status = _root.querySelector (".audio-context .status");
-var doc = status.ownerDocument;
-var p = doc.createElement ("p");
-var t = doc.createTextNode (message);
+statusMessage (message) {
+const status = this.shadowRoot.querySelector ("#statusMessage");
+const p = document.createElement ("p");
+const t = document.createTextNode (message);
 if (status && p && t) {
 p.appendChild (t);
 status.appendChild (p);
@@ -131,7 +132,7 @@ alert (message);
 
 } // class _AudioContext_
 
-window.customElements.define(_AudioContext_.is, _AudioContext_);
+customElements.define(_AudioContext_.is, _AudioContext_);
 
 /// utility functions
 
@@ -204,7 +205,7 @@ clearInterval(automation);
 
 export function addToAutomationQueue (element) {
 automationQueue.push (element);
-console.log (`added ${element.label || element._id} to automation queue`);
+console.log (`added ${element.label || element.id} to automation queue`);
 } // addToAutomationQueue
 
 export function removeFromAutomationQueue (element) {

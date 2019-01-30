@@ -21,19 +21,24 @@
 <script type="module" crossorigin="anonymous" src="./audio-split.js"></script>
 <script type="module" crossorigin="anonymous" src="./audio-resonance.js"></script>
 <script type="module" crossorigin="anonymous" src="./audio-control.js"></script>
+<script type="module" crossorigin="anonymous" src="./audio-parameter.js"></script>
 </head>
 <body>
 <audio-context label="testing..."><audio-series>
 <audio-player label="player" src="./media/jazzomatic.mp3"></audio-player>
 
 <audio-split>
-<audio-control label="control q" parameter="q"
-function="0.01 + 1.4 * pow(sin(t/2.5 + 1.5), 2)">
+<audio-control>
 <audio-filter label="filter" type="lowpass" frequency="150"></audio-filter>
+
+<audio-parameter label="controling filter q" name="q"
+function="0.01 + 1.4 * pow(sin(t/2.5 + 1.5), 2)"></audio-parameter>
 </audio-control>
-<audio-control label="control delay time" parameter="delayTime"
-function="0.0035 + 0.003 * pow(sin(t/5), 2)">
+
+<audio-control>
 <audio-delay label="delay" mix="1"></audio-delay>
+<audio-parameter label="controling delay time" name="delayTime"
+function="0.0035 + 0.003 * pow(sin(t/5), 2)">
 </audio-control>
 </audio-split>
 
