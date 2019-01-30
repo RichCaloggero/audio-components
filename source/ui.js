@@ -1,6 +1,28 @@
 import {PolymerElement} from "./@polymer/polymer/polymer-element.js";
 
 export class UI extends PolymerElement {
+keyChanged (value) {
+const input = this.shadowRoot.querySelector("input");
+console.log(`keyChanged: ${this.id} ${input.nodeName} (${value})`);
+if (value && input) input.setAttribute("accesskey", value);
+} // keyChanged
+
+handleSpecialKeys (e) {
+const keys = ["Enter", "0", "1",];
+const key = e.key;
+const input = this.shadowRoot.querySelector("input");
+console.log(`handleKey: ${this.id} ${e.target.nodeName} (${key})`);
+
+if (!input || keys.indexOf(key) < 0) return true;
+else if (input.type === "checkbox") return true;
+else if ((key === "1" || key === "0") && input.type !== "range") return true;
+
+if (key === "Enter") input.click();
+else input.value = key;
+return false;
+} // handleSpecialKeys
+
+
 static processValues (values) {
 if (values instanceof String || typeof(values) === "string") {
 values = values.trim();
@@ -95,3 +117,4 @@ return result;
 } // ancestors
 
 } // class UI
+

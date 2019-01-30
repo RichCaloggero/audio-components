@@ -44,7 +44,6 @@ this.delay.connect(this.component.wet);
 connectedCallback () {
 super.connectedCallback();
 signalReady(this);
-console.log(`${this.id} connected, mix=${this.component.mix()}`);
 } // connectedCallback
 
 invertPhaseChanged (value) {this.component.invertPhase(value);}

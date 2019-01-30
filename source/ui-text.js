@@ -8,7 +8,7 @@ static get template () {
 return html`
 <div class="ui-text">
 <label>[[label]]
-<br><input type="text" value="{{value::change}}">
+<br><input type="text" value="{{value::change}}" on-keydown="handleSpecialKeys">
 </label>
 </div>
 `; // html
@@ -18,9 +18,9 @@ static get is() { return "ui-text"; }
 
 static get properties () {
 return {
-label: {type: String, notify: true},
+label: String,
 value: {type: String, value: "", notify: true},
-key: {type: String, value: "", notify: true}, // key
+key: {type: String, notify: true, observer: "keyChanged"}
 }; // return
 } // get properties
 
@@ -29,17 +29,5 @@ super ();
 instanceCount += 1;
 this.id = `${UIText.is}-${instanceCount}`;
 } // constructor
-
-
-_keyChanged (value) {
-if (value) {
-let key = value.charAt(0);
-this.shadowRoot.querySelector ("input[type='text']").setAttribute ("accesskey", key);
-} else {
-this.shadowRoot.querySelector ("input[type='text']").removeAttribute ("accesskey");
-} // if
-} // _keyChanged
-
 } // class UIText
-
-window.customElements.define(UIText.is, UIText);
+customElements.define(UIText.is, UIText);

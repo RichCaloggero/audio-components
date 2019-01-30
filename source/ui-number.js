@@ -8,7 +8,7 @@ static get template () {
 return html`
 <div class="ui-number">
 <label >[[label]]
-<br><input type="range" value="{{value::change}}" min="[[min]]" max="[[max]]" step="{{step::change}}">
+<br><input type="range" value="{{value::change}}" min="[[min]]" max="[[max]]" step="{{step::change}}" on-keydown="handleSpecialKeys">
 </label>
 </div>
 `; // html
