@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>UI test</title>
-<script crossorigin="anonymous" src="./@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>
+<!--<script crossorigin="anonymous" src="./@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>-->
 <script crossorigin="anonymous" src="./resonance-audio.min.js"></script>
 
 <script type="module" crossorigin="anonymous" src="./ui-number.js"></script>
@@ -25,11 +25,12 @@
 </head>
 <body>
 <audio-context label="testing..."><audio-series>
-<audio-player label="player" src="./media/jazzomatic.mp3"></audio-player>
+<audio-player label="player" src="funk.wav"></audio-player>
 
 <audio-split>
 <audio-control>
-<audio-filter label="filter" type="lowpass" frequency="150"></audio-filter>
+<audio-filter label="filter" type="lowpass" frequency="150"
+hide="gain, mix"></audio-filter>
 
 <audio-parameter label="controling filter q" name="q"
 function="0.01 + 1.4 * pow(sin(t/2.5 + 1.5), 2)"></audio-parameter>

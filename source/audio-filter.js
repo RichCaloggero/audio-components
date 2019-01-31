@@ -38,7 +38,6 @@ static get is() { return "audio-filter"; }
 
 static get properties () {
 return {
-label: String,
 type: {type: String, value: "lowpass", notify: true, observer: "typeChanged"},
 
 bypass: {type: Boolean, value: false, notify: true, observer: "bypassChanged"},

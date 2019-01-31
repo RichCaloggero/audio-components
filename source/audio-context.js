@@ -26,6 +26,7 @@ static get is() { return "audio-context";}
 
 static get properties() {
 return {
+hide: String,
 label: String,
 enableAutomation: {
 type: Boolean,
@@ -74,7 +75,31 @@ connectedCallback () {
 super.connectedCallback();
 //console.log(`${this.id} connected, shadow = ${this.shadowRoot}`);
 this.hidden = this.ui && !this.label;
+this.hideControls();
 } // connectedCallback
+
+hideControls () {
+console.log(`${this.id}: hide ${this.hide}`);
+if (! this.hide) return;
+const controls = this.uiControls().filter(x => x.name || x.label);
+if (this.hide.trim() && controls.length > 0) {
+const hide = this.hide.split(",").map(x => x.trim().toLowerCase());
+console.log(`${this.id} hiding ${hide.toSource()}`);
+
+controls.forEach(element => {
+const name = element.name || element.label;
+console.log (`- checking ${element.id} ${name}`);
+if (name && hide.includes(name)) element.hidden = true;
+}); // forEach
+} // if
+} // hideControls
+
+uiControls () {
+const elementNames = "ui-text,ui-number,ui-boolean";
+const controls = Array.from(this.shadowRoot.querySelectorAll(elementNames));
+//console.log(`${this.id}: controls ${controls.length} ${controls.map(x => x.name || x.label || x.id || x)}`);
+return controls;
+} // uiControls
 
 components (elements) {
 return elements.map(e => {
