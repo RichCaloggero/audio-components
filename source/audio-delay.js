@@ -24,7 +24,7 @@ return {
 label: String,
 mix: {type: Number, value: 1.0, notify: true, observer: "mixChanged"},
 delayTime: {type: Number, value: 0.0, notify: true, observer: "delayTimeChanged"},
-bypass: {type: Boolean, value: false, notify: true, observer: "bypassChanged"},
+bypass: {type: Boolean, value: false, notify: true, observer: "bypass"},
 invertPhase: {type: Boolean, value: false, notify: true, observer: "invertPhaseChanged"},
 }; // return
 } // get properties

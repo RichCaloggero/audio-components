@@ -101,6 +101,11 @@ const controls = Array.from(this.shadowRoot.querySelectorAll(elementNames));
 return controls;
 } // uiControls
 
+bypass (value) {
+return this.component? this.component.bypass(value)
+: false;
+} // bypass
+
 components (elements) {
 return elements.map(e => {
 if (e && e.component) return e.component;
@@ -142,17 +147,8 @@ alert (e.stack);
 
 statusMessage (message) {
 const status = this.shadowRoot.querySelector ("#statusMessage");
-const p = document.createElement ("p");
-const t = document.createTextNode (message);
-if (status && p && t) {
-p.appendChild (t);
-status.appendChild (p);
+if (status) status.innerHTML = `<p>${message}</p>`;
 //alert ("status: " + status);
-
-} else {
-alert (message);
-} // if
-
 } // statusMessage
 
 } // class _AudioContext_
