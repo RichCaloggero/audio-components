@@ -39,9 +39,6 @@ static get is() { return "audio-filter"; }
 static get properties () {
 return {
 type: {type: String, value: "lowpass", notify: true, observer: "typeChanged"},
-
-bypass: {type: Boolean, value: false, notify: true, observer: "bypassChanged"},
-mix: {type: Number, value: 1, notify: true, observer: "mixChanged"},
 frequency: {type: Number, value: 300.0, notify: true, observer: "frequencyChanged"},
 q: {type: Number, value: 1.0, notify: true, observer: "qChanged"},
 gain: {type: Number, value: 1.0, notify: true, observer: "gainChanged"},

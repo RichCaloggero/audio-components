@@ -28,22 +28,11 @@ static get properties() {
 return {
 hide: String,
 label: String,
-enableAutomation: {
-type: Boolean,
-value: false,
-notify: true,
-observer: "_enableAutomation"
-}, // enableAutomation
-
+mix: {type: Number, value: 1.0, notify: true, observer: "_mix"},
+bypass: {type: Boolean, value: false, notify: true, observer: "_bypass"},
+invertPhase: {type: Boolean, value: false, notify: true, observer: "_invertPhase"},
+enableAutomation: {type: Boolean, value: false, notify: true, observer: "_enableAutomation"}, // enableAutomation
 id: {type: String, notify:true, observer: "setId"},
-
-/*hideOnBypass: {
-type: Boolean,
-value: true,
-notify: true,
-observer: "_hideOnBypass"
-}, // hideOnBypass
-*/
 }; // return
 } // get properties
 
@@ -67,8 +56,6 @@ this.audio = audio;
 alert("initialization failure -- cannot initialize new AudioContext()");
 throw new Error ("cannot initialize");
 } // if
-
-//startAutomation();
 } // constructor
 
 connectedCallback () {
@@ -101,10 +88,26 @@ const controls = Array.from(this.shadowRoot.querySelectorAll(elementNames));
 return controls;
 } // uiControls
 
-bypass (value) {
-return this.component? this.component.bypass(value)
+_mix (value) {
+//console.debug(`_mix: ${this.id} ${value}`);
+if (this._ready && this.ui && this.component) {
+//console.debug(`- setting mix...`);
+return this.component.mix(value);
+} else {
+return false;
+} // if
+} // _mix
+
+_bypass (value) {
+//console.debug(`_bypass: ${this.id} ${value}`);
+return (this._ready && this.ui && this.component)? this.component.bypass(value)
 : false;
 } // bypass
+
+_invertPhase (value) {
+return this._ready && this.ui && this.component? this.component.invertPhase(value)
+: false;
+} // _invertPhase
 
 components (elements) {
 return elements.map(e => {

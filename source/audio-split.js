@@ -38,15 +38,6 @@ signalReady(this);
 }).catch(error => alert(`audio-split: cannot connect;\n${error}`));
 } // connectedCallback
 
-childrenAvailable (children) {
-//setTimeout(() => {
-const components = this.components(children);
-console.log(`audio-split: ${components.length} components; ${components.map(c => c.name)}`);
-
-signalReady(this);
-
-//}, 1); // millisecond timeout
-} // childrenAvailable
 } // class AudioSplit
 
 window.customElements.define(AudioSplit.is, AudioSplit);

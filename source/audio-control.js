@@ -46,7 +46,7 @@ if (children.length < 2) throw new Error(`${this.id}: must have at least one tar
 this.target = children[0];
 const targetComponent = this.target.component;
 this.component.input.connect(targetComponent.input);
-targetComponent.output.connect(this.component.output);
+targetComponent.output.connect(this.component.wet);
 children.slice(1).forEach(child => this.updateParameter(child.name, child.function));
 this.start();
 signalReady(this);

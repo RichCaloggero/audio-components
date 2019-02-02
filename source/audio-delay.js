@@ -10,7 +10,7 @@ return html`
 <fieldset class="audio-delay">
 <legend><h2>{{label}}</h2></legend>
 <ui-boolean label="bypass" value="{{bypass}}"></ui-boolean>
-<ui-number label="mix" value="{{mix}}" min="0.0" max="1.0" step="0.1"></ui-number>
+<ui-number label="mix" value="{{mix}}" min="-1.0" max="1.0" step="0.1"></ui-number>
 <br><ui-boolean label="invert phase" value="{{invertPhase}}"></ui-boolean>
 <ui-number label="delay time" value="{{delayTime}}" min="0.0" max="1.0" step="0.00001"></ui-number>
 </fieldset>
@@ -21,11 +21,7 @@ static get is() { return "audio-delay"; }
 
 static get properties () {
 return {
-label: String,
-mix: {type: Number, value: 1.0, notify: true, observer: "mixChanged"},
 delayTime: {type: Number, value: 0.0, notify: true, observer: "delayTimeChanged"},
-bypass: {type: Boolean, value: false, notify: true, observer: "bypass"},
-invertPhase: {type: Boolean, value: false, notify: true, observer: "invertPhaseChanged"},
 }; // return
 } // get properties
 

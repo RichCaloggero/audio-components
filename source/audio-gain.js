@@ -39,6 +39,7 @@ instanceCount += 1;
 this.id = `${AudioGain.is}-${instanceCount}`;
 
 this.component = new AudioComponent(this.audio, "gain");
+this.component.input.connect(this.component.wet);
 } // constructor
 
 connectedCallback () {
@@ -47,7 +48,7 @@ signalReady(this);
 } // connectedCallback
 
 gainChanged (value) {
-this._setParameterValue (this.component.output.gain, value);
+this._setParameterValue (this.component.wet.gain, value);
 } // gainChanged
 
 } // class AudioGain

@@ -2,24 +2,36 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>accesskey test</title>
+<title>UI test</title>
+<!--<script crossorigin="anonymous" src="./@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>-->
+<script crossorigin="anonymous" src="./resonance-audio.min.js"></script>
+
+<script type="module" crossorigin="anonymous" src="./ui-number.js"></script>
+<script type="module" crossorigin="anonymous" src="./ui-text.js"></script>
+<script type="module" crossorigin="anonymous" src="./ui-list.js"></script>
+<script type="module" crossorigin="anonymous" src="./ui-boolean.js"></script>
+
+<script type="module" crossorigin="anonymous" src="./audio-context.js"></script>
+<script type="module" crossorigin="anonymous" src="./audio-player.js"></script>
+<script type="module" crossorigin="anonymous" src="./audio-destination.js"></script>
+<script type="module" crossorigin="anonymous" src="./audio-series.js"></script>
+<script type="module" crossorigin="anonymous" src="./audio-gain.js"></script>
+<script type="module" crossorigin="anonymous" src="./audio-filter.js"></script>
+<script type="module" crossorigin="anonymous" src="./audio-delay.js"></script>
+<script type="module" crossorigin="anonymous" src="./audio-split.js"></script>
+<script type="module" crossorigin="anonymous" src="./audio-resonance.js"></script>
+<script type="module" crossorigin="anonymous" src="./audio-control.js"></script>
+<script type="module" crossorigin="anonymous" src="./audio-parameter.js"></script>
 </head>
 <body>
-<button accesskey="1">my button in normal dom</button>
-<div>
-</div>
+<audio-context label="testing..."><audio-series>
+<audio-player label="player" src="./media/3.mp3"></audio-player>
+<audio-split>
+<audio-gain label="left" gain="1"></audio-gain>
+<audio-gain label="right" gain="1"></audio-gain>
+</audio-split>
+<audio-destination></audio-destination>
 
-<script>
-const d = document.querySelector("div");
-d.attachShadow({mode: "open"});
-d.shadowRoot.innerHTML = '<button accesskey="2">my button in shadow dom</button>';
-d.shadowRoot.querySelector("button").addEventListener("click", handleClick);
-document.querySelector("button").addEventListener("click", handleClick);
-
-function handleClick (e) {
-alert(e.target.textContent);
-} // handleClick
-</script>
-
+</audio-series></audio-context>
 </body>
 </html>

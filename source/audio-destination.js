@@ -19,7 +19,7 @@ constructor () {
 super ();
 instanceCount += 1;
 this.id = `${AudioDestination.is}-${instanceCount}`;
-
+this.ui = false;
 this.component = new AudioComponent(this.audio, "speakers");
 this.component.input.connect(this.audio.destination);
 this.component.output = null;

@@ -1,9 +1,10 @@
 export class AudioComponent {
 constructor (audio, name) {
-//console.log("audioComponent: instantiating ", name);
+//console.debug("audioComponent: instantiating ", name);
 this.audio = audio;
 this.name = name;
-this._bypass = false;
+this._bypass = 0;
+
 this.input = audio.createGain();
 this.output = audio.createGain();
 this.wet = audio.createGain();
@@ -12,43 +13,40 @@ this.dry = audio.createGain();
 this.input.connect(this.dry);
 this.wet.connect(this.output);
 this.dry.connect(this.output);
+
+this._bypass = this.mix(1.0);
+this.bypass(false);
 } // constructor
 
 mix (value) {
-if (arguments.length > 0) {
-this.dry.gain.value = 1-value;
-this.wet.gain.value = value;
-return value;
-} else {
-return this.wet.gain.value;
-} // if
+//console.debug(`mix: ${this.name} ${this.value} ${!this.output} ${!this.wet}`);
+this.dry.gain.value = 1-Math.abs(value);
+return (this.wet.gain.value = value);
 } // mix
 
-invertPhase (invert) {
-if (arguments.length > 0) {
-const value = this.wet.gain.value;
-this.wet.gain.value = (invert? -1 * value : Math.abs(value));
-console.log(`${this.name} phase: ${this.wet.gain.value}`);
-return this.wet.gain.value;
+bypass (value) {
+console.debug(`${this.name}.bypass ${value} ${this.wet.gain.value} ${this.dry.gain.value} ${this._bypass}`);
+if (value) {
+this._bypass = this.wet.gain.value;
+this.mix(0);
 } else {
-this.wet.gain.value < 0;
+this.mix(this._bypass);
+this._bypass = 0;
 } // if
+console.debug(`- ${this.wet.gain.value} ${this.dry.gain.value} ${this._bypass}`);
+} // bypass
+
+isEnabled () {return this._bypass === 0;}
+
+invertPhase (invert) {
+/*if (!this.wet) return false;
+const gain = this.wet.gain.value;
+if (value && gain > 0) gain *= -1;
+else if (!value && gain < 0) gain *= -1;
+this.wet.gain.value = gain;
+*/
 } // invertPhase
 
-bypass (value) {
-if (arguments.length > 0) {
-if (value) {
-this._bypass = true;
-this.wet.disconnect();
-} else {
-this.wet.connect(this.output);
-this._bypass = false;
-} // if
-
-} else {
-return this._bypass;
-} // if
-} // bypass
 } // Component
 
 export class Split extends AudioComponent {
@@ -68,31 +66,30 @@ const channel2 = components.length === 1? null : components[1];
 if (channel1) {
 s.connect (channel1.input, this.swapInputs? 1 : 0, 0);
 channel1.output.connect (m, 0, this.swapOutputs? 1 : 0);
-console.log(`- channel1: ${channel1.name} connected`);
+console.log(`- channel 1: ${channel1.name} connected`);
 } // if
 
 if (channel2) {
 s.connect (channel2.input, this.swapInputs? 0 : 1, 0);
 channel2.output.connect (m, 0, this.swapOutputs? 0 : 1);
-console.log(`- channel2: ${channel2.name} connected`);
+console.log(`- channel 2: ${channel2.name} connected`);
 } // if
 
 this.input.connect(s);
-m.connect(this.output);
-this.mix(1);
+m.connect(this.wet);
 } // constructor
 } // class Split
 
 export class Series extends AudioComponent {
 constructor (audio, components) {
 super (audio, "series");
-console.log(`Series: connecting ${components.length} components in series:`);
+//console.debug(`Series: connecting ${components.length} components in series:`);
 if (components.length < 2) throw new Error("Series: need two or more components");
 const first = components[0];
 const last = components[components.length-1];
 
 if(first.input) {
-this.input.disconnect();
+//this.input.disconnect();
 this.input.connect(first.input);
 console.log(`- connected ${this.name} input to ${first.name}`);
 } // if
@@ -101,7 +98,7 @@ components.forEach((c, i, all) => {
 if (i < all.length-1) {
 const next = all[i+1];
 if (c.output && next.input) {
-c.output.disconnect();
+//c.output.disconnect();
 c.output.connect(next.input);
 console.log(`- connected ${c.name} to ${next.name}`);
 } else {
@@ -111,12 +108,10 @@ throw new Error (`series: ${c.name} and ${next.name} must both be AudioComponent
 }); // forEach
 
 if (last.output) {
-last.output.disconnect();
-last.output.connect(this.output);
-console.log(`- connected ${last.name} to ${this.name} output`);
+//last.output.disconnect();
+last.output.connect(this.wet);
+console.log(`- connected ${last.name} to ${this.name} wet`);
 } // if
-
-this.mix(1);
 } // constructor
 } // class Series
 
@@ -125,7 +120,7 @@ constructor (audio, components) {
 super (audio, "parallel");
 if (components.length < 2) throw new Error("Parallel: need two or more components");
 
-console.log(`parallel: connecting ${components.length} components in parallel:`);
+//console.debug(`parallel: connecting ${components.length} components in parallel:`);
 components.forEach((c, i) => {
 if (c.input) {
 this.input.connect(c.input);
@@ -134,13 +129,12 @@ console.log(`- connecting ${this.name}.input to ${c.name}`);
 
 if (c.output) {
 c.output.disconnect();
-c.output.connect(this.output);
-console.log(`- connecting ${c.name} to ${this.name}.output`);
+c.output.connect(this.wet);
+console.log(`- connecting ${c.name} to ${this.name}.wet`);
 } // if
 }); // forEach
 
 this.output.gain.value = 1 / components.length;
-this.mix(1);
 } // constructor
 } // class Parallel
 
@@ -172,7 +166,7 @@ s.connect(this.rightPanner, 1).connect(this.wet);
 
 
 setPosition (a, r) {
-//console.log("setPosition: ", a, r);
+//console.debug("setPosition: ", a, r);
 this.leftPanner.positionX.value = r*Math.cos(a);
 this.leftPanner.positionY.value = r*Math.sin(a);
 //this.leftPanner.positionZ = Math.sin(a + r) * Math.cos(a - r);
