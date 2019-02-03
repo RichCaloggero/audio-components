@@ -1,4 +1,7 @@
 import {PolymerElement} from "./@polymer/polymer/polymer-element.js";
+import {statusMessage} from "./audio-context.js";
+
+let savedValues = new Map();
 
 export class UI extends PolymerElement {
 keyChanged (value) {
@@ -8,20 +11,56 @@ if (value && input) input.setAttribute("accesskey", value);
 } // keyChanged
 
 handleSpecialKeys (e) {
-const keys = ["Enter", "0", "1",];
+const keys = ["Enter", " ", "-", "0", "1",];
 const key = e.key;
 const input = this.shadowRoot.querySelector("input");
-console.log(`handleKey: ${this.id} ${e.target.nodeName} (${key})`);
+//console.debug(`handleKey: ${this.id} ${e.target.nodeName} (${key})`);
 
-if (!input || input.type === "checkbox" || keys.indexOf(key) < 0) return true;
-else if ((key === "1" || key === "0") && input.type !== "range") return true;
+if (!input || input.type === "checkbox" || !keys.includes(key)) return true;
 
-if (key === "Enter") input.click();
-else input.value = key;
+if (key === "Enter") {
+if (input.type === "range") {
+this.saveValue(input);
+return false;
+} // if
+
+}else if (key === " ") {
+if (input.type === "range") {
+this.swapValues(input);
+return false;
+} else {
+return true;
+} // if
+
+} else if (key === "-") {
+if (input.type === "range") {
+input.value = -1 * Number(input.value);
+} else {
+return true;
+} // if
+
+} else {
+return true;
+} // if
+
 input.dispatchEvent(new CustomEvent("change"));
 return false;
 } // handleSpecialKeys
 
+saveValue (input) {
+savedValues.set(input, input.value);
+statusMessage(`${input.value}: value saved.`);
+} // saveValue
+
+swapValues (input) {
+if (savedValues.has(input)) {
+const old = savedValues.get(input);
+savedValues.set(input, input.value);
+input.value = old;
+} else {
+statusMessage(`No saved value; press enter to save.`);
+} // if
+} // swapValues
 
 static processValues (values) {
 if (values instanceof String || typeof(values) === "string") {

@@ -2,7 +2,8 @@ import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
 
 // audio-context
 let instanceCount = 0;
-let _root = null;
+let shadowRoot = null;
+
 export const audio = new AudioContext();
 
 const automationInterval = 100; // milliseconds
@@ -15,7 +16,8 @@ return html`
 <div class="audio-context">
 <h1>[[label]]</h1>
 <ui-boolean label="Run automation" value="{{enableAutomation}}"></ui-boolean>
-<div id="statusMessage" aria-live="polite"></div>
+<div role="region" aria-label="status" id="statusMessage" aria-live="polite">
+</div>
 </div>
 
 <slot></slot>
@@ -58,11 +60,13 @@ throw new Error ("cannot initialize");
 } // if
 } // constructor
 
+
 connectedCallback () {
 super.connectedCallback();
 //console.log(`${this.id} connected, shadow = ${this.shadowRoot}`);
 this.hidden = this.ui && !this.label;
 this.hideControls();
+if (! shadowRoot) shadowRoot = this.shadowRoot;
 } // connectedCallback
 
 hideControls () {
@@ -120,7 +124,6 @@ _enableAutomation (value) {
 const _message = value? "Automation enabled." : "Automation disabled.";
 if (value) startAutomation();
 else stopAutomation();
-//this.statusMessage(_message);
 } // _enableAutomation
 
 setId (value) {this.id = value;}
@@ -146,14 +149,6 @@ alert (message);
 alert (e.stack);
 } // catch
 } // _setParameterValue
-
-
-statusMessage (message) {
-const status = this.shadowRoot.querySelector ("#statusMessage");
-if (status) status.innerHTML = `<p>${message}</p>`;
-//alert ("status: " + status);
-} // statusMessage
-
 } // class _AudioContext_
 
 customElements.define(_AudioContext_.is, _AudioContext_);
@@ -236,3 +231,14 @@ export function removeFromAutomationQueue (element) {
 automationQueue = automationQueue.filter(e => e != element);
 } // removeFromAutomationQueue
 
+export function statusMessage (message) {
+if (shadowRoot) {
+const status = shadowRoot.querySelector ("#statusMessage");
+if (status) {
+status.innerHTML = `<p>${message}</p>`;
+return;
+} // if
+} // if
+
+alert (message);
+} // statusMessage
