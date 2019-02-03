@@ -39,7 +39,7 @@ return true;
 } // if
 
 } else {
-return true;
+input.value = key;
 } // if
 
 input.dispatchEvent(new CustomEvent("change"));
