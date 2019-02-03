@@ -27,7 +27,6 @@ return false;
 }else if (key === " ") {
 if (input.type === "range") {
 this.swapValues(input);
-return false;
 } else {
 return true;
 } // if
