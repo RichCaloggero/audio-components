@@ -29,12 +29,12 @@
 
 <audio-split>
 <audio-control>
-<audio-filter label="leftfilter" type="allpass" frequency="420" q="1"
-hide="gain, mix"></audio-filter>
+<audio-filter label="left filter" type="allpass" frequency="420" q="1"
+hide="detune, gain, mix"></audio-filter>
 
 <audio-parameter label="controling left filter q" name="q"
 function="0.01 + 1.4 * pow(sin(t/2.5 + 1.5), 2)"></audio-parameter>
-<audio-parameter label="controling left filter frequency" name="q"
+<audio-parameter label="controling left filter frequency" name="frequency"
 function="100 + 5 * abs(sin(t))"></audio-parameter>
 </audio-control>
 
@@ -44,11 +44,11 @@ function="100 + 5 * abs(sin(t))"></audio-parameter>
 function="0.0035 + 0.003 * pow(sin(t/5), 2)">
 </audio-control><audio-control>
 <audio-filter label="right filter" type="allpass" frequency="420" q="1"
-hide="gain, mix"></audio-filter>
+hide="detune, gain, mix"></audio-filter>
 
-<audio-parameter label="controling left filter q" name="q"
+<audio-parameter label="controling right filter q" name="q"
 function="0.01 + 1.4 * pow(sin(t/2.5 + 1.5), 2)"></audio-parameter>
-<audio-parameter label="controling left filter frequency" name="q"
+<audio-parameter label="controling right filter frequency" name="frequency"
 function="100 + 5 * abs(sin(t))"></audio-parameter>
 </audio-control></audio-series>
 </audio-split>

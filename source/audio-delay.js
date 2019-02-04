@@ -11,7 +11,6 @@ return html`
 <legend><h2>{{label}}</h2></legend>
 <ui-boolean label="bypass" value="{{bypass}}"></ui-boolean>
 <ui-number label="mix" value="{{mix}}" min="-1.0" max="1.0" step="0.1"></ui-number>
-<br><ui-boolean label="invert phase" value="{{invertPhase}}"></ui-boolean>
 <ui-number label="delay time" value="{{delayTime}}" min="0.0" max="1.0" step="0.00001"></ui-number>
 </fieldset>
 `; // html

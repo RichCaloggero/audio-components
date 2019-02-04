@@ -32,7 +32,6 @@ hide: String,
 label: String,
 mix: {type: Number, value: 1.0, notify: true, observer: "_mix"},
 bypass: {type: Boolean, value: false, notify: true, observer: "_bypass"},
-invertPhase: {type: Boolean, value: false, notify: true, observer: "_invertPhase"},
 enableAutomation: {type: Boolean, value: false, notify: true, observer: "_enableAutomation"}, // enableAutomation
 id: {type: String, notify:true, observer: "setId"},
 }; // return
@@ -51,9 +50,7 @@ return;
 } // if
 
 if (audio) {
-//alert ("only one audio context per document");
 this.audio = audio;
-//console.log(`inherriting from ${this.audio}.`);
 } else {
 alert("initialization failure -- cannot initialize new AudioContext()");
 throw new Error ("cannot initialize");
@@ -66,21 +63,21 @@ super.connectedCallback();
 //console.log(`${this.id} connected, shadow = ${this.shadowRoot}`);
 this.hidden = this.ui && !this.label;
 this.hideControls();
-if (! shadowRoot) shadowRoot = this.shadowRoot;
+if (!shadowRoot) shadowRoot = this.shadowRoot;
 } // connectedCallback
 
 hideControls () {
-console.log(`${this.id}: hide ${this.hide}`);
+console.debug(`${this.id}: hide ${this.hide}`);
 if (! this.hide) return;
 const controls = this.uiControls().filter(x => x.name || x.label);
 if (this.hide.trim() && controls.length > 0) {
 const hide = this.hide.split(",").map(x => x.trim().toLowerCase());
-console.log(`${this.id} hiding ${hide.toSource()}`);
+console.debug(`${this.id} hiding ${hide.toSource()}`);
 
 controls.forEach(element => {
 const name = element.name || element.label;
-console.log (`- checking ${element.id} ${name}`);
-if (name && hide.includes(name)) element.hidden = true;
+console.debug(`- checking ${element.id} ${name}`);
+if (name && hide.includes(name.trim().toLowerCase())) element.hidden = true;
 }); // forEach
 } // if
 } // hideControls
@@ -95,7 +92,6 @@ return controls;
 _mix (value) {
 //console.debug(`_mix: ${this.id} ${value}`);
 if (this._ready && this.ui && this.component) {
-//console.debug(`- setting mix...`);
 return this.component.mix(value);
 } else {
 return false;
@@ -107,11 +103,6 @@ _bypass (value) {
 return (this._ready && this.ui && this.component)? this.component.bypass(value)
 : false;
 } // bypass
-
-_invertPhase (value) {
-return this._ready && this.ui && this.component? this.component.invertPhase(value)
-: false;
-} // _invertPhase
 
 components (elements) {
 return elements.map(e => {

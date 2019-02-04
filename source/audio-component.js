@@ -27,7 +27,7 @@ return (this._mix = this.wet.gain.value = value);
 
 bypass (value) {
 if (!this.output) return;
-console.debug(`${this.name}.bypass ${value} ${this.wet.gain.value} ${this.dry.gain.value} ${this._bypass}`);
+//console.debug(`${this.name}.bypass ${value} ${this.wet.gain.value} ${this.dry.gain.value} ${this._bypass}`);
 if (value) {
 this.dry.disconnect();
 this.wet.disconnect();
@@ -37,7 +37,7 @@ this.dry.connect(this.output);
 this.wet.connect(this.output);
 this._bypass.disconnect();
 } // if
-console.debug(`- ${this.wet.gain.value} ${this.dry.gain.value} ${this._bypass}`);
+//console.debug(`- ${this.wet.gain.value} ${this.dry.gain.value} ${this._bypass}`);
 } // bypass
 
 isEnabled () {return this._bypass === 0;}
