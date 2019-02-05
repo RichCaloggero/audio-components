@@ -1,6 +1,7 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
 import {_AudioContext_, signalReady} from "./audio-context.js";
 import {AudioComponent} from "./audio-component.js";
+import {updateParameter} from "./audio-control.js";
 
 let instanceCount  = 0;
 
@@ -18,12 +19,17 @@ static get is() { return "audio-parameter"; }
 
 static get properties () {
 return {
-name: {type: String, notify: true, observer: "nameChanged"},
-function: {type: String, notify: true, observer: "functionChanged"},
+name: String,
+function: String,
 key: {type: String, value: "f", notify: true},
 }; // return
 } // get properties
 
+static get observers () {
+return [
+"update(name, function)"
+];
+} // get observers
 
 constructor () {
 super ();
@@ -36,14 +42,11 @@ super.connectedCallback();
 signalReady(this);
 } // connectedCallback
 
-nameChanged (value) {
-this.parentElement.name = value;
-this.parentElement.function = this.function;
-} // nameChanged
+update (_name, _function) {
+if (!_name) return;
+if (!_function) _function = "";
+updateParameter(this.parentElement, _name, _function);
+} // update
 
-functionChanged (value) {
-this.parentElement.function = value;
-this.parentElement.name = this.name;
-}
 } // class AudioParameter
 customElements.define(AudioParameter.is, AudioParameter);

@@ -22,7 +22,7 @@ name: String, function: String
 
 static get observers () {
 return [
-"updateParameter(name, function)"
+//"updateParameter(name, function)"
 ];
 } // observers
 
@@ -48,34 +48,13 @@ this.component.input.connect(targetComponent.input);
 targetComponent.output.connect(this.component.wet);
 children.slice(1).forEach(child => {
 console.debug(`${this.id}.childrenReady: updating ${child.name} ${child.function}`);
-if (typeof(child.function) !== "undefined") this.updateParameter(child.name, child.function);
+updateParameter(this, child.name, child.function);
 });
 this.start();
 signalReady(this);
 }).catch(error => alert(`audio-control: cannot connect;\n${error}`));
 } // connectedCallback
 
-updateParameter (_name, _text) {
-console.debug(`${this.id}.updateParameter: ${_name} ${_text}`);
-if (!_name ) return;
-const index = this.parameters.findIndex(p => p.name === _name);
-const parameter = index >= 0? this.parameters[index]
-: {};
-parameter.name = _name;
-parameter.text = _text;
-
-if (parameter.text) {
-parameter.function = compileFunction(parameter.text, "t");
-if (!parameter.function) throw new Error(`${this.id}: automation of parameter ${parameter.name} failed; invalid function;\n${parameter.text}`);
-parameter.function.bind(this.target);
-} else {
-parameter.function = null;
-statusMessage(`Automation disabled for ${parameter.name}`);
-} // if
-
-if (index < 0) this.parameters.push(parameter);
-console.debug(`- updated ${index} ${parameter.toSource()}`);
-} // updateParameter
 
 
 automate () {
@@ -112,3 +91,26 @@ alert (e);
 return null;
 } // try
 } // compileFunction
+
+export function updateParameter (controller, _name, _text) {
+console.debug(`${controller.id}.updateParameter: ${_name} ${_text}`);
+if (!_name ) return;
+const parameters = controller.parameters;
+const index = parameters.findIndex(p => p.name === _name);
+const parameter = index >= 0? parameters[index] : {};
+parameter.name = _name;
+parameter.text = _text;
+
+if (parameter.text) {
+parameter.function = compileFunction(parameter.text, "t");
+
+if (!parameter.function) statusMessage(`${this.id}: automation of parameter ${parameter.name} failed; invalid function;\n${parameter.text}`);
+parameter.function.bind(controller.target);
+} else {
+parameter.function = null;
+statusMessage(`Automation disabled for ${parameter.name}`);
+} // if
+
+if (index < 0) parameters.push(parameter);
+console.debug(`- updated ${index} ${parameter.toSource()}`);
+} // updateParameter
