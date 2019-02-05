@@ -3,35 +3,28 @@
 <head>
 <meta charset="utf-8">
 <title>UI test</title>
-<!--<script crossorigin="anonymous" src="./@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>-->
-<script crossorigin="anonymous" src="./resonance-audio.min.js"></script>
+<script src="./audio-context.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-series.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-player.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-filter.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-control.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-parameter.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-destination.js" type="module" crossorigin="anonymous"></script>
 
-<script type="module" crossorigin="anonymous" src="./ui-number.js"></script>
-<script type="module" crossorigin="anonymous" src="./ui-text.js"></script>
-<script type="module" crossorigin="anonymous" src="./ui-list.js"></script>
-<script type="module" crossorigin="anonymous" src="./ui-boolean.js"></script>
-
-<script type="module" crossorigin="anonymous" src="./audio-context.js"></script>
-<script type="module" crossorigin="anonymous" src="./audio-player.js"></script>
-<script type="module" crossorigin="anonymous" src="./audio-destination.js"></script>
-<script type="module" crossorigin="anonymous" src="./audio-series.js"></script>
-<script type="module" crossorigin="anonymous" src="./audio-gain.js"></script>
-<script type="module" crossorigin="anonymous" src="./audio-filter.js"></script>
-<script type="module" crossorigin="anonymous" src="./audio-delay.js"></script>
-<script type="module" crossorigin="anonymous" src="./audio-split.js"></script>
-<script type="module" crossorigin="anonymous" src="./audio-resonance.js"></script>
-<script type="module" crossorigin="anonymous" src="./audio-control.js"></script>
-<script type="module" crossorigin="anonymous" src="./audio-parameter.js"></script>
+<script src="./ui-number.js" type="module" crossorigin="anonymous"></script>
+<script src="./ui-boolean.js" type="module" crossorigin="anonymous"></script>
+<script src="./ui-text.js" type="module" crossorigin="anonymous"></script>
+<script src="./ui-list.js" type="module" crossorigin="anonymous"></script>
 </head>
 <body>
-<audio-context label="testing..."><audio-series>
-<audio-player label="player" src="./media/3.mp3"></audio-player>
-<audio-split>
-<audio-gain label="left" gain="1"></audio-gain>
-<audio-gain label="right" gain="1"></audio-gain>
-</audio-split>
-<audio-destination></audio-destination>
-
+<audio-context label="testing..." enableAutomation><audio-series>
+<audio-player label="player" src="./media/7.mp3"></audio-player>
+<audio-control>
+<audio-filter label="filter" type="lowpass" frequency="200" hide="mix, gain, detune, type"></audio-filter>
+<audio-parameter label="controling filter q" name="q" function="sin(t)+1"></audio-parameter>
+<audio-parameter label="controling filter frequency" name="frequency" function="5 * sin(t) +100"></audio-parameter>
+</audio-control>
+<audio-destination label="speakers"></audio-destination>
 </audio-series></audio-context>
 </body>
 </html>

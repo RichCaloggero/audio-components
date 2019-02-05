@@ -8,7 +8,7 @@ class AudioParameter extends _AudioContext_ {
 static get template () {
 return html`
 <fieldset class="audio-parameter">
-<legend><h3>{{label}}</h3></legend>
+<legend><h3>[[label]]</h3></legend>
 <ui-text label="function" value="{{function}}" key="f"></ui-text>
 </fieldset>
 `; // html
@@ -18,8 +18,7 @@ static get is() { return "audio-parameter"; }
 
 static get properties () {
 return {
-label: String,
-name: String,
+name: {type: String, notify: true, observer: "nameChanged"},
 function: {type: String, notify: true, observer: "functionChanged"},
 key: {type: String, value: "f", notify: true},
 }; // return
@@ -37,6 +36,14 @@ super.connectedCallback();
 signalReady(this);
 } // connectedCallback
 
-functionChanged (value) {this.parentElement.name = this.name;}
-} // class AudioDelay
+nameChanged (value) {
+this.parentElement.name = value;
+this.parentElement.function = this.function;
+} // nameChanged
+
+functionChanged (value) {
+this.parentElement.function = value;
+this.parentElement.name = this.name;
+}
+} // class AudioParameter
 customElements.define(AudioParameter.is, AudioParameter);

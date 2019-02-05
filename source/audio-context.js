@@ -67,16 +67,16 @@ if (!shadowRoot) shadowRoot = this.shadowRoot;
 } // connectedCallback
 
 hideControls () {
-console.debug(`${this.id}: hide ${this.hide}`);
+//console.debug(`${this.id}: hide ${this.hide}`);
 if (! this.hide) return;
 const controls = this.uiControls().filter(x => x.name || x.label);
 if (this.hide.trim() && controls.length > 0) {
 const hide = this.hide.split(",").map(x => x.trim().toLowerCase());
-console.debug(`${this.id} hiding ${hide.toSource()}`);
+//console.debug(`${this.id} hiding ${hide.toSource()}`);
 
 controls.forEach(element => {
 const name = element.name || element.label;
-console.debug(`- checking ${element.id} ${name}`);
+//console.debug(`- checking ${element.id} ${name}`);
 if (name && hide.includes(name.trim().toLowerCase())) element.hidden = true;
 }); // forEach
 } // if
@@ -187,7 +187,7 @@ resolve(e.target);
 });
 
 } else {
-console.log(`ready: ${element} ${element && element.nodeName}#${element && element.id} is invalid`);
+console.log(`ready: ${element.id} is invalid`);
 } // if
 } // ready
 

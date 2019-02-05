@@ -56,14 +56,13 @@ signalReady(this);
 } // connectedCallback
 
 updateParameter (_name, _text) {
-console.debug(`${this.id}._updateParameter: ${_name} ${_text}`);
+console.debug(`${this.id}.updateParameter: ${_name} ${_text}`);
 if (!_name ) return;
 const index = this.parameters.findIndex(p => p.name === _name);
 const parameter = index >= 0? this.parameters[index]
 : {};
 parameter.name = _name;
 parameter.text = _text;
-console.debug(`- updated ${index} ${parameter.toSource()}`);
 
 if (parameter.text) {
 parameter.function = compileFunction(parameter.text, "t");
@@ -75,6 +74,7 @@ statusMessage(`Automation disabled for ${parameter.name}`);
 } // if
 
 if (index < 0) this.parameters.push(parameter);
+console.debug(`- updated ${index} ${parameter.toSource()}`);
 } // updateParameter
 
 

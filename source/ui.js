@@ -39,7 +39,8 @@ return true;
 } // if
 
 } else {
-input.value = key;
+if (input.type === "text") return true;
+else input.value = key;
 } // if
 
 input.dispatchEvent(new CustomEvent("change"));
