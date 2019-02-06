@@ -171,6 +171,24 @@ this.convolver.buffer = buffer;
 
 } // class Convolver
 
+export class Compressor extends AudioComponent {
+constructor (audio) {
+super(audio, "compressor");
+this.compressor = audio.createDynamicsCompressor();
+this.input.connect(this.compressor);
+this.compressor.connect(this.wet);
+} // constructor
+} // class Compressor
+
+export class Delay extends AudioComponent {
+constructor (audio) {
+super(audio, "delay");
+this.delay = audio.createDelay();
+this.input.connect(this.delay);
+this.delay.connect(this.wet);
+} // constructor
+} // class Delay
+
 export class Binaural extends AudioComponent {
 constructor (audio) {
 super (audio, "binaural");

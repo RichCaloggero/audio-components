@@ -63,20 +63,11 @@ super.connectedCallback();
 signalReady(this);
 } // connectedCallback
 
-bypassChanged (value) {
-if (this.component) this.component.bypass(value);
-} // bypassChanged
-
-mixChanged (value) {
-if (this.component) this.component.mix(value);
-} // mixChanged
-
 frequencyChanged (value) {this.filter.frequency.value = value;}
 qChanged (value) {this.filter.Q.value = value;}
 typeChanged (value) {this.filter.type = value;}
 detuneChanged (value) {this.filter.detune.value = value;}
 gainChanged (value) {this.filter.gain.value = value;}
-
 } // class AudioGain
 
-window.customElements.define(AudioFilter.is, AudioFilter);
+customElements.define(AudioFilter.is, AudioFilter);

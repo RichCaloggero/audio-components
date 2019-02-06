@@ -30,8 +30,8 @@ static get properties() {
 return {
 hide: String,
 label: String,
-mix: {type: Number, value: 1.0, notify: true, observer: "_mix"},
-bypass: {type: Boolean, value: false, notify: true, observer: "_bypass"},
+mix: {type: Number, notify: true, observer: "_mix"},
+bypass: {type: Boolean, notify: true, observer: "_bypass"},
 enableAutomation: {type: Boolean, value: false, notify: true, observer: "_enableAutomation"}, // enableAutomation
 id: {type: String, notify:true, observer: "setId"},
 }; // return
@@ -90,18 +90,19 @@ return controls;
 } // uiControls
 
 _mix (value) {
-//console.debug(`_mix: ${this.id} ${value}`);
-if (this._ready && this.ui && this.component) {
-return this.component.mix(value);
-} else {
-return false;
+console.debug(`_mix: ${this.id} ${value}`);
+if (this.ui && this.component) {
+this.component.mix(value);
+console.debug(`- ${value}`);
 } // if
 } // _mix
 
 _bypass (value) {
-//console.debug(`_bypass: ${this.id} ${value}`);
-return (this._ready && this.ui && this.component)? this.component.bypass(value)
-: false;
+//console.debug(`_bypass: ${this.id}`);
+if (this.ui && this.component) {
+this.component.bypass(value);
+//console.debug(`- ${value}`);
+} // if
 } // bypass
 
 components (elements) {
@@ -233,3 +234,4 @@ return;
 
 alert (message);
 } // statusMessage
+

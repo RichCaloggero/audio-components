@@ -79,10 +79,10 @@ signalReady(this);
 } // connectedCallback
 
 impulseChanged (value) {
-console.debug(`${this.id}.impulseChanged: ${value}`);
+//console.debug(`${this.id}.impulseChanged: ${value}`);
 if (value) {
 const url = `${this.path}/${value}${this.extension}`;
-console.debug(`- url is ${url}`);
+//console.debug(`- url is ${url}`);
 loadImpulse(url, (buffer) => {
 this.component.setImpulse(buffer);
 }); // load
