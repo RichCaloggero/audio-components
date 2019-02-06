@@ -1,5 +1,5 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {_AudioContext_} from "./audio-context.js";
+import {_AudioContext_, signalReady} from "./audio-context.js";
 
 
 
@@ -8,14 +8,10 @@ let instanceCount = 0;
 class AudioReverb extends _AudioContext_{
 static get template () {
 return html`
-<div class="audio-reverb" role="region" aria-label$="{{label}}">
-<span class="label">{{label}}</span>
-
-
-<div class="row">
+<fieldset class="audio-reverb">
+<legend><h2>[[label]]</h2></legend>
 <ui-boolean name="bypass" label="bypass" value="{{bypass}}"></ui-boolean>
-<ui-number name="mix" label="mix" min="0.0" max="1.0" step="0.1" value="{{mix}}"></ui-number>
-</div><!-- .row -->
+<ui-number label="mix" value="{{mix}}" min="0.0" max="1.0" step="0.1""></ui-number>
 
 <audio-parallel><audio-series>
 <audio-gain class="dry-level" gain="0.5"></audio-gain>

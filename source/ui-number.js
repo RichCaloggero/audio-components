@@ -21,12 +21,12 @@ static get properties () {
 return {
 label: String,
 value: {type: Number, value: 0.0, notify: true},
-min: Number,
-max: Number,
+min: {type: Number, value: 0.0},
+max: {type: Number, value: 1.0},
 
 step: {
 type: Number,
-value: 1.0,
+value: 0.1,
 notify: true,
 observer: "stepChanged"
 }, // step

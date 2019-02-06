@@ -47,7 +47,7 @@ const targetComponent = this.target.component;
 this.component.input.connect(targetComponent.input);
 targetComponent.output.connect(this.component.wet);
 /*children.slice(1).forEach(child => {
-console.debug(`${this.id}.childrenReady: updating ${child.name} ${child.function}`);
+//console.debug(`${this.id}.childrenReady: updating ${child.name} ${child.function}`);
 updateParameter(this, child.name, child.function);
 });
 */
@@ -95,7 +95,7 @@ return null;
 } // compileFunction
 
 export function updateParameter (controller, _name, _text) {
-console.debug(`${controller.id}.updateParameter: ${_name} ${_text}`);
+//console.debug(`${controller.id}.updateParameter: ${_name} ${_text}`);
 if (!_name ) return;
 const parameters = controller.parameters;
 const index = parameters.findIndex(p => p.name === _name);
@@ -114,5 +114,5 @@ statusMessage(`Automation disabled for ${parameter.name}`);
 } // if
 
 if (index < 0) parameters.push(parameter);
-console.debug(`- updated ${index} ${parameter.toSource()}`);
+//console.debug(`- updated ${index} ${parameter.toSource()}`);
 } // updateParameter

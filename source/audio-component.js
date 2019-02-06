@@ -154,9 +154,26 @@ m.connect(this.wet);
 } // constructor
 } // class ReverseStereo
 
+export class Convolver extends AudioComponent {
+constructor (audio) {
+super(audio, "convolver");
+this.convolver = audio.createConvolver();
+this.impulse = null;
+this.input.connect(this.convolver);
+this.convolver.connect(this.wet);
+} // constructor
+
+setImpulse(buffer) {
+console.debug(`Convolver.setImpulse: ${buffer}`);
+this.impulse = buffer;
+this.convolver.buffer = buffer;
+} // setImpulse
+
+} // class Convolver
+
 export class Binaural extends AudioComponent {
 constructor (audio) {
-super (audio);
+super (audio, "binaural");
 const s = audio.createChannelSplitter(2);
 this.leftPanner = audio.createPanner();
 this.rightPanner = audio.createPanner();

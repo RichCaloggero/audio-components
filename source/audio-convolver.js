@@ -1,5 +1,6 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {_AudioContext_} from "./audio-context.js";
+import {_AudioContext_, audio, signalReady, statusMessage} from "./audio-context.js";
+import {Convolver} from "./audio-component.js";
 
 let instanceCount  = 0;
 
@@ -7,13 +8,12 @@ class AudioConvolver extends _AudioContext_ {
 static get template () {
 return html`
 
-<div class="audio-convolver" role="region" aria-label$="{{label}}">
-<span class="label">[[label]]</span>
-
-<ui-boolean name="bypass" label="bypass" value="{{bypass}}"></ui-boolean>
-
-<ui-list name="impulseUrl" label="impulse" value="{{impulseUrl}}" values="{{impulses}}"></ui-list>
-</div>
+<fieldset class="audio-convolver">
+<legend><h2>[[label]]</h2></legend>
+<ui-boolean label="bypass" value="{{bypass}}"></ui-boolean>
+<ui-number label="mix" value="{{mix}}"></ui-number>
+<ui-list label="impulse" value="{{impulse}}" values="{{impulses}}"></ui-list>
+</fieldset>
 `; // html
 } // get template
 
@@ -21,83 +21,76 @@ static get is() { return "audio-convolver"; }
 
 static get properties () {
 return {
-label: {
-type: String,
-value: ""
-}, // label
-
-impulseLibrary: {
-type: String,
-value: ""
-}, // impulseLibrary
-
-impulses: {
-type: String,
-value: ""
-}, // impulses
-
-impulseUrl: {
-type: String,
-value: "",
-notify: true,
-observer: "impulseUrlChanged"
-}, // impulseUrl
-
-defaultExtension: {
-type: String,
-value: ""
-}, // defaultExtension
-
-bypass: {
-type: Boolean,
-value: false,
-notify: true,
-observer: "_bypass"
-}, // bypass
-
-invertPhase: {
-type: Boolean,
-value: false,
-notify: true,
-observer: "_invertPhase"
-} // invertPhase
-
+path: {type: String, value: "."},
+extension: {type: String, value: ".wav"},
+impulse: {type: String, notify: true, observer: "impulseChanged"},
+impulses: {type: String, notify: true, value: `[
+"Cement Blocks 2",
+"Cement Blocks 1",
+"Chateau de Logne, Outside",
+"Conic Long Echo Hall",
+"Deep Space",
+"Derlon Sanctuary",
+"Bottle Hall",
+"Direct Cabinet N1",
+"Direct Cabinet N2",
+"Direct Cabinet N3",
+"Direct Cabinet N4",
+"French 18th Century Salon",
+"Five Columns Long",
+"Five Columns",
+"Going Home",
+"Greek 7 Echo Hall",
+"In The Silo",
+"In The Silo Revised",
+"Highly Damped Large Room",
+"Large Bottle Hall",
+"Large Long Echo Hall",
+"Large Wide Echo Hall",
+"Masonic Lodge",
+"Musikvereinsaal",
+"Narrow Bumpy Space",
+"Nice Drum Room",
+"On a Star",
+"Parking Garage",
+"Rays",
+"Right Glass Triangle",
+"Ruby Room",
+"Scala Milan Opera Hall",
+"Small Prehistoric Cave",
+"Small Drum Room",
+"St Nicolaes Church",
+"Grig Room",
+"Vocal Duo"
+]`} // impulses
 }; // return
 } // get properties
 
 constructor () {
 super ();
 instanceCount += 1;
-this._id = AudioConvolver.is + instanceCount;
-
-this._init (audio.createConvolver());
-//this._audioIn.channelCount = this._in.channelCount = this._audioOut.channelCount = this._out.channelCount = this._audioNode.channelCount = 2;
-//this._audioIn.channelCountMode = this._in.channelCountMode = this._audioOut.channelCountMode = this._out.channelCountMode = this._audioNode.channelCountMode = "explicit";
+this.id = `${AudioConvolver.is}-${instanceCount}`;
+this.component = new Convolver(this.audio);
 } // constructor
-
 
 connectedCallback () {
 super.connectedCallback ();
-//if (this.contextCheck(AudioConvolver.is)) {
-this.addFieldLabels ();
-//moveElements (this.shadowRoot.querySelector(".impulseNames").assignedNodes(), this.shadowRoot.querySelector (".impulse"));
-//this.shadowRoot.querySelector (".impulse").dispatchEvent (new CustomEvent("change"));
-//} // if
+signalReady(this);
 } // connectedCallback
 
 impulseChanged (value) {
-} // impulseChanged
-
-impulseUrlChanged (value) {
+console.debug(`${this.id}.impulseChanged: ${value}`);
 if (value) {
-loadImpulse (this.impulseLibrary + "/" + value + this.defaultExtension, (buffer) => {
-this._audioNode.buffer = buffer;
+const url = `${this.path}/${value}${this.extension}`;
+console.debug(`- url is ${url}`);
+loadImpulse(url, (buffer) => {
+this.component.setImpulse(buffer);
 }); // load
 } // if
-} // impulseUrlChanged
-
-
+} // impulseChanged
 } // class AudioConvolver
+
+customElements.define(AudioConvolver.is, AudioConvolver);
 
 
 function decodeBuffer(arrayBuffer, callback) {
@@ -108,32 +101,25 @@ callback(audioBuffer);
 throw new Error ("loadImpulse: missing callback");
 } // if
 }, function (e) {
-throw new Error(`Could not decode audio data: ${e}`);
+statusMessage(`Could not decode audio data: ${e}`);
 }); // decode
 } // decodeBuffer
 
 function loadImpulse (url, callback) {
-var request = new XMLHttpRequest();
+const request = new XMLHttpRequest();
 request.responseType = "arraybuffer";
 request.open("GET", url, true);
 //console.log (`loadImpulse: get ${url}`);
 
-request.addEventListener("load", function () {
-
+request.addEventListener("load", () => {
 if (request.response) {
 decodeBuffer(request.response, callback);
 } else {
-throw new Error ("loadImpulse: response is null");
+statusMessage("loadImpulse: response is null");
 } // if
-//} // if
-//}; // onreadstatechange
 }); // load
+
 request.send();
 } // loadImpulse
 
-function moveElements (source, destination) {
-source.filter (x => x.nodeType === 1)
-.forEach (e => destination.appendChild(e));
-} // moveElements
 
-window.customElements.define(AudioConvolver.is, AudioConvolver);

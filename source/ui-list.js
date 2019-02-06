@@ -96,4 +96,4 @@ this.shadowRoot.querySelector ("select").removeAttribute ("accesskey");
 
 } // class UIList
 
-window.customElements.define(UIList.is, UIList);
+customElements.define(UIList.is, UIList);

@@ -18,13 +18,7 @@ static get is() { return "audio-gain"; }
 
 static get properties () {
 return {
-label: String,
-gain: {
-type: Number,
-value: 1.0,
-notify: true,
-observer: "gainChanged"
-}, // gain
+gain: {type: Number, value: 1.0, notify: true, observer: "gainChanged"}, // gain
 
 min: {type: Number, value: -2.0}, // min
 max: {type: Number, value: 2.0}, // max
@@ -48,9 +42,9 @@ signalReady(this);
 } // connectedCallback
 
 gainChanged (value) {
+console.debug(`${this.id}.gainChanged: ${value}`);
 this._setParameterValue (this.component.wet.gain, value);
 } // gainChanged
-
 } // class AudioGain
 
-window.customElements.define(AudioGain.is, AudioGain);
+customElements.define(AudioGain.is, AudioGain);
