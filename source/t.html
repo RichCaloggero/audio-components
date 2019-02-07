@@ -2,29 +2,67 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>UI test</title>
-<script src="./audio-context.js" type="module" crossorigin="anonymous"></script>
-<script src="./audio-series.js" type="module" crossorigin="anonymous"></script>
-<script src="./audio-player.js" type="module" crossorigin="anonymous"></script>
-<script src="./audio-filter.js" type="module" crossorigin="anonymous"></script>
-<script src="./audio-control.js" type="module" crossorigin="anonymous"></script>
-<script src="./audio-parameter.js" type="module" crossorigin="anonymous"></script>
-<script src="./audio-destination.js" type="module" crossorigin="anonymous"></script>
-
-<script src="./ui-number.js" type="module" crossorigin="anonymous"></script>
-<script src="./ui-boolean.js" type="module" crossorigin="anonymous"></script>
-<script src="./ui-text.js" type="module" crossorigin="anonymous"></script>
-<script src="./ui-list.js" type="module" crossorigin="anonymous"></script>
+<title>test</title>
 </head>
 <body>
-<audio-context label="testing..." enableAutomation><audio-series>
-<audio-player label="player" src="./media/7.mp3"></audio-player>
-<audio-control>
-<audio-filter label="filter" type="lowpass" frequency="200" hide="mix, gain, detune, type"></audio-filter>
-<audio-parameter label="controling filter q" name="q" function="sin(t)+1"></audio-parameter>
-<audio-parameter label="controling filter frequency" name="frequency" function="5 * sin(t) +100"></audio-parameter>
-</audio-control>
-<audio-destination label="speakers"></audio-destination>
-</audio-series></audio-context>
+<x-parent p1="22" p2="13">
+<x-child p1="13" p2="44"></x-child>
+</x-parent>
+
+<script type="module">
+import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
+
+let instanceCount = 0;
+
+class Parent extends PolymerElement {
+static get is () {return "x-parent"}
+static get properties () {
+return {
+p1: {type: Number, notify: true, observer: "p1Changed"},
+id: {type: String, value: `${this.is}-${instanceCount}`},
+};
+} // properties
+
+constructor () {
+super();
+instanceCount += 1;
+} // constructor
+
+connectedCallback () {
+super.connectedCallback();
+console.debug(`${this.id} parent says ${this.p1} ${this.p2}`);
+} // connectedCallback
+
+p1Changed (value) {return; console.debug(`p1Changed: ${value} ${this.p1}`);}
+
+} // class Parent
+
+class Child extends Parent {
+static get is () {return "x-child"}
+
+static get properties () {
+return {
+id: {value: `${this.is}-${instanceCount}`},
+p2: {type: Number, notify: true, observer: "p2Changed"},
+};
+} // properties
+
+constructor () {
+super();
+instanceCount += 1;
+} // constructor
+
+connectedCallback () {
+super.connectedCallback();
+console.debug(`${this.id} child says ${this.p1} ${this.p2}`);
+} // connectedCallback
+
+p2Changed (value) {return; console.debug(`p2Changed: ${value} ${this.p2}`);}
+} // class Child
+
+customElements.define("x-parent", Parent);
+customElements.define("x-child", Child);
+
+</script>
 </body>
 </html>

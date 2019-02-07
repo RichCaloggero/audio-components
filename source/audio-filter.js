@@ -1,6 +1,6 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
 import {_AudioContext_, signalReady} from "./audio-context.js";
-import {AudioComponent} from "./audio-component.js";
+import {Filter} from "./audio-component.js";
 
 let instanceCount  = 0;
 
@@ -29,7 +29,6 @@ return html`
 
 <br><ui-number label="gain" value="{{gain}}" min="-30.0" max="30.0" step="1"></ui-number>
 <ui-number label="detune" value="{{detune}}" min="0.0" max="100.0"></ui-number>
-
 </fieldset>
 `; // html
 } // get template
@@ -39,10 +38,10 @@ static get is() { return "audio-filter"; }
 static get properties () {
 return {
 type: {type: String, value: "lowpass", notify: true, observer: "typeChanged"},
-frequency: {type: Number, value: 300.0, notify: true, observer: "frequencyChanged"},
-q: {type: Number, value: 1.0, notify: true, observer: "qChanged"},
-gain: {type: Number, value: 1.0, notify: true, observer: "gainChanged"},
-detune: {type: Number, value: 0.0, notify: true, observer: "detuneChanged"},
+frequency: {type: Number, notify: true, observer: "frequencyChanged"},
+q: {type: Number, notify: true, observer: "qChanged"},
+gain: {type: Number, notify: true, observer: "gainChanged"},
+detune: {type: Number, notify: true, observer: "detuneChanged"},
 }; // return
 } // get properties
 
@@ -52,10 +51,7 @@ super ();
 instanceCount += 1;
 this.id = `${AudioFilter.is}-${instanceCount}`;
 
-this.component = new AudioComponent(this.audio, "filter");
-this.filter = this.audio.createBiquadFilter();
-this.component.input.connect(this.filter);
-this.filter.connect(this.component.wet);
+this.component = new Filter(this.audio);
 } // constructor
 
 connectedCallback () {
@@ -63,11 +59,11 @@ super.connectedCallback();
 signalReady(this);
 } // connectedCallback
 
-frequencyChanged (value) {this.filter.frequency.value = value;}
-qChanged (value) {this.filter.Q.value = value;}
-typeChanged (value) {this.filter.type = value;}
-detuneChanged (value) {this.filter.detune.value = value;}
-gainChanged (value) {this.filter.gain.value = value;}
+frequencyChanged (value) {this.component.filter.frequency.value = value;}
+qChanged (value) {this.component.filter.Q.value = value;}
+typeChanged (value) {this.component.filter.type = value;}
+detuneChanged (value) {this.component.filter.detune.value = value;}
+gainChanged (value) {this.component.filter.gain.value = value;}
 } // class AudioGain
 
 customElements.define(AudioFilter.is, AudioFilter);

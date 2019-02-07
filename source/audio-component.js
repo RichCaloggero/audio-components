@@ -168,7 +168,6 @@ console.debug(`Convolver.setImpulse: ${buffer}`);
 this.impulse = buffer;
 this.convolver.buffer = buffer;
 } // setImpulse
-
 } // class Convolver
 
 export class Compressor extends AudioComponent {
@@ -179,6 +178,15 @@ this.input.connect(this.compressor);
 this.compressor.connect(this.wet);
 } // constructor
 } // class Compressor
+
+export class Filter extends AudioComponent {
+constructor (audio) {
+super (audio, "filter");
+this.filter = this.audio.createBiquadFilter();
+this.input.connect(this.filter);
+this.filter.connect(this.wet);
+} // constructor
+} // class Filter
 
 export class Delay extends AudioComponent {
 constructor (audio) {
