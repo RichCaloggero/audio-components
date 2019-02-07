@@ -197,6 +197,44 @@ this.delay.connect(this.wet);
 } // constructor
 } // class Delay
 
+export class Oscillator extends AudioComponent {
+constructor (audio) {
+super(audio, "oscillator");
+this.isPlaying = false;
+this.input = null;
+} // constructor
+
+set(options) {
+const isPlaying = this.isPlaying;
+if (isPlaying) this.stop();
+if (this.oscillator) this.oscillator.disconnect();
+this.oscillator = this.audio.createOscillator();
+
+if (options.type) this.oscillator.type = options.type;
+if (options.frequency) this.oscillator.frequency.value = options.frequency;
+if (options.detune) this.oscillator.detune.value = options.detune;
+
+this.oscillator.connect(this.wet);
+if (isPlaying) this.start();
+console.debug(`Oscillator.set: ${options.toSource()}`);
+} // set
+
+start () {
+if (this.oscillator && !this.isPlaying) {
+this.oscillator.start();
+this.isPlaying = true;
+} // if
+} // start
+
+stop () {
+if (this.oscillator && this.isPlaying) {
+this.oscillator.stop();
+this.isPlaying = false;
+} // if
+} // stop
+
+} // class Delay
+
 export class Binaural extends AudioComponent {
 constructor (audio) {
 super (audio, "binaural");

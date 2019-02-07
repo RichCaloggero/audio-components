@@ -16,10 +16,10 @@ return html`
 
 static get is() { return "ui-number"; }
 
-
 static get properties () {
 return {
 label: String,
+value: {type: String, notify: true},
 min: {type: Number, value: 0.0},
 max: {type: Number, value: 1.0},
 
