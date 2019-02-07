@@ -90,10 +90,10 @@ return controls;
 } // uiControls
 
 _mix (value) {
-console.debug(`_mix: ${this.id} ${value}`);
+//console.debug(`_mix: ${this.id} ${value}`);
 if (this.ui && this.component) {
 this.component.mix(value);
-console.debug(`- ${value}`);
+//console.debug(`- ${value}`);
 } // if
 } // _mix
 

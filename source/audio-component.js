@@ -164,7 +164,7 @@ this.convolver.connect(this.wet);
 } // constructor
 
 setImpulse(buffer) {
-console.debug(`Convolver.setImpulse: ${buffer}`);
+//console.debug(`Convolver.setImpulse: ${buffer}`);
 this.impulse = buffer;
 this.convolver.buffer = buffer;
 } // setImpulse

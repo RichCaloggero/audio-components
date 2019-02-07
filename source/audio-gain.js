@@ -42,7 +42,6 @@ signalReady(this);
 } // connectedCallback
 
 gainChanged (value) {
-console.debug(`${this.id}.gainChanged: ${value}`);
 this._setParameterValue (this.component.wet.gain, value);
 } // gainChanged
 } // class AudioGain
