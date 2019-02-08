@@ -1,5 +1,6 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
 import {UI} from "./ui.js";
+import {statusMessage} from "./audio-context.js";
 
 let instanceCount  = 0;
 
@@ -8,7 +9,7 @@ static get template () {
 return html`
 <div  class="ui-list">
 <label>[[label]]
-<br><select  value="{{value::change}}">
+<br><select  value="{{value::change}}" on-change="fixAccessibility">
 </select>
 </label>
 </div>
@@ -54,6 +55,14 @@ super.connectedCallback();
 //console.log(`${this.id}: dom created.`);
 } // connectedCallback
 
+valuesChanged (value) {
+//console.log(`valuesChanged: ${value.length}`);
+const list = this._buildList (value);
+} // valuesChanged
+
+fixAccessibility (e) {
+statusMessage(e.target.value);
+} // fixAccessibility
 
 _buildList (newList) {
 //console.log(`buildList: ${newList}`);
@@ -79,10 +88,6 @@ return list;
 
 
 
-valuesChanged (value) {
-//console.log(`valuesChanged: ${value.length}`);
-const list = this._buildList (value);
-} // valuesChanged
 
 _keyChanged (value) {
 if (value) {

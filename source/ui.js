@@ -4,13 +4,47 @@ import {statusMessage} from "./audio-context.js";
 let savedValues = new Map();
 
 export class UI extends PolymerElement {
+handleSpecialKeys (e) {
+const keys = ["Enter", " ", "-", ".", "0", "1"];
+const key = e.key;
+const input = e.target;
+
+if (!input || input.type === "checkbox" || !keys.includes(key)) return true;
+
+if (input.type === "range") {
+if (key === "0" || key === "1") input.value = key;
+else if (key === "-") input.value = -1 * Number(input.value);
+else if (key === ".") {
+const step = input.step;
+input.step = undefined;
+input.value = Number(prompt(`value for ${this.label}: `));
+input.step = step;
+} else if (key === "Enter") {
+saveValue(input);
+return false;
+} else if (key === " ") {
+swapValues(input);
+return false;
+} // if
+
+} else if (input.type === "text") {
+if (key !== "Enter") input.value = key;
+
+} else {
+return true;
+} // if
+
+input.dispatchEvent(new CustomEvent("change"));
+} // handleSpecialKeys
+
+
 keyChanged (value) {
 const input = this.shadowRoot.querySelector("input");
 console.log(`keyChanged: ${this.id} ${input.nodeName} (${value})`);
 if (value && input) input.setAttribute("accesskey", value);
 } // keyChanged
 
-handleSpecialKeys (e) {
+/*handleSpecialKeys (e) {
 const keys = ["Enter", " ", "-", "0", "1",];
 const key = e.key;
 const input = this.shadowRoot.querySelector("input");
@@ -46,21 +80,7 @@ else input.value = key;
 input.dispatchEvent(new CustomEvent("change"));
 return false;
 } // handleSpecialKeys
-
-saveValue (input) {
-savedValues.set(input, input.value);
-statusMessage(`${input.value}: value saved.`);
-} // saveValue
-
-swapValues (input) {
-if (savedValues.has(input)) {
-const old = savedValues.get(input);
-savedValues.set(input, input.value);
-input.value = old;
-} else {
-statusMessage(`No saved value; press enter to save.`);
-} // if
-} // swapValues
+*/
 
 static processValues (values) {
 if (values instanceof String || typeof(values) === "string") {
@@ -157,3 +177,19 @@ return result;
 
 } // class UI
 
+
+
+function saveValue (input) {
+savedValues.set(input, input.value);
+statusMessage(`${input.value}: value saved.`);
+} // saveValue
+
+function swapValues (input) {
+if (savedValues.has(input)) {
+const old = savedValues.get(input);
+savedValues.set(input, input.value);
+input.value = old;
+} else {
+statusMessage(`No saved value; press enter to save.`);
+} // if
+} // swapValues
