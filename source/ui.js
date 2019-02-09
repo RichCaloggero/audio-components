@@ -28,7 +28,7 @@ return false;
 } // if
 
 } else if (input.type === "text") {
-if (key !== "Enter") input.value = key;
+if (key !== "Enter") return true;
 
 } else {
 return true;

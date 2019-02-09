@@ -24,30 +24,34 @@
 <script type="module" crossorigin="anonymous" src="./audio-parameter.js"></script>
 <script type="module" crossorigin="anonymous" src="./audio-convolver.js"></script>
 <script type="module" crossorigin="anonymous" src="./audio-compressor.js"></script>
+<script type="module" crossorigin="anonymous" src="./audio-parallel.js"></script>
 </head>
 <body>
 <audio-context label="testing..."><audio-series>
-<audio-player label="player" src="t5.mp3"></audio-player>
-
+<audio-player label="player" src="media/Claire Lynch_Crowd Favorites_10_Kennesaw Line.mp3"></audio-player>
+<audio-series label="main" hide="mix">
 <audio-split>
 <audio-control>
-<audio-filter label="left filter" type="allpass" frequency="420.0" q="1.0"
+<audio-filter bypass label="left filter" type="allpass" frequency="420.0" q="0.2"
 hide="detune, gain, mix"></audio-filter>
+
+<audio-parameter label="controling left filter q" name="q"
+function=".01 + .1 * abs(sin(t/3))"></audio-parameter>
 
 <audio-parameter label="controling left filter frequency" name="frequency"
 function="100 + 400 * abs(sin(t/3))"></audio-parameter>
 </audio-control>
 
 <audio-series><audio-control>
-<audio-delay label="delay" bypass mix="1" delay="1.0"></audio-delay>
+<audio-delay label="delay" mix="1" delay="0.0035"></audio-delay>
 <audio-parameter label="controling delay time" name="delay"
-function="0.002 * abs(sin(t/3))">
+function="0.0023 + 0.001 * abs(sin(t/3))">
 </audio-control><audio-control>
-<audio-filter label="right filter" type="allpass" frequency="260" q="1"
+<audio-filter label="right filter" type="allpass" frequency="1200" q="1.0"
 hide="detune, gain, mix"></audio-filter>
 
 <audio-parameter label="controling right filter frequency" name="frequency"
-function="20 + 500 * abs(sin(t/3 + .7))"></audio-parameter>
+function="500 + 1000 * abs(sin(t/3))"></audio-parameter>
 </audio-control></audio-series>
 </audio-split>
 
@@ -59,6 +63,8 @@ function="20 + 500 * abs(sin(t/3 + .7))"></audio-parameter>
 <audio-compressor label="compressor" bypass threshold="-20"></audio-compressor>
 
 <audio-gain label="output volume"></audio-gain>
+</audio-series>
+
 <audio-destination></audio-destination>
 </audio-series></audio-context>
 </body>

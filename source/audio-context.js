@@ -6,7 +6,7 @@ let shadowRoot = null;
 
 export const audio = new AudioContext();
 
-const automationInterval = 100; // milliseconds
+const automationInterval = 50; // milliseconds
 let automationQueue = [];
 let automation = null; // value returned from setInterval
 
@@ -61,15 +61,20 @@ throw new Error ("cannot initialize");
 connectedCallback () {
 super.connectedCallback();
 //console.log(`${this.id} connected, shadow = ${this.shadowRoot}`);
+// if is element with a UI, then hide it if no label or name attribute present in HTML
 this.hidden = this.ui && !this.label;
+
+// hide controls in UI elements that have labe or name if control's label or name mentioned in hidden attribute's value
 this.hideControls();
+
 if (!shadowRoot) shadowRoot = this.shadowRoot;
 } // connectedCallback
 
 hideControls () {
 //console.debug(`${this.id}: hide ${this.hide}`);
 if (! this.hide) return;
-const controls = this.uiControls().filter(x => x.name || x.label);
+const controls = this.uiControls()
+.filter(x => x.name || x.label);
 if (this.hide.trim() && controls.length > 0) {
 const hide = this.hide.split(",").map(x => x.trim().toLowerCase());
 //console.debug(`${this.id} hiding ${hide.toSource()}`);
@@ -83,15 +88,15 @@ if (name && hide.includes(name.trim().toLowerCase())) element.hidden = true;
 } // hideControls
 
 uiControls () {
-const elementNames = "ui-text,ui-number,ui-boolean";
-const controls = Array.from(this.shadowRoot.querySelectorAll(elementNames));
+const selectors = "ui-text,ui-number,ui-boolean";
+const controls = Array.from(this.shadowRoot.querySelectorAll(selectors));
 //console.log(`${this.id}: controls ${controls.length} ${controls.map(x => x.name || x.label || x.id || x)}`);
 return controls;
 } // uiControls
 
 _mix (value) {
 //console.debug(`_mix: ${this.id} ${value}`);
-if (this.ui && this.component) {
+if (this.component) {
 this.component.mix(value);
 //console.debug(`- ${value}`);
 } // if
@@ -99,7 +104,7 @@ this.component.mix(value);
 
 _bypass (value) {
 //console.debug(`_bypass: ${this.id}`);
-if (this.ui && this.component) {
+if (this.component) {
 this.component.bypass(value);
 //console.debug(`- ${value}`);
 } // if
