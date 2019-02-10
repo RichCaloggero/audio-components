@@ -32,7 +32,6 @@ childrenReady(this)
 //console.log(`- connectedCallback.then: found ${children.length} children`);
 this.component = new Series(this.audio, this.components(children));
 if (this.uiControls().every(x => x.hidden)) this.shadowRoot.querySelector("legend").hidden = true;
-
 signalReady(this);
 }).catch(error => {
 console.log(`${this.id}: ${error}\n${error.stack}`);

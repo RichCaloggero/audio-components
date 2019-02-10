@@ -64,7 +64,7 @@ super.connectedCallback();
 // if is element with a UI, then hide it if no label or name attribute present in HTML
 this.hidden = this.ui && !this.label;
 
-// hide controls in UI elements that have labe or name if control's label or name mentioned in hidden attribute's value
+// hide controls in UI elements that have label or name if control's label or name mentioned in hidden attribute's value
 this.hideControls();
 
 if (!shadowRoot) shadowRoot = this.shadowRoot;

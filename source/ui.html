@@ -29,10 +29,11 @@
 <body>
 <audio-context label="testing..."><audio-series>
 <audio-player label="player" src="media/Claire Lynch_Crowd Favorites_10_Kennesaw Line.mp3"></audio-player>
-<audio-series label="main" hide="mix">
+
+<audio-series label="master" hide="mix">
 <audio-split>
 <audio-control>
-<audio-filter bypass label="left filter" type="allpass" frequency="420.0" q="0.2"
+<audio-filter label="left filter" type="allpass" frequency="420.0" q="1"
 hide="detune, gain, mix"></audio-filter>
 
 <audio-parameter label="controling left filter q" name="q"
