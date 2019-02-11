@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+<title>Audio Components editor</title>
+
+<script src="./resonance-audio.min.js" crossorigin="anonymous"></script>
+
+<script src="./ui-number.js" type="module" crossorigin="anonymous"></script>
+<script src="./ui-text.js" type="module" crossorigin="anonymous"></script>
+<script src="./ui-list.js" type="module" crossorigin="anonymous"></script>
+<script src="./ui-boolean.js" type="module" crossorigin="anonymous"></script>
+
+<script src="./audio-context.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-player.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-destination.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-series.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-gain.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-filter.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-delay.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-split.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-resonance.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-control.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-parameter.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-convolver.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-compressor.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-parallel.js" type="module" crossorigin="anonymous"></script>
+
+</head>
+<body>
+<h1>Audio Component Editor</h1>
+
+<div id="demo">
+<label>Edit: <input type="checkbox" id="edit"></label>
+
+<div role="region" aria-label="HTML:" id="editor" tabindex="-1" style="white-space:pre-line">
+
+</div>
+</div>
+
+<script>
+let editor = document.querySelector ("#editor");
+let html = "";
+
+document.querySelector("#edit").addEventListener ("click", (e) => {
+if (e.target.checked) {
+enableEditing ();
+} else {
+disableEditing ();
+} // if
+}); // listen
+
+function enableEditing () {
+restore ();
+editor.setAttribute ("contenteditable", "");
+editor.setAttribute("tabindex", "0");
+editor.focus ();
+} // enableEditing
+
+function disableEditing () {
+editor.removeAttribute ("contenteditable");
+editor.setAttribute("tabindex", "-1");
+save ();
+} // disableEditing
+
+function format (text) {
+return text.replace (/>/g, ">\n");
+} // format
+
+function save () {
+html = editor.textContent;
+editor.innerHTML = html;
+} // save
+
+function restore () {
+if (html) {
+editor.innerHTML = "";
+editor.textContent = html;
+} // if
+} // restore
+
+</script>
+
+</body>
+</html>
