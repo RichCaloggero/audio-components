@@ -1,0 +1,7 @@
+<audio-context label="example"><audio-series>
+<audio-player label="player" src="t1.mp3"></audio-player>
+
+<audio-panner label="panner"></audio-panner>
+
+<audio-destination></audio-destination>
+</audio-series></audio-context>

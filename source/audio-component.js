@@ -235,6 +235,16 @@ this.isPlaying = false;
 
 } // class Delay
 
+export class Panner extends AudioComponent {
+constructor (audio) {
+super (audio, "panner");
+this.panner = audio.createPanner();
+this.input.connect(this.panner);
+this.panner.connect(this.wet);
+this.panner.panningModel = "HRTF";
+} // constructor
+} // class Panner
+
 export class Binaural extends AudioComponent {
 constructor (audio) {
 super (audio, "binaural");

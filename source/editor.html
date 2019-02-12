@@ -14,37 +14,77 @@
 <script src="./ui-boolean.js" type="module" crossorigin="anonymous"></script>
 
 <script src="./audio-context.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-series.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-split.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-parallel.js" type="module" crossorigin="anonymous"></script>
+
 <script src="./audio-player.js" type="module" crossorigin="anonymous"></script>
 <script src="./audio-destination.js" type="module" crossorigin="anonymous"></script>
-<script src="./audio-series.js" type="module" crossorigin="anonymous"></script>
+
 <script src="./audio-gain.js" type="module" crossorigin="anonymous"></script>
 <script src="./audio-filter.js" type="module" crossorigin="anonymous"></script>
 <script src="./audio-delay.js" type="module" crossorigin="anonymous"></script>
-<script src="./audio-split.js" type="module" crossorigin="anonymous"></script>
-<script src="./audio-resonance.js" type="module" crossorigin="anonymous"></script>
-<script src="./audio-control.js" type="module" crossorigin="anonymous"></script>
-<script src="./audio-parameter.js" type="module" crossorigin="anonymous"></script>
 <script src="./audio-convolver.js" type="module" crossorigin="anonymous"></script>
 <script src="./audio-compressor.js" type="module" crossorigin="anonymous"></script>
-<script src="./audio-parallel.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-panner.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-resonance.js" type="module" crossorigin="anonymous"></script>
+
+<script src="./audio-control.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-parameter.js" type="module" crossorigin="anonymous"></script>
 
 </head>
 <body>
 <h1>Audio Component Editor</h1>
 
-<div id="demo">
-<label>Edit: <input type="checkbox" id="edit"></label>
+<div class="instructions">
+<p>This application allows you to edit and test audio-component networks right from the browser.
+Simply click the edit checkbox and drop your html into the box.
+Optionally, use the file box to load the predefined networks "example.txt" (default)
+or "demo.txt" (same as running the demo directly).
+</p><p>
+Once the file is loaded and editing is complete, uncheck the edit checkbox and the network will be instantiated and available for use.
+</p></div>
 
-<div role="region" aria-label="HTML:" id="editor" tabindex="-1" style="white-space:pre-line">
+<div id="status" aria-live="polite"></div>
+<div id="editor" role="region" aria-label="editor">
+<label>Enable editing: <input type="checkbox" id="enable" accesskey="e"></label>
+<span id="file" style="display:none">
+<label>File: <input type="text" id="fileName" value="example.txt"></label>
+<button id="getFile">go</button>
+</span>
 
+<div id="document">
+<label for="source">Source:</label>
+<br><textarea id="source" rows="20" cols="132" wrap="off"></textarea>
 </div>
+</div><!-- editor -->
+
+<div id="container">
 </div>
 
 <script>
 let editor = document.querySelector ("#editor");
+let container = document.querySelector ("#container");
+let enable = editor.querySelector("#enable");
+let file = editor.querySelector("#file");
+let fileName = file.querySelector("#fileName");
+let getFile = file.querySelector("#getFile");
+let doc = editor.querySelector ("#document");
+let source = doc.querySelector ("#source");
 let html = "";
+let parameters = new URLSearchParams (location.search);
 
-document.querySelector("#edit").addEventListener ("click", (e) => {
+if (parameters && parameters.get("source")) {
+//enableEditing ();
+load (parameters.get("source"), save);
+} // if
+
+
+getFile.addEventListener ("click", (e) => {
+load (fileName.value);
+}); // listen
+
+enable.addEventListener ("click", (e) => {
 if (e.target.checked) {
 enableEditing ();
 } else {
@@ -53,33 +93,57 @@ disableEditing ();
 }); // listen
 
 function enableEditing () {
-restore ();
-editor.setAttribute ("contenteditable", "");
-editor.setAttribute("tabindex", "0");
-editor.focus ();
+file.style.display = "block";
+doc.style.display = "block";
+container.style.display = "none";
 } // enableEditing
 
 function disableEditing () {
-editor.removeAttribute ("contenteditable");
-editor.setAttribute("tabindex", "-1");
+file.style.display = "none";
+doc.style.display = "none";
 save ();
 } // disableEditing
 
-function format (text) {
-return text.replace (/>/g, ">\n");
-} // format
+
+function load (fileName, callback) {
+loadFile (fileName, (text) => {
+let lines = text.split ("\n");
+source.value = "";
+source.value = text;
+statusMessage (`${lines.length} lines to edit`);
+if (callback) callback ();
+}); // getFile
+} // load
 
 function save () {
-html = editor.textContent;
-editor.innerHTML = html;
+html = source.value;
+container.style.display = "block";
+container.innerHTML = "";
+container.innerHTML = html;
 } // save
 
-function restore () {
-if (html) {
-editor.innerHTML = "";
-editor.textContent = html;
+function loadFile (url, callback) {
+var request = new XMLHttpRequest();
+request.responseType = "text/plain";
+//request.withCredentials = true;
+request.open("GET", url, true);
+request.send();
+
+request.addEventListener("load", function () {
+console.log ("- loaded...");
+if (request.response) {
+callback (request.response);
+} else {
+alert (`load: ${request.error}`);
 } // if
-} // restore
+}); // load
+
+console.log (`request sent via ${request}, url=${url}`);
+} // loadFile
+
+function statusMessage (text) {
+document.querySelector ("#status").textContent = text;
+} // statusMessage
 
 </script>
 
