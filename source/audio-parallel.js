@@ -22,6 +22,8 @@ constructor () {
 super ();
 instanceCount += 1;
 this.id = `${AudioParallel.is}-${instanceCount}`;
+this.ui = false;
+this.hide = "bypass, mix";
 } // constructor
 
 connectedCallback () {
@@ -30,6 +32,8 @@ childrenReady(this)
 .then(children => {
 //console.log(`- connectedCallback.then: found ${children.length} children`);
 this.component = new Parallel(this.audio, this.components(children));
+debugger;
+if (this.uiControls().every(x => x.hidden)) this.shadowRoot.querySelector("legend").hidden = true;
 signalReady(this);
 }).catch(error => {
 console.log(`${this.id}: ${error}\n${error.stack}`);
@@ -38,4 +42,4 @@ alert(`${this.id}: ${error}`);
 } // connectedCallback
 } // class AudioParallel
 
-window.customElements.define(AudioParallel.is, AudioParallel);
+customElements.define(AudioParallel.is, AudioParallel);

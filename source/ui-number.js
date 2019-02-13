@@ -124,8 +124,4 @@ _AudioContext_._position (e.target);
 } // class UINumber
 
 
-function idGen (name) {
-return "ui-number" + instanceCount + "-" + name;
-} // idGen
-
-window.customElements.define(UINumber.is, UINumber);
+customElements.define(UINumber.is, UINumber);

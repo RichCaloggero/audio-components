@@ -132,7 +132,6 @@ console.log(`- connecting ${this.name}.input to ${c.name}`);
 } // if
 
 if (c.output) {
-c.output.disconnect();
 c.output.connect(this.wet);
 console.log(`- connecting ${c.name} to ${this.name}.wet`);
 } // if
@@ -239,9 +238,13 @@ export class Panner extends AudioComponent {
 constructor (audio) {
 super (audio, "panner");
 this.panner = audio.createPanner();
+this.panner.channelCount = 1;
+this.panner.channelCountMode = "explicit";
 this.input.connect(this.panner);
 this.panner.connect(this.wet);
 this.panner.panningModel = "HRTF";
+this.panner.setOrientation(0, 0, 0);
+audio.listener.setOrientation(0,0,-1,0,1,0);
 } // constructor
 } // class Panner
 

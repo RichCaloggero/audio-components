@@ -44,43 +44,32 @@ console.log(`keyChanged: ${this.id} ${input.nodeName} (${value})`);
 if (value && input) input.setAttribute("accesskey", value);
 } // keyChanged
 
-/*handleSpecialKeys (e) {
-const keys = ["Enter", " ", "-", "0", "1",];
-const key = e.key;
-const input = this.shadowRoot.querySelector("input");
-//console.debug(`handleKey: ${this.id} ${e.target.nodeName} (${key})`);
 
-if (!input || input.type === "checkbox" || !keys.includes(key)) return true;
+reset () {
+this.value = (this.max - this.min) / 2.0 + this.min;
+} // reset
 
-if (key === "Enter") {
-if (input.type === "range") {
-this.saveValue(input);
-return false;
-} // if
+setMax () {
+this.value = this.max;
+} // setMax
 
-}else if (key === " ") {
-if (input.type === "range") {
-this.swapValues(input);
-} else {
-return true;
-} // if
+setMin () {
+this.value = this.min;
+} // setMin
 
-} else if (key === "-") {
-if (input.type === "range") {
-input.value = -1 * Number(input.value);
-} else {
-return true;
-} // if
+increase() {
+let amount = (this.max-this.min) / 10.0;
+this.value = this.clamp(this.value + amount);
+} // increase
 
-} else {
-if (input.type === "text") return true;
-else input.value = key;
-} // if
+decrease() {
+let amount = (this.max-this.min) / 10.0;
+this.value = this.clamp (this.value - amount);
+} // decrease
 
-input.dispatchEvent(new CustomEvent("change"));
-return false;
-} // handleSpecialKeys
-*/
+clamp (value, min = this.min, max = this.max) {
+return clamp(value, min, max);
+} // clamp
 
 static processValues (values) {
 if (values instanceof String || typeof(values) === "string") {
@@ -193,3 +182,15 @@ input.value = old;
 statusMessage(`No saved value; press enter to save.`);
 } // if
 } // swapValues
+
+function clamp (value, min, max) {
+if (min > max) {
+const t = min;
+min = max;
+max = t;
+} // if
+
+if (value > max) return max
+else if (value < min) return min;
+else return value;
+} // clamp

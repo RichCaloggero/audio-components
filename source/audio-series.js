@@ -40,4 +40,4 @@ alert(`${this.id}: ${error}`);
 } // connectedCallback
 } // class AudioSeries
 
-window.customElements.define(AudioSeries.is, AudioSeries);
+customElements.define(AudioSeries.is, AudioSeries);

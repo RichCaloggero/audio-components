@@ -5,64 +5,49 @@
 <title>test</title>
 </head>
 <body>
-<x-parent p1="22" p2="13">
-<x-child p1="13" p2="44"></x-child>
-</x-parent>
+<label id="label">position:</label>
+<span role="application" tabindex="0" aria-labelledby="label" role="group">0, 0, 0</span>
 
-<script type="module">
-import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
+<script>
+document.querySelector("span").addEventListener("keydown", handleKeydown);
 
-let instanceCount = 0;
+function handleKeydown (e) {
+let text = e.target.textContent.trim();
+const vector = text.split(",").map(x => Number(x.trim()));
+console.log(`vector: ${vector}`);
+switch (e.key) {
+case "ArrowRight": vector[0] = clamp(vector[0]+1); break;
+case "ArrowLeft": vector[0] = clamp(vector[0]-1); break;
 
-class Parent extends PolymerElement {
-static get is () {return "x-parent"}
-static get properties () {
-return {
-p1: {type: Number, notify: true, observer: "p1Changed"},
-id: {type: String, value: `${this.is}-${instanceCount}`},
-};
-} // properties
+case "ArrowUp": vector[2] = clamp(vector[2]+1); break;
+case "ArrowDown": vector[2] = clamp(vector[2]-1); break;
 
-constructor () {
-super();
-instanceCount += 1;
-} // constructor
+case "u": vector[1] = clamp(vector[1]+1); break;
+case "d": vector[1] = clamp(vector[1]-1); break;
 
-connectedCallback () {
-super.connectedCallback();
-console.debug(`${this.id} parent says ${this.p1} ${this.p2}`);
-} // connectedCallback
+case "Tab": case "Escape": return true;
 
-p1Changed (value) {return; console.debug(`p1Changed: ${value} ${this.p1}`);}
+default: return false;
+} // switch
 
-} // class Parent
+e.target.textContent = vector.join(",");
+return false;
+} // handleKeydown
 
-class Child extends Parent {
-static get is () {return "x-child"}
+function clamp (value, min, max) {
+if (min > max) {
+const t = min;
+min = max;
+max = t;
+} // if
 
-static get properties () {
-return {
-id: {value: `${this.is}-${instanceCount}`},
-p2: {type: Number, notify: true, observer: "p2Changed"},
-};
-} // properties
-
-constructor () {
-super();
-instanceCount += 1;
-} // constructor
-
-connectedCallback () {
-super.connectedCallback();
-console.debug(`${this.id} child says ${this.p1} ${this.p2}`);
-} // connectedCallback
-
-p2Changed (value) {return; console.debug(`p2Changed: ${value} ${this.p2}`);}
-} // class Child
-
-customElements.define("x-parent", Parent);
-customElements.define("x-child", Child);
+if (value > max) return max
+else if (value < min) return min;
+else return value;
+} // clamp
 
 </script>
+
+
 </body>
 </html>

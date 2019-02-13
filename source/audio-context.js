@@ -15,9 +15,19 @@ static get template () {
 return html`
 <div class="audio-context">
 <h1>[[label]]</h1>
-<ui-boolean label="Run automation" value="{{enableAutomation}}"></ui-boolean>
-<div role="region" aria-label="status" id="statusMessage" aria-live="polite">
-</div>
+<ui-boolean label="enable automation" value="{{enableAutomation}}"></ui-boolean>
+<ui-boolean label="showListener" value="{{showListener}}"></ui-boolean>
+
+<fieldset hidden id="listener">
+<legend><h3>Listener</h3></legend>
+<ui-number label="x" value="{{listenerX}}"></ui-number>
+<ui-number label="y" value="{{listenerY}}"></ui-number>
+<ui-number label="z" value="{{listenerZ}}"></ui-number>
+<ui-text label="orientation" value="{{listenerOrientation}}"></ui-text>
+</fieldset>
+
+
+<div role="region" aria-label="status" id="statusMessage" aria-live="polite"></div>
 </div>
 
 <slot></slot>
@@ -33,6 +43,7 @@ label: String,
 mix: {type: Number, notify: true, observer: "_mix"},
 bypass: {type: Boolean, notify: true, observer: "_bypass"},
 enableAutomation: {type: Boolean, value: false, notify: true, observer: "_enableAutomation"}, // enableAutomation
+showListener: {type: Boolean, value: false, notify: true, observer: "_showListener"},
 id: {type: String, notify:true, observer: "setId"},
 }; // return
 } // get properties
@@ -67,6 +78,7 @@ this.hidden = this.ui && !this.label;
 // hide controls in UI elements that have label or name if control's label or name mentioned in hidden attribute's value
 this.hideControls();
 
+// when this.shadowRoot becomes set for the first time, store it since it will be shadow root of the audio-context itself
 if (!shadowRoot) shadowRoot = this.shadowRoot;
 } // connectedCallback
 
@@ -121,7 +133,10 @@ _enableAutomation (value) {
 const _message = value? "Automation enabled." : "Automation disabled.";
 if (value) startAutomation();
 else stopAutomation();
+//statusMessage(_message);
 } // _enableAutomation
+
+_showListener (value) {if (shadowRoot) shadowRoot.querySelector("#listener").hidden = !value;}
 
 setId (value) {this.id = value;}
 
@@ -239,4 +254,5 @@ return;
 
 alert (message);
 } // statusMessage
+
 

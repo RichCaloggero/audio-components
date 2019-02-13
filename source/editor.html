@@ -12,6 +12,7 @@
 <script src="./ui-text.js" type="module" crossorigin="anonymous"></script>
 <script src="./ui-list.js" type="module" crossorigin="anonymous"></script>
 <script src="./ui-boolean.js" type="module" crossorigin="anonymous"></script>
+<script src="./ui-position.js" type="module" crossorigin="anonymous"></script>
 
 <script src="./audio-context.js" type="module" crossorigin="anonymous"></script>
 <script src="./audio-series.js" type="module" crossorigin="anonymous"></script>
@@ -27,6 +28,7 @@
 <script src="./audio-convolver.js" type="module" crossorigin="anonymous"></script>
 <script src="./audio-compressor.js" type="module" crossorigin="anonymous"></script>
 <script src="./audio-panner.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-equalizer.js" type="module" crossorigin="anonymous"></script>
 <script src="./audio-resonance.js" type="module" crossorigin="anonymous"></script>
 
 <script src="./audio-control.js" type="module" crossorigin="anonymous"></script>
@@ -39,7 +41,7 @@
 <div class="instructions">
 <p>This application allows you to edit and test audio-component networks right from the browser.
 Simply click the edit checkbox and drop your html into the box.
-Optionally, use the file box to load the predefined networks "example.txt" (default)
+Optionally, use the file box to load the predefined networks "t.txt" (default)
 or "demo.txt" (same as running the demo directly).
 </p><p>
 Once the file is loaded and editing is complete, uncheck the edit checkbox and the network will be instantiated and available for use.
@@ -47,10 +49,10 @@ Once the file is loaded and editing is complete, uncheck the edit checkbox and t
 
 <div id="status" aria-live="polite"></div>
 <div id="editor" role="region" aria-label="editor">
-<label>Enable editing: <input type="checkbox" id="enable" accesskey="e"></label>
+<label>Enable editing: <input type="checkbox" checked id="enable" accesskey="e"></label>
 <span id="file" style="display:none">
-<label>File: <input type="text" id="fileName" value="example.txt"></label>
-<button id="getFile">go</button>
+<label>File: <input type="text" id="fileName" value="t.txt"></label>
+<button id="getFile" accesskey="g">go</button>
 </span>
 
 <div id="document">
@@ -74,6 +76,7 @@ let source = doc.querySelector ("#source");
 let html = "";
 let parameters = new URLSearchParams (location.search);
 
+enableEditing();
 if (parameters && parameters.get("source")) {
 //enableEditing ();
 load (parameters.get("source"), save);
