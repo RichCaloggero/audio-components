@@ -278,6 +278,32 @@ this.rightPanner.positionZ.value = r*Math.sin(-1*a-r/3+r/6-r/9);
 
 } // class Binaural
 
+export class Equalizer extends AudioComponent {
+constructor (audio, frequencies) {
+super (audio, "equalizer");
+this.filters = createFilterBank(audio, frequencies);
+const container = new Parallel(this.audio, this.filters);
+this.input.connect(container.input);
+container.output.connect(this.wet);
+this.reset();
+} // constructor
+
+get bandCount () {return this.filters.length;}
+
+reset () {this.filters.forEach(filter => this.resetFilter(filter));}
+
+resetFilter (filter) {
+filter.filter.Q.value = 1;
+filter.filter.type = "peaking";
+filter.filter.gain.value = 0;
+filter.filter.detune.value = 0;
+} // resetFilter
+
+set q (value) {
+this.filters.forEach(filter => filter.filter.Q.value = value);
+} // set q
+} // class Equalizer
+
 export class Phaser extends AudioComponent {
 constructor (audio, bandCount = 1) {
 super (audio);
@@ -331,3 +357,11 @@ m.connect(this.wet);
 m.connect(this.feedback).connect(s);
 } // constructor
 } // class Xtc
+
+function createFilterBank (audio, frequencies) {
+return frequencies.map (frequency => {
+const filter = new Filter(audio);
+filter.filter.frequency.value = frequency;
+return filter;
+}); // mapreturn filters;
+} // createFilterBank

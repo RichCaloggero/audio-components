@@ -1,7 +1,11 @@
 <audio-context label="example"><audio-series>
 <audio-player label="player" src="t1.mp3"></audio-player>
 
+<audio-control>
 <audio-panner label="panner"></audio-panner>
+<audio-parameter label="controling x" name="x" function="pow(cos(t), 2)"></audio-parameter>
+<audio-parameter label="controling z" name="z" function="pow(sin(t), 2)"></audio-parameter>
+</audio-control>
 
 <audio-destination></audio-destination>
 </audio-series></audio-context>

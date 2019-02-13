@@ -1,53 +1,48 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
-<title>test</title>
+<meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+<title>Equalizer Test</title>
+
+<script src="./resonance-audio.min.js" crossorigin="anonymous"></script>
+
+<script src="./ui-number.js" type="module" crossorigin="anonymous"></script>
+<script src="./ui-text.js" type="module" crossorigin="anonymous"></script>
+<script src="./ui-list.js" type="module" crossorigin="anonymous"></script>
+<script src="./ui-boolean.js" type="module" crossorigin="anonymous"></script>
+
+<script src="./audio-context.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-series.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-split.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-parallel.js" type="module" crossorigin="anonymous"></script>
+
+<script src="./audio-player.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-destination.js" type="module" crossorigin="anonymous"></script>
+
+<script src="./audio-gain.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-filter.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-delay.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-convolver.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-compressor.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-panner.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-equalizer.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-resonance.js" type="module" crossorigin="anonymous"></script>
+
+<script src="./audio-control.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-parameter.js" type="module" crossorigin="anonymous"></script>
+
 </head>
 <body>
-<label id="label">position:</label>
-<span role="application" tabindex="0" aria-labelledby="label" role="group">0, 0, 0</span>
+<h1>Equalizer Test</h1>
 
-<script>
-document.querySelector("span").addEventListener("keydown", handleKeydown);
+<audio-context label="example"><audio-series>
+<audio-player label="player" src="t1.mp3"></audio-player>
 
-function handleKeydown (e) {
-let text = e.target.textContent.trim();
-const vector = text.split(",").map(x => Number(x.trim()));
-console.log(`vector: ${vector}`);
-switch (e.key) {
-case "ArrowRight": vector[0] = clamp(vector[0]+1); break;
-case "ArrowLeft": vector[0] = clamp(vector[0]-1); break;
+<audio-equalizer label="equalizer"></audio-equalizer>
 
-case "ArrowUp": vector[2] = clamp(vector[2]+1); break;
-case "ArrowDown": vector[2] = clamp(vector[2]-1); break;
-
-case "u": vector[1] = clamp(vector[1]+1); break;
-case "d": vector[1] = clamp(vector[1]-1); break;
-
-case "Tab": case "Escape": return true;
-
-default: return false;
-} // switch
-
-e.target.textContent = vector.join(",");
-return false;
-} // handleKeydown
-
-function clamp (value, min, max) {
-if (min > max) {
-const t = min;
-min = max;
-max = t;
-} // if
-
-if (value > max) return max
-else if (value < min) return min;
-else return value;
-} // clamp
-
-</script>
-
-
+<audio-destination></audio-destination>
+</audio-series></audio-context>
 </body>
 </html>
