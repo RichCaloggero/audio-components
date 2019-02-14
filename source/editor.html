@@ -12,7 +12,7 @@
 <script src="./ui-text.js" type="module" crossorigin="anonymous"></script>
 <script src="./ui-list.js" type="module" crossorigin="anonymous"></script>
 <script src="./ui-boolean.js" type="module" crossorigin="anonymous"></script>
-<script src="./ui-position.js" type="module" crossorigin="anonymous"></script>
+<!--<script src="./ui-position.js" type="module" crossorigin="anonymous"></script>-->
 
 <script src="./audio-context.js" type="module" crossorigin="anonymous"></script>
 <script src="./audio-series.js" type="module" crossorigin="anonymous"></script>
@@ -48,8 +48,14 @@ Once the file is loaded and editing is complete, uncheck the edit checkbox and t
 </p></div>
 
 <div id="status" aria-live="polite"></div>
+<div id="project" role="region" aria-label="project">
+<label>Project: <select id="projectList" accesskey="p"></select></label>
+<label>Name: <input type="text" id="name"></label>
+<button id="save" accesskey="s">Save</button>
+</div>
+
 <div id="editor" role="region" aria-label="editor">
-<label>Enable editing: <input type="checkbox" checked id="enable" accesskey="e"></label>
+<label>Enable editing: <input type="checkbox" id="enable" accesskey="e"></label>
 <span id="file" style="display:none">
 <label>File: <input type="text" id="fileName" value="t.txt"></label>
 <button id="getFile" accesskey="g">go</button>
@@ -61,27 +67,41 @@ Once the file is loaded and editing is complete, uncheck the edit checkbox and t
 </div>
 </div><!-- editor -->
 
-<div id="container">
+<div id="container" role="region" aria-label="application">
 </div>
 
 <script>
-let editor = document.querySelector ("#editor");
-let container = document.querySelector ("#container");
-let enable = editor.querySelector("#enable");
-let file = editor.querySelector("#file");
-let fileName = file.querySelector("#fileName");
-let getFile = file.querySelector("#getFile");
-let doc = editor.querySelector ("#document");
-let source = doc.querySelector ("#source");
+"use strict";
+const storage = localStorage;
+const storageTag = "audio-components editor";
+const editor = document.querySelector ("#editor");
+const container = document.querySelector ("#container");
+const enable = editor.querySelector("#enable");
+const file = editor.querySelector("#file");
+const fileName = file.querySelector("#fileName");
+const getFile = file.querySelector("#getFile");
+const doc = editor.querySelector ("#document");
+const source = doc.querySelector ("#source");
+let projects = {};
+const projectName = document.querySelector("#project #name");
+const projectList = document.querySelector("#projectList");
 let html = "";
 let parameters = new URLSearchParams (location.search);
 
-enableEditing();
-if (parameters && parameters.get("source")) {
-//enableEditing ();
-load (parameters.get("source"), save);
-} // if
+restoreProjects(storage, storageTag);
 
+projectList.addEventListener("change", e => {
+loadProject(e.target.value);
+});
+
+/*projectList.addEventListener("keyup", e => {
+const key = e.key;
+const name = e.target.value;
+if (key === "Delete") deleteProject(name);
+else if (key === "Enter") loadProject(name);
+else return true;
+});
+*/
 
 getFile.addEventListener ("click", (e) => {
 load (fileName.value);
@@ -91,7 +111,23 @@ enable.addEventListener ("click", (e) => {
 if (e.target.checked) {
 enableEditing ();
 } else {
+if (!source.value) {
+statusMessage("Please enter some content.");
+source.focus();
+e.preventDefault();
+return;
+} else if (!projectName.value) {
+statusMessage("Please provide a project name.");
+projectName.focus();
+e.preventDefault();
+return;
+} // if
+
 disableEditing ();
+saveProject(projectName.value, source.value);
+saveProjects(projects);
+updateProjectList(projectList, projects, projectName.value);
+run(source.value);
 } // if
 }); // listen
 
@@ -99,31 +135,69 @@ function enableEditing () {
 file.style.display = "block";
 doc.style.display = "block";
 container.style.display = "none";
+loadEditor(projects[projectList.value]);
+source.focus();
 } // enableEditing
 
 function disableEditing () {
 file.style.display = "none";
 doc.style.display = "none";
-save ();
 } // disableEditing
 
-
-function load (fileName, callback) {
-loadFile (fileName, (text) => {
+function loadEditor (text) {
 let lines = text.split ("\n");
 source.value = "";
 source.value = text;
 statusMessage (`${lines.length} lines to edit`);
+} // loadEditor
+
+function run (html) {
+container.style.display = "block";
+container.innerHTML = "";
+container.innerHTML = html;
+} // run
+
+function saveProject (name, html) {
+projects[name] = html;
+saveProjects(projects);
+} // saveProject
+
+function saveProjects (projects) {
+try {
+storage.setItem(storageTag, JSON.stringify(projects));
+} catch (e) {
+statusMessage(e);
+return;
+} // try
+
+} // saveProjects
+
+function updateProjectList (projectList, projects, name) {
+const html = Object.keys(projects)
+.map(name => `<option id="${name}">${name}</option>`)
+.join("\n");
+projectList.innerHTML = html;
+updateSelection(projectList, projectName.value);
+} // updateProjectList
+
+function updateSelection (list, name) {
+name = projectName.value;
+if (!name) return;
+
+for (i=0; i<list.length; i++) {
+const option = list.selectedOptions;
+if (option.id === name) return;
+} // for
+list.selectedIndex = 0;
+} // updateSelection
+
+function load (fileName, callback) {
+loadFile (fileName, (text) => {
+loadEditor(text);
 if (callback) callback ();
 }); // getFile
 } // load
 
-function save () {
-html = source.value;
-container.style.display = "block";
-container.innerHTML = "";
-container.innerHTML = html;
-} // save
 
 function loadFile (url, callback) {
 var request = new XMLHttpRequest();
@@ -147,6 +221,36 @@ console.log (`request sent via ${request}, url=${url}`);
 function statusMessage (text) {
 document.querySelector ("#status").textContent = text;
 } // statusMessage
+
+function restoreProjects (storage, storageTag) {
+const text = storage.getItem(storageTag);
+if (text) {
+try {
+projects = JSON.parse(text);
+updateProjectList(projectList, projects);
+loadProject(projectList.value);
+projectList.focus();
+} catch (e) {
+statusMessage(e);
+} // try
+} // if
+} // restoreProjects
+
+
+function loadProject (name) {
+disableEditing();
+if (projects[name]) {
+projectName.value = name;
+run(projects[name]);
+} else {
+statusMessage(`Project ${name} not found.`);
+} // if
+} // loadProject
+
+function deleteProject (name) {
+delete projects[name];
+updateProjectList(projectList, projects);
+} // deleteProject
 
 </script>
 
