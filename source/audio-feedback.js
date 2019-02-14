@@ -1,101 +1,53 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {_AudioContext_} from "./audio-context.js";
+import {_AudioContext_, childrenReady, signalReady} from "./audio-context.js";
+import {Feedback} from "./audio-component.js";
+
 
 let instanceCount = 0;
 
 class AudioFeedback extends _AudioContext_{
 static get template () {
 return html`
+<fieldset class="audio-feedback">
+<legend><h2>[[label]]</h2></legend>
+<ui-boolean label="bypass" value="{{bypass}}"></ui-boolean>
+<ui-number label="mix" value="{{mix}}" min="0" max="1" step="0.1"></ui-number>
 
-<div class="audio-feedback" role="region" aria-label$="{{label}}">
-<span class="label">[[label]]</span>
-
-
-<div class="row">
-<ui-number name="gain" label="gain" value="{{gain}}" min="0.0" max="1.0" step="0.1"></ui-number>
-</div><!-- .row -->
-
+<ui-number label="delay" value="{{delay}}" min="0" max="1.0" step="0.000001"></ui-number>
+<ui-number label="gain" value="{{gain}}" min="-1" max="1" step="0.1"></ui-number>
+</fieldset>
 <slot></slot>
-</div><!-- .audio-feedback -->
 `; // html
 } // get template
-static get is () {return "audio-feedback";}
 
 static get properties () {
 return {
-label: {
-type: String,
-value: ""
-}, // label
-
-/*bypass: {
-type: Boolean,
-notify: true,
-observer: "_bypass"
-}, // bypass
-*/
-
-to: {
-type: String,
-value: ""
-}, // to
-
-gain: {
-type: Number,
-value: 0.0,
-notify: true,
-observer: "gainChanged"
-} // gain
-
+delay: {type: Number, value: 0, notify: true, observer: "delayChanged"},
+gain: {type: Number, value: .5, notify: true, observer: "gainChanged"},
 }; // return
 } // get properties
+
+static get is () {return "audio-feedback";}
 
 constructor () {
 super ();
 instanceCount += 1;
-this._id = "audio-feedback" + instanceCount;
-
-this._init (audio.createGain());
-this._audioIn.disconnect ();
-this._audioNode.disconnect();
+this.id = `${AudioFeedback.is}-${instanceCount}`;
 } // constructor
 
 connectedCallback () {
 super.connectedCallback ();
-this.whenAllChildrenLoaded (() => {
-this.addFieldLabels ();
-this.connectFeedback ();
-});
+childrenReady(this)
+.then(children => {
+const target = this.components(children)[0];
+this.component = new Feedback(this.audio, target);
+signalReady(this);
+}); // childrenReady
 } // connectedCallback
 
-connectFeedback () {
-this._to = this.firstElementChild;
-//console.log (`feedback to ${this._to}`);
-
-if (! this._to) {
-alert ("feedback: no child element");
-return;
-} // if
-
-this._audioIn.connect (this._to._in);
-this._to._out.connect (this._audioNode);
-this._audioNode.connect (this._audioOut);
-this._audioNode.connect (this._audioIn);
-this._to._out.connect (this._audioOut);
-} // connectFeedback
-
-gainChanged (value) {
-this._audioNode.gain.value = value;
-} // gainChanged
-
-mixChanged (value) {
-let self = this.shadowRoot;
-let dry = self.querySelector(".dry-level");
-let wet = self.querySelector (".wet-level");
-wet.gain = value;
-dry.gain = 1 - value;
-} // mixChanged
+delayChanged (value) {if (this.component) this.component.setDelay(value);}
+gainChanged (value) {if (this.component) this.component.setGain(value);}
 
 } // class AudioFeedback
 
-window.customElements.define(AudioFeedback.is, AudioFeedback);
+customElements.define(AudioFeedback.is, AudioFeedback);

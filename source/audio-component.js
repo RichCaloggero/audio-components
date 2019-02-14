@@ -234,6 +234,31 @@ this.isPlaying = false;
 
 } // class Delay
 
+export class Feedback extends AudioComponent {
+constructor (audio, target) {
+super (audio, "feedback");
+this.delay = audio.createDelay();
+this.gain = audio.createGain();
+this.target = target;
+
+this.input.connect(this.target.input);
+this.target.output.connect(this.wet);
+this.connectFeedback();
+
+this.delay.delayTime.value = 0;
+this.gain.gain.value = 0.5;
+} // constructor
+
+bypass (value) {
+super.bypass (value);
+if (!value && this.wet && this.delay && this.gain) this.connectFeedback();
+} // bypass
+
+connectFeedback () {this.wet.connect(this.delay).connect(this.gain).connect(this.input);}
+setGain (value) {this.gain.gain.value = value;}
+setDelay (value) {this.delay.delayTime.value = value;}
+} // class Feedback
+
 export class Panner extends AudioComponent {
 constructor (audio) {
 super (audio, "panner");

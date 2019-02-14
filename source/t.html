@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
-<title>Equalizer Test</title>
+<title>Test</title>
 
 <script src="./resonance-audio.min.js" crossorigin="anonymous"></script>
 
@@ -24,6 +24,7 @@
 <script src="./audio-gain.js" type="module" crossorigin="anonymous"></script>
 <script src="./audio-filter.js" type="module" crossorigin="anonymous"></script>
 <script src="./audio-delay.js" type="module" crossorigin="anonymous"></script>
+<script src="./audio-feedback.js" type="module" crossorigin="anonymous"></script>
 <script src="./audio-convolver.js" type="module" crossorigin="anonymous"></script>
 <script src="./audio-compressor.js" type="module" crossorigin="anonymous"></script>
 <script src="./audio-panner.js" type="module" crossorigin="anonymous"></script>
@@ -35,12 +36,17 @@
 
 </head>
 <body>
-<h1>Equalizer Test</h1>
 
 <audio-context label="example"><audio-series>
 <audio-player label="player" src="t1.mp3"></audio-player>
 
-<audio-equalizer label="equalizer"></audio-equalizer>
+<audio-feedback label="feedback">
+<audio-split swapOutputs>
+<audio-delay label="left delay" hide="mix, bypass"></audio-delay>
+<audio-delay label="right delay" hide="mix, bypass"></audio-delay>
+</audio-split>
+</audio-feedback>
+
 
 <audio-destination></audio-destination>
 </audio-series></audio-context>

@@ -46,11 +46,6 @@ this.target = children[0];
 const targetComponent = this.target.component;
 this.component.input.connect(targetComponent.input);
 targetComponent.output.connect(this.component.wet);
-/*children.slice(1).forEach(child => {
-//console.debug(`${this.id}.childrenReady: updating ${child.name} ${child.function}`);
-updateParameter(this, child.name, child.function);
-});
-*/
 
 this.start();
 signalReady(this);
@@ -80,6 +75,7 @@ stop () {
 removeFromAutomationQueue(this);
 } // stop
 } // class AudioControl
+
 customElements.define(AudioControl.is, AudioControl);
 
 
