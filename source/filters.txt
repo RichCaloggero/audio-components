@@ -1,0 +1,49 @@
+<audio-context label="test"><audio-series>
+<audio-player label="player" src="media/summer time.mp3"></audio-player>
+
+<audio-series label="master" hide="mix">
+<audio-control>
+<audio-panner bypass label="panner" refDistance="100" distanceModel="linear"></audio-panner>
+<audio-parameter label="controling x" name="x" function="
+5 * cos(t/2)
+"></audio-parameter>
+<audio-parameter label="controling z" name="z" function="
+6.5 * sin(t/2)
+"></audio-parameter>
+</audio-control>
+
+
+<audio-series label="splitter block" hide="" mix="-1">
+<audio-split swapOutputs>
+<audio-control>
+<audio-filter label="left filter" type="allpass" frequency="420.0" q="1"
+hide="detune, gain, mix"></audio-filter>
+
+<audio-parameter label="controling left filter q" name="q"></audio-parameter>
+<audio-parameter label="controling left filter frequency" name="frequency"></audio-parameter>
+</audio-control>
+
+<audio-series><audio-control>
+<audio-delay bypass label="delay" mix="1" delay="0.0035"></audio-delay>
+<audio-parameter label="controling delay time" name="delay"></audio-parameter>
+</audio-control><audio-control>
+<audio-filter label="right filter" type="allpass" frequency="220" q="1.0"
+hide="detune, gain, mix"></audio-filter>
+
+<audio-parameter label="controling right filter frequency" name="frequency"></audio-parameter>
+</audio-control></audio-series>
+</audio-split>
+</audio-series>
+
+<!--<audio-resonance label="Resonance Audio"></audio-resonance>
+-->
+
+<audio-convolver label="reverb" bypass mix="0.5" path="./impulses" impulse="Going Home"></audio-convolver>
+
+<audio-compressor label="compressor" bypass threshold="-20"></audio-compressor>
+
+<audio-gain label="output volume"></audio-gain>
+</audio-series>
+
+<audio-destination></audio-destination>
+</audio-series></audio-context>

@@ -1,0 +1,7 @@
+<audio-context label="equalizer test"><audio-series>
+<audio-player label="player" src="t1.mp3"></audio-player>
+
+<audio-equalizer label="equalizer"></audio-equalizer>
+
+<audio-destination></audio-destination>
+</audio-series></audio-context>
