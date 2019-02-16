@@ -1,17 +1,12 @@
 <!doctype html>
-<html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
-
-<title>Test</title>
-
 <script src="./resonance-audio.min.js" crossorigin="anonymous"></script>
 
 <script src="./ui-number.js" type="module" crossorigin="anonymous"></script>
 <script src="./ui-text.js" type="module" crossorigin="anonymous"></script>
 <script src="./ui-list.js" type="module" crossorigin="anonymous"></script>
 <script src="./ui-boolean.js" type="module" crossorigin="anonymous"></script>
+<!--<script src="./ui-position.js" type="module" crossorigin="anonymous"></script>-->
 
 <script src="./audio-context.js" type="module" crossorigin="anonymous"></script>
 <script src="./audio-series.js" type="module" crossorigin="anonymous"></script>
@@ -24,7 +19,6 @@
 <script src="./audio-gain.js" type="module" crossorigin="anonymous"></script>
 <script src="./audio-filter.js" type="module" crossorigin="anonymous"></script>
 <script src="./audio-delay.js" type="module" crossorigin="anonymous"></script>
-<script src="./audio-feedback.js" type="module" crossorigin="anonymous"></script>
 <script src="./audio-convolver.js" type="module" crossorigin="anonymous"></script>
 <script src="./audio-compressor.js" type="module" crossorigin="anonymous"></script>
 <script src="./audio-panner.js" type="module" crossorigin="anonymous"></script>
@@ -33,20 +27,50 @@
 
 <script src="./audio-control.js" type="module" crossorigin="anonymous"></script>
 <script src="./audio-parameter.js" type="module" crossorigin="anonymous"></script>
-
 </head>
 <body>
+<audio-context label="test"><audio-series>
+<audio-player label="player" src="media/My Shining Hour.mp3"></audio-player>
 
-<audio-context label="example"><audio-series>
-<audio-player label="player" src="t1.mp3"></audio-player>
+<audio-series label="master" hide="mix">
+<audio-control>
+<audio-panner label="panner"></audio-panner>
+<audio-parameter label="controling x" name="x" function="cos(t/2)"></audio-parameter>
+<audio-parameter label="controling z" name="z" function="sin(t/2)"></audio-parameter>
+</audio-control>
 
-<audio-feedback label="feedback">
+
+<audio-series label="splitter block" hide="">
 <audio-split swapOutputs>
-<audio-delay label="left delay" hide="mix, bypass"></audio-delay>
-<audio-delay label="right delay" hide="mix, bypass"></audio-delay>
-</audio-split>
-</audio-feedback>
+<audio-control>
+<audio-filter label="left filter" type="allpass" frequency="420.0" q="1"
+hide="detune, gain, mix"></audio-filter>
 
+<audio-parameter label="controling left filter q" name="q"></audio-parameter>
+<audio-parameter label="controling left filter frequency" name="frequency"</audio-parameter>
+</audio-control>
+
+<audio-series><audio-control>
+<audio-delay label="delay" mix="1" delay="0.0035"></audio-delay>
+<audio-parameter label="controling delay time" name="delay"></audio-parameter>
+</audio-control><audio-control>
+<audio-filter label="right filter" type="allpass" frequency="1200" q="1.0"
+hide="detune, gain, mix"></audio-filter>
+
+<audio-parameter label="controling right filter frequency" name="frequency"></audio-parameter>
+</audio-control></audio-series>
+</audio-split>
+</audio-series>
+
+<!--<audio-resonance label="Resonance Audio"></audio-resonance>
+-->
+
+<audio-convolver label="reverb" bypass mix="0.5" path="./impulses" impulse="Going Home"></audio-convolver>
+
+<audio-compressor label="compressor" bypass threshold="-20"></audio-compressor>
+
+<audio-gain label="output volume"></audio-gain>
+</audio-series>
 
 <audio-destination></audio-destination>
 </audio-series></audio-context>

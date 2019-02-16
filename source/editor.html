@@ -33,7 +33,6 @@
 
 <script src="./audio-control.js" type="module" crossorigin="anonymous"></script>
 <script src="./audio-parameter.js" type="module" crossorigin="anonymous"></script>
-
 </head>
 <body>
 <h1>Audio Component Editor</h1>
@@ -49,25 +48,28 @@ Once the file is loaded and editing is complete, uncheck the edit checkbox and t
 
 <div id="status" aria-live="polite"></div>
 <div id="project" role="region" aria-label="project">
-<label>Project: <select id="projectList" accesskey="p"></select></label>
-<label>Name: <input type="text" id="name"></label>
-<button id="save" accesskey="s">Save</button>
-</div>
+<h2><label>Name: <input type="text" id="projectName" accesskey="n"></label></h2>
+<label>Select a project: <select id="projectList" accesskey="p"></select></label>
+</div><!-- #project -->
 
 <div id="editor" role="region" aria-label="editor">
-<label>Enable editing: <input type="checkbox" id="enable" accesskey="e"></label>
+<div id="editor-controls">
+<button id="edit" accesskey="e">Edit</button>
+<button id="run" accesskey="r">Run</button>
 <span id="file" style="display:none">
-<label>File: <input type="text" id="fileName" value="t.txt"></label>
+<label>File: <input type="text" id="fileName" value="t.txt" accesskey="f"></label>
 <button id="getFile" accesskey="g">go</button>
 </span>
+</div><!-- #editor-controls -->
 
 <div id="document">
+<h2 id="title"></h2>
 <label for="source">Source:</label>
-<br><textarea id="source" rows="20" cols="132" wrap="off"></textarea>
-</div>
+<br><textarea id="source" rows="20" cols="132" wrap="off" accesskey="d"></textarea>
+</div><!-- #document -->
 </div><!-- editor -->
 
-<div id="container" role="region" aria-label="application">
+<div id="application" role="region" aria-label="application">
 </div>
 
 <script>
@@ -75,15 +77,16 @@ Once the file is loaded and editing is complete, uncheck the edit checkbox and t
 const storage = localStorage;
 const storageTag = "audio-components editor";
 const editor = document.querySelector ("#editor");
-const container = document.querySelector ("#container");
-const enable = editor.querySelector("#enable");
+const application = document.querySelector ("#application");
+const editButton = editor.querySelector("#edit");
+const runButton = editor.querySelector("#run");
 const file = editor.querySelector("#file");
 const fileName = file.querySelector("#fileName");
 const getFile = file.querySelector("#getFile");
 const doc = editor.querySelector ("#document");
 const source = doc.querySelector ("#source");
 let projects = {};
-const projectName = document.querySelector("#project #name");
+const projectName = document.querySelector("#projectName");
 const projectList = document.querySelector("#projectList");
 let html = "";
 let parameters = new URLSearchParams (location.search);
@@ -94,23 +97,24 @@ projectList.addEventListener("change", e => {
 loadProject(e.target.value);
 });
 
-/*projectList.addEventListener("keyup", e => {
+projectList.addEventListener("keyup", e => {
 const key = e.key;
 const name = e.target.value;
 if (key === "Delete") deleteProject(name);
 else if (key === "Enter") loadProject(name);
 else return true;
 });
-*/
 
 getFile.addEventListener ("click", (e) => {
 load (fileName.value);
 }); // listen
 
-enable.addEventListener ("click", (e) => {
-if (e.target.checked) {
+editButton.addEventListener ("click", (e) => {
 enableEditing ();
-} else {
+source.focus();
+});
+
+runButton.addEventListener ("click", (e) => {
 if (!source.value) {
 statusMessage("Please enter some content.");
 source.focus();
@@ -125,17 +129,16 @@ return;
 
 disableEditing ();
 saveProject(projectName.value, source.value);
-saveProjects(projects);
 updateProjectList(projectList, projects, projectName.value);
 run(source.value);
-} // if
 }); // listen
 
 function enableEditing () {
+statusMessage(`Editing ${projectName.value}...`);
 file.style.display = "block";
 doc.style.display = "block";
-container.style.display = "none";
-loadEditor(projects[projectList.value]);
+application.style.display = "none";	
+loadEditor(projects[projectName.value]);
 source.focus();
 } // enableEditing
 
@@ -152,9 +155,10 @@ statusMessage (`${lines.length} lines to edit`);
 } // loadEditor
 
 function run (html) {
-container.style.display = "block";
-container.innerHTML = "";
-container.innerHTML = html;
+application.style.display = "block";
+application.innerHTML = "";
+application.innerHTML = html;
+Array.from(application.querySelector(focusableSelector))[0].focus();
 } // run
 
 function saveProject (name, html) {
@@ -172,22 +176,27 @@ return;
 
 } // saveProjects
 
-function updateProjectList (projectList, projects, name) {
+function updateProjectList (projectList, projects, projectName) {
 const html = Object.keys(projects)
-.map(name => `<option id="${name}">${name}</option>`)
-.join("\n");
+.map(name => `
+<option ${name === projectName? "selected" : ""} value="${name}">${name}</option>
+`).join("\n");
 projectList.innerHTML = html;
-updateSelection(projectList, projectName.value);
 } // updateProjectList
 
 function updateSelection (list, name) {
-name = projectName.value;
+const index = projects.findIndex(_name => name);
 if (!name) return;
+list.selectedIndex = 0;
 
-for (i=0; i<list.length; i++) {
+for (let i=0; i<list.length; i++) {
 const option = list.selectedOptions;
-if (option.id === name) return;
+if (option.id === name) {
+list.selectedIndex = i;
+return;
+} // if
 } // for
+
 list.selectedIndex = 0;
 } // updateSelection
 
@@ -238,10 +247,9 @@ statusMessage(e);
 
 
 function loadProject (name) {
-disableEditing();
 if (projects[name]) {
 projectName.value = name;
-run(projects[name]);
+run(projects[projectName.value]);
 } else {
 statusMessage(`Project ${name} not found.`);
 } // if
@@ -249,7 +257,7 @@ statusMessage(`Project ${name} not found.`);
 
 function deleteProject (name) {
 delete projects[name];
-updateProjectList(projectList, projects);
+updateProjectList(projectList, projects, projectName.value);
 } // deleteProject
 
 </script>

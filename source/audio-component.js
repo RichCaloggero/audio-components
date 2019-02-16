@@ -88,16 +88,16 @@ export class Series extends AudioComponent {
 constructor (audio, components) {
 super (audio, "series");
 //console.debug(`Series: connecting ${components.length} components in series:`);
-if (components.length < 2) throw new Error("Series: need two or more components");
+//if (components.length < 2) throw new Error("Series: need two or more components");
 const first = components[0];
 const last = components[components.length-1];
 
 if(first.input) {
-//this.input.disconnect();
 this.input.connect(first.input);
 console.log(`- connected ${this.name} input to ${first.name}`);
 } // if
 
+if (first !== last) {
 components.forEach((c, i, all) => {
 if (i < all.length-1) {
 const next = all[i+1];
@@ -110,9 +110,9 @@ throw new Error (`series: ${c.name} and ${next.name} must both be AudioComponent
 } // if
 } // if
 }); // forEach
+} // if
 
 if (last.output) {
-//last.output.disconnect();
 last.output.connect(this.wet);
 console.log(`- connected ${last.name} to ${this.name} wet`);
 } // if
