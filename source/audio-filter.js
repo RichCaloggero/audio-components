@@ -24,7 +24,7 @@ return html`
 ["notch","notch"]
 ]'></ui-list>
 
-<ui-number label="frequency" value="{{frequency}}" min="20.0" max="20000.0" step="10.0"></ui-number>
+<ui-number label="frequency" type="number" value="{{frequency}}" min="20" max="20000" step="10.0"></ui-number>
 <ui-number label="Q" value="{{q}}" min="0.01" max="20.0" step="0.01"></ui-number>
 
 <br><ui-number label="gain" value="{{gain}}" min="-30.0" max="30.0" step="1"></ui-number>
