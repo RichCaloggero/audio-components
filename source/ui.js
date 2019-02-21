@@ -1,7 +1,8 @@
 import {PolymerElement} from "./@polymer/polymer/polymer-element.js";
-import {statusMessage} from "./audio-context.js";
+import {shadowRoot, statusMessage} from "./audio-context.js";
 
-let savedValues = new Map();
+const savedValues = new Map();
+const userKeymap = new Map();
 
 export class UI extends PolymerElement {
 
@@ -21,8 +22,14 @@ switch (key) {
 case " ": if(e.ctrlKey) swapValues(input);
 break;
 
-case "Enter": if(e.ctrlKey) saveValue(input);
-else this.reset();
+case "Enter":
+if (e.ctrlKey && e.altKey && e.shiftKey) {
+getKey(input);
+} else if(e.ctrlKey) {
+saveValue(input);
+} else {
+this.reset();
+} // if
 break;
 
 default: return true;
@@ -144,3 +151,28 @@ statusMessage(`No saved value; press enter to save.`);
 } // if
 } // swapValues
 
+export function getKey (input) {
+const dialog = shadowRoot.querySelector("#defineKeyDialog");
+const ok = dialog.querySelector(".ok");
+const closeButton = dialog.querySelector(".close");
+
+dialog.removeAttribute("hidden");
+dialog.querySelector(".control").focus();
+
+closeButton.addEventListener ("click", close);
+ok.addEventListener("click", () => {
+dialog.setAttribute("hidden", true);
+userKeymap.set(input, {
+ctrlKey: dialog.querySelector(".control").checked,
+altKey: dialog.querySelector(".alt").checked,
+shiftKey: dialog.querySelector(".shift").checked,
+key: dialog.querySelector(".key").value
+}); // callback
+close();
+}); // ok
+
+function close () {
+dialog.setAttribute("hidden", true);
+input.focus();
+} // close
+} // getKey

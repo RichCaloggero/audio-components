@@ -2,7 +2,7 @@ import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
 
 // audio-context
 let instanceCount = 0;
-let shadowRoot = null;
+export let shadowRoot = null;
 
 export const audio = new AudioContext();
 
@@ -26,6 +26,22 @@ return html`
 <ui-text label="orientation" value="{{listenerOrientation}}"></ui-text>
 </fieldset>
 
+<div role="dialog" hidden id="defineKeyDialog" aria-labelledby="dialog-title">
+<header>
+<h2 id="dialog-title">Define Key</h2>
+<button class="close">Close</button>
+</header>
+
+<div class="body">
+<label>Control <input type="checkbox" class="control"></label>
+<label>Alt <input type="checkbox" class="alt"></label>
+<label>Shift <input type="checkbox" class="shift"></label>
+<label>key <input type="text" class="key"></label>
+<button class="ok">OK</button>
+</div><!-- .body -->
+</div><!-- dialog -->
+
+</fieldset>
 
 <div role="region" aria-label="status" id="statusMessage" aria-live="polite"></div>
 </div>
@@ -242,6 +258,7 @@ console.log (`added ${element.label || element.id} to automation queue`);
 export function removeFromAutomationQueue (element) {
 automationQueue = automationQueue.filter(e => e != element);
 } // removeFromAutomationQueue
+
 
 export function statusMessage (message) {
 if (shadowRoot) {
