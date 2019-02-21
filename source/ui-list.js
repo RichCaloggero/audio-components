@@ -9,7 +9,7 @@ static get template () {
 return html`
 <div  class="ui-list">
 <label>[[label]]
-<br><select  value="{{value::change}}" on-change="fixAccessibility">
+<br><select  id="input" value="{{value::change}}" on-change="fixAccessibility">
 </select>
 </label>
 </div>

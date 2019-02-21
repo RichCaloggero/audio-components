@@ -8,7 +8,7 @@ static get template () {
 return html`
 <div class="ui-text">
 <label>[[label]]
-<br><input type="text" value="{{value::change}}" on-keyup="handleSpecialKeys">
+<br><input id="input" type="text" value="{{value::change}}" on-keyup="handleSpecialKeys">
 </label>
 </div>
 `; // html

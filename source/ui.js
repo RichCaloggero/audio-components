@@ -16,7 +16,15 @@ if (value && input) input.setAttribute("accesskey", value);
 handleSpecialKeys (e) {
 const key = e.key;
 const input = e.target;
-//console.debug(`${this.id}.handleSpecialKeys: ${e.ctrlKey}, ${e.key}`);
+const _key = {ctrlKey: e.ctrlKey, shiftKey: e.shiftKey, altKey: e.altKey, key: e.key};
+//console.debug(`${this.id}.handleSpecialKeys: ${_key.toSource()},`);
+const focus = findKey(_key);
+console.debug(`focus: ${focus.toSource()}`);
+
+if (focus) {
+focus.focus();
+return false;
+} // if
 
 switch (key) {
 case " ": if(e.ctrlKey) swapValues(input);
@@ -37,6 +45,22 @@ default: return true;
 
 return false;
 } // handleSpecialKeys
+
+defineKey (text) {
+console.debug(`defining key ${text}`);
+try {
+const input = this.shadowRoot.querySelector("#input");
+if (!input) return;
+
+const key = textToKey(text);
+//console.log(`- ${key.toSource()}, ${input.toSource()}`);
+userKeymap.set(key, input);
+console.debug(`map: ${Array.from(userKeymap.entries()).toSource()}`);
+
+} catch (e) {
+statusMessage(`invalid key definition: ${text}.`);
+} // try
+} // defineKey
 
 static processValues (values) {
 if (values instanceof String || typeof(values) === "string") {
@@ -176,3 +200,39 @@ dialog.setAttribute("hidden", true);
 input.focus();
 } // close
 } // getKey
+
+function textToKey (text) {
+const t = text.split(" ").map(x => x.trim());
+ const key = {};
+key.ctrlKey = (t.includes("control") || t.includes("ctrl"));
+key.altKey = t.includes("alt");
+key.shiftKey = t.includes("shift");
+key.key = t[t.length-1];
+
+if (!key.key) throw new Error(`textToKey: ${text} is an invalid key descriptor; character must be last component as in "control shift x"`);
+else if (key.key.toLowerCase() === "space") key.key = " ";
+else if (key.key.toLowerCase() === "enter") key.key = "Enter";
+else key.key = key.key.substr(0,1).toLowerCase();
+return key;
+} // textToKey
+
+function findKey (key) {
+console.debug(`looking up ${key.toSource()}`);
+const entry = Array.from(userKeymap.entries())
+.find(entry => compareKeys(key, entry[0]));
+if (entry) {
+console.debug(`found entry ${entry}`);
+return entry[1];
+} else {
+return undefined;
+} // if
+} // findKey
+
+function compareKeys (k1, k2) {
+return (
+k1.ctrlKey === k2.ctrlKey
+&& k1.altKey === k2.altKey
+&& k1.shiftKey === k2.shiftKey
+&& k1.key === k2.key
+); // return
+} // compareKeys

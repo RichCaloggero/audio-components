@@ -23,6 +23,7 @@ value: {type: Number, notify: true},
 min: {type: Number, value: 0.0},
 max: {type: Number, value: 1.0},
 step: {type: Number, value: 0.1},
+shortcut: {type: String, notify: true, observer: "defineKey"}
 }; // return
 } // get properties
 
@@ -33,6 +34,10 @@ instanceCount += 1;
 this.id = `ui-number-${instanceCount}`;
 } // constructor
 
+connectedCallback () {
+super.connectedCallback();
+if (this.shortcut) this.defineKey(this.key);
+} // connectedCallback
 
 /*_keyChanged (value) {
 if (value) {
