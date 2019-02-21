@@ -12,32 +12,24 @@ console.log(`keyChanged: ${this.id} ${input.nodeName} (${value})`);
 if (value && input) input.setAttribute("accesskey", value);
 } // keyChanged
 
+handleSpecialKeys (e) {
+const key = e.key;
+const input = e.target;
+//console.debug(`${this.id}.handleSpecialKeys: ${e.ctrlKey}, ${e.key}`);
 
-reset () {
-this.value = (this.max - this.min) / 2.0 + this.min;
-} // reset
+switch (key) {
+case " ": if(e.ctrlKey) swapValues(input);
+break;
 
-setMax () {
-this.value = this.max;
-} // setMax
+case "Enter": if(e.ctrlKey) saveValue(input);
+else this.reset();
+break;
 
-setMin () {
-this.value = this.min;
-} // setMin
+default: return true;
+} // switch
 
-increase() {
-let amount = (this.max-this.min) / 10.0;
-this.value = this.clamp(this.value + amount);
-} // increase
-
-decrease() {
-let amount = (this.max-this.min) / 10.0;
-this.value = this.clamp (this.value - amount);
-} // decrease
-
-clamp (value, min = this.min, max = this.max) {
-return clamp(value, min, max);
-} // clamp
+return false;
+} // handleSpecialKeys
 
 static processValues (values) {
 if (values instanceof String || typeof(values) === "string") {

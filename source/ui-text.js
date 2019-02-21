@@ -8,7 +8,7 @@ static get template () {
 return html`
 <div class="ui-text">
 <label>[[label]]
-<br><input type="text" value="{{value::change}}" on-keydown="handleSpecialKeys">
+<br><input type="text" value="{{value::change}}" on-keyup="handleSpecialKeys">
 </label>
 </div>
 `; // html
@@ -29,5 +29,23 @@ super ();
 instanceCount += 1;
 this.id = `${UIText.is}-${instanceCount}`;
 } // constructor
+
+handleSpecialKeys (e) {
+const key = e.key;
+const input = e.target;
+//console.debug(`${this.id}.handleSpecialKeys: ${e.ctrlKey}, ${e.key}`);
+
+if (super.handleSpecialKeys(e)) {
+switch (key) {
+case "Enter": if (e.ctrlKey) return true;
+break;
+
+default: return true;
+} // switch
+} // if
+
+e.preventDefault();
+e.target.dispatchEvent(new CustomEvent("change"));
+} // handleSpecialKeys
 } // class UIText
 customElements.define(UIText.is, UIText);

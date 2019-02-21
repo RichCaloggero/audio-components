@@ -1,5 +1,5 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {UI, saveValue, swapValues} from "./ui.js";
+import {UI} from "./ui.js";
 
 let instanceCount  = 0;
 
@@ -8,7 +8,7 @@ static get template () {
 return html`
 <div class="ui-number">
 <label  for="input">[[label]]</label>
-<br><input id="input" type="[[type]]" value="{{value::change}}" min="[[min]]" max="[[max]]" step="{{step::change}}" on-keydown="handleSpecialKeys">
+<br><input id="input" type="[[type]]" value="{{value::change}}" min="[[min]]" max="[[max]]" step="{{step::change}}" on-keyup="handleSpecialKeys">
 </div>
 `; // html
 } // get template
@@ -49,13 +49,12 @@ handleSpecialKeys (e) {
 const input = e.target;
 const value = Number(input.value);
 const step = Number(input.step);
+//console.debug(`${this.id}.handleSpecialKeys: ${e.ctrlKey}, ${e.key}`);
 
+if (super.handleSpecialKeys(e)) {
 switch (e.key) {
-case " ": if(e.ctrlKey) swapValues(input);
-break;
-
-case "Enter": if(e.ctrlKey) this.reset();
-else saveValue(input);
+case "Enter": if (!e.ctrlKey) this.reset();
+else return true;
 break;
 
 case "Home": if (e.ctrlKey) this.setMax ();
@@ -82,6 +81,7 @@ case "0": case "1": return true;
 
 default: return true;
 } // switch
+} // if
 
 input.dispatchEvent(new CustomEvent("change"));
 e.preventDefault();
