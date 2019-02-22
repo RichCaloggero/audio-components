@@ -7,6 +7,7 @@ const userKeymap = new Map();
 export class UI extends PolymerElement {
 static get properties () {
 return {
+label: String,
 shortcut: String
 }; // return
 } // get properties
@@ -21,15 +22,7 @@ if (value && input) input.setAttribute("accesskey", value);
 handleSpecialKeys (e) {
 const key = e.key;
 const input = e.target;
-const _key = {ctrlKey: e.ctrlKey, shiftKey: e.shiftKey, altKey: e.altKey, key: e.key};
-//console.debug(`${this.id}.handleSpecialKeys: ${_key.toSource()},`);
-const focus = findKey(_key);
-
-if (focus) {
-focus.focus();
-return false;
-} // if
-
+if (handleUserKey(e)) {
 switch (key) {
 case " ": if(e.ctrlKey) swapValues(input);
 break;
@@ -46,6 +39,7 @@ break;
 
 default: return true;
 } // switch
+} // if
 
 return false;
 } // handleSpecialKeys
@@ -237,3 +231,18 @@ userKeymap.set(key, input);
 statusMessage(`invalid key definition: ${text}.`);
 } // try
 } // defineKey
+
+function eventToKey (e) {
+return {ctrlKey: e.ctrlKey, shiftKey: e.shiftKey, altKey: e.altKey, key: e.key};
+} // eventToKey 
+
+export function handleUserKey (e) {
+const focus = findKey(eventToKey(e));
+
+if (focus) {
+focus.focus();
+return false;
+} // if
+
+return true;
+} // handleUserKey

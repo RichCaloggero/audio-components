@@ -1,6 +1,7 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
 import {_AudioContext_, signalReady} from "./audio-context.js";
 import {AudioComponent} from "./audio-component.js";
+import {handleUserKey} from "./ui.js";
 
 let instanceCount = 0;
 
@@ -10,7 +11,7 @@ return html`
 <fieldset class="audio-player">
 <legend><h2>[[label]]</h2></legend>
 <ui-text label="Media URL" value="{{src}}" key="m"></ui-text>
-<button class="play" accesskey="p" on-click="play">Play</button>
+<button class="play" on-click="play" on-keyup="handleSpecialKeys">Play</button>
 <button class="back" on-click="back">back</button>
 <button class="forward" on-click="forward">forward</button>
 </fieldset>
@@ -76,6 +77,9 @@ if (player.currentTime < player.duration) player.currentTime = player.currentTim
 else player.currentTime = player.duration;
 } // forward
 
+handleSpecialKeys (e) {
+return handleUserKey(e);
+} // handleSpecialKeys
 } // class AudioPlayer
 
 customElements.define(AudioPlayer.is, AudioPlayer);

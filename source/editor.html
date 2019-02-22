@@ -158,7 +158,7 @@ function run (html) {
 application.style.display = "block";
 application.innerHTML = "";
 application.innerHTML = html;
-Array.from(application.querySelector(focusableSelector))[0].focus();
+//Array.from(focusableSelector && application.querySelector(focusableSelector))[0].focus();
 } // run
 
 function saveProject (name, html) {
