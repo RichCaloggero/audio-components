@@ -1,5 +1,5 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {UI} from "./ui.js";
+import {UI, defineKey} from "./ui.js";
 
 let instanceCount  = 0;
 
@@ -23,7 +23,7 @@ value: {type: Number, notify: true},
 min: {type: Number, value: 0.0},
 max: {type: Number, value: 1.0},
 step: {type: Number, value: 0.1},
-shortcut: {type: String, notify: true, observer: "defineKey"}
+//shortcut: {type: String, notify: true, observer: "defineKey"}
 }; // return
 } // get properties
 
@@ -36,7 +36,7 @@ this.id = `ui-number-${instanceCount}`;
 
 connectedCallback () {
 super.connectedCallback();
-if (this.shortcut) this.defineKey(this.key);
+if (this.shortcut) defineKey(this.shortcut, this.shadowRoot.querySelector("#input"));
 } // connectedCallback
 
 /*_keyChanged (value) {
@@ -92,6 +92,7 @@ input.dispatchEvent(new CustomEvent("change"));
 e.preventDefault();
 return false;
 } // handleSpecialKeys
+
 
 reset () {
 this.value = (this.max - this.min) / 2.0 + this.min;

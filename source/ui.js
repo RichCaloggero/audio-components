@@ -5,6 +5,11 @@ const savedValues = new Map();
 const userKeymap = new Map();
 
 export class UI extends PolymerElement {
+static get properties () {
+return {
+shortcut: String
+}; // return
+} // get properties
 
 
 keyChanged (value) {
@@ -19,7 +24,6 @@ const input = e.target;
 const _key = {ctrlKey: e.ctrlKey, shiftKey: e.shiftKey, altKey: e.altKey, key: e.key};
 //console.debug(`${this.id}.handleSpecialKeys: ${_key.toSource()},`);
 const focus = findKey(_key);
-console.debug(`focus: ${focus.toSource()}`);
 
 if (focus) {
 focus.focus();
@@ -32,7 +36,7 @@ break;
 
 case "Enter":
 if (e.ctrlKey && e.altKey && e.shiftKey) {
-getKey(input);
+defineKey(getKey(input), input);
 } else if(e.ctrlKey) {
 saveValue(input);
 } else {
@@ -46,21 +50,6 @@ default: return true;
 return false;
 } // handleSpecialKeys
 
-defineKey (text) {
-console.debug(`defining key ${text}`);
-try {
-const input = this.shadowRoot.querySelector("#input");
-if (!input) return;
-
-const key = textToKey(text);
-//console.log(`- ${key.toSource()}, ${input.toSource()}`);
-userKeymap.set(key, input);
-console.debug(`map: ${Array.from(userKeymap.entries()).toSource()}`);
-
-} catch (e) {
-statusMessage(`invalid key definition: ${text}.`);
-} // try
-} // defineKey
 
 static processValues (values) {
 if (values instanceof String || typeof(values) === "string") {
@@ -217,9 +206,10 @@ return key;
 } // textToKey
 
 function findKey (key) {
-console.debug(`looking up ${key.toSource()}`);
+//console.debug(`looking up ${key.toSource()}`);
 const entry = Array.from(userKeymap.entries())
-.find(entry => compareKeys(key, entry[0]));
+.find(x => compareKeys(key, x[0]));
+
 if (entry) {
 console.debug(`found entry ${entry}`);
 return entry[1];
@@ -233,6 +223,17 @@ return (
 k1.ctrlKey === k2.ctrlKey
 && k1.altKey === k2.altKey
 && k1.shiftKey === k2.shiftKey
-&& k1.key === k2.key
+&& k1.key.toLowerCase() === k2.key.toLowerCase()
 ); // return
 } // compareKeys
+
+export function defineKey (text, input) {
+console.debug(`defining key ${text}`);
+try {
+const key = textToKey(text);
+userKeymap.set(key, input);
+
+} catch (e) {
+statusMessage(`invalid key definition: ${text}.`);
+} // try
+} // defineKey

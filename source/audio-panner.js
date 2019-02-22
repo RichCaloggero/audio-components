@@ -15,7 +15,7 @@ return html`
 <ui-number label="mix" value="{{mix}}"></ui-number>
 <ui-position label="position" value="{{position}}"></ui-position>
 
-<br><ui-number label="x" value="{{x}}" min="-1000" max="1000" step="0.1" shortcut="control shift x"></ui-number>
+<br><ui-number label="x" value="{{x}}" min="-1000" max="1000" step="0.1" shortcut="alt shift x"></ui-number>
 <ui-number label="y" value="{{y}}" min="-1000" max="1000" step="0.1"></ui-number>
 <ui-number label="z" value="{{z}}" min="-1000" max="1000" step="0.1"></ui-number>
 
