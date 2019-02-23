@@ -8,21 +8,27 @@ export class UI extends PolymerElement {
 static get properties () {
 return {
 label: String,
-shortcut: String
+defaultModifiers: {type: String, value: "alt shift", notify: true},
 }; // return
 } // get properties
 
+connectedCallback () {
+super.connectedCallback();
+this.uiElement = this.shadowRoot && this.shadowRoot.querySelector("#input");
+} // connectedCallback
 
-keyChanged (value) {
-const input = this.shadowRoot.querySelector("input");
-console.log(`keyChanged: ${this.id} ${input.nodeName} (${value})`);
-if (value && input) input.setAttribute("accesskey", value);
-} // keyChanged
+shortcutChanged (value) {
+console.debug(`ui.shortcutChanged: ${value}, ${this.uiElement}`);
+defineKey(value, this.uiElement);
+} // shortcutChanged
+
 
 handleSpecialKeys (e) {
 const key = e.key;
+if (!modifierKeys(e) && !allowedUnmodified(key)) return true;
+if (handleUserKey(e)) return true;
+
 const input = e.target;
-if (handleUserKey(e)) {
 switch (key) {
 case " ": if(e.ctrlKey) swapValues(input);
 break;
@@ -39,7 +45,6 @@ break;
 
 default: return true;
 } // switch
-} // if
 
 return false;
 } // handleSpecialKeys
@@ -184,9 +189,11 @@ input.focus();
 } // close
 } // getKey
 
-function textToKey (text) {
-const t = text.split(" ").map(x => x.trim());
- const key = {};
+export function textToKey (text) {
+let t = text.split(" ").map(x => x.trim());
+if (t.length === 1) t = `${defaultModifiers} ${t[0]}`.split(" ");
+
+const key = {};
 key.ctrlKey = (t.includes("control") || t.includes("ctrl"));
 key.altKey = t.includes("alt");
 key.shiftKey = t.includes("shift");
@@ -222,7 +229,8 @@ k1.ctrlKey === k2.ctrlKey
 } // compareKeys
 
 export function defineKey (text, input) {
-console.debug(`defining key ${text}`);
+if (!input) return;
+console.debug(`defining key ${text} ${input}`);
 try {
 const key = textToKey(text);
 userKeymap.set(key, input);
@@ -241,8 +249,21 @@ const focus = findKey(eventToKey(e));
 
 if (focus) {
 focus.focus();
-return false;
+e.preventDefault();
+return true;
 } // if
 
-return true;
+return false;
 } // handleUserKey
+
+export function modifierKeys (e) {
+return e.ctrlKey || e.altKey || e.shiftKey;
+} // modifierKeys
+
+function allowedUnmodified (key) {
+const allowed = "Enter, Home, End, PageUp, PageDown, ArrowUp, ArrowDown, ArrowLeft, ArrowRight"
+.split(",").map(x => x.trim());
+
+return allowed.includes(key);
+
+} // allowedUnmodified

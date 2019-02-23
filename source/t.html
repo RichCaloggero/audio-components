@@ -1,5 +1,7 @@
 <!doctype html>
 <head>
+<meta charset="utf-8">
+<title>Test</title>
 <script src="./resonance-audio.min.js" crossorigin="anonymous"></script>
 
 <script src="./ui-number.js" type="module" crossorigin="anonymous"></script>
@@ -30,9 +32,9 @@
 </head>
 <body>
 <audio-context label="test"><audio-series>
-<audio-player label="player" src="media/My Shining Hour.mp3"></audio-player>
+<audio-player label="player" src="media/07crash course.wav"></audio-player>
 
-<audio-series label="master" hide="mix">
+<audio-series label="master" hide="mix" shortcuts="bypass alt shift m">
 <audio-control>
 <audio-panner label="panner"></audio-panner>
 <audio-parameter label="controling x" name="x" function="cos(t/2)"></audio-parameter>
@@ -43,7 +45,7 @@
 <audio-series label="splitter block" hide="">
 <audio-split swapOutputs>
 <audio-control>
-<audio-filter label="left filter" type="allpass" frequency="420.0" q="1"
+<audio-filter bypass label="left filter" type="allpass" frequency="420.0" q="1"
 hide="detune, gain, mix"></audio-filter>
 
 <audio-parameter label="controling left filter q" name="q"></audio-parameter>
@@ -51,13 +53,14 @@ hide="detune, gain, mix"></audio-filter>
 </audio-control>
 
 <audio-series><audio-control>
-<audio-delay label="delay" mix="1" delay="0.0035"></audio-delay>
+<audio-delay label="delay" mix="1" delay="0.00045"></audio-delay>
 <audio-parameter label="controling delay time" name="delay"></audio-parameter>
 </audio-control><audio-control>
-<audio-filter label="right filter" type="allpass" frequency="1200" q="1.0"
+<audio-filter label="right filter" type="allpass" frequency="750" q="1.0"
 hide="detune, gain, mix"></audio-filter>
 
-<audio-parameter label="controling right filter frequency" name="frequency"></audio-parameter>
+<audio-parameter label="controling right filter frequency" name="frequency"
+function="80 + 800 * abs(sin(t/2 + .2))"></audio-parameter>
 </audio-control></audio-series>
 </audio-split>
 </audio-series>

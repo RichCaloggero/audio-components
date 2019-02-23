@@ -78,7 +78,7 @@ else player.currentTime = player.duration;
 } // forward
 
 handleSpecialKeys (e) {
-return handleUserKey(e);
+if (handleUserKey(e)) e.preventDefault();
 } // handleSpecialKeys
 } // class AudioPlayer
 

@@ -60,7 +60,8 @@ mix: {type: Number, notify: true, observer: "_mix"},
 bypass: {type: Boolean, notify: true, observer: "_bypass"},
 enableAutomation: {type: Boolean, value: false, notify: true, observer: "_enableAutomation"}, // enableAutomation
 showListener: {type: Boolean, value: false, notify: true, observer: "_showListener"},
-id: {type: String, notify:true, observer: "setId"},
+id: {type: String, notify:true, observer: "setId"}	,
+shortcuts: {type: String, notify:true, observer: "shortcutsChanged"},
 }; // return
 } // get properties
 
@@ -87,7 +88,7 @@ throw new Error ("cannot initialize");
 
 connectedCallback () {
 super.connectedCallback();
-//console.log(`${this.id} connected, shadow = ${this.shadowRoot}`);
+console.debug (`${this.id} connected, element = ${this.uiElement}`);
 // if is element with a UI, then hide it if no label or name attribute present in HTML
 this.hidden = this.ui && !this.label;
 
@@ -97,6 +98,16 @@ this.hideControls();
 // when this.shadowRoot becomes set for the first time, store it since it will be shadow root of the audio-context itself
 if (!shadowRoot) shadowRoot = this.shadowRoot;
 } // connectedCallback
+
+shortcutsChanged (value) {
+console.debug(`${this.id} shortcut list: ${value}`);
+this._shortcuts = value.split(",").map(definition => {
+console.log(`- definition: ${definition}`);
+const tokens = definition.split(" ");
+if (tokens.length < 2) throw new Error(`${definition}: invalid shortcut definition`);
+return {parameter: tokens[0], shortcut: tokens.slice(1)};
+});
+} // shortcutsChanged
 
 hideControls () {
 //console.debug(`${this.id}: hide ${this.hide}`);

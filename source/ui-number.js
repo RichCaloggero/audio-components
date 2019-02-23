@@ -23,7 +23,7 @@ value: {type: Number, notify: true},
 min: {type: Number, value: 0.0},
 max: {type: Number, value: 1.0},
 step: {type: Number, value: 0.1},
-//shortcut: {type: String, notify: true, observer: "defineKey"}
+shortcut: {type: String, notify: true, observer: "shortcutChanged"}
 }; // return
 } // get properties
 
@@ -36,8 +36,14 @@ this.id = `ui-number-${instanceCount}`;
 
 connectedCallback () {
 super.connectedCallback();
-if (this.shortcut) defineKey(this.shortcut, this.shadowRoot.querySelector("#input"));
+this.uiElement = this.shadowRoot.querySelector("#input");
+if (this.shortcut) defineKey(this.shortcut, this.uiElement);
 } // connectedCallback
+
+shortcutChanged (value) {
+console.debug(`number.shortcutChanged: ${value}, ${this.uiElement}`);
+defineKey(value, this.uiElement);
+} // shortcutChanged
 
 /*_keyChanged (value) {
 if (value) {

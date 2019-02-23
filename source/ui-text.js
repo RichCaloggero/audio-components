@@ -1,5 +1,5 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {UI} from "./ui.js";
+import {UI, defineKey} from "./ui.js";
 
 let instanceCount  = 0;
 
@@ -20,7 +20,7 @@ static get properties () {
 return {
 label: String,
 value: {type: String, value: "", notify: true},
-key: {type: String, notify: true, observer: "keyChanged"}
+shortcut: {type: String, notify: true, observer: "shortcutChanged"},
 }; // return
 } // get properties
 
@@ -29,6 +29,12 @@ super ();
 instanceCount += 1;
 this.id = `${UIText.is}-${instanceCount}`;
 } // constructor
+
+connectedCallback () {
+super.connectedCallback();
+this.uiElement = this.shadowRoot.querySelector("#input");
+} // connectedCallback
+
 
 handleSpecialKeys (e) {
 const key = e.key;

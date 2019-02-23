@@ -10,7 +10,7 @@ static get template () {
 return html`
 <fieldset class="audio-parameter">
 <legend><h3>[[label]]</h3></legend>
-<ui-text label="function" value="{{function}}" key="f"></ui-text>
+<ui-text label="function" value="{{function}}" shortcut="alt shift f"></ui-text>
 </fieldset>
 `; // html
 } // get template
@@ -21,7 +21,6 @@ static get properties () {
 return {
 name: String,
 function: String,
-key: {type: String, value: "f", notify: true},
 }; // return
 } // get properties
 
