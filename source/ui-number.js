@@ -8,7 +8,7 @@ static get template () {
 return html`
 <div class="ui-number">
 <label  for="input">[[label]]</label>
-<br><input id="input" type="[[type]]" value="{{value::change}}" min="[[min]]" max="[[max]]" step="{{step::change}}" on-keyup="handleSpecialKeys">
+<br><input id="input" type="[[type]]" value="{{value::change}}" min="[[min]]" max="[[max]]" step="{{step::change}}" on-keydown="handleSpecialKeys">
 </div>
 `; // html
 } // get template
@@ -23,7 +23,6 @@ value: {type: Number, notify: true},
 min: {type: Number, value: 0.0},
 max: {type: Number, value: 1.0},
 step: {type: Number, value: 0.1},
-shortcut: {type: String, notify: true, observer: "shortcutChanged"}
 }; // return
 } // get properties
 
@@ -36,8 +35,7 @@ this.id = `ui-number-${instanceCount}`;
 
 connectedCallback () {
 super.connectedCallback();
-this.uiElement = this.shadowRoot.querySelector("#input");
-if (this.shortcut) defineKey(this.shortcut, this.uiElement);
+//if (this.shhortcut && this.uiElement) defineKey(this.shortcut, this.uiElement);
 } // connectedCallback
 
 shortcutChanged (value) {

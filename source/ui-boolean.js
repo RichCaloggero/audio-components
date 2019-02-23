@@ -8,7 +8,7 @@ static get template () {
 return html`
 <div class="ui-boolean">
 <label >[[label]]
-<br><input id="input" type="checkbox" checked="{{value::change}}" on-keyup="handleSpecialKeys">
+<br><input id="input" type="checkbox" checked="{{value::change}}" on-keydown="handleSpecialKeys">
 </label>
 </div>
 `; // html
@@ -30,6 +30,10 @@ instanceCount += 1;
 this.id = `UIBoolean.is}-${instanceCount}`;
 } // constructor
 
+connectedCallback () {
+super.connectedCallback();
+if (this.shhortcut && this.uiElement) defineKey(this.shortcut, this.uiElement);
+} // connectedCallback
 
 
 

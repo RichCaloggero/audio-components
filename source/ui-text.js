@@ -8,7 +8,7 @@ static get template () {
 return html`
 <div class="ui-text">
 <label>[[label]]
-<br><input id="input" type="text" value="{{value::change}}" on-keyup="handleSpecialKeys">
+<br><input id="input" type="text" value="{{value::change}}" on-keydown="handleSpecialKeys">
 </label>
 </div>
 `; // html
@@ -20,7 +20,6 @@ static get properties () {
 return {
 label: String,
 value: {type: String, value: "", notify: true},
-shortcut: {type: String, notify: true, observer: "shortcutChanged"},
 }; // return
 } // get properties
 
@@ -32,9 +31,13 @@ this.id = `${UIText.is}-${instanceCount}`;
 
 connectedCallback () {
 super.connectedCallback();
-this.uiElement = this.shadowRoot.querySelector("#input");
+//if (this.shhortcut && this.uiElement) defineKey(this.shortcut, this.uiElement);
 } // connectedCallback
 
+shortcutChanged (value) {
+console.debug(`ui-text.shortcutChanged: ${value}, ${this.uiElement}`);
+defineKey(value, this.uiElement);
+} // shortcutChanged
 
 handleSpecialKeys (e) {
 const key = e.key;
@@ -54,4 +57,5 @@ e.preventDefault();
 e.target.dispatchEvent(new CustomEvent("change"));
 } // handleSpecialKeys
 } // class UIText
+
 customElements.define(UIText.is, UIText);

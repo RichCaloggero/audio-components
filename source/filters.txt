@@ -1,36 +1,34 @@
-<audio-context label="test"><audio-series>
-<audio-player label="player" src="media/summer time.mp3"></audio-player>
+<audio-context label="Fun with Filters"><audio-series>
+<audio-player label="player" src="media/01 - 11 - Jerry Garcia - GarciaLive Volume 6_ 24 bit - LIKE A ROAD.flac"></audio-player>
 
-<audio-series label="master" hide="mix">
+<audio-series label="master" hide="mix" shortcuts="bypass alt shift m">
 <audio-control>
-<audio-panner bypass label="panner" refDistance="100" distanceModel="linear"></audio-panner>
-<audio-parameter label="controling x" name="x" function="
-5 * cos(t/2)
-"></audio-parameter>
-<audio-parameter label="controling z" name="z" function="
-6.5 * sin(t/2)
-"></audio-parameter>
+<audio-panner bypass label="panner" rolloffFactor="1" shortcuts="bypass alt shift p, distanceModel alt shift d"></audio-panner>
+<audio-parameter label="controling x" name="x" function="cos(t/2)"></audio-parameter>
+<audio-parameter label="controling z" name="z" function="sin(t/2)"></audio-parameter>
 </audio-control>
 
 
-<audio-series label="splitter block" hide="" mix="-1">
+<audio-series label="splitter block" hide="">
 <audio-split swapOutputs>
 <audio-control>
-<audio-filter label="left filter" type="allpass" frequency="420.0" q="1"
+<audio-filter label="left filter" type="allpass" frequency="1660.0" q="1"
 hide="detune, gain, mix"></audio-filter>
 
 <audio-parameter label="controling left filter q" name="q"></audio-parameter>
-<audio-parameter label="controling left filter frequency" name="frequency"></audio-parameter>
+<audio-parameter label="controling left filter frequency" name="frequency"
+function="1000 + 700 * cos(t/5)"></audio-parameter>
 </audio-control>
 
 <audio-series><audio-control>
-<audio-delay bypass label="delay" mix="1" delay="0.0035"></audio-delay>
+<audio-delay bypass label="delay" mix="1" delay="0.00096"></audio-delay>
 <audio-parameter label="controling delay time" name="delay"></audio-parameter>
 </audio-control><audio-control>
-<audio-filter label="right filter" type="allpass" frequency="220" q="1.0"
+<audio-filter label="right filter" type="allpass" frequency="714" q="1.0"
 hide="detune, gain, mix"></audio-filter>
 
-<audio-parameter label="controling right filter frequency" name="frequency"></audio-parameter>
+<audio-parameter label="controling right filter frequency" name="frequency"
+function="80 + 700 * abs(sin(t/5.05 + .2))"></audio-parameter>
 </audio-control></audio-series>
 </audio-split>
 </audio-series>
@@ -38,9 +36,9 @@ hide="detune, gain, mix"></audio-filter>
 <!--<audio-resonance label="Resonance Audio"></audio-resonance>
 -->
 
-<audio-convolver label="reverb" bypass mix="0.5" path="./impulses" impulse="Going Home"></audio-convolver>
+<audio-convolver bypass label="reverb" mix="0.5" path="./impulses" impulse="Going Home"></audio-convolver>
 
-<audio-compressor label="compressor" bypass threshold="-20"></audio-compressor>
+<audio-compressor bypass shortcuts="bypass alt shift c" label="compressor" ratio="4" threshold="-20"></audio-compressor>
 
 <audio-gain label="output volume"></audio-gain>
 </audio-series>

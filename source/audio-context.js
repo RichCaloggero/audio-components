@@ -88,7 +88,6 @@ throw new Error ("cannot initialize");
 
 connectedCallback () {
 super.connectedCallback();
-console.debug (`${this.id} connected, element = ${this.uiElement}`);
 // if is element with a UI, then hide it if no label or name attribute present in HTML
 this.hidden = this.ui && !this.label;
 
@@ -100,13 +99,6 @@ if (!shadowRoot) shadowRoot = this.shadowRoot;
 } // connectedCallback
 
 shortcutsChanged (value) {
-console.debug(`${this.id} shortcut list: ${value}`);
-this._shortcuts = value.split(",").map(definition => {
-console.log(`- definition: ${definition}`);
-const tokens = definition.split(" ");
-if (tokens.length < 2) throw new Error(`${definition}: invalid shortcut definition`);
-return {parameter: tokens[0], shortcut: tokens.slice(1)};
-});
 } // shortcutsChanged
 
 hideControls () {

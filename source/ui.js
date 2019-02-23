@@ -9,24 +9,42 @@ static get properties () {
 return {
 label: String,
 defaultModifiers: {type: String, value: "alt shift", notify: true},
+shortcuts: {type: String, notify: true, observer: "shortcutsChanged"},
+shortcut: {type: String, notify: true, observer: "shortcutChanged"},
 }; // return
 } // get properties
 
 connectedCallback () {
 super.connectedCallback();
 this.uiElement = this.shadowRoot && this.shadowRoot.querySelector("#input");
+if (this.shortcut && this.uiElement) {
+console.debug(`UI connected: list is ${this.shortcuts}, key is ${this.shortcut}, element is ${this.uiElement}`);
+defineKey(this.shortcut, this.uiElement);
+} // if
 } // connectedCallback
 
+
 shortcutChanged (value) {
-console.debug(`ui.shortcutChanged: ${value}, ${this.uiElement}`);
+console.debug(`UI.shortcutChanged: ${value}, ${this.uiElement}`);
 defineKey(value, this.uiElement);
 } // shortcutChanged
 
+shortcutsChanged (text) {
+const list = parseShortcuts(text);
+console.debug(`- list is ${list.toSource()}`);
+const name = this.name || this.label || "";
+console.debug(`UI: looking for ${name} in ${list.map(x => x.parameter)}`);
+const shortcut = list.find(x => x.parameter === name);
+if (shortcut) {
+console.log(`- found ${shortcut.toSource()}`);
+this.shortcut = shortcut.shortcut;
+} // if
+} // shortcutsChanged
 
 handleSpecialKeys (e) {
 const key = e.key;
 if (!modifierKeys(e) && !allowedUnmodified(key)) return true;
-if (handleUserKey(e)) return true;
+if (handleUserKey(e)) return false;
 
 const input = e.target;
 switch (key) {
@@ -233,8 +251,13 @@ if (!input) return;
 console.debug(`defining key ${text} ${input}`);
 try {
 const key = textToKey(text);
-userKeymap.set(key, input);
-
+if (userKeymap.has(key)) {
+const list = userKeymap.get(key);
+list.push(input);
+userKeymap.set(key, list);
+} else {
+userKeymap.set(key, [input]);
+} // if
 } catch (e) {
 statusMessage(`invalid key definition: ${text}.`);
 } // try
@@ -245,15 +268,29 @@ return {ctrlKey: e.ctrlKey, shiftKey: e.shiftKey, altKey: e.altKey, key: e.key};
 } // eventToKey 
 
 export function handleUserKey (e) {
-const focus = findKey(eventToKey(e));
+const elements = findKey(eventToKey(e));
+if (elements && elements.length && elements.length > 0) {
+const input = e.target;
+let focus = elements[0];
+if (elements.length > 1) {
+focus = findNextFocus(elements, input);
+} // if
 
 if (focus) {
 focus.focus();
 e.preventDefault();
 return true;
 } // if
+} // if
 
 return false;
+
+function findNextFocus (list, item) {
+const index = list.indexOf(item);
+if (index < 0) return null;
+else if (index === list.length - 1) return list[0];
+else return list[index+1];
+} // findNextFocus
 } // handleUserKey
 
 export function modifierKeys (e) {
@@ -267,3 +304,13 @@ const allowed = "Enter, Home, End, PageUp, PageDown, ArrowUp, ArrowDown, ArrowLe
 return allowed.includes(key);
 
 } // allowedUnmodified
+
+function parseShortcuts (text) {
+console.debug(`parseShortcuts:  ${text}`);
+return text.split(",").map(definition => {
+console.debug(`- definition: ${definition}`);
+const tokens = definition.match(/(\w)+/g);
+if (tokens.length < 2) throw new Error(`${definition}: invalid shortcut definition`);
+return {parameter: tokens[0], shortcut: tokens.slice(1).join(" ")};
+});
+} // parseShortcuts
