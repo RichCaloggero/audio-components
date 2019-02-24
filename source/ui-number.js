@@ -1,5 +1,5 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {UI, defineKey} from "./ui.js";
+import {UI, defineKey, modifierKeys} from "./ui.js";
 
 let instanceCount  = 0;
 
@@ -62,31 +62,36 @@ const step = Number(input.step);
 
 if (super.handleSpecialKeys(e)) {
 switch (e.key) {
-case "Enter": if (!e.ctrlKey) this.reset();
+case "Enter": if (!e.ctrlKey && this.reset instanceof Function) this.reset();
 else return true;
 break;
 
 case "Home": if (e.ctrlKey) this.setMax ();
+else return true;
 break;
 
 case "End": if(e.ctrlKey) this.setMin ();
-break;
-
-case "PageUp": this.increase();
-break;
-
-case "PageDown": this.decrease();
-break;
-
-case "-": if(input.type === "number")  {
-if (e.shiftKey) input.value *= -1;
 else return true;
-} else {
-input.value *= -1;
-} // if
 break;
 
-case "0": case "1": return true;
+case "PageUp": if (modifierKeys(e)) return true;
+else input.value = Number(this.increase());
+break;
+
+case "PageDown": if (modifierKeys(e)) return true;
+else input.value = Number(this.decrease());
+break;
+
+case "-": if(
+(input.type === "number" && e.shiftKey)
+|| (!modifierKeys(e)))  input.value = -1 * value;
+else return true;
+break;
+
+case "0": case "1": if (modifierKeys(e)) return true;
+else input.value = Number(e.key);
+break;
+
 
 default: return true;
 } // switch
@@ -112,17 +117,23 @@ this.value = this.min;
 
 increase() {
 const newValue = this.clamp(Number(this.value) + stepSize(Number(this.value)));
-this.value = newValue;
+return newValue;
 } // increase
 
 decrease() {
-const newValue = this.clamp (Number(this.value) - stepSize(Number(this.value)));
-if (newValue + stepSize(newValue) < Number(this.value)) this.value = this.clamp(Number(this.value) - stepSize(newValue));
-else this.value = newValue;
+const value = Number(this.value);
+const step = Number(stepSize(value));
+const newValue = Number(this.clamp (value - step));
+const newStep = Number(stepSize(newValue));
+console.log(`decrease: ${value}, ${step}, ${newValue}, ${newStep}`);
+if (newStep < step) return value - newStep;
+else return newValue;
 } // decrease
 
 clamp (value, min = this.min, max = this.max) {
-console.debug(`clamp: ${this.id}, ${min}, ${max}, ${value}`);
+value = Number(value);
+min = Number(min);
+max = Number(max);
 if (value < min) return min;
 else if (value > max) return max;
 else return value;
@@ -143,9 +154,10 @@ customElements.define(UINumber.is, UINumber);
 
 function stepSize (n) {
 let count = 0;
-if (n > 1) {
+if (n === 1|| n === 0) return 0.1;
+if (n >= 1) {
 let t = n;
-while (t >= 1) {
+while (t > 1) {
 count += 1;
 t /= 10;
 } // while

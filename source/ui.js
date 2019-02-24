@@ -43,12 +43,13 @@ this.shortcut = shortcut.shortcut;
 
 handleSpecialKeys (e) {
 const key = e.key;
-if (!modifierKeys(e) && !allowedUnmodified(key)) return true;
+if (!modifierKeys(e) || !allowedUnmodified(key)) return true;
 if (handleUserKey(e)) return false;
 
 const input = e.target;
 switch (key) {
 case " ": if(e.ctrlKey) swapValues(input);
+else return true;
 break;
 
 case "Enter":
@@ -57,7 +58,7 @@ defineKey(getKey(input), input);
 } else if(e.ctrlKey) {
 saveValue(input);
 } else {
-if (this.reset instanceof Function) this.reset();
+return true;
 } // if
 break;
 
