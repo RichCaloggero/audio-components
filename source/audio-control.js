@@ -4,6 +4,7 @@ import {AudioComponent} from "./audio-component.js";
 
 
 let instanceCount  = 0;
+const userScope = Object.create(null);
 
 
 class AudioControl extends _AudioContext_ {
@@ -55,15 +56,21 @@ signalReady(this);
 
 
 automate () {
-this.parameters.forEach(parameter => {
-if (parameter.function) {
 const target = this.target;
+this.parameters.forEach(parameter => {
 const p = target[parameter.name];
+try {
+if (parameter.function) {
 const value = parameter.function(this.audio.currentTime);
 
 if (p instanceof AudioParam) p.value = value;
 else target[parameter.name] = value;
 } // if
+
+} catch (e) {
+statusMessage (e);
+parameter.function = null;
+} // try
 }); // forEach parameters
 } // automate
 
@@ -82,12 +89,28 @@ customElements.define(AudioControl.is, AudioControl);
 function compileFunction (text, parameter) {
 try {
 return new Function (parameter,
-`with (Math) {return ${text};}`);
+`with (Math) {
+return ${text};
+}`);
 
 } catch (e) {
 alert (e);
 return null;
+
+
+/// user functions
+
+function  toRange (a, b, x) {
+return (a-b) * x + a;
+} // toRange
+
+function  s  (x) {return math.sin(x)/2 + 1;}
+function c (x) {return Math.cos(x)/2 + 1;}
+
+function leftFrequency (t) {return toRange(300, 1700, c(t/3));}
+function rightFrequency (t) {return toRange(80, 780, c(t/3));}
 } // try
+
 } // compileFunction
 
 export function updateParameter (controller, _name, _text) {
@@ -102,8 +125,12 @@ parameter.text = _text;
 if (parameter.text) {
 parameter.function = compileFunction(parameter.text, "t");
 
-if (!parameter.function) statusMessage(`${this.id}: automation of parameter ${parameter.name} failed; invalid function;\n${parameter.text}`);
+if (parameter.function) {
 parameter.function.bind(controller.target);
+} else {
+statusMessage(`automation of parameter ${parameter.name} failed; invalid function;\n${parameter.text}`);
+} // if
+
 } else {
 parameter.function = null;
 statusMessage(`Automation disabled for ${parameter.name}`);
@@ -112,3 +139,4 @@ statusMessage(`Automation disabled for ${parameter.name}`);
 if (index < 0) parameters.push(parameter);
 //console.debug(`- updated ${index} ${parameter.toSource()}`);
 } // updateParameter
+

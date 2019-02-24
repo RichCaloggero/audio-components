@@ -57,7 +57,7 @@ defineKey(getKey(input), input);
 } else if(e.ctrlKey) {
 saveValue(input);
 } else {
-this.reset();
+if (this.reset instanceof Function) this.reset();
 } // if
 break;
 
