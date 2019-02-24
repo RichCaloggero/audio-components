@@ -153,6 +153,19 @@ _AudioContext_._position (e.target);
 customElements.define(UINumber.is, UINumber);
 
 function stepSize (n) {
+n = Math.abs(n);
+if (n > 1000) return 1000;
+else if (n >1 && n <= 10) return 1;
+else if(n > 10 && n <= 100) return 10;
+else if (n > 100 & n <= 1000) return 100;
+else if (n > .1 && n <= 1) return 0.1;
+else if (n > .01 && n <= 0.1) return 0.01;
+else if (n > .001 && n <= 0.01) return 0.001;
+else if (n > 0.0001 && n <= 0.001) return 0.0001;
+else if (n <= .0001) return 0.0001;
+} // stepSize
+
+/*function stepSize (n) {
 let count = 0;
 if (n === 1|| n === 0) return 0.1;
 if (n >= 1) {
@@ -173,6 +186,7 @@ t *= 10;
 
 return Math.pow(10, count);
 } // stepSize
+*/
 
 /*function clamp (value, min, max) {
 if (min > max) {
