@@ -50,7 +50,7 @@ hide="detune, gain, mix"></audio-filter>
 
 <audio-parameter label="controling left filter q" name="q"></audio-parameter>
 <audio-parameter label="controling left filter frequency" name="frequency"
-function="1000 + 700 * cos(t/5)"></audio-parameter>
+function="1000 + 700 * cos(t/3)"></audio-parameter>
 </audio-control>
 
 <audio-series><audio-control>
@@ -61,7 +61,7 @@ function="1000 + 700 * cos(t/5)"></audio-parameter>
 hide="detune, gain, mix"></audio-filter>
 
 <audio-parameter label="controling right filter frequency" name="frequency"
-function="80 + 700 * abs(sin(t/5.05 + .2))"></audio-parameter>
+function="80 + 700 * abs(sin(t/6 + .2))"></audio-parameter>
 </audio-control></audio-series>
 </audio-split>
 </audio-series>
