@@ -99,6 +99,24 @@ if (!shadowRoot) shadowRoot = this.shadowRoot;
 } // connectedCallback
 
 shortcutsChanged (value) {
+const root = this.shadowRoot;
+if (! root) return;
+
+const parameters = Array.from(root.querySelectorAll("ui-number, ui-boolean, ui-text, ui-list"));
+//console.debug(`- ${parameters.length} parameters found`);
+const shortcuts = parseShortcuts(value);
+//console.debug(`- ${shortcuts.length} shortcuts found`);
+
+parameters.forEach(p => {
+const name = p.name || p.label;
+if (name) {
+const shortcut = shortcuts.find(x => x.parameter.toLowerCase() === name.toLowerCase());
+if (shortcut) {
+//console.debug(`- defining shortcut for ${name} to be ${shortcut.shortcut}`);
+p.shortcut = shortcut.shortcut;
+} // if
+} // if
+}); // forEach
 } // shortcutsChanged
 
 hideControls () {
@@ -275,4 +293,13 @@ return;
 alert (message);
 } // statusMessage
 
+function parseShortcuts (text) {
+//console.debug(`parseShortcuts:  ${text}`);
+return text.split(",").map(definition => {
+//console.debug(`- definition: ${definition}`);
+const tokens = definition.match(/(\w)+/g);
+if (tokens.length < 2) throw new Error(`${definition}: invalid shortcut definition`);
+return {parameter: tokens[0], shortcut: tokens.slice(1).join(" ")};
+});
+} // parseShortcuts
 

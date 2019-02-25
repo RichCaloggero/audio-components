@@ -25,21 +25,10 @@ defineKey(this.shortcut, this.uiElement);
 
 
 shortcutChanged (value) {
-console.debug(`UI.shortcutChanged: ${value}, ${this.uiElement}`);
+//console.debug(`UI.shortcutChanged: ${value}, ${this.uiElement}`);
 defineKey(value, this.uiElement);
 } // shortcutChanged
 
-shortcutsChanged (text) {
-const list = parseShortcuts(text);
-console.debug(`- list is ${list.toSource()}`);
-const name = this.name || this.label || "";
-console.debug(`UI: looking for ${name} in ${list.map(x => x.parameter)}`);
-const shortcut = list.find(x => x.parameter === name);
-if (shortcut) {
-console.log(`- found ${shortcut.toSource()}`);
-this.shortcut = shortcut.shortcut;
-} // if
-} // shortcutsChanged
 
 handleSpecialKeys (e) {
 const key = e.key;
@@ -310,12 +299,3 @@ return allowed.includes(key);
 
 } // allowedUnmodified
 
-function parseShortcuts (text) {
-console.debug(`parseShortcuts:  ${text}`);
-return text.split(",").map(definition => {
-console.debug(`- definition: ${definition}`);
-const tokens = definition.match(/(\w)+/g);
-if (tokens.length < 2) throw new Error(`${definition}: invalid shortcut definition`);
-return {parameter: tokens[0], shortcut: tokens.slice(1).join(" ")};
-});
-} // parseShortcuts
