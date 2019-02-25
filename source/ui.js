@@ -182,12 +182,13 @@ dialog.querySelector(".control").focus();
 closeButton.addEventListener ("click", close);
 ok.addEventListener("click", () => {
 dialog.setAttribute("hidden", true);
-userKeymap.set(input, {
+const text = keyToText({
 ctrlKey: dialog.querySelector(".control").checked,
 altKey: dialog.querySelector(".alt").checked,
 shiftKey: dialog.querySelector(".shift").checked,
 key: dialog.querySelector(".key").value
-}); // callback
+});
+defineKey(text, input);
 close();
 }); // ok
 
@@ -196,6 +197,45 @@ dialog.setAttribute("hidden", true);
 input.focus();
 } // close
 } // getKey
+
+export function handleUserKey (e) {
+const text = keyToText(eventToKey(e));
+const elements = userKeymap.get(text);
+if (!elements) return false;
+
+if (elements && elements.length && elements.length > 0) {
+console.debug(`handleUserKeys: found ${elements.length} elements attached to ${text}`);
+const input = e.target;
+let focus = elements[0];
+if (elements.length > 1) {
+statusMessage (`${elements.length} elements attached to key`);
+focus = findNextFocus(elements, input);
+} // if
+
+if (focus) {
+focus.focus();
+e.preventDefault();
+return true;
+} // if
+} // if
+
+return false;
+
+function findNextFocus (list, item) {
+const index = list.indexOf(item);
+if (index < 0) return null;
+else if (index === list.length - 1) return list[0];
+else return list[index+1];
+} // findNextFocus
+} // handleUserKey
+
+export function defineKey (text, element) {
+let elements = userKeymap.get(text);
+
+if (elements) elements.push(text);
+else elements = [text];
+userKeymap.set(text, elements);
+} // defineKey
 
 export function textToKey (text) {
 let t = text.split(" ").map(x => x.trim());
@@ -214,7 +254,20 @@ else key.key = key.key.substr(0,1).toLowerCase();
 return key;
 } // textToKey
 
-function findKey (key) {
+export function keyToText (key) {
+let text = "";
+if (key.cntrlKey) text += "control ";
+if (key.altKey) text += "alt ";
+if (key.shiftKey) text += "shift ";
+if (key.key) text += key.key.toLowerCase();
+return text.trim();
+} keyToText
+
+export function normalizeKeyText (text) {
+return keyToText(textToKey(text));
+} // normalizeKeyText
+
+/*function findKey (key) {
 //console.debug(`looking up ${key.toSource()}`);
 const entry = Array.from(userKeymap.entries())
 .find(x => compareKeys(key, x[0]));
@@ -241,47 +294,26 @@ if (!input) return;
 console.debug(`defining key ${text} ${input}`);
 try {
 const key = textToKey(text);
+const elements = 
 if (userKeymap.has(key)) {
 const list = userKeymap.get(key);
 list.push(input);
 userKeymap.set(key, list);
+console.debug(`define: ${text} has ${list} elements`);
 } else {
 userKeymap.set(key, [input]);
+console.debug(`define: ${text} has initial definition`);
 } // if
 } catch (e) {
 statusMessage(`invalid key definition: ${text}.`);
 } // try
 } // defineKey
+*/
 
 function eventToKey (e) {
 return {ctrlKey: e.ctrlKey, shiftKey: e.shiftKey, altKey: e.altKey, key: e.key};
 } // eventToKey 
 
-export function handleUserKey (e) {
-const elements = findKey(eventToKey(e));
-if (elements && elements.length && elements.length > 0) {
-const input = e.target;
-let focus = elements[0];
-if (elements.length > 1) {
-focus = findNextFocus(elements, input);
-} // if
-
-if (focus) {
-focus.focus();
-e.preventDefault();
-return true;
-} // if
-} // if
-
-return false;
-
-function findNextFocus (list, item) {
-const index = list.indexOf(item);
-if (index < 0) return null;
-else if (index === list.length - 1) return list[0];
-else return list[index+1];
-} // findNextFocus
-} // handleUserKey
 
 export function isModifierKey (key) {
 return key === "Control" || key === "Alt" || key === "Shift";
