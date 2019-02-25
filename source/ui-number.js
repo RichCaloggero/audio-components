@@ -75,7 +75,7 @@ else return true;
 break;
 
 case "PageUp": if (modifierKeys(e)) return true;
-else input.value = Number(this.increase());
+else this.value = Number(this.increase());
 break;
 
 case "PageDown": if (modifierKeys(e)) return true;
@@ -99,6 +99,7 @@ default: return true;
 
 input.dispatchEvent(new CustomEvent("change"));
 e.preventDefault();
+statusMessage(`new value is ${this.value}`);
 return false;
 } // handleSpecialKeys
 
@@ -116,18 +117,23 @@ this.value = this.min;
 } // setMin
 
 increase() {
-const newValue = this.clamp(Number(this.value) + stepSize(Number(this.value)));
+const value = Number(this.value);
+const s = Number(stepSize(value));
+const newValue = Number(this.clamp(value + s));
 return newValue;
 } // increase
 
 decrease() {
-const value = Number(this.value);
+const newValue = this.clamp(Number(this.value) - Number(stepSize(Number(this.value))));
+return newValue;
+/*const value = Number(this.value);
 const step = Number(stepSize(value));
 const newValue = Number(this.clamp (value - step));
 const newStep = Number(stepSize(newValue));
 console.log(`decrease: ${value}, ${step}, ${newValue}, ${newStep}`);
 if (newStep < step) return value - newStep;
 else return newValue;
+*/
 } // decrease
 
 clamp (value, min = this.min, max = this.max) {
@@ -155,48 +161,14 @@ customElements.define(UINumber.is, UINumber);
 function stepSize (n) {
 n = Math.abs(n);
 if (n > 1000) return 1000;
-else if (n >1 && n <= 10) return 1;
-else if(n > 10 && n <= 100) return 10;
-else if (n > 100 & n <= 1000) return 100;
-else if (n > .1 && n <= 1) return 0.1;
-else if (n > .01 && n <= 0.1) return 0.01;
-else if (n > .001 && n <= 0.01) return 0.001;
-else if (n > 0.0001 && n <= 0.001) return 0.0001;
-else if (n <= .0001) return 0.0001;
+if (n > 100) return 100;
+if (n > 10) return 10;
+if (n > 1) return 1;
+if (n > .1) return .1;
+if (n > .01) return .01;
+if (n > .001) return .001;
+if (n > .0001) return .0001;
+else return .0001;
 } // stepSize
 
-/*function stepSize (n) {
-let count = 0;
-if (n === 1|| n === 0) return 0.1;
-if (n >= 1) {
-let t = n;
-while (t > 1) {
-count += 1;
-t /= 10;
-} // while
-count -= 1;
 
-} else if (n < 1) {
-let t = n;
-while (t < 1) {
-count -= 1;
-t *= 10;
-} // while
-} // if
-
-return Math.pow(10, count);
-} // stepSize
-*/
-
-/*function clamp (value, min, max) {
-if (min > max) {
-const t = min;
-min = max;
-max = t;
-} // if
-
-if (value > max) return max
-else if (value < min) return min;
-else return value;
-} // clamp
-*/
