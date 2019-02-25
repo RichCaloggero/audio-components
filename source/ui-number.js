@@ -1,5 +1,5 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {UI, defineKey, modifierKeys} from "./ui.js";
+import {UI, defineKey, hasModifierKeys} from "./ui.js";
 
 let instanceCount  = 0;
 
@@ -8,7 +8,7 @@ static get template () {
 return html`
 <div class="ui-number">
 <label  for="input">[[label]]</label>
-<br><input id="input" type="[[type]]" value="{{value::change}}" min="[[min]]" max="[[max]]" step="{{step::change}}" on-keydown="handleSpecialKeys">
+<br><input id="input" type="[[type]]" value="{{value::change}}" min="[[min]]" max="[[max]]" step="[[step]]" on-keydown="handleSpecialKeys">
 </div>
 `; // html
 } // get template
@@ -22,7 +22,7 @@ type: {type: String, value: "range", notify: true},
 value: {type: Number, notify: true},
 min: {type: Number, value: 0.0},
 max: {type: Number, value: 1.0},
-step: {type: Number, value: 0.1},
+step: {type: Number, value: .1},
 }; // return
 } // get properties
 
@@ -57,39 +57,45 @@ this.shadowRoot.querySelector ("input").removeAttribute ("accesskey");
 handleSpecialKeys (e) {
 const input = e.target;
 const value = Number(input.value);
-const step = Number(input.step);
-//console.debug(`${this.id}.handleSpecialKeys: ${e.ctrlKey}, ${e.key}`);
+const step = Number(this.step);
+//console.debug(`number: handling ${hasModifierKeys(e)}, ${e.key}, ${input.type} ${value}`);
 
 if (super.handleSpecialKeys(e)) {
+//console.debug(`- parent did not handle it;`);
 switch (e.key) {
 case "Enter": if (!e.ctrlKey && this.reset instanceof Function) this.reset();
 else return true;
 break;
 
-case "Home": if (e.ctrlKey) this.setMax ();
-else return true;
+case "Home":
+if (input.type === "number" && !hasModifierKeys(e)) return true;
+if (e.ctrlKey) this.setMax ();
 break;
 
-case "End": if(e.ctrlKey) this.setMin ();
-else return true;
+case "End":
+if (input.type === "number" && !hasModifierKeys(e)) return true;
+if (e.ctrlKey) this.setMin ();
 break;
 
-case "PageUp": if (modifierKeys(e)) return true;
-else this.value = Number(this.increase());
+case "PageUp": 
+if (hasModifierKeys(e)) return true;
+this.increase(10 * step);
 break;
 
-case "PageDown": if (modifierKeys(e)) return true;
-else input.value = Number(this.decrease());
+case "PageDown": 
+if (hasModifierKeys(e)) return true;
+this.decrease(10 * step);
 break;
 
 case "-": if(
 (input.type === "number" && e.shiftKey)
-|| (!modifierKeys(e)))  input.value = -1 * value;
+|| (!hasModifierKeys(e)))  input.value = -1 * value;
 else return true;
 break;
 
-case "0": case "1": if (modifierKeys(e)) return true;
-else input.value = Number(e.key);
+case "0": case "1":
+if (input.type === "number" || hasModifierKeys(e)) return true;
+input.value = Number(e.key);
 break;
 
 
@@ -99,7 +105,6 @@ default: return true;
 
 input.dispatchEvent(new CustomEvent("change"));
 e.preventDefault();
-statusMessage(`new value is ${this.value}`);
 return false;
 } // handleSpecialKeys
 
@@ -116,24 +121,12 @@ setMin () {
 this.value = this.min;
 } // setMin
 
-increase() {
-const value = Number(this.value);
-const s = Number(stepSize(value));
-const newValue = Number(this.clamp(value + s));
-return newValue;
+increase(step = this.step) {
+return (this.value = Number(this.clamp(Number(this.value) + step)));
 } // increase
 
-decrease() {
-const newValue = this.clamp(Number(this.value) - Number(stepSize(Number(this.value))));
-return newValue;
-/*const value = Number(this.value);
-const step = Number(stepSize(value));
-const newValue = Number(this.clamp (value - step));
-const newStep = Number(stepSize(newValue));
-console.log(`decrease: ${value}, ${step}, ${newValue}, ${newStep}`);
-if (newStep < step) return value - newStep;
-else return newValue;
-*/
+decrease(step = this.step) {
+return (this.value = Number(this.clamp(Number(this.value) - step)));
 } // decrease
 
 clamp (value, min = this.min, max = this.max) {
@@ -168,7 +161,7 @@ if (n > .1) return .1;
 if (n > .01) return .01;
 if (n > .001) return .001;
 if (n > .0001) return .0001;
-else return .0001;
+else return minStep;
 } // stepSize
 
 

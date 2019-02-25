@@ -43,7 +43,7 @@ this.shortcut = shortcut.shortcut;
 
 handleSpecialKeys (e) {
 const key = e.key;
-if (!modifierKeys(e) || !allowedUnmodified(key)) return true;
+if (isModifierKey(key)) return false;
 if (handleUserKey(e)) return false;
 
 const input = e.target;
@@ -294,7 +294,11 @@ else return list[index+1];
 } // findNextFocus
 } // handleUserKey
 
-export function modifierKeys (e) {
+export function isModifierKey (key) {
+return key === "Control" || key === "Alt" || key === "Shift";
+} // isModifierKey
+
+export function hasModifierKeys (e) {
 return e.ctrlKey || e.altKey || e.shiftKey;
 } // modifierKeys
 
