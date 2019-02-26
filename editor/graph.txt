@@ -1,9 +1,0 @@
-<audio-context label="audio grapher"><audio-series>
-<audio-oscillator label="graph tone" type="sine">
-<audio-control label="frequency automation" parameter="frequency" click-to-start type="function" function="(10*t) + 50"></audio-control>
-</audio-oscillator>
-
-<audio-gain gain="0.1"></audio-gain>
-<audio-destination></audio-destination>
-</audio-series></audio-context>
-
