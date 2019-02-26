@@ -159,51 +159,15 @@ The audio-feedback element sends its input to the input of its single child, and
 
 #### Example 2
 
-Both the oscillator and output gain have UI controls.
-The empty series inside split simply passes input to output with unity gain.
+This sends the output of an oscillator to the right speaker only:
+
+The gain elements inside split hide their UI since they have no label. Their gain defaults to unity, so in a sense they are simply placeholders. The split is only being used here to swap channels.
 
 ```
 <audio-context><audio-series>
-<audio-oscillator label="my oscillator" frequency="220.0"></audio-oscillator>
-
-<audio-split><audio-gain></audio-gain></audio-split>
-
-<audio-gain label="master volume" gain=".2"></audio-gain>
-
-<audio-destination></audio-destination>
-</audio-series></audio-context>
+<audio-oscillator label="oscillator" frequency="250"></audio-oscillator>
+<audio-split swapOutputs>
+<audio-gain></audio-gain>
+<audio-gain></audio-gain>
+</audio-split>
 ```
-
-#### Example 2
-
-Same as above, but puts signal only in right channel at destination.
-
-```
-<audio-context><audio-series>
-<audio-oscillator label="my oscillator" frequency="220.0"></audio-oscillator>
-
-<audio-split swap-outputs><audio-gain></audio-gain></audio-split>
-
-<audio-gain label="master volume" gain=".2"></audio-gain>
-
-<audio-destination></audio-destination>
-</audio-series></audio-context>
-```
-
-See `demo/index.html` for a more complex example.
-
-## Composed Elements
-
-### `audio-xtc`
-
-The `audio-xtc` element wraps a network made from audio-components into a single element.
-This is a good mechanism of abstraction, although it does require some development setup and understanding of polymer.
-However, following the pattern here can make it fairly simple to develop new elements fairly painlessly.
-
-### `audio-equalizer`
-
-This implements a graphic equalizer. It uses `audio-filter`, with type set to "peaking" and all UI controls hidden accept for gain. A reset control is added to quickly reset all bands back to zero gain.
-
-### `audio-reverb`
-
-The audio-reverb element is based on audio-convolver and a public domain impulse library which is distributed with this project.
