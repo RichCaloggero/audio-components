@@ -292,7 +292,7 @@ return e.ctrlKey || e.altKey || e.shiftKey;
 } // modifierKeys
 
 function allowedUnmodified (key) {
-const allowed = "Enter, Home, End, PageUp, PageDown, ArrowUp, ArrowDown, ArrowLeft, ArrowRight"
+const allowed = "Enter, Home, End, PageUp, PageDown, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Delete, Backspace"
 .split(",").map(x => x.trim());
 
 return allowed.includes(key);

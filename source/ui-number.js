@@ -59,17 +59,18 @@ const step = Number(this.step);
 if (super.handleSpecialKeys(e)) {
 //console.debug(`- parent did not handle it;`);
 switch (e.key) {
-case "Enter": if (!e.ctrlKey && this.reset instanceof Function) this.reset();
+/*case "Enter": if (!e.ctrlKey && this.reset instanceof Function) this.reset();
 else return true;
 break;
+*/
 
 case "Home":
-if (input.type === "number" && !hasModifierKeys(e)) return true;
+if (input.type === "number") return true;
 if (e.ctrlKey) this.setMax ();
 break;
 
 case "End":
-if (input.type === "number" && !hasModifierKeys(e)) return true;
+if (input.type === "number") return true;
 if (e.ctrlKey) this.setMin ();
 break;
 
