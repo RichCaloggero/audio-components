@@ -1,7 +1,0 @@
-<audio-context label="equalizer"><audio-series>
-<audio-player src="https://dl.dropboxusercontent.com/u/8529048/slow%20down%20jack.mp3"></audio-player>
-
-<audio-equalizer label="equalizer"></audio-equalizer>
-
-<audio-destination></audio-destination>
-</audio-series></audio-context>

@@ -1,65 +1,61 @@
 # Audio Components
 
 This project was begun as a way to learn Polymer.
+Polymer has evolved since, so this version is a major rewrite to align with polymer 3.
+The most significant change is the use  of javascript modules rather than HTML imports.
 
 ## Installation
 
-- download via git clone or equivalent
-- navigate to root folder and open command prompt
-- install polymer if not already installed
-	+ npm install -g polymer-cli
-- install bower
-	+ npm install -g bower
-- install polymer runtime
-	+ bower install
-- run polymer server
-	+ polymer serve
-- click the `run-demo.bat` file in root folder or open browser to `localhost:8081/demo/`
+- download a .zip file (not necessary to clone unless you need to submit a pull request)
+- all sources are in the source folder and each element can be independantly loaded via a script tag:
+	+ `<script src="audio-delay.js" type="module" crossorigin="anonymous"</script>`
+- alternatively, use `loader.js` to load everything except `resonance-audio.min.js` which must be loaded separately:
+	+ `script src="loader.js"></script>`
 
 ## Elements
 
-The package contains six distinct types of elements:
+The package contains five distinct types of elements:
+
 - context (from which all others are inherrited, and which directly wraps the webaudio AudioContext node)
 - connectors
 - audio processing elements
 - UI elements
 - automation elements
-- composed elements
 
-The connectors build the connection graph and the only UI they display is a label and a bypass control. They currently include:
+### The connectors build the connection graph. They currently include:
+
 - audio-context
 - audio-series
 - audio-parallel
 - audio-split
-- audio-merge
 - audio-feedback
 
-The audio processing elements wrap the webaudio nodes which actually do the heavy lifting, as well as provide a UI by which to control the processing. They currently include:
+### The audio processing elements wrap the webaudio nodes which actually do the heavy lifting, as well as provide a UI by which to control the processing. They currently include:
+
 - audio-player
 - audio-destination
 - audio-gain
 - audio-filter
 - audio-delay
-- audio-pan
+- audio-panner
 - audio-oscillator
 - audio-convolver
+- audio-reverb
 - audio-compressor
+- audio-equalizer (10 band graphic equalizer)
+- audio-resonance (provides access to Google's resonance audio system which does room simulation)
 
-The UI elements handle UI generation and currently include:
+### The UI elements handle UI generation and currently include:
+
 - ui-number
 - ui-boolean
 - ui-list
 - ui-text
 
-The currently implemented automation element is "audio-control", which modifies specified parameters of it's parent element based on mathematical functions in the time domain.
-The free variable "t" is the current time stored in the webaudio context node which contains the graph.  They also implement several experimental automation techniques:
-- using LFO to automate a webaudio parameter node
-- random automation based on parameter range and user-specified automation interval 
+### The currently implemented automation elements are "audio-control" and "audio-parameter". 
 
-Composed elements are ones which leverage other audio-component elements directly. They may use the UI of those elements directly, and/or add some controls of their own. The currently implemented composed elements are:
-- audio-reverb (based on convolver and a set of public domain impulses), and a couple gain elements
-- audio-equalizer (a graphic equalizer implemented as a set of ten audio-filter elements and some additional UI)
-- audio-xtc (crosstalk cancelation network implemented mostly in audio-components html)
+- Audio-control  modifies specified parameters of it's parent element based on mathematical functions in the time domain. The free variable "t" is the current time stored in the webaudio context node which contains the graph.  
+- Audio-parameter specifies the parameter to be automated and a javascript function which generates values for the parameter. It must be wrapped inside an audio-control element and must appear *after* the element whose parameters are being automated. See examples for more details.
 
 ## declarative rather than imperative
 
@@ -71,7 +67,6 @@ For instance, here is a simple webaudio graph which takes an audio signal from a
 ### Javascript example
 
 ```
-// we assume there is an HTML audio element in the document (our web components create this on the fly in a shadow tree)
 var audio = new AudioContext ();
 var audioElement = document.querySelector("#myAudio");
 var player = audio.createMediaElementSource (audioElement);
@@ -83,79 +78,81 @@ player.connect (gain)
 
 The above builds the graph and connects all the nodes, but no UI is present. The author is responsible for adding UI elements to control the gain, and the player (or use built-in browser controls for the player).
 
-### HTML example
+### Same example using audio-components
 
 Here is the same graph created via our audio components:
 
 ```
-<audio-context><audio-series>
+<audio-context label="example1"><audio-series>
 <audio-player src="some-file.mp3"></audio-player>
-
 <audio-gain label="master volume"></audio-gain>
-
 <audio-destination></audio-destination>
 </audio-series></audio-context>
 ```
 
-The player uses the standard browser UI for control (start, stop, seek, volume, etc).
+The player contains three buttons: play/pause, forward, and back.
 Our web components automatically add UI for specifying audio source file, as well as for controling the gain.
 If the `label` attribute on the gain element were not present, it's UI would be hidden and it would act as a constant gain whose gain value could be set by a `gain` attribute.
 
 ## Limitations
 
 - webaudio can deal with more than 2 channels, but this project assumes all elements either 1 or 2 channels
-	+ webaudio has notion of channels and destinations which are a bit hard to get my head around
-	+ generally nodes are stereo in and stereo out, but they can be mono as well depending on channelCount, channelCountMode
-	+ filter and delay are explicitly mono, but others can be either depending on what they are connected to
 
-## All elements
+## Basic Architecture
 
 All elements are implemented as web components, and create new HTML elements (known as custom elements in webcomponents parlents). They consist of an html template which generates the UI, and an associated JS class definition.
 
-In the javascript domain, all elements inherrit directly from `_AudioContext_`.
+In the javascript domain, all `audio-` elements inherrit from `_AudioContext_`, which itself inherrits from `PolymerElement`. all `ui-` elements inherrit from `UI` which lives in `ui.js`.  
+
+There are a small set of extra libraries which comprise a simple component model and provide lower level implementations of many of the processing elements.
+
+- `audio-component.js` is the module which implements the component model and exports class `AudioComponent`
+- `room.js` is an additional component which works with `resonance-audio` and also inherrits from `AudioComponent`
+
 In the HTML domain, the entire HTML graph needs to be wrapped in a `<audio-context> ... </audio-context>` element.
 
-If a label attribute is supplied, they display a UI; if no label is supplied then they stay hidden.
-If they have a `hide-controls` attribute, the value of that attribute is used as a space-separated of field names to hide. Using this, we can display only those fields we need from the element. The `audio-reverb` element uses this to hide the `audio-convolver`'s "bypass" control while still displaying the list of available impulses.
-Most parameters displayed in the UI can be set in the HTML via attributes.
+If a label attribute is supplied on an element, it display a UI; without a label, an element is hidden, but still takes part in the graph using parameters supplied in the markup.
+
+If a `hide` attribute is present on an element, the value of that attribute is used as a comma-separated list of field names to hide. 
+
+Most parameters displayed in the UI can be set in the HTML via attributes. For instance, including the boolean attribute `bypass` on an element will boot it up in bypass mode; as long as the UI for the bypass control is not hidden, the user can change it's value at any time via a checkbox in the element's UI.
 
 ### Accessibility
 
-Each component's UI lives in its own region (`role="region"`) and is labeled via `aria-label`.
-The group label is specified via HTML `label` attribute on host element.
-Because polymer does not encapsulate components completely, IDs still leak out, so we avoid IDref here in favor of `aria-label`.
+Each component's UI lives in its own fieldset  and is labeled via `legend` which wraps an `h2` element containing the label provided via the element's `label` attribute. If `label` is not provided, the entire UI for that element is hidden.  If audio-parameter elements are present, they wrap their labels in `h3` elements. 
 
-We also label the group via span element with `role="heading"` and an `aria-level` corresponding to the nesting level of the host element within the audio context.
-This helps navigate the UI and maintain a better sense of location within the hierarchy.
-However, we end up with duplicate group label announcement: both the `aria-label` and the visible group label are seen by the screen reader.
+All elements are controlable via the keyboard.
+Shortcut keys can be specified in markup.  The user can also add a shortcut to an element via the UI.
 
-- if we eliminate the visible label announcement via `aria-hidden`, we lose the hierarchy info provided by the heading level
-- if we eliminate the `aria-label` on the group container, we lose group label announcement on focus (i.e. when tab used to move through the UI) and we lose landmark
+Most controls have native keyboard control as defined via HTML5. However, we have added extra features.
 
-There seems to be no good solution for this annoyance at present.
+##### Numeric Parameters
 
-## Processors
+They come in two flavors: input of type `number` and inputs of type `range`.
 
-...
+- number can be edited directly via standard editing keys; range is a simple slider
+- both types support movement via up/down arrows and page up/down, with page up/down moving by larger amounts
+- both types use control+home to set to largest allowed value, and control+end to set smallest value
+- both support saving current value via control+enter and swapping with current value via control+space
+- slider can be set to zero via the "0" key, and one via the "1" key
 
 ## UI Elements
 
-They generate appropriate input controls (type="number" for ui-number, type="text" for ui-text, and type="checkbox" for ui-boolean). A select element is generated when ui-list is used.
-The label attribute specifies a label for the control.
-The name attribute specifies a name for the control (generally the name of the current element's property which is being exposed.
+The `ui-` elements generate single controls. The label attribute specifies a label for the control. 
+The `label` or `name` attribute, whichever is present, is used as the name of the parameter to be manipulated. The element which uses the control must insure that the parameter it exposed via polymer's properties or observers mechanism.
 The value attribute pipes the result back to the current element's property being manipulated.
 
 Numeric controls can also specify min, max, and step, which are passed directly to the underlying html input element.
 
+
 ## Control Elements
 
-The audio-control element allows one to specify a parameter to be automated, and a function to generate values based on the current time stored in the underlying webaudio context containing the graph.
-The default evaluation intervall is 0.2 seconds.
-The parameter must be specified in the markup. The element being controled wraps the `audio-controls` element; if several parameters of an element are to be automated, the element wraps separate instances of `audio-control`, one for each parameter being automated.
+The audio-control element allows one to specify a parameter to be automated, and a function to generate values based on the current time stored in the underlying webaudio context. The `audio-control` element must wrap the element to which automation is to be applied as it's first child, and any additional children must be `audio-parameter` elements specifying at least the name of the parameter being automated. If a `function` attribute is specified in markup, then it is taken to be the default function used to generate parameter values; this can be manipulated in the UI as long as the `function` attribute is not present in the element's hide list.
 
-The automator function can be specified in markup, and also via the UI.
-It is a simple javascript expression which is evaluated in the context of the controled element (i.e. the "this" keyword references the currently controled element).
-It references the "Math" object using the javascript "with" statement which allows one to reference Math functions via just their name (i.e. sin(t) instead of Math.sin(t)).
+
+The automator function  is a simple javascript expression which is evaluated in the context of the controled element (i.e. the "this" keyword references the currently controled element).
+It references the "Math" object using the javascript "with" statement which allows one to reference Math functions via just their name (i.e. sin(t) instead of Math.sin(t)). The variable `t` is the free variable and it contains the current time, in seconds, of the currently running audio context.
+
 
 ## Connectors
 
@@ -172,16 +169,13 @@ It references the "Math" object using the javascript "with" statement which allo
 
 ### Feedback
 
-The audio-feedback element sends its input to the input of its single child, and sends the output of it's child element to the output of the audio-feedback element, as well as sending it back to it's input, through a gain node. 
+The audio-feedback element sends its input to the input of its single child, and sends the output of it's child element to the output of the audio-feedback element, as well as sending it back to it's input, through a delay node. A delay node *must* be included in a closed loop in the graph, thus we provide a delay node by default here so the feedback will always work.
 
-### merge
 
-- takes input from previous sibling and merges all its channels into one mono signal
-- no children
 
 ### Split
 
-- split must have either 1 or 2 children, currently each of which must be a series
+- split must have either 1 or 2 children
 	+if 2 children then first child is connected to left channel of input and second to right channel, and outputs are merged back into a stereo signal at the output of split
 	+if 1 child  and no attributes, left of input goes to left of output
 - the boolean swap-outputs attribute reverses channels on the output
@@ -193,53 +187,17 @@ The audio-feedback element sends its input to the input of its single child, and
 - both swap-inputs and swap-outputs on a stereo source with 2 children have no effect
 	+ both attributes on stereo source with 1 child pipes right of input to right of output
 
-#### Example 1
-
-Both the oscillator and output gain have UI controls.
-The empty series inside split simply passes input to output with unity gain.
-
-```
-<audio-context><audio-series>
-<audio-oscillator label="my oscillator" frequency="220.0"></audio-oscillator>
-
-<audio-split><audio-gain></audio-gain></audio-split>
-
-<audio-gain label="master volume" gain=".2"></audio-gain>
-
-<audio-destination></audio-destination>
-</audio-series></audio-context>
-```
-
 #### Example 2
 
-Same as above, but puts signal only in right channel at destination.
+This sends the output of an oscillator to the right speaker only:
+
+The gain elements inside split hide their UI since they have no label. Their gain defaults to unity, so in a sense they are simply placeholders. The split is only being used here to swap channels.
 
 ```
 <audio-context><audio-series>
-<audio-oscillator label="my oscillator" frequency="220.0"></audio-oscillator>
-
-<audio-split swap-outputs><audio-gain></audio-gain></audio-split>
-
-<audio-gain label="master volume" gain=".2"></audio-gain>
-
-<audio-destination></audio-destination>
-</audio-series></audio-context>
+<audio-oscillator label="oscillator" frequency="250"></audio-oscillator>
+<audio-split swapOutputs>
+<audio-gain></audio-gain>
+<audio-gain></audio-gain>
+</audio-split>
 ```
-
-See `demo/index.html` for a more complex example.
-
-## Composed Elements
-
-### `audio-xtc`
-
-The `audio-xtc` element wraps a network made from audio-components into a single element.
-This is a good mechanism of abstraction, although it does require some development setup and understanding of polymer.
-However, following the pattern here can make it fairly simple to develop new elements fairly painlessly.
-
-### `audio-equalizer`
-
-This implements a graphic equalizer. It uses `audio-filter`, with type set to "peaking" and all UI controls hidden accept for gain. A reset control is added to quickly reset all bands back to zero gain.
-
-### `audio-reverb`
-
-The audio-reverb element is based on audio-convolver and a public domain impulse library which is distributed with this project.
