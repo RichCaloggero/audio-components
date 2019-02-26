@@ -34,10 +34,6 @@ super.connectedCallback();
 //if (this.shhortcut && this.uiElement) defineKey(this.shortcut, this.uiElement);
 } // connectedCallback
 
-shortcutChanged (value) {
-console.debug(`ui-text.shortcutChanged: ${value}, ${this.uiElement}`);
-defineKey(value, this.uiElement);
-} // shortcutChanged
 
 handleSpecialKeys (e) {
 const key = e.key;

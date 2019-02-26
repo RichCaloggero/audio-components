@@ -38,10 +38,6 @@ super.connectedCallback();
 //if (this.shhortcut && this.uiElement) defineKey(this.shortcut, this.uiElement);
 } // connectedCallback
 
-shortcutChanged (value) {
-console.debug(`number.shortcutChanged: ${value}, ${this.uiElement}`);
-defineKey(value, this.uiElement);
-} // shortcutChanged
 
 /*_keyChanged (value) {
 if (value) {

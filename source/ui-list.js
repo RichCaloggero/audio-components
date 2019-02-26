@@ -20,13 +20,6 @@ static get is() { return "ui-list"; }
 
 static get properties () {
 return {
-label: String,
-key: {
-type: String,
-value: "",
-notify: true,
-}, // key
-
 values: {
 type: String,
 value: "",
@@ -89,14 +82,6 @@ return list;
 
 
 
-_keyChanged (value) {
-if (value) {
-let key = value.charAt(0);
-this.shadowRoot.querySelector ("select").setAttribute ("accesskey", key);
-} else {
-this.shadowRoot.querySelector ("select").removeAttribute ("accesskey");
-} // if
-} // _keyChanged
 
 
 } // class UIList

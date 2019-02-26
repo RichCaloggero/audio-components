@@ -18,7 +18,6 @@ connectedCallback () {
 super.connectedCallback();
 this.uiElement = this.shadowRoot && this.shadowRoot.querySelector("#input");
 if (this.shortcut && this.uiElement) {
-console.debug(`UI connected: list is ${this.shortcuts}, key is ${this.shortcut}, element is ${this.uiElement}`);
 defineKey(this.shortcut, this.uiElement);
 } // if
 } // connectedCallback
@@ -204,11 +203,10 @@ const elements = userKeymap.get(text);
 if (!elements) return false;
 
 if (elements && elements.length && elements.length > 0) {
-console.debug(`handleUserKeys: found ${elements.length} elements attached to ${text}`);
+//console.debug(`handleUserKeys: found ${elements.length} elements attached to ${text}`);
 const input = e.target;
 let focus = elements[0];
 if (elements.length > 1) {
-statusMessage (`${elements.length} elements attached to key`);
 focus = findNextFocus(elements, input);
 } // if
 
@@ -223,18 +221,21 @@ return false;
 
 function findNextFocus (list, item) {
 const index = list.indexOf(item);
-if (index < 0) return null;
+if (index < 0) return list[0];
 else if (index === list.length - 1) return list[0];
 else return list[index+1];
 } // findNextFocus
 } // handleUserKey
 
 export function defineKey (text, element) {
+if (!text || !element) return;
+text = normalizeKeyText(text);
 let elements = userKeymap.get(text);
 
-if (elements) elements.push(text);
-else elements = [text];
+if (elements) elements.push(element);
+else elements = [element];
 userKeymap.set(text, elements);
+//console.debug (`define key ${text} maps to ${elements.slice(-1)}`);
 } // defineKey
 
 export function textToKey (text) {
@@ -267,19 +268,6 @@ export function normalizeKeyText (text) {
 return keyToText(textToKey(text));
 } // normalizeKeyText
 
-/*function findKey (key) {
-//console.debug(`looking up ${key.toSource()}`);
-const entry = Array.from(userKeymap.entries())
-.find(x => compareKeys(key, x[0]));
-
-if (entry) {
-console.debug(`found entry ${entry}`);
-return entry[1];
-} else {
-return undefined;
-} // if
-} // findKey
-
 function compareKeys (k1, k2) {
 return (
 k1.ctrlKey === k2.ctrlKey
@@ -289,26 +277,6 @@ k1.ctrlKey === k2.ctrlKey
 ); // return
 } // compareKeys
 
-export function defineKey (text, input) {
-if (!input) return;
-console.debug(`defining key ${text} ${input}`);
-try {
-const key = textToKey(text);
-const elements = 
-if (userKeymap.has(key)) {
-const list = userKeymap.get(key);
-list.push(input);
-userKeymap.set(key, list);
-console.debug(`define: ${text} has ${list} elements`);
-} else {
-userKeymap.set(key, [input]);
-console.debug(`define: ${text} has initial definition`);
-} // if
-} catch (e) {
-statusMessage(`invalid key definition: ${text}.`);
-} // try
-} // defineKey
-*/
 
 function eventToKey (e) {
 return {ctrlKey: e.ctrlKey, shiftKey: e.shiftKey, altKey: e.altKey, key: e.key};
@@ -328,6 +296,5 @@ const allowed = "Enter, Home, End, PageUp, PageDown, ArrowUp, ArrowDown, ArrowLe
 .split(",").map(x => x.trim());
 
 return allowed.includes(key);
-
 } // allowedUnmodified
 
