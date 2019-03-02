@@ -28,9 +28,10 @@ hide="detune, gain, mix"></audio-filter>
 function="1000 + 700 * cos(t/3)"></audio-parameter>
 </audio-control>
 
-<audio-series><audio-control>
-<audio-delay bypass label="delay" mix="1" delay="0.00096"></audio-delay>
-<audio-parameter label="controling delay time" name="delay"></audio-parameter>
+<audio-series><audio-control>	
+<audio-delay bypass label="delay" mix="1" delay="0.0009"></audio-delay>
+<audio-parameter label="controling delay time" name="delay"
+function=".0009 * cos(t/3)*sin(t/2)"></audio-parameter>
 </audio-control><audio-control>
 <audio-filter label="right filter" type="allpass" frequency="714" q="1.0"
 hide="detune, gain, mix"></audio-filter>
