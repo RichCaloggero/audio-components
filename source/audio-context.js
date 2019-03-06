@@ -23,7 +23,14 @@ return html`
 <ui-number label="x" value="{{listenerX}}"></ui-number>
 <ui-number label="y" value="{{listenerY}}"></ui-number>
 <ui-number label="z" value="{{listenerZ}}"></ui-number>
-<ui-text label="orientation" value="{{listenerOrientation}}"></ui-text>
+
+<ui-number label="forwardX" value="{{forwardX}}"></ui-number>
+<ui-number label="forwardY" value="{{forwardY}}"></ui-number>
+<ui-number label="forwardZ" value="{{forwardZ}}"></ui-number>
+
+<ui-number label="upX" value="{{upX}}"></ui-number>
+<ui-number label="upY" value="{{upY}}"></ui-number>
+<ui-number label="upZ" value="{{upZ}}"></ui-number>
 </fieldset>
 
 <div role="dialog" hidden id="defineKeyDialog" aria-labelledby="dialog-title">
@@ -62,6 +69,18 @@ enableAutomation: {type: Boolean, value: false, notify: true, observer: "_enable
 showListener: {type: Boolean, value: false, notify: true, observer: "_showListener"},
 id: {type: String, notify:true, observer: "setId"}	,
 shortcuts: {type: String, notify:true, observer: "shortcutsChanged"},
+
+listenerX: {type: Number, value: 0, notify: true, observer: "listenerXChanged"},
+listenerY: {type: Number, value: 0, notify: true, observer: "listenerYChanged"},
+listenerZ: {type: Number, value: 0, notify: true, observer: "listenerZChanged"},
+
+forwardX: {type: Number, value: 0, notify: true, observer: "forwardXChanged"},
+forwardY: {type: Number, value: 0, notify: true, observer: "forwardYChanged"},
+forwardZ: {type: Number, value: 0, notify: true, observer: "forwardZChanged"},
+
+upX: {type: Number, value: 0, notify: true, observer: "upXChanged"},
+upY: {type: Number, value: 0, notify: true, observer: "upYChanged"},
+upZ: {type: Number, value: 0, notify: true, observer: "upZChanged"},
 }; // return
 } // get properties
 
@@ -97,6 +116,18 @@ this.hideControls();
 // when this.shadowRoot becomes set for the first time, store it since it will be shadow root of the audio-context itself
 if (!shadowRoot) shadowRoot = this.shadowRoot;
 } // connectedCallback
+
+listenerXChanged (value) {this.audio.listener.setPosition(this.listenerX, this.listenerY, this.listenerZ);}
+listenerYChanged (value) {this.audio.listener.setPosition(this.listenerX, this.listenerY, this.listenerZ);}
+listenerZChanged (value) {this.audio.listener.setPosition(this.listenerX, this.listenerY, this.listenerZ);}
+
+forwardXChanged (value) {this.audio.listener.setOrientation(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ);}
+forwardYChanged (value) {this.audio.listener.setOrientation(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ);}
+forwardZChanged (value) {this.audio.listener.setOrientation(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ);}
+
+upXChanged (value) {this.audio.listener.setOrientation(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ);}
+upYChanged (value) {this.audio.listener.setOrientation(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ);}
+upZChanged (value) {this.audio.listener.setOrientation(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ);}
 
 shortcutsChanged (value) {
 const root = this.shadowRoot;
@@ -142,6 +173,8 @@ const controls = Array.from(this.shadowRoot.querySelectorAll(selectors));
 //console.log(`${this.id}: controls ${controls.length} ${controls.map(x => x.name || x.label || x.id || x)}`);
 return controls;
 } // uiControls
+
+_showListener (value) {shadowRoot.querySelector("#listener").hide = !value;}
 
 _mix (value) {
 //console.debug(`_mix: ${this.id} ${value}`);
