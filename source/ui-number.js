@@ -65,13 +65,13 @@ break;
 */
 
 case "Home":
-if (input.type === "number") return true;
 if (e.ctrlKey) this.setMax ();
+else if (input.type === "number") return true;
 break;
 
 case "End":
-if (input.type === "number") return true;
 if (e.ctrlKey) this.setMin ();
+else if (input.type === "number") return true;
 break;
 
 case "PageUp": 

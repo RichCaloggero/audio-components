@@ -15,7 +15,7 @@ static get template () {
 return html`
 <div class="audio-context">
 <h1>[[label]]</h1>
-<ui-boolean label="enable automation" value="{{enableAutomation}}"></ui-boolean>
+<ui-boolean label="enable automation" value="{{enableAutomation}}" shortcut="alt shift r"></ui-boolean>
 <ui-boolean label="showListener" value="{{showListener}}"></ui-boolean>
 
 <fieldset hidden id="listener">
@@ -33,9 +33,9 @@ return html`
 <ui-number label="upZ" value="{{upZ}}"></ui-number>
 </fieldset>
 
-<div role="dialog" hidden id="defineKeyDialog" aria-labelledby="dialog-title">
+<div role="dialog" hidden id="defineKeyDialog" aria-labelledby="defineKeyDialog-title">
 <header>
-<h2 id="dialog-title">Define Key</h2>
+<h2 id="defineKeyDialog-title">Define Key</h2>
 <button class="close">Close</button>
 </header>
 
