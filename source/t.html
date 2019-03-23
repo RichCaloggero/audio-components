@@ -10,23 +10,27 @@
 <audio-player label="player" shortcuts="src alt shift u" src="media/01 - 11 - Jerry Garcia - GarciaLive Volume 6_ 24 bit - LIKE A ROAD.flac"></audio-player>
 
 <audio-series label="master" hide="mix" shortcuts="bypass shift alt m">
-<audio-control>
-<audio-panner bypass label="panner" rolloffFactor="1" shortcuts="bypass alt shift p"></audio-panner>
-<audio-parameter label="controling x" name="x" function="7 * cos(t/2)"></audio-parameter>
-<audio-parameter label="controling y" name="y" function="10 * sin(t/2)"></audio-parameter>
-<audio-parameter label="controling z" name="z" function="5 * sin(t/2)"></audio-parameter>
-</audio-control>
 
 <audio-series label="phaser" hide="" shortcuts="bypass alt shift x">
 <audio-split swapOutputs>
+<audio-parallel label="left channel">
 <audio-control>
-<audio-filter label="left filter" type="allpass" frequency="1660.0" q="1"
+<audio-filter label="left filter 1" type="allpass" frequency="1660.0" q="1"
 hide="detune, gain, mix"></audio-filter>
 
-<audio-parameter label="controling left filter q" name="q"></audio-parameter>
-<audio-parameter label="controling left filter frequency" name="frequency"
+<audio-parameter label="controling left filter 1 frequency" name="frequency"
 function="100 + 900 * abs(cos(t/3 + .6))"></audio-parameter>
 </audio-control>
+
+<audio-control>
+<audio-filter label="left filter 2" type="allpass" frequency="2660.0" q="1"
+hide="detune, gain, mix">
+</audio-filter>
+
+<audio-parameter label="controling left filter 2 frequency" name="frequency"
+function="1000 + 900 * abs(cos(t/3 + 1))"></audio-parameter>
+</audio-control>
+</audio-parallel>
 
 <audio-series><audio-control>	
 <audio-delay label="delay" mix="-0.4" delay="0.0009" shortcuts="bypass alt shift d, delay alt shift t"></audio-delay>
