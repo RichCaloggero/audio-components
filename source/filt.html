@@ -1,0 +1,38 @@
+<!doctype html>
+<head>
+<meta charset="utf-8">
+<title>Fun with Filters</title>
+<!--<script src="./resonance-audio.min.js" crossorigin="anonymous"></script>-->
+<script src="loader.js"></script>
+</head>
+<body>
+<audio-context hide="bypass" label="filt" shortcuts="enableAutomation alt shift r">
+<audio-series>
+<audio-player label="player" shortcuts="src alt shift u" src="media/01 - 12 - Jerry Garcia - GarciaLive Volume 6_ 24 bit - MERL'S TUNE.flac"></audio-player>
+
+<audio-series label="master"  shortcuts="bypass shift alt m">
+<audio-control>
+<audio-filter label="band 1" shortcuts="bypass shift alt 1" type="allpass" hide="gain, detune"
+  frequency="800"
+  q="0.5"></audio-filter>
+
+<audio-parameter label="control band 1 frequency" name="frequency"
+function="800 + 3000 * sin(t + 1)"></audio-parameter>
+<audio-parameter label="control band 1 q" name="q"
+function=".1 + 5  * sin(t + 2)"></audio-parameter>
+</audio-control>
+
+<audio-split  swap-inputs>
+<audio-gain></audio-gain>
+<audio-gain></audio-gain>
+</audio-split>
+
+<audio-gain label="master volume" shortcuts="gain alt shift v"></audio-gain>
+</audio-series>
+
+<audio-destination></audio-destination>
+</audio-series>
+</audio-context>
+
+</body>
+</html>
