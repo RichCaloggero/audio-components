@@ -13,15 +13,15 @@ return html`
 <ui-boolean label="bypass" value="{{bypass}}"></ui-boolean>
 <ui-number label="mix" value="{{mix}}" min="0.0" max="1.0" step="0.1"></ui-number>
 
-<ui-list label="type" value="{{type}}" values='[
-["allpass","all pass"],
+<ui-list label="type" initial-value="[[type]]" values='[
+["peaking","peaking"],
+["notch","notch"],
+["bandpass","band pass"],
 ["lowpass","low pass"],
 ["highpass","high pass"],
-["bandpass","band pass"],
 ["lowshelf","low shelf"],
 ["highshelf","high shelf"],
-["peaking","peaking"],
-["notch","notch"]
+["allpass","all pass"]
 ]'></ui-list>
 
 <ui-number label="frequency" type="number" value="{{frequency}}" min="20" max="20000" step="10.0"></ui-number>
@@ -64,6 +64,6 @@ qChanged (value) {this.component.filter.Q.value = value;}
 typeChanged (value) {this.component.filter.type = value;}
 detuneChanged (value) {this.component.filter.detune.value = value;}
 gainChanged (value) {this.component.filter.gain.value = value;}
-} // class AudioGain
+} // class AudioFilter
 
 customElements.define(AudioFilter.is, AudioFilter);

@@ -9,7 +9,7 @@ static get template () {
 return html`
 <div  class="ui-list">
 <label>[[label]]
-<br><select  id="input" value="{{value::change}}" on-change="fixAccessibility" on-keydown="handleSpecialKeys">
+<br><select  id="input" value="{{value::change}}"  on-keydown="handleSpecialKeys">
 </select>
 </label>
 </div>
@@ -20,18 +20,9 @@ static get is() { return "ui-list"; }
 
 static get properties () {
 return {
-values: {
-type: String,
-value: "",
-notify: true,
-observer: "valuesChanged"
-}, // values
-
-value: {
-type: String,
-value: "",
-notify: true,
-} // value
+"initial-value": {type: String, notify: true, observer: "initialValueChanged"},
+values: {type: String, notify: true, observer: "valuesChanged"},
+value: {type: String, value: "", notify: true, observer: "valueChanged"}
 }; // return
 } // get properties
 
@@ -48,9 +39,14 @@ super.connectedCallback();
 //console.log(`${this.id}: dom created.`);
 } // connectedCallback
 
+//initialValueChanged (value) {this.root.querySelector("#input").value = value;}
+
 valuesChanged (value) {
 //console.log(`valuesChanged: ${value.length}`);
 const list = this._buildList (value);
+if (this["initial-value"]) {
+list.value = this["initial-value"];
+} // if
 } // valuesChanged
 
 fixAccessibility (e) {
@@ -78,11 +74,6 @@ list.add (option);
 
 return list;
 } // _buildList
-
-
-
-
-
 
 } // class UIList
 
