@@ -54,7 +54,7 @@ this.wet.gain.value = gain;
 } // Component
 
 export class Split extends AudioComponent {
-constructor (audio, components) {
+constructor (audio, components, swapInputs, swapOutputs) {
 super (audio, "split");
 this.splitter = this.audio.createChannelSplitter(2);
 this.merger = this.audio.createChannelMerger(2);
@@ -67,13 +67,14 @@ return;
 
 this.input.connect(this.splitter);
 this.merger.connect(this.wet);
+this.connect (swapInputs, swapOutputs);
 } // constructor
 
 connect (swapInputs, swapOutputs) {
 const channel1 = this.components[0];
 const channel2 = this.components.length === 1? null : this.components[1];
 
-alert (`split: swap: ${swapInputs}, ${swapOutputs}`);
+//alert (`split: swap: ${swapInputs}, ${swapOutputs}`);
 if (channel1) {
 this.splitter.connect (channel1.input, swapInputs? 1 : 0, 0);
 channel1.output.connect (this.merger, 0, swapOutputs? 1 : 0);

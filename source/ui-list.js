@@ -20,9 +20,9 @@ static get is() { return "ui-list"; }
 
 static get properties () {
 return {
-"initial-value": {type: String, notify: true, observer: "initialValueChanged"},
+"initial-value": {type: String, notify: true},
 values: {type: String, notify: true, observer: "valuesChanged"},
-value: {type: String, value: "", notify: true, observer: "valueChanged"}
+value: {type: String, value: "", notify: true}
 }; // return
 } // get properties
 
@@ -39,19 +39,20 @@ super.connectedCallback();
 //console.log(`${this.id}: dom created.`);
 } // connectedCallback
 
-//initialValueChanged (value) {this.root.querySelector("#input").value = value;}
 
 valuesChanged (value) {
 //console.log(`valuesChanged: ${value.length}`);
 const list = this._buildList (value);
 if (this["initial-value"]) {
 list.value = this["initial-value"];
+list.dispatchEvent(new CustomEvent("change", {composed: true, bubbles: true}));
 } // if
 } // valuesChanged
 
-fixAccessibility (e) {
+/*fixAccessibility (e) {
 statusMessage(e.target.value);
 } // fixAccessibility
+*/
 
 _buildList (newList) {
 //console.log(`buildList: ${newList}`);

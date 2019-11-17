@@ -35,8 +35,8 @@ super.connectedCallback();
 childrenReady(this)
 .then(children => {
 //console.log(`- ${this.nodeName}#${this.id}.connectedCallback.then: found ${children.length} children`);
-this.component = new Split(this.audio, this.components(children));
-this.component.connect(this["swap-inputs"], this["swap-outputs"]);
+this.component = new Split(this.audio, this.components(children), this["swap-inputs"], this["swap-outputs"]);
+//this.component.connect(this["swap-inputs"], this["swap-outputs"]);
 signalReady(this);
 }).catch(error => alert(`audio-split: cannot connect;\n${error}`));
 } // connectedCallback

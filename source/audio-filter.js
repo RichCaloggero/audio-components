@@ -13,7 +13,7 @@ return html`
 <ui-boolean label="bypass" value="{{bypass}}"></ui-boolean>
 <ui-number label="mix" value="{{mix}}" min="0.0" max="1.0" step="0.1"></ui-number>
 
-<ui-list label="type" initial-value="[[type]]" values='[
+<ui-list label="type" initial-value="[[type]]" value="{{type}}" values='[
 ["peaking","peaking"],
 ["notch","notch"],
 ["bandpass","band pass"],
