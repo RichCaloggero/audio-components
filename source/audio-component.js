@@ -3,6 +3,7 @@ constructor (audio, name) {
 //console.debug("audioComponent: instantiating ", name);
 this.audio = audio;
 this.name = name;
+this._silentBypass = false;
 
 this.input = audio.createGain();
 this.output = audio.createGain();
@@ -18,6 +19,15 @@ this.dry.connect(this.output);
 this.mix(1.0);
 this.bypass(false);
 } // constructor
+
+silentBypass (value) {
+if (value) {
+this._silentBypass = true;
+this._bypass.gain.value = 0;} else {
+this._silentBypass = false;
+this._bypass.gain.value = 1.0;
+} // if
+} // silentBypass
 
 mix (value) {
 //console.debug(`mix: ${this.name} ${this.value} ${!this.output} ${!this.wet}`);

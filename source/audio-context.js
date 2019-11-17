@@ -65,6 +65,7 @@ hide: String,
 label: String,
 mix: {type: Number, notify: true, observer: "_mix"},
 bypass: {type: Boolean, notify: true, observer: "_bypass"},
+"silent-bypass": {type: Boolean, notify: true, observer: "_silentBypass"},
 enableAutomation: {type: Boolean, value: false, notify: true, observer: "_enableAutomation"}, // enableAutomation
 showListener: {type: Boolean, value: false, notify: true, observer: "_showListener"},
 id: {type: String, notify:true, observer: "setId"}	,
@@ -191,6 +192,8 @@ this.component.bypass(value);
 //console.debug(`- ${value}`);
 } // if
 } // bypass
+
+_silentBypass (value) {if (this.component) this.component.silentBypass(value);}
 
 components (elements) {
 return elements.map(e => {
