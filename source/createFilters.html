@@ -1,0 +1,57 @@
+<!doctype html>
+<head>
+<meta charset="utf-8">
+<title>Create Filters</title>
+</head>
+<body>
+<div>
+<label>Starting frequency: <input type="text" id="frequency" value="20"></label>
+<br><label>Band count: <input type="text" id="count" value="10"></label>
+<br><label>multiplier: <input type="text" id="multiplier" value="2"></label>
+<br><label>q: <input type="text" id="q" value="0.5"></label>
+<br><button id="go">Go</button>
+</div><div id="result">
+<label>HTML:</label>
+<br><textarea id="html"></textarea>
+</div>
+
+<script>
+const $ = document.querySelector.bind(document);
+const frequency = Number($("#frequency").value);
+const q = Number($("#q").value);
+const multiplier = Number($("#multiplier").value);
+const count = Number($("#count").value);
+const html = $("#html");
+
+html.value = createFilters(frequency, count, multiplier, q);
+
+function createFilters (initialFrequency=40, count=10, multiplier=2, q=0.75) {
+let html = "";
+let frequency = initialFrequency;
+
+for(let i=1; i<=count; i++) {
+let lFreq = frequency / multiplier;
+let hFreq = frequency * multiplier;
+html += `
+<audio-control>
+<audio-filter silent-bypass label="band ${i}" type="bandpass" hide="detune"
+frequency="${frequency}"
+q="${q}"></audio-filter>
+
+<audio-parameter label="control band ${i} frequency" name="frequency"
+function="s(${i}*t + .35*${i}, ${lFreq}, ${hFreq})"></audio-parameter>
+</audio-control>
+`;
+
+frequency = hFreq;
+} // for
+
+return html;
+} // createFilters
+
+
+</script>
+
+
+</body>
+</html>

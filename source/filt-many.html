@@ -1,0 +1,122 @@
+<!doctype html>
+<head>
+<meta charset="utf-8">
+<title>Fun with Filters</title>
+<!--<script src="./resonance-audio.min.js" crossorigin="anonymous"></script>-->
+<script src="loader.js"></script>
+</head>
+<body>
+<audio-context hide="bypass" label="filt" shortcuts="enableAutomation alt shift r">
+<audio-series>
+<audio-player label="player" shortcuts="src alt shift u" src="media/1. Poinciana.mp3"></audio-player>
+
+<audio-series label="master"  shortcuts="bypass shift alt m">
+
+<audio-parallel>
+
+<audio-control>
+<audio-filter silent-bypass label="band 1" type="bandpass" hide="detune"
+frequency="20"
+q="0.5"></audio-filter>
+
+<audio-parameter label="control band 1 frequency" name="frequency"
+function="s(1*t + .35*1, 10, 40)"></audio-parameter>
+</audio-control>
+
+<audio-control>
+<audio-filter silent-bypass label="band 2" type="bandpass" hide="detune"
+frequency="40"
+q="0.5"></audio-filter>
+
+<audio-parameter label="control band 2 frequency" name="frequency"
+function="s(2*t + .35*2, 20, 80)"></audio-parameter>
+</audio-control>
+
+<audio-control>
+<audio-filter silent-bypass label="band 3" type="bandpass" hide="detune"
+frequency="80"
+q="0.5"></audio-filter>
+
+<audio-parameter label="control band 3 frequency" name="frequency"
+function="s(3*t + .35*3, 40, 160)"></audio-parameter>
+</audio-control>
+
+<audio-control>
+<audio-filter silent-bypass label="band 4" type="bandpass" hide="detune"
+frequency="160"
+q="0.5"></audio-filter>
+
+<audio-parameter label="control band 4 frequency" name="frequency"
+function="s(4*t + .35*4, 80, 320)"></audio-parameter>
+</audio-control>
+
+<audio-control>
+<audio-filter silent-bypass label="band 5" type="bandpass" hide="detune"
+frequency="320"
+q="0.5"></audio-filter>
+
+<audio-parameter label="control band 5 frequency" name="frequency"
+function="s(5*t + .35*5, 160, 640)"></audio-parameter>
+</audio-control>
+
+<audio-control>
+<audio-filter silent-bypass label="band 6" type="bandpass" hide="detune"
+frequency="640"
+q="0.5"></audio-filter>
+
+<audio-parameter label="control band 6 frequency" name="frequency"
+function="s(6*t + .35*6, 320, 1280)"></audio-parameter>
+</audio-control>
+
+<audio-control>
+<audio-filter silent-bypass label="band 7" type="bandpass" hide="detune"
+frequency="1280"
+q="0.5"></audio-filter>
+
+<audio-parameter label="control band 7 frequency" name="frequency"
+function="s(7*t + .35*7, 640, 2560)"></audio-parameter>
+</audio-control>
+
+<audio-control>
+<audio-filter silent-bypass label="band 8" type="bandpass" hide="detune"
+frequency="2560"
+q="0.5"></audio-filter>
+
+<audio-parameter label="control band 8 frequency" name="frequency"
+function="s(8*t + .35*8, 1280, 5120)"></audio-parameter>
+</audio-control>
+
+<audio-control>
+<audio-filter silent-bypass label="band 9" type="bandpass" hide="detune"
+frequency="5120"
+q="0.5"></audio-filter>
+
+<audio-parameter label="control band 9 frequency" name="frequency"
+function="s(9*t + .35*9, 2560, 10240)"></audio-parameter>
+</audio-control>
+
+<audio-control>
+<audio-filter silent-bypass label="band 10" type="bandpass" hide="detune"
+frequency="10240"
+q="0.5"></audio-filter>
+
+<audio-parameter label="control band 10 frequency" name="frequency"
+function="s(10*t + .35*10, 5120, 20480)"></audio-parameter>
+</audio-control>
+</audio-parallel>
+
+
+<audio-split  swap-inputs>
+<audio-gain></audio-gain>
+<audio-gain></audio-gain>
+</audio-split>
+
+<audio-gain label="master volume" shortcuts="gain alt shift v"></audio-gain>
+</audio-series>
+
+<audio-destination></audio-destination>
+</audio-series>
+</audio-context>
+
+</body>
+</html>
