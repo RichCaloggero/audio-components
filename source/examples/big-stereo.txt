@@ -1,0 +1,27 @@
+<audio-context label="big stereo"><audio-series>
+<audio-player src="https://dl.dropboxusercontent.com/u/8529048/slow%20down%20jack.mp3"></audio-player>
+
+<audio-split>
+<audio-pan label="left channel"
+x="-50" y="0" z="0"
+max-distance="100" ref-distance="1" rolloff-factor="1"
+hide-controls="maxDistance refDistance rolloffFactor coneInnerAngle coneOuterAngle coneOuterGain">
+
+<audio-control  label="automate x" parameter="x" function="25 * cos(t) - 25"></audio-control>
+<audio-control  label="automate y" parameter="y" function=""></audio-control>
+<audio-control  label="automate z" parameter="z" function=""></audio-control>
+</audio-pan>
+
+<audio-pan label="right channel"
+x="50" y="0" z="0"
+max-distance="100" ref-distance="1" rolloff-factor="1"
+hide-controls="maxDistance refDistance rolloffFactor coneInnerAngle coneOuterAngle coneOuterGain">
+
+<audio-control  label="automate x" parameter="x" function="25 * sin(t) + 25"></audio-control>
+<audio-control  label="automate y" parameter="y" function=""></audio-control>
+<audio-control  label="automate z" parameter="z" function=""></audio-control>
+</audio-pan>
+</audio-split>
+
+<audio-destination></audio-destination>
+</audio-series></audio-context>
