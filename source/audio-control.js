@@ -100,18 +100,7 @@ return ${text};
 } catch (e) {
 alert (e);
 return null;
-
-
 } // try
-
-/// user functions
-
-
-
-
-function leftFrequency (t) {return toRange(300, 1700, c(t/3));}
-function rightFrequency (t) {return toRange(80, 780, c(t/3));}
-
 } // compileFunction
 
 export function updateParameter (controller, _name, _text) {
@@ -125,7 +114,6 @@ parameter.text = _text;
 
 if (parameter.text) {
 parameter.function = compileFunction(parameter.text, "t");
-
 if (parameter.function) {
 parameter.function.bind(controller.target);
 } else {
@@ -140,8 +128,4 @@ statusMessage(`Automation disabled for ${parameter.name}`);
 if (index < 0) parameters.push(parameter);
 //console.debug(`- updated ${index} ${parameter.toSource()}`);
 } // updateParameter
-
-/// automation utilities
-
-
 

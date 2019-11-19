@@ -16,92 +16,65 @@
 
 <audio-control>
 <audio-filter silent-bypass label="band 1" type="bandpass" hide="detune"
-frequency="20"
-q="0.5"></audio-filter>
+frequency="160"
+q="0.075"></audio-filter>
 
-<audio-parameter label="control band 1 frequency" name="frequency"
-function="s(1*t + .35*1, 10, 40)"></audio-parameter>
+<audio-parameter label="control band 1 q" name="q"
+function="s(0.1*t + 0.3, .04, 1)"></audio-parameter>
 </audio-control>
 
 <audio-control>
 <audio-filter silent-bypass label="band 2" type="bandpass" hide="detune"
-frequency="40"
-q="0.5"></audio-filter>
+frequency="320"
+q="0.075"></audio-filter>
 
-<audio-parameter label="control band 2 frequency" name="frequency"
-function="s(2*t + .35*2, 20, 80)"></audio-parameter>
+<audio-parameter label="control band 2 q" name="q"
+function="s(0.2*t + 0.6, .04, 1)"></audio-parameter>
 </audio-control>
 
 <audio-control>
 <audio-filter silent-bypass label="band 3" type="bandpass" hide="detune"
-frequency="80"
-q="0.5"></audio-filter>
+frequency="640"
+q="0.075"></audio-filter>
 
-<audio-parameter label="control band 3 frequency" name="frequency"
-function="s(3*t + .35*3, 40, 160)"></audio-parameter>
+<audio-parameter label="control band 3 q" name="q"
+function="s(0.30000000000000004*t + 0.8999999999999999, .04, 1)"></audio-parameter>
 </audio-control>
 
 <audio-control>
 <audio-filter silent-bypass label="band 4" type="bandpass" hide="detune"
-frequency="160"
-q="0.5"></audio-filter>
+frequency="1280"
+q="0.075"></audio-filter>
 
-<audio-parameter label="control band 4 frequency" name="frequency"
-function="s(4*t + .35*4, 80, 320)"></audio-parameter>
+<audio-parameter label="control band 4 q" name="q"
+function="s(0.4*t + 1.2, .04, 1)"></audio-parameter>
 </audio-control>
 
 <audio-control>
 <audio-filter silent-bypass label="band 5" type="bandpass" hide="detune"
-frequency="320"
-q="0.5"></audio-filter>
+frequency="2560"
+q="0.075"></audio-filter>
 
-<audio-parameter label="control band 5 frequency" name="frequency"
-function="s(5*t + .35*5, 160, 640)"></audio-parameter>
+<audio-parameter label="control band 5 q" name="q"
+function="s(0.5*t + 1.5, .04, 1)"></audio-parameter>
 </audio-control>
 
 <audio-control>
 <audio-filter silent-bypass label="band 6" type="bandpass" hide="detune"
-frequency="640"
-q="0.5"></audio-filter>
+frequency="5120"
+q="0.075"></audio-filter>
 
-<audio-parameter label="control band 6 frequency" name="frequency"
-function="s(6*t + .35*6, 320, 1280)"></audio-parameter>
+<audio-parameter label="control band 6 q" name="q"
+function="s(0.6000000000000001*t + 1.7999999999999998, .04, 1)"></audio-parameter>
 </audio-control>
 
 <audio-control>
 <audio-filter silent-bypass label="band 7" type="bandpass" hide="detune"
-frequency="1280"
-q="0.5"></audio-filter>
-
-<audio-parameter label="control band 7 frequency" name="frequency"
-function="s(7*t + .35*7, 640, 2560)"></audio-parameter>
-</audio-control>
-
-<audio-control>
-<audio-filter silent-bypass label="band 8" type="bandpass" hide="detune"
-frequency="2560"
-q="0.5"></audio-filter>
-
-<audio-parameter label="control band 8 frequency" name="frequency"
-function="s(8*t + .35*8, 1280, 5120)"></audio-parameter>
-</audio-control>
-
-<audio-control>
-<audio-filter silent-bypass label="band 9" type="bandpass" hide="detune"
-frequency="5120"
-q="0.5"></audio-filter>
-
-<audio-parameter label="control band 9 frequency" name="frequency"
-function="s(9*t + .35*9, 2560, 10240)"></audio-parameter>
-</audio-control>
-
-<audio-control>
-<audio-filter silent-bypass label="band 10" type="bandpass" hide="detune"
 frequency="10240"
-q="0.5"></audio-filter>
+q="0.075"></audio-filter>
 
-<audio-parameter label="control band 10 frequency" name="frequency"
-function="s(10*t + .35*10, 5120, 20480)"></audio-parameter>
+<audio-parameter label="control band 7 q" name="q"
+function="s(0.7000000000000001*t + 2.1, .04, 1)"></audio-parameter>
 </audio-control>
 </audio-parallel>
 
@@ -117,6 +90,30 @@ function="s(10*t + .35*10, 5120, 20480)"></audio-parameter>
 <audio-destination></audio-destination>
 </audio-series>
 </audio-context>
+
+<div aria-label="set all" role="region">
+<label>q: <input type="range" id="qq" min="0.01" max="20"></label>
+<label>type: <input type="text" id="filter-type"></label>
+
+</div>
+
+<script>
+const qq = document.querySelector("#qq");
+const type = document.querySelector("#filter-type");
+
+qq.addEventListener("change", setAll);
+type.addEventListener("change", setAll);
+
+function setAll (e) {
+const attr = e.target.id === "qq"? "q" : "type";
+const value = Number(e.target.value);
+const filters = document.querySelectorAll("audio-parallel audio-filter");
+
+filters.forEach(f => f.setAttribute(attr, value));
+} // setAll
+
+
+</script>
 
 </body>
 </html>

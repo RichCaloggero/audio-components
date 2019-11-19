@@ -16,14 +16,17 @@
 </div>
 
 <script>
+go.addEventListener("click", () => {
 const $ = document.querySelector.bind(document);
 const frequency = Number($("#frequency").value);
 const q = Number($("#q").value);
 const multiplier = Number($("#multiplier").value);
 const count = Number($("#count").value);
 const html = $("#html");
+const go = $("#go");
 
-html.value = createFilters(frequency, count, multiplier, q);
+html.value = createFilters(frequency, count, multiplier, q)
+});
 
 function createFilters (initialFrequency=40, count=10, multiplier=2, q=0.75) {
 let html = "";
@@ -38,8 +41,8 @@ html += `
 frequency="${frequency}"
 q="${q}"></audio-filter>
 
-<audio-parameter label="control band ${i} frequency" name="frequency"
-function="s(${i}*t + .35*${i}, ${lFreq}, ${hFreq})"></audio-parameter>
+<audio-parameter label="control band ${i} q" name="q"
+function="s(${.1*i}*t + ${.3 * i}, .04, 1)"></audio-parameter>
 </audio-control>
 `;
 

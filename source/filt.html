@@ -8,14 +8,15 @@
 <body>
 <audio-context hide="bypass" label="filt" shortcuts="enableAutomation alt shift r">
 <audio-series>
-<audio-player label="player" shortcuts="src alt shift u" src="media/1. Poinciana.mp3"></audio-player>
+<audio-player label="player" shortcuts="src alt shift u" src="media/08 Slow Sixteen.m4a"></audio-player>
 
-<audio-series label="master"  shortcuts="bypass shift alt m">
-<audio-filter type="highpass" frequency="300" q="1.0"></audio-filter>
+<audio-series label="master"  shortcuts="bypass shift alt m" mix="-0.4">
+<audio-filter hide="detune, gain, mix" type="bandpass" frequency="9000" q="0.07"></audio-filter>
+<audio-delay label="delay" mix="1.0" delay="0.00024"></audio-delay>
 
 <audio-parallel>
 <audio-control>
-<audio-filter silent-bypass label="band 1" shortcuts="bypass shift alt l" type="allpass" hide="gain, detune"
+<audio-filter silent-bypass mix="0" label="band 1" shortcuts="bypass shift alt l" type="allpass" hide="gain, detune"
   frequency="800"
   q="0.5"></audio-filter>
 
@@ -26,7 +27,7 @@ function="s(t+.5, 1, 5)"></audio-parameter>
 </audio-control>
 
 <audio-control>
-<audio-filter silent-bypass label="band 2" shortcuts="bypass shift alt i" type="allpass" hide="gain, detune"
+<audio-filter bypass silent-bypass label="band 2" shortcuts="bypass shift alt i" type="allpass" hide="gain, detune"
   frequency="800"
   q="0.5"></audio-filter>
 
@@ -37,7 +38,7 @@ function="s(3*t+.75, 1, 5)"></audio-parameter>
 </audio-control>
 
 <audio-control>
-<audio-filter silent-bypass label="band 3" shortcuts="bypass shift alt h" type="allpass" hide="gain, detune"
+<audio-filter bypass silent-bypass label="band 3" shortcuts="bypass shift alt h" type="allpass" hide="gain, detune"
   frequency="800"
   q="0.5"></audio-filter>
 
@@ -46,8 +47,9 @@ function="s(4*t,2500, 5000)"></audio-parameter>
 <audio-parameter label="control band 3 q" name="q"
 function="s(4*t+1.25, 1, 5)"></audio-parameter>
 </audio-control>
-</audio-parallel>
+<audio-gain label="filter volume" shortcuts="gain alt shift g" max="4.0"></audio-gain>
 
+</audio-parallel>
 
 <audio-split  swap-inputs>
 <audio-gain></audio-gain>
