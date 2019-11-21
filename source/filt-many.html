@@ -10,7 +10,14 @@
 <audio-series>
 <audio-player label="player" shortcuts="src alt shift u" src="media/uno momento.mp3"></audio-player>
 
-<audio-series label="master"  shortcuts="bypass shift alt m">
+<audio-series label="master"  mix=".4" shortcuts="bypass shift alt m">
+<audio-filter type="highpass" frequency="160" q="0.01"></audio-filter>
+
+<audio-control>
+<audio-delay label="delay" delay="0"></audio-delay>
+<audio-parameter label="control delay time" name="delay"
+function="c(t, 0,.00076)"></audio-parameter>
+</audio-control>
 
 <audio-parallel>
 
@@ -84,7 +91,7 @@ function="s(0.7000000000000001*t + 2.1, .04, 1)"></audio-parameter>
 <audio-gain></audio-gain>
 </audio-split>
 
-<audio-gain label="master volume" shortcuts="gain alt shift v"></audio-gain>
+<audio-gain label="master volume" shortcuts="gain alt shift v" max="5"></audio-gain>
 </audio-series>
 
 <audio-destination></audio-destination>
@@ -92,9 +99,10 @@ function="s(0.7000000000000001*t + 2.1, .04, 1)"></audio-parameter>
 </audio-context>
 
 <div id="set" aria-label="set all" role="region">
-<label>q: <input type="range" id="q" min="0.01" max="20"></label>
+<label>Bypass: <input type="checkbox" id="bypass"></label>
+<label for="q">q:</label> <input type="number" id="q" min="0.0001" max="100" step=".0001">
 <label>type: <input type="text" id="type"></label>
-<label>function: <input type="text" id="function"></label>
+<br><label>function: <input type="text" id="function"></label>
 </div>
 
 <script>
@@ -110,7 +118,13 @@ const filters = document.querySelectorAll("audio-parallel audio-filter");
 
 filters.forEach(f => {
 if (attr === "function") f = f.nextElementSibling;
+
+if (attr === "bypass") {
+if (e.target.checked) f.setAttribute("bypass", true);
+else f.removeAttribute("bypass");
+} else {
 f.setAttribute(attr, value)
+} // if
 });
 } // setAll
 
