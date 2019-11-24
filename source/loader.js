@@ -10,6 +10,7 @@ const elementList = [
 "./audio-series.js",
 "./audio-split.js",
 "./audio-parallel.js",
+"./audio-channelSwap.js",
 
 // processors
 "./audio-player.js",

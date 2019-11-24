@@ -84,7 +84,7 @@ connect (swapInputs, swapOutputs) {
 const channel1 = this.components[0];
 const channel2 = this.components.length === 1? null : this.components[1];
 
-//alert (`split: swap: ${swapInputs}, ${swapOutputs}`);
+//console.debug(`split: swap: ${swapInputs}, ${swapOutputs}`);
 if (channel1) {
 this.splitter.connect (channel1.input, swapInputs? 1 : 0, 0);
 channel1.output.connect (this.merger, 0, swapOutputs? 1 : 0);
@@ -396,12 +396,40 @@ s.connect(right, 1).connect(this.rightDelay).connect(m, 0,0);
 m.connect(this.wet);
 m.connect(this.feedback).connect(s);
 } // constructor
+
+setFilter (frequency, q) {
+this.filter.frequency.value = frequency;
+this.filter.Q.value = q;
+return this;
+} // setFilter
+
+setFeedback (value) {
+this.feedback.gain.value = value;
+return this;
+} // setFeedback
+
+setDelay (value) {
+this.leftDelay.delay.value = this.rightDelay.delay.value = value;
+return this;
+} // setDelay
 } // class Xtc
+
+export class ChannelSwap extends AudioComponent {
+constructor (audio) {
+super (audio, "ChannelSwap");
+const s = audio.createChannelSplitter(2);
+const m = audio.createChannelMerger(2);
+this.input.connect(s);
+s.connect(m, 0,1);
+s.connect(m, 1,0);
+m.connect(this.wet);
+} // constructor
+} // ChannelSwap
 
 function createFilterBank (audio, frequencies) {
 return frequencies.map (frequency => {
 const filter = new Filter(audio);
 filter.filter.frequency.value = frequency;
 return filter;
-}); // mapreturn filters;
+}); // map return filters;
 } // createFilterBank

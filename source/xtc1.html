@@ -11,12 +11,12 @@
 <audio-player label="player" shortcuts="src alt shift u" src="media/uno momento.mp3"></audio-player>
 
 <audio-series label="master"  mix=".4" shortcuts="bypass shift alt m">
-<audio-filter type="highpass" frequency="160" q="0.001"></audio-filter>
+<audio-filter type="highpass" frequency="200" q="0.0003"></audio-filter>
 
 <audio-parallel>
 <audio-series>
 <audio-delay delay="0.00001"></audio-delay>
-<audio-gain gain="0.8"></audio-gain>
+<audio-gain gain="0.9"></audio-gain>
 <audio-gain gain="-1"></audio-gain>
 <audio-split  swap-inputs>
 <audio-gain></audio-gain>
@@ -27,12 +27,12 @@
 
 <audio-series>
 <audio-delay delay="0.00002"></audio-delay>
-<audio-gain gain="0.6"></audio-gain>
+<audio-gain gain="0.8"></audio-gain>
 </audio-series>
 
 <audio-series>
 <audio-delay delay="0.00003"></audio-delay>
-<audio-gain gain="0.4"></audio-gain>
+<audio-gain gain="0.7"></audio-gain>
 <audio-gain gain="-1"></audio-gain>
 <audio-split  swap-inputs>
 <audio-gain></audio-gain>
@@ -42,7 +42,7 @@
 
 <audio-series>
 <audio-delay delay="0.00004"></audio-delay>
-<audio-gain gain="0.4"></audio-gain>
+<audio-gain gain="0.6"></audio-gain>
 </audio-series>
 
 </audio-parallel>
