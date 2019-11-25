@@ -19,9 +19,9 @@ function="c(t)"></audio-parameter>
 <audio-parameter label="control panner" name="z"
 function="s(t)"></audio-parameter>
 </audio-control>
-<audio-filter label="bass boost" type="lowshelf" gain="2" hide="type, detune, q, mix"></audio-filter>
 
-<audio-series label="master"  mix=".4" shortcuts="bypass shift alt m">
+<audio-series label="master"  hide="mix" shortcuts="bypass shift alt m">
+<audio-series label="widener" mix="0.4">
 <audio-filter type="bandpass" frequency="600" q="0.0003"></audio-filter>
 
 <audio-parallel>
@@ -40,7 +40,9 @@ function="s(t)"></audio-parameter>
 <audio-gain gain="-0.7"></audio-gain>
 </audio-series>
 </audio-parallel>
+</audio-series>
 
+<audio-filter label="bass boost" type="lowshelf" gain="2" hide="type, detune, q, mix"></audio-filter>
 <audio-gain label="master volume" shortcuts="gain alt shift v" max="5"></audio-gain>
 </audio-series>
 
