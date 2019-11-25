@@ -13,8 +13,8 @@ let automation = null; // value returned from setInterval
 export class _AudioContext_ extends PolymerElement {
 static get template () {
 return html`
-<div class="audio-context">
-<h1>[[label]]</h1>
+<fieldset class="audio-context">
+<legend><h1>[[label]]</h1></legend>
 <ui-boolean label="enable automation" value="{{enableAutomation}}" shortcut="alt shift r"></ui-boolean>
 <ui-boolean label="showListener" value="{{showListener}}"></ui-boolean>
 
@@ -48,10 +48,9 @@ return html`
 </div><!-- .body -->
 </div><!-- dialog -->
 
-</fieldset>
 
 <div role="region" aria-label="status" id="statusMessage" aria-live="polite"></div>
-</div>
+</fieldset><!-- audio context region -->
 
 <slot></slot>
 `; // html
@@ -169,13 +168,12 @@ if (name && hide.includes(name.trim().toLowerCase())) element.hidden = true;
 } // hideControls
 
 uiControls () {
-const selectors = "ui-text,ui-number,ui-boolean";
+const selectors = "ui-list,ui-text,ui-number,ui-boolean";
 const controls = Array.from(this.shadowRoot.querySelectorAll(selectors));
 //console.log(`${this.id}: controls ${controls.length} ${controls.map(x => x.name || x.label || x.id || x)}`);
 return controls;
 } // uiControls
 
-_showListener (value) {shadowRoot.querySelector("#listener").hide = !value;}
 
 _mix (value) {
 //console.debug(`_mix: ${this.id} ${value}`);

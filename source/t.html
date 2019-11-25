@@ -6,13 +6,40 @@
 <script src="loader.js"></script>
 </head>
 <body>
-<audio-context hide="bypass" label="filt" shortcuts="enableAutomation alt shift r">
+<audio-context hide="bypass" label="Fun with Filters" shortcuts="enableAutomation alt shift r">
 <audio-series>
-<audio-player label="player" shortcuts="src alt shift u" src="media/uno momento.mp3"></audio-player>
+<audio-player label="player" shortcuts="src alt shift u" src="media/If I Loved You.mp3"></audio-player>
+
+<audio-control>
+<audio-panner bypass label="panner" maxDistance="1" refDistance="1" rolloffFactor="1"></audio-panner>
+
+<audio-parameter label="control panner" name="x"
+function="c(t)"></audio-parameter>
+
+<audio-parameter label="control panner" name="z"
+function="s(t)"></audio-parameter>
+</audio-control>
+<audio-filter label="bass boost" type="lowshelf" gain="2" hide="type, detune, q, mix"></audio-filter>
 
 <audio-series label="master"  mix=".4" shortcuts="bypass shift alt m">
 <audio-filter type="bandpass" frequency="600" q="0.0003"></audio-filter>
+
+<audio-parallel>
+<audio-series silent-bypass label="band 1">
 <audio-channelSwap></audio-channelSwap>
+<audio-delay delay="0.0008"></audio-delay>
+<audio-gain gain="-0.9"></audio-gain>
+
+</audio-series><audio-series silent-bypass label="band 2">
+<audio-delay delay="0.0008"></audio-delay>
+<audio-gain gain="0.8"></audio-gain>
+
+</audio-series><audio-series silent-bypass label="band 3">
+<audio-channelSwap></audio-channelSwap>
+<audio-delay delay="0.0008"></audio-delay>
+<audio-gain gain="-0.7"></audio-gain>
+</audio-series>
+</audio-parallel>
 
 <audio-gain label="master volume" shortcuts="gain alt shift v" max="5"></audio-gain>
 </audio-series>
@@ -21,6 +48,19 @@
 </audio-series>
 </audio-context>
 
+<fieldset><legend><h2>Set Delays</h2></legend>
+<label>Delay: </label>
+<input type="range" id="delay" value="0.0006" min="0.0001" max="0.09" step="0.0001">
+</label>
+</fieldset>
+
+<script>
+document.querySelector("#delay").addEventListener("change", e => {
+const value = e.target.value;
+
+document.querySelectorAll("audio-delay").forEach(delay => delay.setAttribute("delay", value));
+});
+</script>
 
 </body>
 </html>
