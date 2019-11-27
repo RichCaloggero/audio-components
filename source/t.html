@@ -7,11 +7,12 @@
 </head>
 <body>
 
-<fieldset><legend><h2>Set Delays</h2></legend>
+<!--<fieldset><legend><h2>Set Delays</h2></legend>
 <label>Delay: </label>
 <input type="range" id="delay" value="0.00001" min="0.00001" max="0.09" step="0.00001">
 </label>
 </fieldset>
+-->
 
 
 <audio-context hide="bypass" label="Fun with Filters" shortcuts="enableAutomation alt shift r">
@@ -35,39 +36,39 @@ function="sin(t)"></audio-parameter>
 <audio-parallel>
 <audio-series silent-bypass label="band 1">
 <audio-channelSwap></audio-channelSwap>
-<audio-delay></audio-delay>
-<audio-gain></audio-gain>
+<audio-delay delay=".00001"></audio-delay>
+<audio-gain gain="0.9"></audio-gain>
 
 </audio-series><audio-series silent-bypass label="band 2">
-<audio-delay></audio-delay>
-<audio-gain></audio-gain>
+<audio-delay delay="0.00002"></audio-delay>
+<audio-gain gain="0.8"></audio-gain>
 
 </audio-series><audio-series silent-bypass label="band 3">
 <audio-channelSwap></audio-channelSwap>
-<audio-delay></audio-delay>
-<audio-gain></audio-gain>
+<audio-delay delay="0.00003"></audio-delay>
+<audio-gain gain="0.7"></audio-gain>
 
 </audio-series><audio-series silent-bypass label="band 4">
-<audio-delay></audio-delay>
-<audio-gain></audio-gain>
+<audio-delay delay="0.00004"></audio-delay>
+<audio-gain gain="0.6"></audio-gain>
 
 </audio-series><audio-series silent-bypass label="band 5">
 <audio-channelSwap></audio-channelSwap>
-<audio-delay></audio-delay>
-<audio-gain></audio-gain>
+<audio-delay delay="0.00005"></audio-delay>
+<audio-gain gain="0.5"></audio-gain>
 
 </audio-series><audio-series silent-bypass label="band 6">
-<audio-delay></audio-delay>
-<audio-gain></audio-gain>
+<audio-delay delay="0.00006"></audio-delay>
+<audio-gain gain="0.4"></audio-gain>
 
 </audio-series><audio-series silent-bypass label="band 7">
 <audio-channelSwap></audio-channelSwap>
-<audio-delay></audio-delay>
-<audio-gain></audio-gain>
+<audio-delay delay="0.00007"></audio-delay>
+<audio-gain gain="0.4"></audio-gain>
 
 </audio-series><audio-series silent-bypass label="band 8">
-<audio-delay></audio-delay>
-<audio-gain></audio-gain>
+<audio-delay delay="0.00008"></audio-delay>
+<audio-gain gain="0.2"></audio-gain>
 
 </audio-series>
 </audio-parallel>
@@ -81,7 +82,7 @@ function="sin(t)"></audio-parameter>
 </audio-series>
 </audio-context>
 
-<script>
+<!--<script>
 document.querySelector("#delay").addEventListener("change", e => {
 const value = e.target.value;
 
@@ -90,14 +91,17 @@ document.querySelectorAll("audio-delay").forEach((delay, i) => delay.setAttribut
 
 document.querySelector("#delay").dispatchEvent(new Event("change"));
 
-document.querySelectorAll ("audio-parallel gain")
-.forEach ((g, i) => 
-g.setAttribute("gain", (isEven(i)? -1 : 1) * (0.9-i)));
+document.querySelectorAll ("audio-parallel audio-gain")
+.forEach ((g, i) => {
+const gain = 0.9 - .1*i;
+g.setAttribute("gain", isEven(i)? -1*gain :gain);
+});
 
-function isEven(n) {return n%2 === 0);}
+function isEven(n) {return n%2 === 0;}
 function isOdd(n) {return !isEven(n);}
 
 </script>
+-->
 
 </body>
 </html>
