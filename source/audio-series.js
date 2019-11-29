@@ -10,7 +10,7 @@ return html`
 <fieldset class="audio-series">
 <legend><h2>[[label]]</h2></legend>
 <ui-boolean label="bypass" value="{{bypass}}"></ui-boolean>
-<ui-number label="mix" value="{{mix}}" min="-1" max="1" step=".1"></ui-number>
+<ui-number label="mix" value="{{mix}}" min="-1.0" max="1.0" step="0.1"></ui-number>
 </fieldset>
 <slot></slot>
 `; // html

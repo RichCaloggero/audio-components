@@ -24,6 +24,7 @@ const elementList = [
 "./audio-panner.js",
 "./audio-equalizer.js",
 "./audio-resonance.js",
+"./audio-xtc.js",
 
 // automation
 "./audio-control.js",

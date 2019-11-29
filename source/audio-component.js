@@ -131,6 +131,8 @@ if (last.output) {
 last.output.connect(this.wet);
 console.log(`- connected ${last.name} to ${this.name} wet`);
 } // if
+
+this.components = components;
 } // constructor
 } // class Series
 
@@ -153,6 +155,7 @@ console.log(`- connecting ${c.name} to ${this.name}.wet`);
 }); // forEach
 
 this.output.gain.value = 1 / components.length;
+this.components = components;
 } // constructor
 } // class Parallel
 
@@ -194,18 +197,24 @@ this.compressor.connect(this.wet);
 } // class Compressor
 
 export class Filter extends AudioComponent {
-constructor (audio) {
+constructor (audio, type = "lowpass", frequency = 300, q = 1.0, gain = 1.0, detune = 0.0) {
 super (audio, "filter");
 this.filter = this.audio.createBiquadFilter();
+this.filter.type = type;
+this.filter.frequency.value = frequency;
+this.filter.Q.value = q;
+this.filter.gain.value = gain;
+this.filter.detune.value = detune;
 this.input.connect(this.filter);
 this.filter.connect(this.wet);
 } // constructor
 } // class Filter
 
 export class Delay extends AudioComponent {
-constructor (audio) {
+constructor (audio, delay = 0.00001) {
 super(audio, "delay");
 this.delay = audio.createDelay();
+this.delay.delayTime.value = delay;
 this.input.connect(this.delay);
 this.delay.connect(this.wet);
 } // constructor
@@ -287,6 +296,16 @@ this.panner.setOrientation(0, 0, 0);
 audio.listener.setOrientation(0,0,-1,0,1,0);
 } // constructor
 } // class Panner
+
+export class Gain extends AudioComponent {
+constructor (audio, _gain = 1.0) {
+super (audio, "gain");
+this.gain = audio.createGain();
+this.gain.gain.value = _gain;
+this.input.connect(this.gain);
+this.gain.connect(this.wet);
+} // constructor
+} // class Gain
 
 export class Binaural extends AudioComponent {
 constructor (audio) {
@@ -377,41 +396,60 @@ this.filterComponent.connect(this.output);
 } // parallel
 } // class Phaser
 
-export class Xtc extends AudioComponent {
-constructor (audio) {
-super (audio);
-const s = audio.createChannelSplitter(2);
-const m = audio.createChannelMerger(2);
-this.filter = audio.createBiquadFilter();
-this.filter.type = "bandpass";
-this.leftDelay = audio.createDelay(), this.rightDelay = audio.createDelay();
-const left = audio.createGain(), right = audio.createGain();
-left.gain.value = right.gain.value = -1;
-this.feedback = audio.createGain();
-this.feedback.gain.value = 0;
+export class XTC extends AudioComponent {
+ constructor (audio, bandCount = 8, delay = 0.00001) {
+super (audio, "xtc");
+this.xtc = new Series(audio, [
+new Series(audio, [
+createFilter("bandpass", 1200, 0.0003),
+createBands(bandCount, delay),
+]), // inner series
+createFilter("lowshelf", 200, 1.0, 4.0),
+createGain(2.5)
+]); // outer series
 
-this.input.connect(this.filter).connect(s);
-s.connect(left, 0).connect(this.leftDelay).connect(m, 0,1);
-s.connect(right, 1).connect(this.rightDelay).connect(m, 0,0);
-m.connect(this.wet);
-m.connect(this.feedback).connect(s);
+this.input.connect(this.xtc.input);
+this.xtc.output.connect(this.wet);
+
+function createBands (count) {
+const p = [];
+for (let i=0; i<count; i++) p[i] = createBand(i);
+return new Parallel(audio, p);
+} // createBands
+
+function createBand (index) {
+const d = delay * (index+1);
+const g = 0.9 - .1*index;
+const s = [];
+if (isEven(index)) s.push(new ChannelSwap(audio));
+s.push(createDelay(d));
+s.push(createGain(isEven(index)? -g : g));
+console.debug (`XTC band ${index}: ${s.length === 3}, ${d}, ${g}`);
+const band = new Series(audio, s);
+band.silentBypass(true);
+return band;
+
+function isEven (n= 0) {return n%2 === 0;}
+} // createBand
+
+function createGain (gain) {return new Gain(audio, gain);}
+
+function createDelay (delay) {return new Delay(audio, delay);}
+
+function createFilter (type, frequency, q, gain) {return new Filter(audio, type, frequency, q, gain);}
 } // constructor
 
-setFilter (frequency, q) {
-this.filter.frequency.value = frequency;
-this.filter.Q.value = q;
-return this;
-} // setFilter
+bands () {return this.xtc.components[0].components[1].components;}
 
-setFeedback (value) {
-this.feedback.gain.value = value;
-return this;
-} // setFeedback
+delays() {
+return this.bands().map(band =>
+band.components.length === 3? band.components[1] : band.components[0]);
+} // delays
 
-setDelay (value) {
-this.leftDelay.delay.value = this.rightDelay.delay.value = value;
-return this;
-} // setDelay
+setDelays (delay) {
+this.delays.forEach((d, i) => d.delay.delayTime = delay * (i+1));
+} // setDelays
+
 } // class Xtc
 
 export class ChannelSwap extends AudioComponent {
