@@ -1,3 +1,4 @@
+import {statusMessage} from "./audio-context.js";
 export class AudioComponent {
 constructor (audio, name) {
 //console.debug("audioComponent: instantiating ", name);
@@ -300,9 +301,8 @@ audio.listener.setOrientation(0,0,-1,0,1,0);
 export class Gain extends AudioComponent {
 constructor (audio, _gain = 1.0) {
 super (audio, "gain");
-this.gain = audio.createGain();
+this.gain = this.input;
 this.gain.gain.value = _gain;
-this.input.connect(this.gain);
 this.gain.connect(this.wet);
 } // constructor
 } // class Gain
@@ -411,6 +411,11 @@ createGain(2.5)
 this.input.connect(this.xtc.input);
 this.xtc.output.connect(this.wet);
 
+this.widener = this.xtc.components[0];
+this.bassBoost = this.xtc.components[1];
+this.makeupGain = this.xtc.components[2];
+this.mix = this.widener.mix.bind(this.widener);
+
 function createBands (count) {
 const p = [];
 for (let i=0; i<count; i++) p[i] = createBand(i);
@@ -419,12 +424,15 @@ return new Parallel(audio, p);
 
 function createBand (index) {
 const d = delay * (index+1);
-const g = 0.9 - .1*index;
-const s = [];
-if (isEven(index)) s.push(new ChannelSwap(audio));
+
+// alternate bands switch their stereo orientation and phase
+const g = (isEven(index)? -1 : 1) * (0.9 - .1*index);
+const s = isEven(index)? [new ChannelSwap(audio)] : [];
+
 s.push(createDelay(d));
-s.push(createGain(isEven(index)? -g : g));
+s.push(createGain(g));
 console.debug (`XTC band ${index}: ${s.length === 3}, ${d}, ${g}`);
+
 const band = new Series(audio, s);
 band.silentBypass(true);
 return band;

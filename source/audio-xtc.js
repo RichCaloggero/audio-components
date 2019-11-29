@@ -29,8 +29,6 @@ super ();
 instanceCount += 1;
 this._id = "audio-xtc" + instanceCount;
 this.component = new XTC(this.audio);
-//window.xtc = this.component;
-
 } // constructor
 
 connectedCallback () {
