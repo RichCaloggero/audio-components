@@ -33,6 +33,7 @@ this.component = new XTC(this.audio);
 
 connectedCallback () {
 super.connectedCallback ();
+this.mix = 0.6;
 signalReady(this);
 } // connectedCallback
 
