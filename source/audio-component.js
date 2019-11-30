@@ -1,9 +1,20 @@
 import {statusMessage} from "./audio-context.js";
+
+const registry = {};
+function registerComponent (name, parent) {
+const value = registry[name];
+if (! value) registry[name] = 1;
+else registry[name] += 1;
+return `${parent? parent.id + "." : ""}${name}-${registry[name]}`;
+} // registerComponent
+
 export class AudioComponent {
-constructor (audio, name) {
+constructor (audio, name, parent) {
 //console.debug("audioComponent: instantiating ", name);
 this.audio = audio;
 this.name = name;
+this.parent = parent;
+this.cid = registerComponent(this.name, this.parent);
 this._silentBypass = false;
 
 this.input = audio.createGain();
@@ -212,8 +223,8 @@ this.filter.connect(this.wet);
 } // class Filter
 
 export class Delay extends AudioComponent {
-constructor (audio, delay = 0.00001) {
-super(audio, "delay");
+constructor (audio, delay = 0.00001, parent) {
+super(audio, "delay", parent);
 this.delay = audio.createDelay();
 this.delay.delayTime.value = delay;
 this.input.connect(this.delay);
@@ -299,8 +310,8 @@ audio.listener.setOrientation(0,0,-1,0,1,0);
 } // class Panner
 
 export class Gain extends AudioComponent {
-constructor (audio, _gain = 1.0) {
-super (audio, "gain");
+constructor (audio, _gain = 1.0, parent) {
+super (audio, "gain", parent);
 this.gain = this.input;
 this.gain.gain.value = _gain;
 this.gain.connect(this.wet);

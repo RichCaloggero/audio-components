@@ -1,7 +1,7 @@
 <!doctype html>
 <head>
 <meta charset="utf-8">
-<title>Fun with Filters</title>
+<title>XTC Test</title>
 <!--<script src="./resonance-audio.min.js" crossorigin="anonymous"></script>-->
 <script src="loader.js"></script>
 </head>
@@ -17,56 +17,47 @@
 
 <audio-context hide="bypass" label="Fun with Filters" shortcuts="enableAutomation alt shift r">
 <audio-series>
-<audio-player label="player" shortcuts="src alt shift u" src="media/If I Loved You.mp3"></audio-player>
+<audio-player label="player" shortcuts="src alt shift u" src="media/smooth sailing.mp3"></audio-player>
 
-<audio-control>
-<audio-panner bypass label="panner" maxDistance="1" refDistance="1" rolloffFactor="1"></audio-panner>
-
-<audio-parameter label="control panner" name="x"
-function="cos(t)"></audio-parameter>
-
-<audio-parameter label="control panner" name="z"
-function="sin(t)"></audio-parameter>
-</audio-control>
 
 <audio-series label="master"  hide="mix" shortcuts="bypass shift alt m">
-<audio-series label="widener" mix="0.4">
+<audio-series label="widener" hide="bypass" mix="0.6">
 <audio-filter type="bandpass" frequency="1200" q="0.0003"></audio-filter>
 
 <audio-parallel>
-<audio-series silent-bypass label="band 1">
+<audio-series silent-bypass label="band 1" hide="mix">
 <audio-channelSwap></audio-channelSwap>
 <audio-delay delay=".00001"></audio-delay>
-<audio-gain gain="0.9"></audio-gain>
+<audio-gain gain="-0.9"></audio-gain>
 
-</audio-series><audio-series silent-bypass label="band 2">
+</audio-series><audio-series silent-bypass label="band 2" hide="mix">
 <audio-delay delay="0.00002"></audio-delay>
 <audio-gain gain="0.8"></audio-gain>
 
-</audio-series><audio-series silent-bypass label="band 3">
+</audio-series><audio-series silent-bypass label="band 3" hide="mix">
 <audio-channelSwap></audio-channelSwap>
 <audio-delay delay="0.00003"></audio-delay>
-<audio-gain gain="0.7"></audio-gain>
+<audio-gain gain="-0.7"></audio-gain>
 
-</audio-series><audio-series silent-bypass label="band 4">
+</audio-series><audio-series silent-bypass label="band 4" hide="mix">
 <audio-delay delay="0.00004"></audio-delay>
 <audio-gain gain="0.6"></audio-gain>
 
-</audio-series><audio-series silent-bypass label="band 5">
+</audio-series><audio-series silent-bypass label="band 5" hide="mix">
 <audio-channelSwap></audio-channelSwap>
 <audio-delay delay="0.00005"></audio-delay>
-<audio-gain gain="0.5"></audio-gain>
+<audio-gain gain="-0.5"></audio-gain>
 
-</audio-series><audio-series silent-bypass label="band 6">
+</audio-series><audio-series silent-bypass label="band 6" hide="mix">
 <audio-delay delay="0.00006"></audio-delay>
 <audio-gain gain="0.4"></audio-gain>
 
-</audio-series><audio-series silent-bypass label="band 7">
+</audio-series><audio-series silent-bypass label="band 7" hide="mix">
 <audio-channelSwap></audio-channelSwap>
 <audio-delay delay="0.00007"></audio-delay>
-<audio-gain gain="0.4"></audio-gain>
+<audio-gain gain="-0.3"></audio-gain>
 
-</audio-series><audio-series silent-bypass label="band 8">
+</audio-series><audio-series silent-bypass label="band 8" hide="mix">
 <audio-delay delay="0.00008"></audio-delay>
 <audio-gain gain="0.2"></audio-gain>
 
@@ -74,8 +65,8 @@ function="sin(t)"></audio-parameter>
 </audio-parallel>
 </audio-series>
 
-<audio-filter label="bass boost" type="lowshelf" gain="2" hide="type, detune, q, mix"></audio-filter>
-<audio-gain label="master volume" shortcuts="gain alt shift v" max="5"></audio-gain>
+<audio-filter label="bass boost" type="lowshelf" frequency="200" gain="4" hide="type, detune, q, mix"></audio-filter>
+<audio-gain label="master volume" shortcuts="gain alt shift v" gain="2.7" max="5"></audio-gain>
 </audio-series>
 
 <audio-destination></audio-destination>

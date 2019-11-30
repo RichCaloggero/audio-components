@@ -9,6 +9,18 @@ export const audio = new AudioContext();
 const automationInterval = 50; // milliseconds
 let automationQueue = [];
 let automation = null; // value returned from setInterval
+const iMap = new Map();
+function doIfInitialized(element, method, value) {
+if (element.component) {
+element.component[method](value);
+return;
+} // if
+
+const queue = iMap.has(element)? iMap.get(element) : [];
+queue.push({method: method, value: value});
+iMap.set(element, queue);
+//console.debug(`defering ${element.id}.${method}...`);
+} // doIfInitialized
 
 export class _AudioContext_ extends PolymerElement {
 static get template () {
@@ -115,6 +127,8 @@ this.hideControls();
 
 // when this.shadowRoot becomes set for the first time, store it since it will be shadow root of the audio-context itself
 if (!shadowRoot) shadowRoot = this.shadowRoot;
+
+//this.mix = this.getAttribute("mix");
 } // connectedCallback
 
 listenerXChanged (value) {this.audio.listener.setPosition(this.listenerX, this.listenerY, this.listenerZ);}
@@ -175,23 +189,9 @@ return controls;
 } // uiControls
 
 
-_mix (value) {
-//console.debug(`_mix: ${this.id} ${value}`);
-if (this.component) {
-this.component.mix(value);
-//console.debug(`- ${value}`);
-} // if
-} // _mix
-
-_bypass (value) {
-//console.debug(`_bypass: ${this.id}`);
-if (this.component) {
-this.component.bypass(value);
-//console.debug(`- ${value}`);
-} // if
-} // bypass
-
-_silentBypass (value) {if (this.component) this.component.silentBypass(value);}
+_mix (value) {doIfInitialized(this, "mix", value);}
+_bypass (value) {doIfInitialized(this, "bypass", value);}
+_silentBypass (value) {doIfInitialized(this, "silentBypass", value);}
 
 components (elements) {
 return elements.map(e => {
@@ -288,6 +288,13 @@ if (element && element instanceof _AudioContext_) {
 element._ready = true;
 element.dispatchEvent(new CustomEvent("elementReady"));
 //console.log(`signalReady dispatched on ${element.id}`);
+
+if (iMap.has(element)) {
+iMap.get(element)
+.forEach(item => element.component[item.method](item.value));
+iMap.delete(element);
+} // if
+
 } else {
 console.log(`signalReady: ${element} invalid`);
 return;
