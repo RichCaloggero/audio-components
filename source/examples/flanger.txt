@@ -1,0 +1,22 @@
+<audio-context label="flanger"><audio-series>
+<audio-player src="https://dl.dropboxusercontent.com/u/8529048/slow%20down%20jack.mp3"></audio-player>
+
+<audio-parallel><audio-series>
+<audio-gain></audio-gain>
+
+</audio-series><audio-series>
+
+<audio-split><audio-series>
+<audio-delay label="left delay">
+<audio-control parameter="delayTime" value=".001 * abs(sin(t)) + .0001"></audio-control>
+</audio-delay>
+</audio-series><audio-series>
+<audio-delay label="right delay">
+<audio-control parameter="delayTime" value=".001 * abs(cos(t)) + .0001"></audio-control>
+</audio-delay>
+</audio-series></audio-split>
+
+</audio-series></audio-parallel>
+
+<audio-destination></audio-destination>
+</audio-series></audio-context>

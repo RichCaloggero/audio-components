@@ -1,82 +1,98 @@
 <!doctype html>
 <head>
 <meta charset="utf-8">
-<title>Fun with Filters</title>
-<script src="./resonance-audio.min.js" crossorigin="anonymous"></script>
-
-<script src="./ui-number.js" type="module" crossorigin="anonymous"></script>
-<script src="./ui-text.js" type="module" crossorigin="anonymous"></script>
-<script src="./ui-list.js" type="module" crossorigin="anonymous"></script>
-<script src="./ui-boolean.js" type="module" crossorigin="anonymous"></script>
-<!--<script src="./ui-position.js" type="module" crossorigin="anonymous"></script>-->
-
-<script src="./audio-context.js" type="module" crossorigin="anonymous"></script>
-<script src="./audio-series.js" type="module" crossorigin="anonymous"></script>
-<script src="./audio-split.js" type="module" crossorigin="anonymous"></script>
-<script src="./audio-parallel.js" type="module" crossorigin="anonymous"></script>
-
-<script src="./audio-player.js" type="module" crossorigin="anonymous"></script>
-<script src="./audio-destination.js" type="module" crossorigin="anonymous"></script>
-
-<script src="./audio-gain.js" type="module" crossorigin="anonymous"></script>
-<script src="./audio-filter.js" type="module" crossorigin="anonymous"></script>
-<script src="./audio-delay.js" type="module" crossorigin="anonymous"></script>
-<script src="./audio-convolver.js" type="module" crossorigin="anonymous"></script>
-<script src="./audio-compressor.js" type="module" crossorigin="anonymous"></script>
-<script src="./audio-panner.js" type="module" crossorigin="anonymous"></script>
-<script src="./audio-equalizer.js" type="module" crossorigin="anonymous"></script>
-<script src="./audio-resonance.js" type="module" crossorigin="anonymous"></script>
-
-<script src="./audio-control.js" type="module" crossorigin="anonymous"></script>
-<script src="./audio-parameter.js" type="module" crossorigin="anonymous"></script>
+<title>XTC Test</title>
+<!--<script src="./resonance-audio.min.js" crossorigin="anonymous"></script>-->
+<script src="loader.js"></script>
 </head>
 <body>
-<audio-context label="test"><audio-series>
-<audio-player label="player" src="media/01 - 11 - Jerry Garcia - GarciaLive Volume 6_ 24 bit - LIKE A ROAD.flac"></audio-player>
 
-<audio-series label="master" hide="mix" shortcuts="bypass shift alt m">
-<audio-control>
-<audio-panner bypass label="panner" rolloffFactor="1" shortcuts="bypass alt shift p, distanceModel alt shift d"></audio-panner>
-<audio-parameter label="controling x" name="x" function="cos(t/2)"></audio-parameter>
-<audio-parameter label="controling z" name="z" function="sin(t/2)"></audio-parameter>
-</audio-control>
-
-
-<audio-series label="splitter block" hide="">
-<audio-split swapOutputs>
-<audio-control>
-<audio-filter label="left filter" type="allpass" frequency="1660.0" q="1"
-hide="detune, gain, mix"></audio-filter>
-
-<audio-parameter label="controling left filter q" name="q"></audio-parameter>
-<audio-parameter label="controling left filter frequency" name="frequency"
-function="1000 + 700 * cos(t/3)"></audio-parameter>
-</audio-control>
-
-<audio-series><audio-control>
-<audio-delay bypass label="delay" mix="1" delay="0.00096"></audio-delay>
-<audio-parameter label="controling delay time" name="delay"></audio-parameter>
-</audio-control><audio-control>
-<audio-filter label="right filter" type="allpass" frequency="714" q="1.0"
-hide="detune, gain, mix"></audio-filter>
-
-<audio-parameter label="controling right filter frequency" name="frequency"
-function="80 + 700 * abs(sin(t/6 + .2))"></audio-parameter>
-</audio-control></audio-series>
-</audio-split>
-</audio-series>
-
-<!--<audio-resonance label="Resonance Audio"></audio-resonance>
+<!--<fieldset><legend><h2>Set Delays</h2></legend>
+<label>Delay: </label>
+<input type="range" id="delay" value="0.00001" min="0.00001" max="0.09" step="0.00001">
+</label>
+</fieldset>
 -->
 
-<audio-convolver bypass label="reverb" mix="0.5" path="./impulses" impulse="Going Home"></audio-convolver>
 
-<audio-compressor bypass shortcuts="bypass alt shift c" label="compressor" ratio="4" threshold="-20"></audio-compressor>
+<audio-context hide="bypass" label="Fun with Filters" shortcuts="enableAutomation alt shift r">
+<audio-series>
+<audio-player label="player" shortcuts="src alt shift u" src="media/smooth sailing.mp3"></audio-player>
 
-<audio-gain label="output volume"></audio-gain>
+
+<audio-series label="master"  hide="mix" shortcuts="bypass shift alt m">
+<audio-series label="widener" hide="bypass" mix="0.6">
+<audio-filter type="bandpass" frequency="1200" q="0.0003"></audio-filter>
+
+<audio-parallel>
+<audio-series silent-bypass label="band 1" hide="mix">
+<audio-channelSwap></audio-channelSwap>
+<audio-delay delay=".00001"></audio-delay>
+<audio-gain gain="-0.9"></audio-gain>
+
+</audio-series><audio-series silent-bypass label="band 2" hide="mix">
+<audio-delay delay="0.00002"></audio-delay>
+<audio-gain gain="0.8"></audio-gain>
+
+</audio-series><audio-series silent-bypass label="band 3" hide="mix">
+<audio-channelSwap></audio-channelSwap>
+<audio-delay delay="0.00003"></audio-delay>
+<audio-gain gain="-0.7"></audio-gain>
+
+</audio-series><audio-series silent-bypass label="band 4" hide="mix">
+<audio-delay delay="0.00004"></audio-delay>
+<audio-gain gain="0.6"></audio-gain>
+
+</audio-series><audio-series silent-bypass label="band 5" hide="mix">
+<audio-channelSwap></audio-channelSwap>
+<audio-delay delay="0.00005"></audio-delay>
+<audio-gain gain="-0.5"></audio-gain>
+
+</audio-series><audio-series silent-bypass label="band 6" hide="mix">
+<audio-delay delay="0.00006"></audio-delay>
+<audio-gain gain="0.4"></audio-gain>
+
+</audio-series><audio-series silent-bypass label="band 7" hide="mix">
+<audio-channelSwap></audio-channelSwap>
+<audio-delay delay="0.00007"></audio-delay>
+<audio-gain gain="-0.3"></audio-gain>
+
+</audio-series><audio-series silent-bypass label="band 8" hide="mix">
+<audio-delay delay="0.00008"></audio-delay>
+<audio-gain gain="0.2"></audio-gain>
+
+</audio-series>
+</audio-parallel>
+</audio-series>
+
+<audio-filter label="bass boost" type="lowshelf" frequency="200" gain="4" hide="type, detune, q, mix"></audio-filter>
+<audio-gain label="master volume" shortcuts="gain alt shift v" gain="2.7" max="5"></audio-gain>
 </audio-series>
 
 <audio-destination></audio-destination>
-</audio-series></audio-context>
+</audio-series>
+</audio-context>
+
+<!--<script>
+document.querySelector("#delay").addEventListener("change", e => {
+const value = e.target.value;
+
+document.querySelectorAll("audio-delay").forEach((delay, i) => delay.setAttribute("delay", (i+1)*value));
+});
+
+document.querySelector("#delay").dispatchEvent(new Event("change"));
+
+document.querySelectorAll ("audio-parallel audio-gain")
+.forEach ((g, i) => {
+const gain = 0.9 - .1*i;
+g.setAttribute("gain", isEven(i)? -1*gain :gain);
+});
+
+function isEven(n) {return n%2 === 0;}
+function isOdd(n) {return !isEven(n);}
+
+</script>
+-->
+
 </body>
 </html>

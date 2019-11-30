@@ -1,7 +1,7 @@
-<audio-context label="Fun with Filters"><audio-series>
+<audio-context label="test"><audio-series>
 <audio-player label="player" src="media/01 - 11 - Jerry Garcia - GarciaLive Volume 6_ 24 bit - LIKE A ROAD.flac"></audio-player>
 
-<audio-series label="master" hide="mix" shortcuts="bypass alt shift m">
+<audio-series label="master" hide="mix" shortcuts="bypass shift alt m">
 <audio-control>
 <audio-panner bypass label="panner" rolloffFactor="1" shortcuts="bypass alt shift p, distanceModel alt shift d"></audio-panner>
 <audio-parameter label="controling x" name="x" function="cos(t/2)"></audio-parameter>

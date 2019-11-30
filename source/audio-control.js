@@ -90,27 +90,17 @@ function compileFunction (text, parameter) {
 try {
 return new Function (parameter,
 `with (Math) {
+function  toRange (x, a,b) {return (Math.abs(a-b) * (x+1)/2) + a;}
+function s (x, l=-1.0, u=1.0) {return toRange(Math.sin(x), l,u);}
+function c (x, l=-1.0, u=1.0) {return toRange(Math.cos(x), l,u);}
 return ${text};
-}`);
+} // Math
+`);
 
 } catch (e) {
 alert (e);
 return null;
-
-
-/// user functions
-
-function  toRange (a, b, x) {
-return (a-b) * x + a;
-} // toRange
-
-function  s  (x) {return math.sin(x)/2 + 1;}
-function c (x) {return Math.cos(x)/2 + 1;}
-
-function leftFrequency (t) {return toRange(300, 1700, c(t/3));}
-function rightFrequency (t) {return toRange(80, 780, c(t/3));}
 } // try
-
 } // compileFunction
 
 export function updateParameter (controller, _name, _text) {
@@ -124,7 +114,6 @@ parameter.text = _text;
 
 if (parameter.text) {
 parameter.function = compileFunction(parameter.text, "t");
-
 if (parameter.function) {
 parameter.function.bind(controller.target);
 } else {

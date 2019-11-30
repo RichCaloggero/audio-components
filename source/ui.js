@@ -31,7 +31,7 @@ defineKey(value, this.uiElement);
 
 handleSpecialKeys (e) {
 const key = e.key;
-if (isModifierKey(key)) return false;
+if (isModifierKey(key)) return true;
 if (handleUserKey(e)) return false;
 
 const input = e.target;
@@ -53,7 +53,8 @@ break;
 default: return true;
 } // switch
 
-return false;
+return false;alert("false man");
+
 } // handleSpecialKeys
 
 

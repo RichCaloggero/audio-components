@@ -1,0 +1,134 @@
+<!doctype html>
+<head>
+<meta charset="utf-8">
+<title>Fun with Filters</title>
+<!--<script src="./resonance-audio.min.js" crossorigin="anonymous"></script>-->
+<script src="loader.js"></script>
+</head>
+<body>
+<audio-context hide="bypass" label="filt" shortcuts="enableAutomation alt shift r">
+<audio-series>
+<audio-player label="player" shortcuts="src alt shift u" src="media/uno momento.mp3"></audio-player>
+
+<audio-series label="master"  mix=".4" shortcuts="bypass shift alt m">
+<audio-filter type="highpass" frequency="160" q="0.01"></audio-filter>
+
+<audio-control>
+<audio-delay label="delay" delay="0"></audio-delay>
+<audio-parameter label="control delay time" name="delay"
+function="c(t, 0,.00076)"></audio-parameter>
+</audio-control>
+
+<audio-parallel>
+
+<audio-control>
+<audio-filter silent-bypass label="band 1" type="bandpass" hide="detune"
+frequency="160"
+q="0.075"></audio-filter>
+
+<audio-parameter label="control band 1 q" name="q"
+function="s(0.1*t + 0.3, .04, 1)"></audio-parameter>
+</audio-control>
+
+<audio-control>
+<audio-filter silent-bypass label="band 2" type="bandpass" hide="detune"
+frequency="320"
+q="0.075"></audio-filter>
+
+<audio-parameter label="control band 2 q" name="q"
+function="s(0.2*t + 0.6, .04, 1)"></audio-parameter>
+</audio-control>
+
+<audio-control>
+<audio-filter silent-bypass label="band 3" type="bandpass" hide="detune"
+frequency="640"
+q="0.075"></audio-filter>
+
+<audio-parameter label="control band 3 q" name="q"
+function="s(0.30000000000000004*t + 0.8999999999999999, .04, 1)"></audio-parameter>
+</audio-control>
+
+<audio-control>
+<audio-filter silent-bypass label="band 4" type="bandpass" hide="detune"
+frequency="1280"
+q="0.075"></audio-filter>
+
+<audio-parameter label="control band 4 q" name="q"
+function="s(0.4*t + 1.2, .04, 1)"></audio-parameter>
+</audio-control>
+
+<audio-control>
+<audio-filter silent-bypass label="band 5" type="bandpass" hide="detune"
+frequency="2560"
+q="0.075"></audio-filter>
+
+<audio-parameter label="control band 5 q" name="q"
+function="s(0.5*t + 1.5, .04, 1)"></audio-parameter>
+</audio-control>
+
+<audio-control>
+<audio-filter silent-bypass label="band 6" type="bandpass" hide="detune"
+frequency="5120"
+q="0.075"></audio-filter>
+
+<audio-parameter label="control band 6 q" name="q"
+function="s(0.6000000000000001*t + 1.7999999999999998, .04, 1)"></audio-parameter>
+</audio-control>
+
+<audio-control>
+<audio-filter silent-bypass label="band 7" type="bandpass" hide="detune"
+frequency="10240"
+q="0.075"></audio-filter>
+
+<audio-parameter label="control band 7 q" name="q"
+function="s(0.7000000000000001*t + 2.1, .04, 1)"></audio-parameter>
+</audio-control>
+</audio-parallel>
+
+
+<audio-split  swap-inputs>
+<audio-gain></audio-gain>
+<audio-gain></audio-gain>
+</audio-split>
+
+<audio-gain label="master volume" shortcuts="gain alt shift v" max="5"></audio-gain>
+</audio-series>
+
+<audio-destination></audio-destination>
+</audio-series>
+</audio-context>
+
+<div id="set" aria-label="set all" role="region">
+<label>Bypass: <input type="checkbox" id="bypass"></label>
+<label for="q">q:</label> <input type="number" id="q" min="0.0001" max="100" step=".0001">
+<label>type: <input type="text" id="type"></label>
+<br><label>function: <input type="text" id="function"></label>
+</div>
+
+<script>
+const q = document.querySelector("#set #q");
+const type = document.querySelector("#set #type");
+
+document.querySelector("#set").addEventListener("change", setAll);
+
+function setAll (e) {
+const attr = e.target.id;
+const value = e.target.value;
+const filters = document.querySelectorAll("audio-parallel audio-filter");
+
+filters.forEach(f => {
+if (attr === "function") f = f.nextElementSibling;
+
+if (attr === "bypass") {
+if (e.target.checked) f.setAttribute("bypass", true);
+else f.removeAttribute("bypass");
+} else {
+f.setAttribute(attr, value)
+} // if
+});
+} // setAll
+
+</script>
+
+</body>
+</html>

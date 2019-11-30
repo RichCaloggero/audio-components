@@ -9,13 +9,25 @@ export const audio = new AudioContext();
 const automationInterval = 50; // milliseconds
 let automationQueue = [];
 let automation = null; // value returned from setInterval
+const iMap = new Map();
+function doIfInitialized(element, method, value) {
+if (element.component) {
+element.component[method](value);
+return;
+} // if
+
+const queue = iMap.has(element)? iMap.get(element) : [];
+queue.push({method: method, value: value});
+iMap.set(element, queue);
+//console.debug(`defering ${element.id}.${method}...`);
+} // doIfInitialized
 
 export class _AudioContext_ extends PolymerElement {
 static get template () {
 return html`
-<div class="audio-context">
-<h1>[[label]]</h1>
-<ui-boolean label="enable automation" value="{{enableAutomation}}"></ui-boolean>
+<fieldset class="audio-context">
+<legend><h1>[[label]]</h1></legend>
+<ui-boolean label="enable automation" value="{{enableAutomation}}" shortcut="alt shift r"></ui-boolean>
 <ui-boolean label="showListener" value="{{showListener}}"></ui-boolean>
 
 <fieldset hidden id="listener">
@@ -23,12 +35,19 @@ return html`
 <ui-number label="x" value="{{listenerX}}"></ui-number>
 <ui-number label="y" value="{{listenerY}}"></ui-number>
 <ui-number label="z" value="{{listenerZ}}"></ui-number>
-<ui-text label="orientation" value="{{listenerOrientation}}"></ui-text>
+
+<ui-number label="forwardX" value="{{forwardX}}"></ui-number>
+<ui-number label="forwardY" value="{{forwardY}}"></ui-number>
+<ui-number label="forwardZ" value="{{forwardZ}}"></ui-number>
+
+<ui-number label="upX" value="{{upX}}"></ui-number>
+<ui-number label="upY" value="{{upY}}"></ui-number>
+<ui-number label="upZ" value="{{upZ}}"></ui-number>
 </fieldset>
 
-<div role="dialog" hidden id="defineKeyDialog" aria-labelledby="dialog-title">
+<div role="dialog" hidden id="defineKeyDialog" aria-labelledby="defineKeyDialog-title">
 <header>
-<h2 id="dialog-title">Define Key</h2>
+<h2 id="defineKeyDialog-title">Define Key</h2>
 <button class="close">Close</button>
 </header>
 
@@ -41,10 +60,9 @@ return html`
 </div><!-- .body -->
 </div><!-- dialog -->
 
-</fieldset>
 
 <div role="region" aria-label="status" id="statusMessage" aria-live="polite"></div>
-</div>
+</fieldset><!-- audio context region -->
 
 <slot></slot>
 `; // html
@@ -58,10 +76,23 @@ hide: String,
 label: String,
 mix: {type: Number, notify: true, observer: "_mix"},
 bypass: {type: Boolean, notify: true, observer: "_bypass"},
+"silent-bypass": {type: Boolean, notify: true, observer: "_silentBypass"},
 enableAutomation: {type: Boolean, value: false, notify: true, observer: "_enableAutomation"}, // enableAutomation
 showListener: {type: Boolean, value: false, notify: true, observer: "_showListener"},
 id: {type: String, notify:true, observer: "setId"}	,
 shortcuts: {type: String, notify:true, observer: "shortcutsChanged"},
+
+listenerX: {type: Number, value: 0, notify: true, observer: "listenerXChanged"},
+listenerY: {type: Number, value: 0, notify: true, observer: "listenerYChanged"},
+listenerZ: {type: Number, value: 0, notify: true, observer: "listenerZChanged"},
+
+forwardX: {type: Number, value: 0, notify: true, observer: "forwardXChanged"},
+forwardY: {type: Number, value: 0, notify: true, observer: "forwardYChanged"},
+forwardZ: {type: Number, value: 0, notify: true, observer: "forwardZChanged"},
+
+upX: {type: Number, value: 0, notify: true, observer: "upXChanged"},
+upY: {type: Number, value: 0, notify: true, observer: "upYChanged"},
+upZ: {type: Number, value: 0, notify: true, observer: "upZChanged"},
 }; // return
 } // get properties
 
@@ -96,7 +127,21 @@ this.hideControls();
 
 // when this.shadowRoot becomes set for the first time, store it since it will be shadow root of the audio-context itself
 if (!shadowRoot) shadowRoot = this.shadowRoot;
+
+//this.mix = this.getAttribute("mix");
 } // connectedCallback
+
+listenerXChanged (value) {this.audio.listener.setPosition(this.listenerX, this.listenerY, this.listenerZ);}
+listenerYChanged (value) {this.audio.listener.setPosition(this.listenerX, this.listenerY, this.listenerZ);}
+listenerZChanged (value) {this.audio.listener.setPosition(this.listenerX, this.listenerY, this.listenerZ);}
+
+forwardXChanged (value) {this.audio.listener.setOrientation(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ);}
+forwardYChanged (value) {this.audio.listener.setOrientation(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ);}
+forwardZChanged (value) {this.audio.listener.setOrientation(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ);}
+
+upXChanged (value) {this.audio.listener.setOrientation(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ);}
+upYChanged (value) {this.audio.listener.setOrientation(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ);}
+upZChanged (value) {this.audio.listener.setOrientation(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ);}
 
 shortcutsChanged (value) {
 const root = this.shadowRoot;
@@ -137,27 +182,16 @@ if (name && hide.includes(name.trim().toLowerCase())) element.hidden = true;
 } // hideControls
 
 uiControls () {
-const selectors = "ui-text,ui-number,ui-boolean";
+const selectors = "ui-list,ui-text,ui-number,ui-boolean";
 const controls = Array.from(this.shadowRoot.querySelectorAll(selectors));
 //console.log(`${this.id}: controls ${controls.length} ${controls.map(x => x.name || x.label || x.id || x)}`);
 return controls;
 } // uiControls
 
-_mix (value) {
-//console.debug(`_mix: ${this.id} ${value}`);
-if (this.component) {
-this.component.mix(value);
-//console.debug(`- ${value}`);
-} // if
-} // _mix
 
-_bypass (value) {
-//console.debug(`_bypass: ${this.id}`);
-if (this.component) {
-this.component.bypass(value);
-//console.debug(`- ${value}`);
-} // if
-} // bypass
+_mix (value) {doIfInitialized(this, "mix", value);}
+_bypass (value) {doIfInitialized(this, "bypass", value);}
+_silentBypass (value) {doIfInitialized(this, "silentBypass", value);}
 
 components (elements) {
 return elements.map(e => {
@@ -254,6 +288,13 @@ if (element && element instanceof _AudioContext_) {
 element._ready = true;
 element.dispatchEvent(new CustomEvent("elementReady"));
 //console.log(`signalReady dispatched on ${element.id}`);
+
+if (iMap.has(element)) {
+iMap.get(element)
+.forEach(item => element.component[item.method](item.value));
+iMap.delete(element);
+} // if
+
 } else {
 console.log(`signalReady: ${element} invalid`);
 return;
