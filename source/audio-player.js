@@ -1,5 +1,8 @@
+/* bufferToWave: https://www.russellgood.com/how-to-convert-audiobuffer-to-audio-file/ */
+
+import {bufferToWave} from "./bufferToWave.js";
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {_AudioContext_, signalReady} from "./audio-context.js";
+import {_AudioContext_, signalReady, statusMessage, shadowRoot} from "./audio-context.js";
 import {AudioComponent} from "./audio-component.js";
 import {handleUserKey} from "./ui.js";
 
@@ -23,7 +26,7 @@ static get is() { return "audio-player"; }
 
 static get properties() {
 return {
-src: {type: String, notify: true, observer: "srcChanged"}
+src: {type: String, notify: true, observer: "srcChanged"},
 }; // return
 } // get properties
 
@@ -31,9 +34,15 @@ constructor () {
 super ();
 instanceCount += 1;
 this.id = `${AudioPlayer.is}-${instanceCount}`;
+
+if (this.offline) {
+this.audioSource = this.audio.createBufferSource();
+alert("offline...");
+} else {
 this.audioElement = document.createElement("audio");
 this.audioElement.setAttribute("crossorigin", "anonymous");
 this.audioSource = this.audio.createMediaElementSource (this.audioElement);
+} // if
 
 this.component = new AudioComponent(this.audio, "player");
 this.component.input = null;
@@ -47,14 +56,26 @@ signalReady(this);
 } // connectedCallback
 
 srcChanged (value) {
-if (value) this.audioElement.src = value;
+if (value) {
+if (this.offline) this.loadAudio(value);
+else this.audioElement.src = value;
+} // if
 } // srcChanged
 
 play (e) {
+if (this.offline) {
+this.render();
+return;
+} // if
+
 const player = this.audioElement;
 if (player.paused) {
-try {player.play();}
-catch (e) {alert (`audio-player: ${e}`);}
+try {
+player.play();
+
+} catch (e) {
+statusMessage(`audio-player: ${e}`);
+} // try
 e.target.textContent = "pause";
 } else {
 player.pause();
@@ -77,9 +98,43 @@ if (player.currentTime < player.duration) player.currentTime = player.currentTim
 else player.currentTime = player.duration;
 } // forward
 
+loadAudio(url) {
+fetch(url)
+.then(response=> {
+if (response.ok) return response.arrayBuffer();
+else throw new Error(response.statusText);
+ }).then(data => {
+const audioContext = new AudioContext();
+return audioContext.decodeAudioData(data)
+}).then(buffer => {
+this.audioSource.buffer = buffer;
+alert(`${buffer.duration} seconds of audio loaded.`);
+}).catch(error => alert (error));
+} // loadAudio
+
+render () {
+audioSource.start();
+statusMessage("Rendering audio, please wait...");
+
+this.audio.startRendering()
+.then(buffer => {
+const audioElement = document.createElement("audio");
+statusMessage(`Render complete: ${Math.round(buffer.duration)} seconds of audio processed.`);
+audioElement.src = URL.createObjectURL(bufferToWave(buffer, buffer.length));
+audioElement.setAttribute("controls", "");
+audioElement.setAttribute("tabindex", "0");
+shadowRoot.appendChild(audioElement);
+audioElement.focus();
+}).catch(error => alert(error));
+} // render
+
+finalizeRecording (buffer) {
+} // finalizeRecording
+
 handleSpecialKeys (e) {
 if (handleUserKey(e)) e.preventDefault();
 } // handleSpecialKeys
 } // class AudioPlayer
 
 customElements.define(AudioPlayer.is, AudioPlayer);
+

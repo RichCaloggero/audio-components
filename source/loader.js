@@ -6,7 +6,7 @@ const elementList = [
 "./ui-boolean.js",
 
 // connectors
-"./audio-context.js",
+//"./audio-context.js",
 "./audio-series.js",
 "./audio-split.js",
 "./audio-parallel.js",
@@ -28,7 +28,10 @@ const elementList = [
 
 // automation
 "./audio-control.js",
-"./audio-parameter.js"
+"./audio-parameter.js",
+
+// utilities
+"bufferToWave.js"
 ]; // element list
 
 

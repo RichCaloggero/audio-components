@@ -1,8 +1,9 @@
 <!doctype html>
 <head>
 <meta charset="utf-8">
-<title>XTC Test</title>
+<title>XTC - audio components demo</title>
 <!--<script src="./resonance-audio.min.js" crossorigin="anonymous"></script>-->
+<script src="offline-context.js"></script>
 <script src="loader.js"></script>
 </head>
 <body>
@@ -15,10 +16,19 @@
 -->
 
 
-<audio-context hide="bypass" label="Fun with Filters" shortcuts="enableAutomation alt shift r">
+<audio-context offline hide="bypass" label="Fun with Filters" shortcuts="enableAutomation alt shift r">
 <audio-series>
 <audio-player label="player" shortcuts="src alt shift u" src="media/smooth sailing.mp3"></audio-player>
 
+<audio-control>
+<audio-panner bypass label="panner" maxDistance="1" refDistance="1" rolloffFactor="1"></audio-panner>
+
+<audio-parameter label="control panner" name="x"
+function="cos(t)"></audio-parameter>
+
+<audio-parameter label="control panner" name="z"
+function="sin(t)"></audio-parameter>
+</audio-control>
 
 <audio-series label="master"  hide="mix" shortcuts="bypass shift alt m">
 <audio-series label="widener" hide="bypass" mix="0.6">
@@ -27,7 +37,7 @@
 <audio-parallel>
 <audio-series silent-bypass label="band 1" hide="mix">
 <audio-channelSwap></audio-channelSwap>
-<audio-delay delay=".00001"></audio-delay>
+<audio-delay  delay=".00001"></audio-delay>
 <audio-gain gain="-0.9"></audio-gain>
 
 </audio-series><audio-series silent-bypass label="band 2" hide="mix">

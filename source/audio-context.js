@@ -4,8 +4,8 @@ import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
 let instanceCount = 0;
 export let shadowRoot = null;
 
-export const audio = new AudioContext();
 
+export const audio = new AudioContext();
 const automationInterval = 50; // milliseconds
 let automationQueue = [];
 let automation = null; // value returned from setInterval
@@ -108,12 +108,8 @@ alert ("webaudio not available");
 return;
 } // if
 
-if (audio) {
 this.audio = audio;
-} else {
-alert("initialization failure -- cannot initialize new AudioContext()");
-throw new Error ("cannot initialize");
-} // if
+this.offline = audio instanceof OfflineAudioContext;
 } // constructor
 
 
@@ -127,8 +123,6 @@ this.hideControls();
 
 // when this.shadowRoot becomes set for the first time, store it since it will be shadow root of the audio-context itself
 if (!shadowRoot) shadowRoot = this.shadowRoot;
-
-//this.mix = this.getAttribute("mix");
 } // connectedCallback
 
 listenerXChanged (value) {this.audio.listener.setPosition(this.listenerX, this.listenerY, this.listenerZ);}
