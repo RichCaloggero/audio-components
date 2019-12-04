@@ -1,14 +1,24 @@
+// bufferToWave: https://www.russellgood.com/how-to-convert-audiobuffer-to-audio-file/
+
+import {bufferToWave} from "./bufferToWave.js";
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
+
+let _audioSource, _audioDestination, _audioBuffer;
+export function audioSource (x) {if (arguments.length > 0) _audioSource = x; else return _audioSource;}
+export function audioDestination (x) {if (arguments.length > 0) _audioDestination = x; else return _audioDestination;}
 
 // audio-context
 let instanceCount = 0;
 export let shadowRoot = null;
 
-
-export const audio = new AudioContext();
+export let audio;
 const automationInterval = 50; // milliseconds
 let automationQueue = [];
 let automation = null; // value returned from setInterval
+
+// the following maintains a map of elements and method calls on their underlying components
+// signalReady() runs these each time an element becomes ready
+
 const iMap = new Map();
 function doIfInitialized(element, method, value) {
 if (element.component) {
@@ -29,6 +39,14 @@ return html`
 <legend><h1>[[label]]</h1></legend>
 <ui-boolean label="enable automation" value="{{enableAutomation}}" shortcut="alt shift r"></ui-boolean>
 <ui-boolean label="showListener" value="{{showListener}}"></ui-boolean>
+<ui-boolean label="enable record mode" value="{{recordMode}}"></ui-boolean>
+
+<fieldset class="recorder">
+<legend><h2>Recorder</h2></legend>
+
+<div id="results-label">Results - right click and choose save from the context menu:</div>
+<audio controls tabindex="0" aria-labelledby="results-label"></audio>
+</fieldset>
 
 <fieldset hidden id="listener">
 <legend><h3>Listener</h3></legend>
@@ -61,7 +79,7 @@ return html`
 </div><!-- dialog -->
 
 
-<div role="region" aria-label="status" id="statusMessage" aria-live="polite"></div>
+<div role="region" aria-label="status" class="statusMessage" aria-live="polite"></div>
 </fieldset><!-- audio context region -->
 
 <slot></slot>
@@ -79,6 +97,7 @@ bypass: {type: Boolean, notify: true, observer: "_bypass"},
 "silent-bypass": {type: Boolean, notify: true, observer: "_silentBypass"},
 enableAutomation: {type: Boolean, value: false, notify: true, observer: "_enableAutomation"}, // enableAutomation
 showListener: {type: Boolean, value: false, notify: true, observer: "_showListener"},
+recordMode: {type: Boolean, value: false, notify: true, observer: "_recordMode"},
 id: {type: String, notify:true, observer: "setId"}	,
 shortcuts: {type: String, notify:true, observer: "shortcutsChanged"},
 
@@ -108,8 +127,12 @@ alert ("webaudio not available");
 return;
 } // if
 
+if (!audio) {
+audio = new AudioContext();
+console.debug(`${this.id}: creating new audio context`);
+} // if
+
 this.audio = audio;
-this.offline = audio instanceof OfflineAudioContext;
 } // constructor
 
 
@@ -123,6 +146,8 @@ this.hideControls();
 
 // when this.shadowRoot becomes set for the first time, store it since it will be shadow root of the audio-context itself
 if (!shadowRoot) shadowRoot = this.shadowRoot;
+
+//console.debug(`connected: ${this.id}`);
 } // connectedCallback
 
 listenerXChanged (value) {this.audio.listener.setPosition(this.listenerX, this.listenerY, this.listenerZ);}
@@ -202,6 +227,46 @@ else stopAutomation();
 } // _enableAutomation
 
 _showListener (value) {if (shadowRoot) shadowRoot.querySelector("#listener").hidden = !value;}
+
+_recordMode (value) {
+if (shadowRoot) {
+const recorder = shadowRoot.querySelector(".recorder");
+recorder.hidden = !value;
+
+if (value) {
+this.render ();
+} // if
+} // if
+} // _recordMode
+
+render () {
+const _buffer = _audioSource.audioSource.buffer;
+const _audio = audio;
+const _oldAudioSource = _audioSource;
+audio = new OfflineAudioContext(2, _buffer.length, 44100);
+const html = this.outerHTML;
+const container = document.createElement("div");
+container.innerHTML = html;
+this.setAttribute("hidden", "");
+this.parentElement.appendChild(container);
+const recorder = container.children[0];
+const statusMessage = (text) => recorder.shadowRoot.querySelector(".statusMessage").textContent = text;
+
+setTimeout(() => {
+console.debug(`render: ${Math.round(_buffer.duration*10)/10}`);
+_audioSource.audioSource.buffer = _buffer;
+_audioSource.audioSource.start();
+statusMessage("Rendering audio, please wait...");
+
+audio.startRendering()
+.then(buffer => {
+const audioElement = recorder.shadowRoot.querySelector("audio");
+audioElement.src = URL.createObjectURL(bufferToWave(buffer, buffer.length));
+audioElement.focus();
+statusMessage(`Render complete: ${Math.round(10*buffer.duration/60)/10} minutes of audio rendered.`);
+}).catch(error => alert(error));
+}, 1000);
+} // render
 
 setId (value) {this.id = value;}
 
@@ -317,10 +382,13 @@ automationQueue = automationQueue.filter(e => e != element);
 
 
 export function statusMessage (message) {
+const p = document.createElement("p");
+p.appendChild(document.createTextNode(message));
 if (shadowRoot) {
-const status = shadowRoot.querySelector ("#statusMessage");
+const status = shadowRoot.querySelector (".statusMessage");
+
 if (status) {
-status.innerHTML = `<p>${message}</p>`;
+status.appendChild(p);
 return;
 } // if
 } // if

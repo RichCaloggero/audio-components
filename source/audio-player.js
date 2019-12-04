@@ -1,8 +1,5 @@
-/* bufferToWave: https://www.russellgood.com/how-to-convert-audiobuffer-to-audio-file/ */
-
-import {bufferToWave} from "./bufferToWave.js";
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {_AudioContext_, signalReady, statusMessage, shadowRoot} from "./audio-context.js";
+import {_AudioContext_, signalReady, statusMessage, shadowRoot, audioSource} from "./audio-context.js";
 import {AudioComponent} from "./audio-component.js";
 import {handleUserKey} from "./ui.js";
 
@@ -14,7 +11,7 @@ return html`
 <fieldset class="audio-player">
 <legend><h2>[[label]]</h2></legend>
 <ui-text label="Media URL" shortcut="alt shift u" value="{{src}}"></ui-text>
-<button class="play" on-click="play" on-keydown="handleSpecialKeys">Play</button>
+<button class="play" aria-pressed="false" on-click="play" on-keydown="handleSpecialKeys">Play</button>
 <button class="back" on-click="back">back</button>
 <button class="forward" on-click="forward">forward</button>
 </fieldset>
@@ -35,7 +32,10 @@ super ();
 instanceCount += 1;
 this.id = `${AudioPlayer.is}-${instanceCount}`;
 
-if (this.offline) {
+this.audioSource = this.audio.createBufferSource();
+this.audioBuffer = null;
+
+/*if (this.offline) {
 this.audioSource = this.audio.createBufferSource();
 alert("offline...");
 } else {
@@ -43,32 +43,41 @@ this.audioElement = document.createElement("audio");
 this.audioElement.setAttribute("crossorigin", "anonymous");
 this.audioSource = this.audio.createMediaElementSource (this.audioElement);
 } // if
+*/
 
 this.component = new AudioComponent(this.audio, "player");
 this.component.input = null;
 this.audioSource.connect(this.component.output);
+this.component.audioSource = this.audioSource;
+audioSource(this.component);
 } // constructor
 
 connectedCallback () {
 super.connectedCallback ();
-this.audioElement.addEventListener ("ended", e => this.shadowRoot.querySelector(".play").textContent = "play");
+
+this.audioSource.addEventListener("ended", () => this.updateAudioSource());
 signalReady(this);
 } // connectedCallback
 
+
 srcChanged (value) {
 if (value) {
-if (this.offline) this.loadAudio(value);
-else this.audioElement.src = value;
+this.loadAudio(value);
+//this.audioElement.src = value;
 } // if
 } // srcChanged
 
+isPlaying () {return this.shadowRoot.querySelector(".play").getAttribute("aria-pressed") === "true";}
+
 play (e) {
-if (this.offline) {
-this.render();
-return;
+if (!this.isPlaying()) {
+this.audioSource.start();
+e.target.setAttribute("aria-pressed", "true");
+} else {
+this.audioSource.stop();
 } // if
 
-const player = this.audioElement;
+/*const player = this.audioElement;
 if (player.paused) {
 try {
 player.play();
@@ -84,6 +93,7 @@ e.target.textContent = "play";
 
 e.target.focus();
 console.log(`${this.id}: player is ${player.paused? "paused" : "playing"}`);
+*/
 } // play
 
 back (e) {
@@ -98,7 +108,7 @@ if (player.currentTime < player.duration) player.currentTime = player.currentTim
 else player.currentTime = player.duration;
 } // forward
 
-loadAudio(url) {
+loadAudio (url) {
 fetch(url)
 .then(response=> {
 if (response.ok) return response.arrayBuffer();
@@ -108,28 +118,26 @@ const audioContext = new AudioContext();
 return audioContext.decodeAudioData(data)
 }).then(buffer => {
 this.audioSource.buffer = buffer;
-alert(`${buffer.duration} seconds of audio loaded.`);
+this.audioBuffer = buffer;
+statusMessage(`${round(buffer.duration/60)} minutes of audio loaded.`);
 }).catch(error => alert (error));
 } // loadAudio
 
-render () {
-audioSource.start();
-statusMessage("Rendering audio, please wait...");
+updateAudioSource () {
+this.shadowRoot.querySelector(".play").setAttribute("aria-pressed", "false")
+if (!this.audioBuffer) {
+alert("no buffer");
+return;
+} // if
 
-this.audio.startRendering()
-.then(buffer => {
-const audioElement = document.createElement("audio");
-statusMessage(`Render complete: ${Math.round(buffer.duration)} seconds of audio processed.`);
-audioElement.src = URL.createObjectURL(bufferToWave(buffer, buffer.length));
-audioElement.setAttribute("controls", "");
-audioElement.setAttribute("tabindex", "0");
-shadowRoot.appendChild(audioElement);
-audioElement.focus();
-}).catch(error => alert(error));
-} // render
+if (this.audioSource) this.audioSource.disconnect();
+this.audioSource = this.audio.createBufferSource();
+this.audioSource.buffer = this.audioBuffer;
+this.audioSource.connect (this.component.output);
+this.component.audioSource = this.audioSource;
+this.audioSource.addEventListener("ended", () => this.updateAudioSource());
+} // updateSource
 
-finalizeRecording (buffer) {
-} // finalizeRecording
 
 handleSpecialKeys (e) {
 if (handleUserKey(e)) e.preventDefault();
@@ -137,4 +145,6 @@ if (handleUserKey(e)) e.preventDefault();
 } // class AudioPlayer
 
 customElements.define(AudioPlayer.is, AudioPlayer);
+
+function round (n) {return Math.round(n*10)/10;}
 
