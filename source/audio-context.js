@@ -41,7 +41,7 @@ return html`
 <ui-boolean label="showListener" value="{{showListener}}"></ui-boolean>
 <ui-boolean label="enable record mode" value="{{recordMode}}"></ui-boolean>
 
-<fieldset class="recorder">
+<fieldset class="recorder" hidden>
 <legend><h2>Recorder</h2></legend>
 
 <div id="results-label">Results - right click and choose save from the context menu:</div>
@@ -229,13 +229,8 @@ else stopAutomation();
 _showListener (value) {if (shadowRoot) shadowRoot.querySelector("#listener").hidden = !value;}
 
 _recordMode (value) {
-if (shadowRoot) {
-const recorder = shadowRoot.querySelector(".recorder");
-recorder.hidden = !value;
-
 if (value) {
 this.render ();
-} // if
 } // if
 } // _recordMode
 
@@ -243,14 +238,18 @@ render () {
 const _buffer = _audioSource.audioSource.buffer;
 const _audio = audio;
 const _oldAudioSource = _audioSource;
+const recorder = this.shadowRoot.querySelector(".recorder");
+const audioElement = recorder.querySelector("audio");
+
 audio = new OfflineAudioContext(2, _buffer.length, 44100);
 const html = this.outerHTML;
 const container = document.createElement("div");
 container.innerHTML = html;
 this.setAttribute("hidden", "");
 this.parentElement.appendChild(container);
-const recorder = container.children[0];
-const statusMessage = (text) => recorder.shadowRoot.querySelector(".statusMessage").textContent = text;
+container.setAttribute("hidden", "");
+const newContext = container.children[0];
+const statusMessage = (text) => newContext.shadowRoot.querySelector(".statusMessage").textContent = text;
 
 setTimeout(() => {
 console.debug(`render: ${Math.round(_buffer.duration*10)/10}`);
@@ -260,9 +259,13 @@ statusMessage("Rendering audio, please wait...");
 
 audio.startRendering()
 .then(buffer => {
-const audioElement = recorder.shadowRoot.querySelector("audio");
+this.removeAttribute("hidden");
+recorder.removeAttribute("hidden");
 audioElement.src = URL.createObjectURL(bufferToWave(buffer, buffer.length));
 audioElement.focus();
+
+// restoring...
+
 statusMessage(`Render complete: ${Math.round(10*buffer.duration/60)/10} minutes of audio rendered.`);
 }).catch(error => alert(error));
 }, 1000);
