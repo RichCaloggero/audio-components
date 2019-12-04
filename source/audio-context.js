@@ -229,8 +229,13 @@ else stopAutomation();
 _showListener (value) {if (shadowRoot) shadowRoot.querySelector("#listener").hidden = !value;}
 
 _recordMode (value) {
+if (shadowRoot) {
 if (value) {
+shadowRoot.querySelector(".recorder").removeAttribute("hidden");
 this.render ();
+} else {
+shadowRoot.querySelector(".recorder").setAttribute("hidden", "");
+} // if
 } // if
 } // _recordMode
 
@@ -244,22 +249,22 @@ const audioElement = recorder.querySelector("audio");
 audio = new OfflineAudioContext(2, _buffer.length, 44100);
 const html = this.outerHTML;
 const container = document.createElement("div");
-container.innerHTML = html;
-this.setAttribute("hidden", "");
-this.parentElement.appendChild(container);
 container.setAttribute("hidden", "");
+container.innerHTML = html;
+//this.setAttribute("hidden", "");
+this.parentElement.appendChild(container);
 const newContext = container.children[0];
-const statusMessage = (text) => newContext.shadowRoot.querySelector(".statusMessage").textContent = text;
+const statusMessage = (text) => this.shadowRoot.querySelector(".statusMessage").textContent = text;
 
 setTimeout(() => {
-console.debug(`render: ${Math.round(_buffer.duration*10)/10}`);
+console.debug(`render: ${Math.round(_buffer.duration*10/60)/10}`);
 _audioSource.audioSource.buffer = _buffer;
 _audioSource.audioSource.start();
 statusMessage("Rendering audio, please wait...");
 
 audio.startRendering()
 .then(buffer => {
-this.removeAttribute("hidden");
+//this.removeAttribute("hidden");
 recorder.removeAttribute("hidden");
 audioElement.src = URL.createObjectURL(bufferToWave(buffer, buffer.length));
 audioElement.focus();
