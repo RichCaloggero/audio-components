@@ -255,6 +255,8 @@ container.innerHTML = html;
 this.parentElement.appendChild(container);
 const newContext = container.children[0];
 const statusMessage = (text) => this.shadowRoot.querySelector(".statusMessage").textContent = text;
+copyAllValues(this, newContext);
+
 
 setTimeout(() => {
 console.debug(`render: ${Math.round(_buffer.duration*10/60)/10}`);
@@ -414,3 +416,26 @@ return {parameter: tokens[0], shortcut: tokens.slice(1).join(" ")};
 });
 } // parseShortcuts
 
+function copyAllValues (_from, _to) {
+const values = findAllControls(_from).map(x => x.value);
+findAllControls(_to)
+.forEach((x,i) => {
+x.value = values[i];
+x.dispatchEvent(new Event("change"));
+});
+} // copyAllValues
+
+function findAllControls(root) {
+return enumerateAll(root)
+.flat(9999)
+.filter(x => x && x.matches && x.matches("input,select"));
+} // findAllControls
+
+
+function enumerateAll (root) {
+return [
+root,
+Array.from(root.children).map(x => enumerateAll(x)),
+root.shadowRoot? enumerateAll(root.shadowRoot) : []
+];
+} // enumerateAll
