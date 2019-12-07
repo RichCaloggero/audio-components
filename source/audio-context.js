@@ -3,9 +3,8 @@
 import {bufferToWave} from "./bufferToWave.js";
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
 
-let _audioSource, _audioDestination, _audioBuffer;
-export function audioSource (x) {if (arguments.length > 0) _audioSource = x; else return _audioSource;}
-export function audioDestination (x) {if (arguments.length > 0) _audioDestination = x; else return _audioDestination;}
+let audioPlayer;
+export function registerAudioPlayer (x) {audioPlayer = x;}
 
 // audio-context
 let instanceCount = 0;
@@ -232,26 +231,39 @@ _recordMode (value) {
 if (shadowRoot) {
 if (value) {
 shadowRoot.querySelector(".recorder").removeAttribute("hidden");
-this.render ();
+this.loadAudio(audioPlayer.src);
 } else {
 shadowRoot.querySelector(".recorder").setAttribute("hidden", "");
 } // if
 } // if
 } // _recordMode
 
-render () {
-const _buffer = _audioSource.audioSource.buffer;
+loadAudio (url) {
+statusMessage("Loading...");
+fetch(url)
+.then(response=> {
+if (response.ok) return response.arrayBuffer();
+else throw new Error(response.statusText);
+ }).then(data => {
+const audioContext = new AudioContext();
+return audioContext.decodeAudioData(data)
+}).then(buffer => {
+this.render(buffer);
+statusMessage(`${round(buffer.duration/60)} minutes of audio loaded.`);
+}).catch(error => statusMessage(error));
+} // loadAudio
+
+render (buffer) {
 const _audio = audio;
-const _oldAudioSource = _audioSource;
+const _audioPlayer = audioPlayer;
 const recorder = this.shadowRoot.querySelector(".recorder");
 const audioElement = recorder.querySelector("audio");
 
-audio = new OfflineAudioContext(2, _buffer.length, 44100);
+audio = new OfflineAudioContext(2, buffer.length, 44100);
 const html = this.outerHTML;
 const container = document.createElement("div");
 container.setAttribute("hidden", "");
 container.innerHTML = html;
-//this.setAttribute("hidden", "");
 this.parentElement.appendChild(container);
 const newContext = container.children[0];
 const statusMessage = (text) => this.shadowRoot.querySelector(".statusMessage").textContent = text;
@@ -259,22 +271,26 @@ copyAllValues(this, newContext);
 
 
 setTimeout(() => {
-console.debug(`render: ${Math.round(_buffer.duration*10/60)/10}`);
-_audioSource.audioSource.buffer = _buffer;
-_audioSource.audioSource.start();
+const audioSource = audio.createBufferSource();
+audioSource.buffer = buffer;
+audioPlayer.audioSource = audioSource;
+audioSource.connect(audioPlayer.output);
+audioSource.start();
 statusMessage("Rendering audio, please wait...");
 
 audio.startRendering()
 .then(buffer => {
-//this.removeAttribute("hidden");
 recorder.removeAttribute("hidden");
 audioElement.src = URL.createObjectURL(bufferToWave(buffer, buffer.length));
 audioElement.focus();
 
 // restoring...
+audio = _audio;
+audioPlayer = _audioPlayer;
+audioPlayer.audioSource.connect(audioPlayer.output);
 
 statusMessage(`Render complete: ${Math.round(10*buffer.duration/60)/10} minutes of audio rendered.`);
-}).catch(error => alert(error));
+}).catch(error => statusMessage(error));
 }, 1000);
 } // render
 
@@ -439,3 +455,6 @@ Array.from(root.children).map(x => enumerateAll(x)),
 root.shadowRoot? enumerateAll(root.shadowRoot) : []
 ];
 } // enumerateAll
+
+function round (n) {return Math.round(n*10)/10;}
+

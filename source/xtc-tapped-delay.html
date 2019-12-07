@@ -11,7 +11,7 @@
 <fieldset id="set-parameters"><legend><h2>Set parameters</h2></legend>
 <label>Delay: <input type="range" id="delay" value="0.00001" min="0.00001" max="0.09" step="0.00001">
 </label>
-<br><label>Gain: <input type="range" id="gain" value="0.8" min="-1" max="0.9" step="0.1">
+<br><label>Gain: <input type="range" id="gain" value="0.7" min="-1" max="0.9" step="0.1">
 </label>
 </fieldset>
 -->
@@ -32,10 +32,10 @@ function="sin(t)"></audio-parameter>
 </audio-control>
 
 <audio-series label="master"  hide="mix" shortcuts="bypass shift alt m">
-<audio-series label="widener" hide="bypass" mix="0.6">
+<audio-series label="widener" hide="bypass" mix="0.5">
 <audio-filter type="bandpass" frequency="1200" q="0.0003"></audio-filter>
 
-<audio-series label="tapped delay"  id="taps" feed-forward>
+<audio-series  mix="0.5" id="taps" feed-forward>
 <audio-series  label="band 1" hide="mix">
 <audio-channelSwap></audio-channelSwap>
 <audio-delay  delay=".00001"></audio-delay>
@@ -77,7 +77,7 @@ function="sin(t)"></audio-parameter>
 </audio-series>
 
 <audio-filter label="bass boost" type="lowshelf" frequency="200" gain="4" hide="type, detune, q, mix"></audio-filter>
-<audio-gain label="master volume" shortcuts="gain alt shift v" gain="2.7" max="5"></audio-gain>
+<audio-gain label="master volume" shortcuts="gain alt shift v" gain="1.5" max="5"></audio-gain>
 </audio-series>
 
 <audio-destination></audio-destination>

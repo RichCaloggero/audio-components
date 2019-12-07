@@ -1,5 +1,5 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {_AudioContext_, signalReady, statusMessage, shadowRoot, audioSource} from "./audio-context.js";
+import {_AudioContext_, signalReady, statusMessage, shadowRoot, registerAudioPlayer} from "./audio-context.js";
 import {AudioComponent} from "./audio-component.js";
 import {handleUserKey} from "./ui.js";
 
@@ -32,52 +32,39 @@ super ();
 instanceCount += 1;
 this.id = `${AudioPlayer.is}-${instanceCount}`;
 
-this.audioSource = this.audio.createBufferSource();
-this.audioBuffer = null;
-
-/*if (this.offline) {
-this.audioSource = this.audio.createBufferSource();
-alert("offline...");
-} else {
-this.audioElement = document.createElement("audio");
-this.audioElement.setAttribute("crossorigin", "anonymous");
-this.audioSource = this.audio.createMediaElementSource (this.audioElement);
-} // if
-*/
-
 this.component = new AudioComponent(this.audio, "player");
 this.component.input = null;
+
+if (this.audio && this.audio instanceof AudioContext && this.audio.createMediaElementSource) {
+this.audioElement = document.createElement("audio");
+this.audioElement.setAttribute("crossorigin", "anonymous");
+this.audioSource = this.audio.createMediaElementSource(this.audioElement);
 this.audioSource.connect(this.component.output);
 this.component.audioSource = this.audioSource;
-audioSource(this.component);
+this.component.src = "";
+} else {
+this.audioSource = this.component.audioSource = null;
+} // if
+
+registerAudioPlayer(this.component);
 } // constructor
 
 connectedCallback () {
 super.connectedCallback ();
-
-this.audioSource.addEventListener("ended", () => this.updateAudioSource());
 signalReady(this);
 } // connectedCallback
 
 
 srcChanged (value) {
-if (value) {
-this.loadAudio(value);
-//this.audioElement.src = value;
+if (value && this.audioElement) {
+this.audioElement.src = this.component.src = value;
 } // if
 } // srcChanged
 
 isPlaying () {return this.shadowRoot.querySelector(".play").getAttribute("aria-pressed") === "true";}
 
 play (e) {
-if (!this.isPlaying()) {
-this.audioSource.start();
-e.target.setAttribute("aria-pressed", "true");
-} else {
-this.audioSource.stop();
-} // if
-
-/*const player = this.audioElement;
+const player = this.audioElement;
 if (player.paused) {
 try {
 player.play();
@@ -93,7 +80,6 @@ e.target.textContent = "play";
 
 e.target.focus();
 console.log(`${this.id}: player is ${player.paused? "paused" : "playing"}`);
-*/
 } // play
 
 back (e) {
@@ -108,22 +94,8 @@ if (player.currentTime < player.duration) player.currentTime = player.currentTim
 else player.currentTime = player.duration;
 } // forward
 
-loadAudio (url) {
-fetch(url)
-.then(response=> {
-if (response.ok) return response.arrayBuffer();
-else throw new Error(response.statusText);
- }).then(data => {
-const audioContext = new AudioContext();
-return audioContext.decodeAudioData(data)
-}).then(buffer => {
-this.audioSource.buffer = buffer;
-this.audioBuffer = buffer;
-statusMessage(`${round(buffer.duration/60)} minutes of audio loaded.`);
-}).catch(error => alert (error));
-} // loadAudio
 
-updateAudioSource () {
+/*updateAudioSource () {
 this.shadowRoot.querySelector(".play").setAttribute("aria-pressed", "false")
 if (!this.audioBuffer) {
 alert("no buffer");
@@ -137,6 +109,7 @@ this.audioSource.connect (this.component.output);
 this.component.audioSource = this.audioSource;
 this.audioSource.addEventListener("ended", () => this.updateAudioSource());
 } // updateSource
+*/
 
 
 handleSpecialKeys (e) {
@@ -146,5 +119,4 @@ if (handleUserKey(e)) e.preventDefault();
 
 customElements.define(AudioPlayer.is, AudioPlayer);
 
-function round (n) {return Math.round(n*10)/10;}
 
