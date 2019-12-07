@@ -112,7 +112,7 @@ console.log(`- channel 2: ${channel2.name} connected`);
 } // class Split
 
 export class Series extends AudioComponent {
-constructor (audio, components) {
+constructor (audio, components, feedForward = false, feedBack = false, parent) {
 super (audio, "series");
 //console.debug(`Series: connecting ${components.length} components in series:`);
 //if (components.length < 2) throw new Error("Series: need two or more components");
@@ -128,10 +128,22 @@ if (first !== last) {
 components.forEach((c, i, all) => {
 if (i < all.length-1) {
 const next = all[i+1];
+
 if (c.output && next.input) {
 //c.output.disconnect();
 c.output.connect(next.input);
 console.log(`- connected ${c.name} to ${next.name}`);
+
+if (feedForward && c !== last) {
+c.output.connect(this.wet);
+console.log(`- feedForward: connected ${c.name} to ${this.name} wet`);
+} // if
+
+if (feedBack) {
+c.output.connect(this.input);
+console.log(`- feedBack: connected ${c.name} to ${this.name} input`);
+} // if
+
 } else {
 throw new Error (`series: ${c.name} and ${next.name} must both be AudioComponents`);
 } // if
@@ -349,21 +361,47 @@ this.rightPanner.positionZ.value = r*Math.sin(-1*a-r/3+r/6-r/9);
 } // class Binaural
 
 export class Equalizer extends AudioComponent {
-constructor (audio, frequencies) {
-super (audio, "equalizer");
-this.filters = createFilterBank(audio, frequencies);
+constructor (audio, bands = {base: 30, count: 10, q: 4.5, frequency: (base, index) => base * 2**index}) {
+super (audio, "equalizer", bands);
+this.filters = initialize(bands);
 const container = new Parallel(this.audio, this.filters);
 this.input.connect(container.input);
 container.output.connect(this.wet);
 this.reset();
+
+function initialize (bands) {
+const filters = [];
+if (bands instanceof Array) {
+bands.forEach((band, i) => filters[i] = createFilter(band.frequency, band.q, band.gain));
+} else if (bands instanceof Object && band.base && band.frequency && bands.count) {
+for (let i = 0; i<bands.count; i++) filters[i] = createFilter(bands.frequency(i, bands.base), bands.q, 1);
+} // if
+return filters;
+} // initialize
+
+function createFilter(i, frequency, q, gain) {
+const f = audio.createFilter();
+f.type = "peaking";
+f.frequency = frequency;
+f.gain = gain;
+f.Q = q;
+f.detune = 0;
+return f;
+} // createFilter
+
 } // constructor
 
 get bandCount () {return this.filters.length;}
 
 reset () {this.filters.forEach(filter => this.resetFilter(filter));}
 
+validBandIndex (i) {return (i>=0 && i<this.bandCount);}
+
+setGain (i, gain) {if (validBandIndex(i)) this.filters[i].gain = gain;}
+setQ (i, q) {if (validBandIndex(i)) this.filters[i].Q = q;}
+setFrequency (i, frequency) {if (validBandIndex(i)) this.filters[i].frequency = frequency;}
+
 resetFilter (filter) {
-filter.filter.Q.value = 1;
 filter.filter.type = "peaking";
 filter.filter.gain.value = 0;
 filter.filter.detune.value = 0;

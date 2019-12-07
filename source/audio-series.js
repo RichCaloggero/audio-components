@@ -17,6 +17,13 @@ return html`
 } // get template
 static get is() { return "audio-series"; }
 
+static get properties () {
+return {
+"feed-forward": Boolean,
+"feed-back": Boolean
+};
+} // static properties
+
 constructor () {
 super ();
 instanceCount += 1;
@@ -30,7 +37,7 @@ super.connectedCallback();
 childrenReady(this)
 .then(children => {
 //console.log(`- connectedCallback.then: found ${children.length} children`);
-this.component = new Series(this.audio, this.components(children));
+this.component = new Series(this.audio, this.components(children), this["feed-forward"], this["feed-back"], this);
 if (this.uiControls().every(x => x.hidden)) this.shadowRoot.querySelector("legend").hidden = true;
 signalReady(this);
 }).catch(error => {

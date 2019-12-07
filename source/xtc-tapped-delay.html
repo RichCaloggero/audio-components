@@ -1,0 +1,109 @@
+<!doctype html>
+<head>
+<meta charset="utf-8">
+<title>XTC - audio components demo</title>
+<!--<script src="./resonance-audio.min.js" crossorigin="anonymous"></script>-->
+<script src="offline-context.js"></script>
+<script src="loader.js"></script>
+</head>
+<body>
+
+<fieldset id="set-parameters"><legend><h2>Set parameters</h2></legend>
+<label>Delay: <input type="range" id="delay" value="0.00001" min="0.00001" max="0.09" step="0.00001">
+</label>
+<br><label>Gain: <input type="range" id="gain" value="0.8" min="-1" max="0.9" step="0.1">
+</label>
+</fieldset>
+-->
+
+
+<audio-context hide="bypass" label="Fun with Filters" shortcuts="enableAutomation alt shift r">
+<audio-series>
+<audio-player label="player" shortcuts="src alt shift u" src="media/jazzomatic.mp3"></audio-player>
+
+<audio-control>
+<audio-panner bypass label="panner" maxDistance="1" refDistance="1" rolloffFactor="1"></audio-panner>
+
+<audio-parameter label="control panner" name="x"
+function="cos(t)"></audio-parameter>
+
+<audio-parameter label="control panner" name="z"
+function="sin(t)"></audio-parameter>
+</audio-control>
+
+<audio-series label="master"  hide="mix" shortcuts="bypass shift alt m">
+<audio-series label="widener" hide="bypass" mix="0.6">
+<audio-filter type="bandpass" frequency="1200" q="0.0003"></audio-filter>
+
+<audio-series label="tapped delay"  id="taps" feed-forward>
+<audio-series  label="band 1" hide="mix">
+<audio-channelSwap></audio-channelSwap>
+<audio-delay  delay=".00001"></audio-delay>
+<audio-gain gain="-0.9"></audio-gain>
+
+</audio-series><audio-series  label="band 2" hide="mix">
+<audio-delay  delay=".00001"></audio-delay>
+<audio-gain gain="0.9"></audio-gain>
+
+</audio-series><audio-series  label="band 3" hide="mix">
+<audio-channelSwap></audio-channelSwap>
+<audio-delay  delay=".00001"></audio-delay>
+<audio-gain gain="-0.9"></audio-gain>
+
+</audio-series><audio-series  label="band 4" hide="mix">
+<audio-delay  delay=".00001"></audio-delay>
+<audio-gain gain="0.9"></audio-gain>
+
+</audio-series><audio-series  label="band 5" hide="mix">
+<audio-channelSwap></audio-channelSwap>
+<audio-delay  delay=".00001"></audio-delay>
+<audio-gain gain="-0.9"></audio-gain>
+
+</audio-series><audio-series  label="band 6" hide="mix">
+<audio-delay  delay=".00001"></audio-delay>
+<audio-gain gain="0.9"></audio-gain>
+
+</audio-series><audio-series  label="band 7" hide="mix">
+<audio-channelSwap></audio-channelSwap>
+<audio-delay  delay=".00001"></audio-delay>
+<audio-gain gain="-0.9"></audio-gain>
+
+</audio-series><audio-series  label="band 8" hide="mix">
+<audio-delay  delay=".00001"></audio-delay>
+<audio-gain gain="0.9"></audio-gain>
+
+</audio-series>
+</audio-series>
+</audio-series>
+
+<audio-filter label="bass boost" type="lowshelf" frequency="200" gain="4" hide="type, detune, q, mix"></audio-filter>
+<audio-gain label="master volume" shortcuts="gain alt shift v" gain="2.7" max="5"></audio-gain>
+</audio-series>
+
+<audio-destination></audio-destination>
+</audio-series>
+</audio-context>
+
+<script>
+const container = document.querySelector("#taps");
+
+document.querySelector("#set-parameters").addEventListener("change", e => {
+const value = e.target.value;
+
+if (e.target.id === "delay") {
+document.querySelectorAll("#taps audio-delay").forEach(delay => delay.setAttribute("delay", value));
+} else if (e.target.id === "gain") {
+document.querySelectorAll("#taps audio-gain").forEach((gain,i) => gain.setAttribute("gain", (isEven(i)? -1 : 1) * value));
+} // if
+}); // listener
+
+document.querySelector("#delay").dispatchEvent(new Event("change"));
+document.querySelector("#gain").dispatchEvent(new Event("change"));
+
+function isEven(n) {return n%2 === 0;}
+function isOdd(n) {return !isEven(n);}
+
+</script>
+
+</body>
+</html>
