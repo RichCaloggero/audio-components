@@ -15,7 +15,7 @@ return html`
 <slot></slot>
 `; // html
 } // get template
-static get is() { return "audio-series"; }
+static get is() { return "audio-series";}
 
 static get properties () {
 return {
@@ -28,7 +28,7 @@ constructor () {
 super ();
 instanceCount += 1;
 this.id = `${AudioSeries.is}-${instanceCount}`;
-this.ui = false;
+//this.ui = false;
 //this.hide = "bypass, mix";
 } // constructor
 

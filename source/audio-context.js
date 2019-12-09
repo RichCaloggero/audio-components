@@ -138,9 +138,7 @@ this.audio = audio;
 connectedCallback () {
 super.connectedCallback();
 // if is element with a UI, then hide it if no label or name attribute present in HTML
-this.hidden = this.ui && !this.label;
-
-// hide controls in UI elements that have label or name if control's label or name mentioned in hidden attribute's value
+// hide controls in UI elements that have label or name if control's label or name mentioned in hide attribute's value
 this.hideControls();
 
 // when this.shadowRoot becomes set for the first time, store it since it will be shadow root of the audio-context itself
@@ -183,18 +181,21 @@ p.shortcut = shortcut.shortcut;
 } // shortcutsChanged
 
 hideControls () {
-//console.debug(`${this.id}: hide ${this.hide}`);
-if (! this.hide) return;
-const controls = this.uiControls()
-.filter(x => x.name || x.label);
-if (this.hide.trim() && controls.length > 0) {
-const hide = this.hide.split(",").map(x => x.trim().toLowerCase());
-//console.debug(`${this.id} hiding ${hide.toSource()}`);
+const label = this.label?
+this.label.trim() : "";
+const hide = this.hide?
+this.hide.trim().split(",").map(x => x.trim().toLowerCase())
+: [];
 
-controls.forEach(element => {
-const name = element.name || element.label;
+if (!label) {
+this.uiControls().forEach(element => element.hidden = true);
+
+} else {
+this.uiControls().filter(x => x.name || x.label).forEach(element => {
+const name = (element.name || element.label).trim().toLowerCase();
 //console.debug(`- checking ${element.id} ${name}`);
-if (name && hide.includes(name.trim().toLowerCase())) element.hidden = true;
+
+if (name && hide.includes(name)) element.hidden = true;
 }); // forEach
 } // if
 } // hideControls

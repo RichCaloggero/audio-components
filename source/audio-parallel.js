@@ -16,7 +16,7 @@ return html`
 <slot></slot>
 `; // html
 } // get template
-static get is() { return "audio-parallel"; }
+static get is() { return "audio-parallel";}
 
 static get properties () {
 return {
@@ -28,8 +28,8 @@ constructor () {
 super ();
 instanceCount += 1;
 this.id = `${AudioParallel.is}-${instanceCount}`;
-this.ui = false;
-this.hide = "bypass, mix";
+//this.ui = false;
+//this.hide = "bypass, mix";
 } // constructor
 
 connectedCallback () {
