@@ -34,11 +34,10 @@ this.id = `${AudioSeries.is}-${instanceCount}`;
 
 connectedCallback () {
 super.connectedCallback();
-childrenReady(this)
-.then(children => {
+childrenReady(this).then(children => {
 //console.log(`- connectedCallback.then: found ${children.length} children`);
 this.component = new Series(this.audio, this.components(children), this["feed-forward"], this["feed-back"], this);
-if (this.uiControls().every(x => x.hidden)) this.shadowRoot.querySelector("legend").hidden = true;
+//if (this.uiControls().every(x => x.hidden)) this.shadowRoot.querySelector("legend").hidden = true;
 signalReady(this);
 }).catch(error => {
 console.log(`${this.id}: ${error}\n${error.stack}`);
