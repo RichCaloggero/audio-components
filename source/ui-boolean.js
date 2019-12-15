@@ -27,7 +27,7 @@ value: {type: Boolean, value: false, notify: true},
 constructor () {
 super ();
 instanceCount += 1;
-this.id = `UIBoolean.is}-${instanceCount}`;
+this.id = `${UIBoolean.is}-${instanceCount}`;
 } // constructor
 
 connectedCallback () {

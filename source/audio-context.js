@@ -189,7 +189,7 @@ this.hide.trim().split(",").map(x => x.trim().toLowerCase())
 
 if (!label) {
 this.uiControls().forEach(element => element.hidden = true);
-
+if (this.shadowRoot) this.shadowRoot.children[0].hidden = true;
 } else {
 this.uiControls().filter(x => x.name || x.label).forEach(element => {
 const name = (element.name || element.label).trim().toLowerCase();
@@ -289,6 +289,9 @@ audioElement.focus();
 audio = _audio;
 audioPlayer = _audioPlayer;
 audioPlayer.audioSource.connect(audioPlayer.output);
+this.parentElement.removeChild(container);
+container.innerHTML = "";
+container = null;
 
 statusMessage(`Render complete: ${Math.round(10*buffer.duration/60)/10} minutes of audio rendered.`);
 }).catch(error => statusMessage(error));

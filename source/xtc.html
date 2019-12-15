@@ -30,9 +30,11 @@ function="sin(t)"></audio-parameter>
 
 <audio-series label="master"  hide="mix" shortcuts="bypass shift alt m">
 <audio-series label="widener" hide="bypass" mix="0.6">
-<audio-filter type="bandpass" frequency="1200" q="0.0003"></audio-filter>
+<audio-filter label="pre-filter" type="bandpass" hide="gain,detune" frequency="1200" q="0.0003"></audio-filter>
 
-<audio-parallel>
+<audio-channelSwap label="side swapper" bypass mix="-0.5" hide="mix"></audio-channelSwap>
+
+<audio-parallel label="delay lines" hide="mix">
 <audio-series silent-bypass label="band 1" hide="mix">
 <audio-channelSwap></audio-channelSwap>
 <audio-delay  delay=".00001"></audio-delay>

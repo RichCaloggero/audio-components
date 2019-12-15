@@ -299,3 +299,14 @@ const allowed = "Enter, Home, End, PageUp, PageDown, ArrowUp, ArrowDown, ArrowLe
 return allowed.includes(key);
 } // allowedUnmodified
 
+export function parseNumber (value) {
+const val = String(value).split(":");
+if (val.length === 2) {
+return {type: val[0], value: Number(val[1])};
+} else if(val.length === 1) {
+return this.value;
+} else {
+statusMessage(`ui-number: bad value - ${value}`);
+return {};
+} // if
+} // parseNumber

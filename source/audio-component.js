@@ -519,7 +519,67 @@ s.connect(m, 0,1);
 s.connect(m, 1,0);
 m.connect(this.wet);
 } // constructor
-} // ChannelSwap
+} // class ChannelSwap
+
+export class Verb extends AudioComponent {
+constructor (audio, elementCount = 500, parent) {
+super (audio, "Verb", parent);
+this.elements = [];
+const gain = audio.createGain();
+const compressor = audio.createDynamicsCompressor();
+for (let i=0; i<elementCount; i++) {
+const d = this.elements[i] = new Delay(audio);
+this.input.connect(d.input);
+d.output.connect(gain);
+} // for
+gain.connect(compressor).connect(this.wet);
+compressor.threshold.value = -20.0;
+compressor.knee.value = 10;
+compressor.ratio.value = 20;
+
+this.setDelays ();
+console.log(`${this.name}: ${this.elements.length} delays initialized`);
+} // constructor
+
+setDelays (minDelay=0.001, maxDelay=1.0, minGain=0.1, maxGain=0.98) {
+statusMessage(`${minDelay}, ${maxDelay}, ${minGain}, ${maxGain}`);
+this.elements.forEach(d => {
+d.delay.delayTime.value = random(minDelay, maxDelay);
+d.wet.gain.value = random(minGain, maxGain);
+ }); // forEach
+
+statusMessage(`${this.name}: ${this.elements.length} delays changed`);
+} // setDelays
+} // class Verb
+
+export class Rotator extends AudioComponent {
+constructor (audio, rotation, parent) {
+super (audio, "rotate", rotation = 0, parent);
+this.rotation = rotation;
+this.processor = audio.createScriptProcessor();
+this.processor.addEventListener ("audioprocess", e => processAudio(e.inputBuffer, e.outputBuffer, this.rotation));
+this.input.connect(this.processor).connect(this.wet);
+
+
+function processAudio (inputBuffer, outputBuffer, rotation) {
+if (inputBuffer.numberOfChannels !== 2 || outputBuffer.numberOfChannels !== 2) throw new Error("processAudio: can only process stereo signals");
+
+const inLeft = inputBuffer.getChannelData(0);
+const inRight = inputBuffer.getChannelData(1);
+const outLeft = outputBuffer.getChannelData(0);
+const outRight = outputBuffer.getChannelData(1);
+
+for (let i = 0; i < inputBuffer.length; i++) {
+const data = rotate (inLeft[i], inRight[i], rotation);
+outLeft[i] = data[0];
+outRight[i] = data[1];
+} // for each sample
+} // processAudio
+} // constructor
+
+setRotation (value) {this.rotation = value;}
+} // class Rotator
+
 
 function createFilterBank (audio, frequencies) {
 return frequencies.map (frequency => {
@@ -528,3 +588,35 @@ filter.filter.frequency.value = frequency;
 return filter;
 }); // map return filters;
 } // createFilterBank
+
+function random (min, max) {return Math.random() * Math.abs(max-min) + min;}
+
+
+function rotate (l, r, rotation) {
+let spl0 = l;
+let spl1 = r;
+const rot = rotation * 0.017453292;
+const s0 = Math.sign(spl0);
+const s1 = Math.sign(spl1);
+let angle = Math.atan( spl0 / spl1 );
+
+if ((s0 == 1 && s1 == -1) || (s0 == -1 && s1 == -1))  angle += Math.PI;
+if (s0 == -1 && s1 == 1) angle += (2*Math.PI);
+
+if (spl1 === 0) {
+if (spl0 > 0) angle = Math.PI/2; else angle = 3*Math.PI/2;
+} // if
+
+if (spl0 === 0) {
+ if (spl1 > 0) angle = 0; else angle = Math.PI;
+} // if
+
+angle -= rot;
+
+const radius = Math.sqrt((spl0*spl0) + (spl1*spl1) ) ;
+spl0 = Math.sin(angle)*radius;
+spl1 = Math.cos(angle)*radius;
+
+return [spl0, spl1];
+} // rotate
+
