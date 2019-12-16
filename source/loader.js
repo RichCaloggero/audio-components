@@ -26,14 +26,15 @@ const elementList = [
 "./audio-resonance.js",
 "./audio-xtc.js",
 "./audio-verb.js",
-"./audio-rotator.js",
+"./audio-stereoProcessor.js",
 
 // automation
 "./audio-control.js",
 "./audio-parameter.js",
 
 // utilities
-"bufferToWave.js"
+//"stereoProcessor.worklet.js",
+//"bufferToWave.js"
 ]; // element list
 
 

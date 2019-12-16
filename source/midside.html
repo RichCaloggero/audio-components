@@ -1,0 +1,50 @@
+<!doctype html>
+<head>
+<meta charset="utf-8">
+<title>Mid Side Processing - audio components demo</title>
+<!--<script src="./resonance-audio.min.js" crossorigin="anonymous"></script>-->
+<script src="loader.js"></script>
+</head>
+<body>
+<audio-context hide="bypass" label="Fun with Filters" shortcuts="enableAutomation alt shift r">
+<audio-series>
+<audio-player label="player" src="media/country balad.mp3" shortcuts="src alt shift u" ></audio-player>
+
+<audio-series label="master"  hide="mix" shortcuts="bypass shift alt m">
+<audio-parallel>
+<audio-series label="mid" silent-bypass hide="mix">
+<audio-channelSwap mix="0.5"></audio-channelSwap>
+<audio-gain label="mid gain" gain="1.0" hide="mix,bypass"></audio-gain>
+</audio-series>
+
+<audio-series label="side" silent-bypass hide="mix">
+<audio-delay bypass label="side delay" delay="0.00022" min="0" mix="-1"></audio-delay>
+
+<audio-channelSwap bypass label="side swapper" mix="-0.5" hide="mix"></audio-channelSwap>
+
+<audio-parallel bypass label="side splitter" hide="mix">
+<audio-split swap-outputs>
+<audio-gain gain="-1"></audio-gain>
+<audio-gain></audio-gain>
+</audio-split>
+
+<audio-split>
+<audio-gain gain="-1"></audio-gain>
+<audio-gain></audio-gain>
+</audio-split>
+</audio-parallel>
+
+<audio-gain label="side gain" gain="1.2" hide="mix,bypass"></audio-gain>
+</audio-series>
+</audio-parallel>
+
+<audio-filter label="bass boost" type="lowshelf" frequency="200" gain="4" hide="type, detune, q, mix"></audio-filter>
+<audio-gain label="master volume" shortcuts="gain alt shift v" gain="1.5" max="5"></audio-gain>
+</audio-series>
+
+<audio-destination></audio-destination>
+</audio-series>
+</audio-context>
+
+</body>
+</html>

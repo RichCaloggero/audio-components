@@ -1,0 +1,30 @@
+<!doctype html>
+<head>
+<meta charset="utf-8">
+<title>verb - audio components demo</title>
+<!--<script src="./resonance-audio.min.js" crossorigin="anonymous"></script>-->
+<script src="loader.js"></script>
+</head>
+<body>
+
+<fieldset id="set-parameters"><legend><h2>Set parameters</h2></legend>
+<label>Delay: <input type="number" id="delay" value="0.5" min="0" max="0.09" step="0.00004">
+</label>
+<br><label>Gain: <input type="range" id="gain" value="-0.84" min="-1" max="0.99" step="0.02">
+</label>
+</fieldset>
+
+
+<audio-context hide="bypass" label="Verb" shortcuts="enableAutomation alt shift r">
+<audio-series>
+<audio-player label="player" shortcuts="src alt shift u" src="media/snare.wav"></audio-player>
+
+<audio-verb label="verb" mix="0.5"></audio-verb>
+
+
+<audio-destination label="speakers"></audio-destination>
+</audio-series>
+</audio-context>
+
+</body>
+</html>

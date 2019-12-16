@@ -1,0 +1,22 @@
+<!doctype html>
+<head>
+<meta charset="utf-8">
+<title>audio worklet test</title>
+</head>
+<body>
+<button>start</button>
+
+<script>
+const c = new AudioContext();
+c.audioWorklet.addModule("t.js")
+.then(() => {
+const whiteNoiseNode = new AudioWorkletNode(c, 'white-noise-processor');
+whiteNoiseNode.connect(c.destination)
+});
+
+</script>
+
+</script>
+
+</body>
+</html>
