@@ -28,9 +28,9 @@ static get is() { return "audio-stereo-processor"; }
 static get properties () {
 return {
 rotation: {type: Number, value: 0, notify: true, observer: "rotationChanged"},
-center: {type: Number, value: 0, notify: true, observer: "_setEnhancer"},
-width: {type: Number, value: 0, notify: true, observer: "_setEnhancer"},
-balance: {type: Number, value: 0, notify: true, observer: "_setEnhancer"},
+center: {type: Number, value: 0, notify: true, observer: "centerChanged"},
+width: {type: Number, value: 0, notify: true, observer: "widthChanged"},
+balance: {type: Number, value: 0, notify: true, observer: "balanceChanged"},
 }; // return
 } // get properties
 
@@ -49,9 +49,12 @@ super.connectedCallback();
 //signalReady(this);
 } // connectedCallback
 
-rotationChanged (value) {this.component.setRotation(value);}
+rotationChanged (value) {this.component.rotation= value;}
+centerChanged (value) {this.component.center = value;}
+widthChanged (value) {this.component.width = value;}
+balanceChanged (value) {this.component.balance = value;}
 
-_setEnhancer (center, width, balance) {
+/*_setEnhancer (center, width, balance) {
 const parameters = [this.center, this.width, this.balance];
 if (parameters.some(Number.isNaN)) return;
 if (this._parameters && parameters.every((value,i) => this._parameters[i] === value)) return;
@@ -59,6 +62,7 @@ this._parameters = parameters;
 
 this.component.setEnhancer(...parameters);
 } // _setEnhancer
+*/
 
 } // class AudioStereoProcessor
 

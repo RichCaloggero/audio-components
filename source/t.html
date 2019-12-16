@@ -12,6 +12,7 @@ c.audioWorklet.addModule("t.js")
 .then(() => {
 const whiteNoiseNode = new AudioWorkletNode(c, 'white-noise-processor');
 whiteNoiseNode.connect(c.destination)
+//whiteNoiseNode.parameters["gain"].value = .2;
 });
 
 </script>
