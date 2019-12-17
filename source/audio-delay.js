@@ -11,7 +11,7 @@ return html`
 <legend><h2>{{label}}</h2></legend>
 <ui-boolean label="bypass" value="{{bypass}}"></ui-boolean>
 <ui-number label="mix" value="{{mix}}" min="-1.0" max="1.0" step="0.1"></ui-number>
-<ui-number label="delay" type="number" value="{{delay}}" min="0.0" max="1.0" step="0.00001"></ui-number>
+<ui-number label="delay" type="number" value="{{delay}}" min="0.0" max="1.0" step="{{step}}"></ui-number>
 </fieldset>
 `; // html
 } // get template
@@ -20,6 +20,7 @@ static get is() { return "audio-delay"; }
 
 static get properties () {
 return {
+step: {type: Number, value: 0.00001},
 delay: {type: Number, value: 0.0, notify: true, observer: "delayChanged"},
 }; // return
 } // get properties
