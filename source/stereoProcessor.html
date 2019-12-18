@@ -12,7 +12,24 @@
 <audio-player label="player" shortcuts="src alt shift u" src="media/friday.mp3"></audio-player>
 
 <audio-series label="master">
+
+<audio-parallel>
+<audio-control label="control stereo processor">
 <audio-stereo-processor silent-bypass label="rotate left" mix="1.0"   hide="mix" rotation="-45"></audio-stereo-processor>
+
+<audio-parameter label="control rotation" name="rotation"
+function="180 * sin(t/6)"></audio-parameter>
+</audio-control>
+
+<audio-control label="control stereo processor">
+<audio-stereo-processor silent-bypass label="rotate left" mix="1.0"   hide="mix" rotation="-45"></audio-stereo-processor>
+
+<audio-parameter label="control rotation" name="rotation"
+function="-180 * sin(t/6)"></audio-parameter>
+</audio-control>
+</audio-parallel>
+
+
 
 </audio-series>
 

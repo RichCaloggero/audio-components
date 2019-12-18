@@ -13,7 +13,7 @@ return html`
 <ui-boolean label="bypass" value="{{bypass}}"></ui-boolean>
 <ui-number label="mix" value="{{mix}}" min="-1.0" max="1.0" step="0.1"></ui-number>
 
-<ui-number label="rotation" value="{{rotation}}" min="-90" max="90" step="1"></ui-number>
+<ui-number label="rotation" value="{{rotation}}" min="-180" max="180" step="1"></ui-number>
 <ui-number label="center" value="{{center}}" min="-100.0" max="100.0" step="1"></ui-number>
 <ui-number label="width" value="{{width}}" min="0.0" max="200.0" step="1"></ui-number>
 <ui-number label="balance" value="{{balance}}" min="-100.0" max="100.0" step="1"></ui-number>
@@ -46,7 +46,7 @@ this._parameters = null;
 
 connectedCallback () {
 super.connectedCallback();
-//signalReady(this);
+signalReady(this);
 } // connectedCallback
 
 rotationChanged (value) {this.component.rotation= value;}

@@ -29,6 +29,12 @@ automationRate: "k-rate"
 
 constructor () {
 super ();
+this.rotation = 0;
+this.width = 100;
+this.balance = 0;
+this.center = 0;
+
+
 this.port.onmessage = e => {
 const data = e.data;
 const name = data[0];
@@ -37,7 +43,6 @@ this[name] = value;
 //console.debug(`parameter ${name} set to ${value}`);
 };
 
-
 console.log("AudioWorkletProcessor initialized...");
 } // constructor
 
@@ -45,17 +50,13 @@ process (inputs, outputs, parameters) {
 const inputBuffer = inputs[0];
 const outputBuffer = outputs[0];
 if (inputBuffer.length > 0) {
-processAudio(inputBuffer, outputBuffer,
-this.rotation, this.center, this.width,  this.balance
-);
+processAudio.call (this, inputBuffer, outputBuffer);
 } // if
 return true;
 } // process
 } // class StereoProcessor
 
-registerProcessor("stereo-processor", _StereoProcessor);
-
-function processAudio (inputBuffer, outputBuffer, rotation=0, center=0, width=100, balance=0) {
+function processAudio (inputBuffer, outputBuffer) {
 if (inputBuffer.length !== 2 || outputBuffer.length !== 2) throw new Error("processAudio: can only process stereo signals");
 
 const inLeft = inputBuffer[0];
@@ -64,15 +65,17 @@ const outLeft = outputBuffer[0];
 const outRight = outputBuffer[1];
 
 for (let i = 0; i < inLeft.length; i++) {
-//outLeft[i] = inLeft[i];
-//outRight[i] = inRight[i];
-const rotated = rotate (inLeft[i], inRight[i], rotation);
-const rotatedEnhanced = stereoEnhance (rotated[0], rotated[1], center, width, balance);
+const rotated = rotate (inLeft[i], inRight[i], this.rotation);
+const rotatedEnhanced = stereoEnhance (rotated[0], rotated[1], this.center, this.width, this.balance);
 
 outLeft[i] = rotatedEnhanced[0];
 outRight[i] = rotatedEnhanced[1];
 } // for each sample
 } // processAudio
+
+
+registerProcessor("stereo-processor", _StereoProcessor);
+
 
 
 function rotate (l, r, rotation) {
