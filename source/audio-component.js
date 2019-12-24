@@ -39,16 +39,19 @@ this._bypass.gain.value = 0;} else {
 this._silentBypass = false;
 this._bypass.gain.value = 1.0;
 } // if
+
+return this;
 } // silentBypass
 
 mix (value) {
 //console.debug(`mix: ${this.name} ${this.value} ${!this.output} ${!this.wet}`);
 this.dry.gain.value = 1-Math.abs(value);
-return (this._mix = this.wet.gain.value = value);
+this._mix = this.wet.gain.value = value;
+return this;
 } // mix
 
 bypass (value) {
-if (!this.output) return;
+if (!this.output) return this;
 //console.debug(`${this.name}.bypass ${value} ${this.wet.gain.value} ${this.dry.gain.value} ${this._bypass}`);
 if (value) {
 this.dry.disconnect();
@@ -60,6 +63,8 @@ this.wet.connect(this.output);
 this._bypass.disconnect();
 } // if
 //console.debug(`- ${this.wet.gain.value} ${this.dry.gain.value} ${this._bypass}`);
+
+return this;
 } // bypass
 
 isEnabled () {return this._bypass === 0;}
@@ -445,69 +450,6 @@ this.filterComponent.connect(this.output);
 } // parallel
 } // class Phaser
 
-export class XTC extends AudioComponent {
- constructor (audio, bandCount = 8, delay = 0.00001) {
-super (audio, "xtc");
-this.xtc = new Series(audio, [
-new Series(audio, [
-createFilter("bandpass", 1200, 0.0003),
-createBands(bandCount, delay),
-]), // inner series
-createFilter("lowshelf", 200, 1.0, 4.0),
-createGain(2.5)
-]); // outer series
-
-this.input.connect(this.xtc.input);
-this.xtc.output.connect(this.wet);
-
-this.widener = this.xtc.components[0];
-this.bassBoost = this.xtc.components[1];
-this.makeupGain = this.xtc.components[2];
-this.mix = this.widener.mix.bind(this.widener);
-
-function createBands (count) {
-const p = [];
-for (let i=0; i<count; i++) p[i] = createBand(i);
-return new Parallel(audio, p);
-} // createBands
-
-function createBand (index) {
-const d = delay * (index+1);
-
-// alternate bands switch their stereo orientation and phase
-const g = (isEven(index)? -1 : 1) * (0.9 - .1*index);
-const s = isEven(index)? [new ChannelSwap(audio)] : [];
-
-s.push(createDelay(d));
-s.push(createGain(g));
-console.debug (`XTC band ${index}: ${s.length === 3}, ${d}, ${g}`);
-
-const band = new Series(audio, s);
-band.silentBypass(true);
-return band;
-
-function isEven (n= 0) {return n%2 === 0;}
-} // createBand
-
-function createGain (gain) {return new Gain(audio, gain);}
-
-function createDelay (delay) {return new Delay(audio, delay);}
-
-function createFilter (type, frequency, q, gain) {return new Filter(audio, type, frequency, q, gain);}
-} // constructor
-
-bands () {return this.xtc.components[0].components[1].components;}
-
-delays() {
-return this.bands().map(band =>
-band.components.length === 3? band.components[1] : band.components[0]);
-} // delays
-
-setDelays (delay) {
-this.delays.forEach((d, i) => d.delay.delayTime = delay * (i+1));
-} // setDelays
-
-} // class Xtc
 
 export class ChannelSwap extends AudioComponent {
 constructor (audio) {

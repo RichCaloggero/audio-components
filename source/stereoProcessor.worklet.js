@@ -89,15 +89,10 @@ let angle = Math.atan( spl1 / spl0 );
 
 //if ((s0 === 1 && s1 === -1) || (s0 == -1 && s1 == -1))  angle += Math.PI;
 if ((s0 === 1 && s1 === -1) || (s0 == 1 && s1 == 1))  angle += Math.PI;
-
-
-if (s0 == -1 && s1 == 1) angle += (2*Math.PI);
-
-if (spl1 === 0) {
+else if (s0 == -1 && s1 == 1) angle += (2*Math.PI);
+else if (spl1 === 0) {
 if (spl0 > 0) angle = Math.PI/2; else angle = 3*Math.PI/2;
-} // if
-
-if (spl0 === 0) {
+} else if (spl0 === 0) {
 if (spl1 > 0) angle = 0; else angle = Math.PI;
 } // if
 

@@ -31,10 +31,27 @@ function="sin(t)"></audio-parameter>
 </audio-control>
 
 <audio-series label="master"   hide="mix" shortcuts="bypass shift alt m">
+
+<audio-parallel>
+<audio-control label="control stereo processor">
+<audio-stereo-processor silent-bypass label="rotate 1" mix="1.0"   hide="mix" rotation="-45"></audio-stereo-processor>
+
+<audio-parameter label="control rotation" name="rotation"
+function="180 * sin(t/8)"></audio-parameter>
+</audio-control>
+
+<audio-control label="control stereo processor">
+<audio-stereo-processor silent-bypass label="rotate 2" mix="1.0"   hide="mix" rotation="-45"></audio-stereo-processor>
+
+<audio-parameter label="control rotation" name="rotation"
+function="180 * sin(t/8 + .3)"></audio-parameter>
+</audio-control>
+</audio-parallel>
+
 <audio-series label="widener" hide="bypass" mix="0.5">
 <audio-filter label="filter" hide="type,detune,gain" type="bandpass" frequency="2400" q="0.3"></audio-filter>
 
-<audio-channelSwap label="swapper" mix="-0.5"></audio-channelSwap>
+<audio-channelSwap bypass label="swapper" mix="-0.5"></audio-channelSwap>
 
 
 <audio-series  	label="tapped delay" hide="mix" mix="0.5" id="taps" feed-forward>

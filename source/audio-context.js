@@ -78,7 +78,7 @@ return html`
 </div><!-- dialog -->
 
 
-<div role="region" aria-label="status" class="statusMessage" aria-live="polite"></div>
+<div role="region" aria-label="status" id="statusMessage" aria-live="polite"></div>
 </fieldset><!-- audio context region -->
 
 <slot></slot>
@@ -220,10 +220,13 @@ else throw new Error(`${this.id}: ${e} is null or invalid -- cannot connect`);
 } // components
 
 _enableAutomation (value) {
-const _message = value? "Automation enabled." : "Automation disabled.";
-if (value) startAutomation();
-else stopAutomation();
-//statusMessage(_message);
+if (value) {
+startAutomation();
+this.dispatchEvent(new CustomEvent("startAutomation"));
+} else {
+stopAutomation();
+this.dispatchEvent(new CustomEvent("stopAutomation"));
+} // if
 } // _enableAutomation
 
 _showListener (value) {if (shadowRoot) shadowRoot.querySelector("#listener").hidden = !value;}
@@ -411,13 +414,14 @@ automationQueue = automationQueue.filter(e => e != element);
 } // removeFromAutomationQueue
 
 
-export function statusMessage (message) {
+export function statusMessage (message, log) {
 const p = document.createElement("p");
 p.appendChild(document.createTextNode(message));
 if (shadowRoot) {
-const status = shadowRoot.querySelector (".statusMessage");
+const status = shadowRoot.querySelector ("#statusMessage");
 
 if (status) {
+if (!log) status.innerHTML = "";
 status.appendChild(p);
 return;
 } // if

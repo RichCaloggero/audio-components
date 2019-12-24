@@ -38,8 +38,8 @@ static get is() { return "audio-filter"; }
 static get properties () {
 return {
 type: {type: String, value: "lowpass", notify: true, observer: "typeChanged"},
-frequency: {type: Number, notify: true, observer: "frequencyChanged"},
-q: {type: Number, notify: true, observer: "qChanged"},
+frequency: {type: Number, notify: true, value: 350, observer: "frequencyChanged"},
+q: {type: Number, notify: true, value: 1, observer: "qChanged"},
 gain: {type: Number, notify: true, observer: "gainChanged"},
 detune: {type: Number, notify: true, observer: "detuneChanged"},
 }; // return

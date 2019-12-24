@@ -31,7 +31,7 @@ constructor () {
 super ();
 instanceCount += 1;
 this.id = `${AudioControl.is}-${instanceCount}`;
-this.ui = false;
+this._init = false;
 this.component = new AudioComponent (this.audio, "control");
 this.target = null;
 this.parameters = [];
@@ -116,13 +116,14 @@ if (parameter.text) {
 parameter.function = compileFunction(parameter.text, "t");
 if (parameter.function) {
 parameter.function.bind(controller.target);
+this._init = true;
 } else {
 statusMessage(`automation of parameter ${parameter.name} failed; invalid function;\n${parameter.text}`);
 } // if
 
 } else {
 parameter.function = null;
-statusMessage(`Automation disabled for ${parameter.name}`);
+if (this._init) statusMessage(`Automation disabled for ${parameter.name}`);
 } // if
 
 if (index < 0) parameters.push(parameter);

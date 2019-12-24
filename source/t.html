@@ -1,21 +1,165 @@
 <!doctype html>
 <head>
 <meta charset="utf-8">
-<title>audio worklet test</title>
+<title>test</title>
+<!--<script src="./resonance-audio.min.js" crossorigin="anonymous"></script>-->
+<script src="loader.js"></script>
 </head>
 <body>
-<button>start</button>
+<fieldset id="parameters">
+<legend><h2>Parameters</h2></legend>
+<label>randomize: <input id="randomize" type="checkbox"></label>
+ <label>filter type: <input id="type" type="text" value="allpass" accesskey="t"></label>
+<label>q: <input id="q" type="range" min="0.1" value="4.3" max="20" step="0.1" accesskey="q"></label>
+
+<label>min frequency: <input id="minFrequency" type="range"  min="128" value="128" max="5000" step="20"></label>
+<label>frequency base: <input id="base" type="range"  min="0" value="1.5" max="2" step="0.1"></label>
+<label>frequency range: <input id="frequencyRange" type="range" min="0.1" value="1" max="8000" step="0.1"></label>
+<label>rate: <input id="rate" type="range" min="-1" value="1" max="20" step="1"></label>
+</fieldset>
+
+
+<audio-context hide="bypass" label="test" shortcuts="enableAutomation alt shift r">
+<audio-series>
+<audio-player label="player" shortcuts="src alt shift u" src="media/Legion_Of_Mary_May_21_1975_Keystone_Complete_medium.mp4"></audio-player>
+
+<audio-series id="master" label="master" mix="0.4">
+<audio-delay label="delay"></audio-delay>
+
+<audio-series id="container"></audio-series>
+
+<audio-filter label="bass" hide="mix, detune, q"></audio-filter>
+
+</audio-series>
+
+<audio-destination label="speakers"></audio-destination>
+</audio-series>
+</audio-context>
 
 <script>
-const c = new AudioContext();
-c.audioWorklet.addModule("t.js")
-.then(() => {
-const whiteNoiseNode = new AudioWorkletNode(c, 'white-noise-processor');
-whiteNoiseNode.connect(c.destination)
-//whiteNoiseNode.parameters["gain"].value = .2;
+const bandCount = 10;
+const container = document.querySelector("#container");
+const parameters = document.querySelector("#parameters");
+
+const s = document.createElement("audio-split");
+s.setAttribute("swap-outputs", "");
+
+const left = document.createElement("audio-parallel");
+const right = document.createElement("audio-parallel");
+s.appendChild(left);
+s.appendChild(right);
+
+for (let i=0; i<2*bandCount; i++) {
+const c = document.createElement("audio-control");
+const f = document.createElement("audio-filter");
+f.setAttribute("type", "bandpass");
+f.setAttribute("q", 1);
+const p = document.createElement("audio-parameter");
+
+c.appendChild(f);
+c.appendChild(p);
+(isEven(i)? left : right)
+.appendChild(c);
+} // for
+container.appendChild(s);
+setType(getValue("#type"));
+setQ(getValue("#q"));
+setFrequencies(getValue("#base"), getValue("#minFrequency"));
+let automate = _automate;
+
+parameters.addEventListener("change", parametersChanged);
+document.querySelector("audio-context").addEventListener("startAutomation", () => statusMessage("Automation started."));
+document.querySelector("audio-context").addEventListener("stopAutomation", () => {
+setFrequencies(getValue("#base"), getValue("#minFrequency"));
+statusMessage("Automation stopped and frequencies reset.")
 });
 
-</script>
+function parametersChanged (e) {
+const parameter = e.target;
+const value = parameter.value;
+
+switch (parameter.id) {
+case "q": setQ(Number(value)); return;
+case "type": setType(value); return;
+case "randomize": automate = parameter.checked? _automateRandomly : _automate; return;
+
+default: automate(...getValues());
+} // switch
+
+function getValues () {
+return [
+getValue("#frequencyRange"),
+getValue("#minFrequency"),
+getValue("#rate")
+];
+} // getValues
+} // parametersChanged
+
+function setQ (value) {s.querySelectorAll("audio-filter").forEach(f => f.setAttribute("q", value));}
+function setType (value) {filters().forEach(f => f.setAttribute("type", value));}
+function setFrequencies (base = 2, minFrequency = 30) {filters().forEach((f,i) => f.setAttribute("frequency", Math.pow(base, i) * minFrequency));}
+
+function getValue (selector) {
+const element = document.querySelector(selector);
+return element.type === "number" || element.type === "range"?
+Number(element.value) : element.value;
+} // getValue
+
+function _automateRandomly (frequencyRange, minFrequency, rate) {
+s.querySelectorAll("audio-parameter").forEach ((parameter,i) => {
+const phase = random();
+const range = random(0, frequencyRange);
+
+let speed;
+speed = rate <= 0?
+1 / random(0.25, 20)
+: 1 / rate;
+
+const func = `${range} * (1 + .5*sin(${speed}*t + ${phase})) + ${minFrequency}`;
+//alert(func);
+
+parameter.setAttribute("name", "frequency");
+parameter.setAttribute("function", func);
+}); // forEach audio-parameter
+
+statusMessage("_automateRandomly: ready.");
+} // _automateRandomly
+
+function _automate (minFrequency, frequencyRange, rate) {
+s.querySelectorAll("audio-control").forEach((c,i) => {
+const f = c.querySelector("audio-filter");
+const p = c.querySelector("audio-parameter");
+const freq = Math.pow(2, i) * base;
+const phase = i/13;
+rate = rate >= 0? 1/rate : 0;
+const range = frequencyRange;
+const func = `${range} * sin(${rate}*t + ${phase}) + ${freq}`;
+
+f.setAttribute("frequency", freq);
+p.setAttribute("name", "frequency");
+p.setAttribute("function", func);
+//alert(func);
+}); // forEach
+statusMessage("Static configuration ready.");
+} // _automate
+
+function filters () {return s.querySelectorAll("audio-filter");}
+function params () {return s.querySelectorAll("audio-parameter");}
+
+
+
+function random (a=0 , b=1) {
+return Math.abs(b-a) * Math.random() + Math.min(a,b);
+} // random
+
+function isEven (x) {return x%2 === 0;}
+
+function statusMessage (text) {
+const status = document.querySelector("audio-context").shadowRoot.querySelector("#statusMessage");
+const p = document.createElement("p");
+p.textContent = text;
+status.appendChild(p);
+} // statusMessage
 
 </script>
 

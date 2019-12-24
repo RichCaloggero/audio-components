@@ -20,13 +20,13 @@ static get is() { return "audio-parameter"; }
 static get properties () {
 return {
 name: String,
-function: String,
+function: String
 }; // return
 } // get properties
 
 static get observers () {
 return [
-"update(name, function)"
+"_update(name, function)"
 ];
 } // get observers
 
@@ -41,11 +41,12 @@ super.connectedCallback();
 signalReady(this);
 } // connectedCallback
 
-update (_name, _function) {
+
+_update (_name, _function) {
 if (!_name) return;
 if (!_function) _function = "";
 updateParameter(this.parentElement, _name, _function);
 } // update
-
 } // class AudioParameter
+
 customElements.define(AudioParameter.is, AudioParameter);

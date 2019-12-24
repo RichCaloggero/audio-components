@@ -7,9 +7,11 @@ let instanceCount = 0;
 class AudioSplit extends _AudioContext_ {
 static get template () {
 return html`
-<div class="audio-split">
+<fieldset class="audio-split">
+<ui-boolean label="bypass" value="{{bypass}}"></ui-boolean>
+<ui-number label="mix" value="{{mix}}" min="-1.0" max="1.0" step="0.1"></ui-number>
+</fieldset>
 <slot></slot>
-</div>
 `; // html
 } // get template
 
@@ -27,7 +29,6 @@ constructor () {
 super ();
 instanceCount += 1;
 this.id = `${AudioSplit.is}-${instanceCount}`;
-this.ui = false;
 } // constructor
 
 connectedCallback () {
@@ -36,7 +37,6 @@ childrenReady(this)
 .then(children => {
 //console.log(`- ${this.nodeName}#${this.id}.connectedCallback.then: found ${children.length} children`);
 this.component = new Split(this.audio, this.components(children), this["swap-inputs"], this["swap-outputs"]);
-//this.component.connect(this["swap-inputs"], this["swap-outputs"]);
 signalReady(this);
 }).catch(error => alert(`audio-split: cannot connect;\n${error}`));
 } // connectedCallback
