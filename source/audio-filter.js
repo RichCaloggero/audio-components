@@ -40,8 +40,8 @@ return {
 type: {type: String, value: "lowpass", notify: true, observer: "typeChanged"},
 frequency: {type: Number, notify: true, value: 350, observer: "frequencyChanged"},
 q: {type: Number, notify: true, value: 1, observer: "qChanged"},
-gain: {type: Number, notify: true, observer: "gainChanged"},
-detune: {type: Number, notify: true, observer: "detuneChanged"},
+gain: {type: Number, notify: true, value: 1, observer: "gainChanged"},
+detune: {type: Number, value: 0, notify: true, observer: "detuneChanged"},
 }; // return
 } // get properties
 
@@ -59,11 +59,11 @@ super.connectedCallback();
 signalReady(this);
 } // connectedCallback
 
-frequencyChanged (value) {this.component.filter.frequency.value = value;}
-qChanged (value) {this.component.filter.Q.value = value;}
-typeChanged (value) {this.component.filter.type = value;}
-detuneChanged (value) {this.component.filter.detune.value = value;}
-gainChanged (value) {this.component.filter.gain.value = value;}
+frequencyChanged (value) {if (Number(value)) this.component.filter.frequency.value = value;}
+qChanged (value) {if (Number(value)) this.component.filter.Q.value = value;}
+typeChanged (value) {if (value) this.component.filter.type = value;}
+detuneChanged (value) {if (Number(value)) this.component.filter.detune.value = value;}
+gainChanged (value) {if (Number(value)) this.component.filter.gain.value = value;}
 } // class AudioFilter
 
 customElements.define(AudioFilter.is, AudioFilter);

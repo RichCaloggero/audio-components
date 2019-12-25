@@ -116,7 +116,7 @@ if (parameter.text) {
 parameter.function = compileFunction(parameter.text, "t");
 if (parameter.function) {
 parameter.function.bind(controller.target);
-this._init = true;
+controller._init = true;
 } else {
 statusMessage(`automation of parameter ${parameter.name} failed; invalid function;\n${parameter.text}`);
 } // if
