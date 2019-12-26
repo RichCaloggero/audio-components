@@ -32,7 +32,7 @@
 <audio-parallel id="left"></audio-parallel>
 
 <audio-series>
-<audio-delay label="delay" delay="0.00007" hide="mix"></audio-delay>
+<audio-gain gain="-1"></audio-gain>
 <audio-parallel id="right"></audio-parallel>
 </audio-series>
 </audio-split>
@@ -48,7 +48,7 @@
 </audio-context>
 
 <script>
-const bandCount = 10;
+const bandCount = 25;
 const container = document.querySelector("#container");
 const parameters = document.querySelector("#parameters");
 let automationEnabled = false;

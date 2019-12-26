@@ -38,6 +38,7 @@ static get is() { return "audio-panner"; }
 
 static get properties () {
 return {
+label: String,
 position: {type: String, value: "0, 0, 0", notify: true, observer: "positionChanged"},
 x: {type: Number, value: 0, notify: true, observer: "xChanged"},
 y: {type: Number, value: 0, notify: true, observer: "yChanged"},

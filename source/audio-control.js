@@ -10,6 +10,8 @@ const userScope = Object.create(null);
 class AudioControl extends _AudioContext_ {
 static get template () {
 return html`
+<div class="audio-control">
+</div>
 <slot></slot>
 `; // html
 } // get template
@@ -17,7 +19,6 @@ static get is() { return "audio-control"; }
 
 static get properties () {
 return {
-name: String, function: String
 };
 } // properties
 

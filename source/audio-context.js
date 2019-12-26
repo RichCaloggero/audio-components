@@ -262,15 +262,16 @@ const _audio = audio;
 const _audioPlayer = audioPlayer;
 const recorder = this.shadowRoot.querySelector(".recorder");
 const audioElement = recorder.querySelector("audio");
+const automationEnabled = this.enableAutomation;
 
 audio = new OfflineAudioContext(2, buffer.length, 44100);
 const html = this.outerHTML;
-const container = document.createElement("div");
+let container = document.createElement("div");
 container.setAttribute("hidden", "");
 container.innerHTML = html;
 this.parentElement.appendChild(container);
 const newContext = container.children[0];
-const statusMessage = (text) => this.shadowRoot.querySelector(".statusMessage").textContent = text;
+const statusMessage = (text) => this.shadowRoot.querySelector("#statusMessage").textContent = text;
 copyAllValues(this, newContext);
 
 
@@ -279,6 +280,8 @@ const audioSource = audio.createBufferSource();
 audioSource.buffer = buffer;
 audioPlayer.audioSource = audioSource;
 audioSource.connect(audioPlayer.output);
+newContext.enableAutomation = automationEnabled;
+
 audioSource.start();
 statusMessage("Rendering audio, please wait...");
 
@@ -295,6 +298,7 @@ audioPlayer.audioSource.connect(audioPlayer.output);
 this.parentElement.removeChild(container);
 container.innerHTML = "";
 container = null;
+this.enableAutomation = automationEnabled;
 
 statusMessage(`Render complete: ${Math.round(10*buffer.duration/60)/10} minutes of audio rendered.`);
 }).catch(error => statusMessage(error));

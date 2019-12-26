@@ -29,6 +29,17 @@ function="sin(t)"></audio-parameter>
 </audio-control>
 
 <audio-series label="master"  hide="mix" shortcuts="bypass shift alt m">
+
+<audio-control>
+<audio-panner label="panner" maxDistance="1" refDistance="1" rolloffFactor="1"></audio-panner>
+
+<audio-parameter label="control x" name="x"
+function="cos(t/3)"></audio-parameter>
+
+<audio-parameter label="control z" name="z"
+function="sin(t/3)"></audio-parameter>
+</audio-control>
+
 <audio-series label="widener" hide="bypass" mix="0.6">
 <audio-filter label="pre-filter" type="bandpass" hide="gain,detune" frequency="1200" q="0.0003"></audio-filter>
 
