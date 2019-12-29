@@ -73,6 +73,8 @@ statusMessage (e);
 parameter.function = null;
 } // try
 }); // forEach parameters
+
+//console.debug (`automate: automating ${this.target.id}`);
 } // automate
 
 start () {

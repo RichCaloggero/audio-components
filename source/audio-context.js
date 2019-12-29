@@ -11,9 +11,10 @@ let instanceCount = 0;
 export let shadowRoot = null;
 
 export let audio;
-const automationInterval = 50; // milliseconds
+const automationInterval = 10; // milliseconds
 let automationQueue = [];
-let automation = null; // value returned from setInterval
+let automator = null;
+let _automation = false;
 
 // the following maintains a map of elements and method calls on their underlying components
 // signalReady() runs these each time an element becomes ready
@@ -280,7 +281,12 @@ const audioSource = audio.createBufferSource();
 audioSource.buffer = buffer;
 audioPlayer.audioSource = audioSource;
 audioSource.connect(audioPlayer.output);
-newContext.enableAutomation = automationEnabled;
+if (automationEnabled) {
+newContext.enableAutomation = true;
+//startAutomation();
+newContext._enableAutomation(true);
+console.debug(`recording: automation enabled for ${automationQueue.length} elements...`);
+} // if
 
 audioSource.start();
 statusMessage("Rendering audio, please wait...");
@@ -398,13 +404,22 @@ return;
 } // signalReady
 
 export function startAutomation () {
-automation = setInterval (() => {
+_automation = true;
+const _tick = () => {
 automationQueue.forEach(e => e.automate());
-}, automationInterval);
+if (_automation) {
+automator = audio.createOscillator();
+automator.onended = _tick;
+automator.start();
+automator.stop(automationInterval/1000);
+} // if
+}; // _tick
+
+_tick();
 } // startAutomation
 
 export function stopAutomation () {
-clearInterval(automation);
+_automation = false;
 } // stopAutomation
 
 

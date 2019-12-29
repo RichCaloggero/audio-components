@@ -27,6 +27,7 @@ const elementList = [
 "./audio-xtc.js",
 "./audio-verb.js",
 "./audio-stereoProcessor.js",
+"./audio-fixedDelay.js",
 
 // automation
 "./audio-control.js",
