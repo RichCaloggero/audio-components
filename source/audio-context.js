@@ -381,7 +381,7 @@ resolve(e.target);
 });
 
 } else {
-console.log(`ready: ${element.id} is invalid`);
+throw new Error (`ready: ${element.id} is invalid`);
 } // if
 } // ready
 

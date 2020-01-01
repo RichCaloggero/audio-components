@@ -89,7 +89,7 @@ removeFromAutomationQueue(this);
 customElements.define(AudioControl.is, AudioControl);
 
 
-function compileFunction (text, parameter) {
+export function compileFunction (text, parameter = "t") {
 try {
 return new Function (parameter,
 `with (Math) {
@@ -98,7 +98,7 @@ function s (x, l=-1.0, u=1.0) {return toRange(Math.sin(x), l,u);}
 function c (x, l=-1.0, u=1.0) {return toRange(Math.cos(x), l,u);}
 return ${text};
 } // Math
-`);
+`); // new Function
 
 } catch (e) {
 alert (e);
