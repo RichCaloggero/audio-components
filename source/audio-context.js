@@ -11,7 +11,7 @@ let instanceCount = 0;
 export let shadowRoot = null;
 
 export let audio;
-const automationInterval = 10; // milliseconds
+export const automationInterval = 10; // milliseconds
 let automationQueue = [];
 let automator = null;
 let _automation = false;
@@ -39,7 +39,7 @@ return html`
 <legend><h1>[[label]]</h1></legend>
 <ui-boolean label="enable automation" value="{{enableAutomation}}" shortcut="alt shift r"></ui-boolean>
 <ui-boolean label="showListener" value="{{showListener}}"></ui-boolean>
-<ui-boolean label="enable record mode" value="{{recordMode}}"></ui-boolean>
+<ui-boolean label="enable record mode" class="enable-record-mode" value="{{recordMode}}"></ui-boolean>
 
 <fieldset class="recorder" hidden>
 <legend><h2>Recorder</h2></legend>
@@ -63,7 +63,7 @@ return html`
 <ui-number label="upZ" value="{{upZ}}"></ui-number>
 </fieldset>
 
-<div role="dialog" hidden id="defineKeyDialog" aria-labelledby="defineKeyDialog-title">
+<!--<div role="dialog" hidden id="defineKeyDialog" aria-labelledby="defineKeyDialog-title">
 <header>
 <h2 id="defineKeyDialog-title">Define Key</h2>
 <button class="close">Close</button>
@@ -77,7 +77,7 @@ return html`
 <button class="ok">OK</button>
 </div><!-- .body -->
 </div><!-- dialog -->
-
+-->
 
 <div role="region" aria-label="status" id="statusMessage" aria-live="polite"></div>
 </fieldset><!-- audio context region -->
@@ -273,14 +273,16 @@ container.innerHTML = html;
 this.parentElement.appendChild(container);
 const newContext = container.children[0];
 const statusMessage = (text) => this.shadowRoot.querySelector("#statusMessage").textContent = text;
-copyAllValues(this, newContext);
 
+copyAllValues(this, newContext);
 
 setTimeout(() => {
 const audioSource = audio.createBufferSource();
 audioSource.buffer = buffer;
 audioPlayer.audioSource = audioSource;
 audioSource.connect(audioPlayer.output);
+
+
 if (automationEnabled) {
 newContext.enableAutomation = true;
 //startAutomation();
@@ -307,8 +309,8 @@ container = null;
 this.enableAutomation = automationEnabled;
 
 statusMessage(`Render complete: ${Math.round(10*buffer.duration/60)/10} minutes of audio rendered.`);
-}).catch(error => statusMessage(error));
-}, 1000);
+}).catch(error => statusMessage(`render: ${error}\n${error.stack}\n`));
+}, 3000);
 } // render
 
 setId (value) {this.id = value;}
@@ -460,18 +462,33 @@ return {parameter: tokens[0], shortcut: tokens.slice(1).join(" ")};
 } // parseShortcuts
 
 function copyAllValues (_from, _to) {
-const values = findAllControls(_from).map(x => x.value);
-findAllControls(_to)
-.forEach((x,i) => {
+//try {
+_from = findAllControls(_from);
+_to = findAllControls(_to);
+
+const values = _from.map(x => {
+return x.type && x.type === "checkbox"? x.checked : x.value
+});
+
+_to.forEach((x,i) => {
+if (x instanceof HTMLInputElement && x.type=== "checkbox") {
+x.checked = Boolean(values[i]);
+console.debug("- checkbox: ", x);
+x.dispatchEvent(new Event("click"));
+} else {
 x.value = values[i];
 x.dispatchEvent(new Event("change"));
+} // if
 });
 } // copyAllValues
 
 function findAllControls(root) {
-return enumerateAll(root)
-.flat(9999)
-.filter(x => x && x.matches && x.matches("input,select"));
+const enableRecordMode = document.querySelector("audio-context")
+.shadowRoot.querySelector(".enable-record-mode")
+.shadowRoot.querySelector("input");
+return enumerateAll(root).filter(x => 
+x && x.matches && x.matches("input,select") && x !== enableRecordMode
+); // filter
 } // findAllControls
 
 
@@ -480,7 +497,7 @@ return [
 root,
 Array.from(root.children).map(x => enumerateAll(x)),
 root.shadowRoot? enumerateAll(root.shadowRoot) : []
-];
+].flat(Infinity);
 } // enumerateAll
 
 function round (n) {return Math.round(n*10)/10;}

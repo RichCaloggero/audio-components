@@ -15,6 +15,7 @@ const elementList = [
 // processors
 "./audio-player.js",
 "./audio-destination.js",
+"./audio-oscillator.js",
 
 "./audio-gain.js",
 "./audio-filter.js",

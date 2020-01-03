@@ -1,0 +1,176 @@
+<!doctype html>
+<head>
+<meta charset="utf-8">
+<title>test</title>
+<!--<script src="./resonance-audio.min.js" crossorigin="anonymous"></script>-->
+<script src="loader.js"></script>
+</head>
+<body>
+<fieldset id="parameters">
+<legend><h2>Parameters</h2></legend>
+<div id="statusMessage" role="status"></div>
+<label>delay: <input id="delay" type="range" min="0.0" value="0.000015" max="0.009" step="0.000005" accesskey="d"></label>
+<label>gain: <input id="gain" type="range" min="0.0" value="0.93" max="0.99" step="0.02" accesskey="g"></label>
+
+</fieldset>
+
+
+<audio-context hide="bypass" label="test" shortcuts="enableAutomation alt shift r">
+<audio-series>
+<audio-player label="player" shortcuts="src alt shift u" src="media/5. Song For My Father.mp3"></audio-player>
+
+<audio-control>
+<audio-panner label="panner" maxDistance="1" refDistance="1" rolloffFactor="1"></audio-panner>
+
+<audio-parameter label="control x" name="x" function="cos(t/2)"></audio-parameter>
+<audio-parameter label="control z" name="z" function="sin(t/2)"></audio-parameter>
+
+<!--<audio-parameter name="positionX"><audio-series>
+<audio-oscillator label="control x" frequency="0.3" max="20" step=".1" hide="detune, bypass, mix"></audio-oscillator>
+<audio-gain label="range of x" gain="0.5" step=".01" hide="bypass, mix"></audio-gain>
+</audio-series></audio-parameter>
+
+<audio-parameter name="positionZ"><audio-series>
+<audio-oscillator label="control z" frequency="0.3" max="20" step="0.1" hide="detune, bypass, mix"></audio-oscillator>
+<audio-delay label="phase of z" delay="0.5" hide="bypass, mix"></audio-delay>
+<audio-gain label="range of z" gain="0.5" step="0.01" hide="bypass, mix"></audio-gain>
+</audio-series></audio-parameter>
+-->
+</audio-control>
+
+<audio-series id="master" label="master" mix="-0.4">
+
+<audio-series id="container" feed-forward>
+
+
+</audio-series><!-- container -->
+
+<audio-filter label="bass" type="lowshelf" hide="mix, detune, q, type"></audio-filter>
+<audio-compressor label="compressor" hide="mix"></audio-compressor>
+</audio-series><!-- master -->
+
+<audio-destination label="speakers"></audio-destination>
+</audio-series>
+</audio-context>
+
+<script>
+const bandCount = 150;
+const container = document.querySelector("#container");
+const parameters = document.querySelector("#parameters");
+let automationEnabled = false;
+
+for (let i=0; i<bandCount; i++) {
+const s = document.createElement("audio-series");
+const d = document.createElement("audio-delay");
+const swap = document.createElement("audio-channelSwap");
+
+s.appendChild(swap);
+s.appendChild(d);
+container.appendChild(s);
+} // for
+setDelays(_valueOf("#delay"));
+setGains(_valueOf("#gain"));
+
+parameters.addEventListener("change", parametersChanged);
+document.querySelector("audio-context").addEventListener("startAutomation", () => {
+automationEnabled = true;
+statusMessage("Automation started.")
+});
+
+document.querySelector("audio-context").addEventListener("stopAutomation", () => {
+automationEnabled = false;
+statusMessage("Automation stopped and frequencies reset.")
+});
+
+function parametersChanged (e) {
+const parameter = e.target;
+const value = parameter.value;
+
+switch (parameter.id) {
+case "delay": setDelays(Number(value)); return;
+case "gain": setGains(Number(value)); return;
+} // switch
+} // parametersChanged
+
+function setDelays (value) {
+container.querySelectorAll("audio-delay").forEach(d => d.setAttribute("delay", value));
+} // setDelays
+
+function setGains (value) {
+container.querySelectorAll("audio-delay").forEach(d => d.setAttribute("mix", -1*value));
+} // setGains
+
+function series (count) {
+const s = [];
+for (let i=0; i<count; i++) s[i] = i;
+return s;
+} // series
+
+
+function _valueOf(selector) {
+const element = document.querySelector(selector);
+return element.type === "number" || element.type === "range"?
+Number(element.value) : element.value;
+} // _valueOf
+
+function _automate (minFrequency = _valueOf("#minFrequency"), frequencyRange = _valueOf("#frequencyRange"), rate = _valueOf("#rate"), base = _valueOf("#base")) {
+params().forEach((p,i) => {
+const freq = frequency(i);
+const range = base * freq;
+const phase = i/13;
+const func = `${range} * 0.5*sin(${rate}*t + ${phase})`;
+
+p.setAttribute("name", "frequency");
+p.setAttribute("function", func);
+//alert(func);
+}); // forEach
+
+statusMessage("non-random automation set.");
+} // _automate
+
+function _automateRandomly (minFrequency = _valueOf("#minFrequency"), frequencyRange = _valueOf("#frequencyRange"), rate = _valueOf("#rate"), base = _valueOf("#base")) {
+params().forEach((p,i) => {
+const freq = random(minFrequency, Math.max(...frequencies(bandCount/2)));
+const range = base * freq;
+const phase = i/13;
+const func = `${range} * 0.5*sin(${rate}*t + ${phase})`;
+
+p.setAttribute("name", "frequency");
+p.setAttribute("function", func);
+//alert(func);
+}); // forEach
+
+statusMessage("random automation set.");
+} // _automateRandomly
+
+
+
+
+
+function random (a=0 , b=1) {
+return Math.abs(b-a) * Math.random() + Math.min(a,b);
+} // random
+
+function isEven (x) {return x%2 === 0;}
+
+function statusMessage (text) {
+const status = document.querySelector("#parameters #statusMessage");
+const p = document.createElement("p");
+p.textContent = text;
+status.innerHTML = "";
+status.appendChild(p);
+} // statusMessage
+
+function zip(a1, a2) {
+if (a1.length === a2.length)
+return a1.map((x,i) => [x, a2[i]]);
+
+alert ("zip: lengths must be equal");
+return [];
+} // zip
+
+
+</script>
+
+</body>
+</html>

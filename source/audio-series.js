@@ -28,8 +28,6 @@ constructor () {
 super ();
 instanceCount += 1;
 this.id = `${AudioSeries.is}-${instanceCount}`;
-//this.ui = false;
-//this.hide = "bypass, mix";
 } // constructor
 
 connectedCallback () {

@@ -11,7 +11,7 @@ return html`
 <legend><h2>[[label]]</h2></legend>
 
 <ui-list label="type" value="{{type}}" values='["sine", "square", "sawtooth", "triangle"]'></ui-list>
-<ui-number label="frequency" value="{{frequency}}" min="0.0" max="20000.0" step="10.0"></ui-number>
+<ui-number label="frequency" value="{{frequency}}" min="{{min}}" max="{{max}}" step="{{step}}"></ui-number>
 <ui-number label="detune" value="{{detune}}" min="0.0" max="100.0" step="1.0"></ui-number>
 <ui-boolean label="play" value="{{play}}" key="p"></ui-boolean>
 </fieldset>
@@ -21,6 +21,10 @@ static get is() { return "audio-oscillator"; }
 
 static get properties() {
 return {
+min: {type: Number, value: 0},
+max: {type: Number, value: 20000},
+step: {type: Number, value: 10},
+
 type: String,
 frequency: Number,
 detune: Number,

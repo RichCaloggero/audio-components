@@ -203,7 +203,7 @@ m.connect(this.wet);
 export class Convolver extends AudioComponent {
 constructor (audio) {
 super(audio, "convolver");
-this.convolver = audio.createConvolver();
+this.node = this.convolver = audio.createConvolver();
 this.impulse = null;
 this.input.connect(this.convolver);
 this.convolver.connect(this.wet);
@@ -219,7 +219,7 @@ this.convolver.buffer = buffer;
 export class Compressor extends AudioComponent {
 constructor (audio) {
 super(audio, "compressor");
-this.compressor = audio.createDynamicsCompressor();
+this.node = this.compressor = audio.createDynamicsCompressor();
 this.input.connect(this.compressor);
 this.compressor.connect(this.wet);
 } // constructor
@@ -228,7 +228,7 @@ this.compressor.connect(this.wet);
 export class Filter extends AudioComponent {
 constructor (audio, type = "lowpass", frequency = 300, q = 1.0, gain = 1.0, detune = 0.0) {
 super (audio, "filter");
-this.filter = this.audio.createBiquadFilter();
+this.node = this.filter = this.audio.createBiquadFilter();
 this.filter.type = type;
 this.filter.frequency.value = frequency;
 this.filter.Q.value = q;
@@ -242,7 +242,7 @@ this.filter.connect(this.wet);
 export class Delay extends AudioComponent {
 constructor (audio, delay = 0.00001, parent) {
 super(audio, "delay", parent);
-this.delay = audio.createDelay();
+this.node = this.delay = audio.createDelay();
 this.delay.delayTime.value = delay;
 this.input.connect(this.delay);
 this.delay.connect(this.wet);
@@ -260,7 +260,7 @@ set(options) {
 const isPlaying = this.isPlaying;
 if (isPlaying) this.stop();
 if (this.oscillator) this.oscillator.disconnect();
-this.oscillator = this.audio.createOscillator();
+this.node = this.oscillator = this.audio.createOscillator();
 
 if (options.type) this.oscillator.type = options.type;
 if (options.frequency) this.oscillator.frequency.value = options.frequency;
@@ -285,7 +285,7 @@ this.isPlaying = false;
 } // if
 } // stop
 
-} // class Delay
+} // class Oscillator
 
 export class Feedback extends AudioComponent {
 constructor (audio, target) {
@@ -315,7 +315,7 @@ setDelay (value) {this.delay.delayTime.value = value;}
 export class Panner extends AudioComponent {
 constructor (audio) {
 super (audio, "panner");
-this.panner = audio.createPanner();
+this.node = this.panner = audio.createPanner();
 this.panner.channelCount = 1;
 this.panner.channelCountMode = "explicit";
 this.input.connect(this.panner);
@@ -329,7 +329,7 @@ audio.listener.setOrientation(0,0,-1,0,1,0);
 export class Gain extends AudioComponent {
 constructor (audio, _gain = 1.0, parent) {
 super (audio, "gain", parent);
-this.gain = this.input;
+this.node = this.gain = this.input;
 this.gain.gain.value = _gain;
 this.gain.connect(this.wet);
 } // constructor
