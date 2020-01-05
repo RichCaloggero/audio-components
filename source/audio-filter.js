@@ -25,7 +25,7 @@ return html`
 ]'></ui-list>
 
 <ui-number label="frequency" type="number" value="{{frequency}}" min="20" max="20000" step="10.0"></ui-number>
-<ui-number label="Q" type="number" value="{{q}}" min="0.0001" max="100.0" step="0.0001"></ui-number>
+<ui-number label="Q" type="number" value="{{q}}" min="-100.0" max="100.0" step="0.01"></ui-number>
 
 <br><ui-number label="gain" value="{{gain}}" min="-30.0" max="30.0" step="1"></ui-number>
 <ui-number label="detune" value="{{detune}}" min="0.0" max="100.0"></ui-number>

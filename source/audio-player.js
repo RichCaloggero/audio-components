@@ -79,7 +79,7 @@ e.target.textContent = "play";
 } // if
 
 e.target.focus();
-console.log(`${this.id}: player is ${player.paused? "paused" : "playing"}`);
+//console.log(`${this.id}: player is ${player.paused? "paused" : "playing"}`);
 } // play
 
 back (e) {

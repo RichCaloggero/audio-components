@@ -1,7 +1,7 @@
 <!doctype html>
 <head>
 <meta charset="utf-8">
-<title>test</title>
+<title>Delays</title>
 <!--<script src="./resonance-audio.min.js" crossorigin="anonymous"></script>-->
 <script src="loader.js"></script>
 </head>
@@ -9,21 +9,21 @@
 <fieldset id="parameters">
 <legend><h2>Parameters</h2></legend>
 <div id="statusMessage" role="status"></div>
-<label>delay: <input id="delay" type="range" min="0.0" value="0.000015" max="0.009" step="0.000005" accesskey="d"></label>
-<label>gain: <input id="gain" type="range" min="0.0" value="0.93" max="0.99" step="0.02" accesskey="g"></label>
+<label>delay: <input id="delay" type="range" min="0.0" value="0.00001" max="0.009" step="0.000005" accesskey="d"></label>
+<label>gain: <input id="gain" type="range" min="0.0" value="0.966" max="0.99" step="0.02" accesskey="g"></label>
 
 </fieldset>
 
 
-<audio-context hide="bypass" label="test" shortcuts="enableAutomation alt shift r">
+<audio-context automation-interval="100" hide="bypass" label="test" shortcuts="enableAutomation alt shift r">
 <audio-series>
-<audio-player label="player" shortcuts="src alt shift u" src="media/5. Song For My Father.mp3"></audio-player>
+<audio-player label="player" shortcuts="src alt shift u" src="media/D2_02_Thats What Love Will Make You Do.flac"></audio-player>
 
 <audio-control>
 <audio-panner label="panner" maxDistance="1" refDistance="1" rolloffFactor="1"></audio-panner>
 
-<audio-parameter label="control x" name="x" function="cos(t/2)"></audio-parameter>
-<audio-parameter label="control z" name="z" function="sin(t/2)"></audio-parameter>
+<audio-parameter label="control x" name="x" function="c(t/3, -10, 10)"></audio-parameter>
+<audio-parameter label="control z" name="z" function="s(t, -10, 10)"></audio-parameter>
 
 <!--<audio-parameter name="positionX"><audio-series>
 <audio-oscillator label="control x" frequency="0.3" max="20" step=".1" hide="detune, bypass, mix"></audio-oscillator>
@@ -38,15 +38,21 @@
 -->
 </audio-control>
 
-<audio-series id="master" label="master" mix="-0.4">
+<audio-series id="master" label="master" mix="0.25">
 
 <audio-series id="container" feed-forward>
 
+<audio-parallel>
+<audio-filter label="eq1" type="peaking" frequency="470" q="2" gain="-30" hide="mix, detune, bypass"></audio-filter>
+<audio-filter label="eq2" type="peaking" frequency="2500" q="2" gain="-30" q="7" hide="mix, detune, bypass"></audio-filter>
+<audio-filter label="eq3" type="lowshelf" frequency="450" q="0.6" gain="-30" hide="mix, detune, bypass"></audio-filter>
+<audio-filter label="eq4" type="peaking" gain="0" hide="mix, detune, bypass"></audio-filter>
+<audio-filter label="eq5" type="peaking" gain="0" hide="mix, detune, bypass"></audio-filter>
+</audio-parallel>
 
 </audio-series><!-- container -->
 
-<audio-filter label="bass" type="lowshelf" hide="mix, detune, q, type"></audio-filter>
-<audio-compressor label="compressor" hide="mix"></audio-compressor>
+<audio-compressor label="compressor" ratio="2" threshold="-30" knee="20" attack="0.2" release="5.0" hide="mix"></audio-compressor>
 </audio-series><!-- master -->
 
 <audio-destination label="speakers"></audio-destination>
@@ -54,7 +60,7 @@
 </audio-context>
 
 <script>
-const bandCount = 150;
+const bandCount = 200;
 const container = document.querySelector("#container");
 const parameters = document.querySelector("#parameters");
 let automationEnabled = false;
@@ -62,19 +68,21 @@ let automationEnabled = false;
 for (let i=0; i<bandCount; i++) {
 const s = document.createElement("audio-series");
 const d = document.createElement("audio-delay");
+const g = document.createElement("audio-gain");
 const swap = document.createElement("audio-channelSwap");
 
 s.appendChild(swap);
 s.appendChild(d);
+s.appendChild(g);
 container.appendChild(s);
 } // for
 setDelays(_valueOf("#delay"));
 setGains(_valueOf("#gain"));
 
 parameters.addEventListener("change", parametersChanged);
-document.querySelector("audio-context").addEventListener("startAutomation", () => {
+document.querySelector("audio-context").addEventListener("startAutomation", e => {
 automationEnabled = true;
-statusMessage("Automation started.")
+statusMessage(`Automation started; interval = ${e.detail.interval}.`);
 });
 
 document.querySelector("audio-context").addEventListener("stopAutomation", () => {
@@ -97,7 +105,7 @@ container.querySelectorAll("audio-delay").forEach(d => d.setAttribute("delay", v
 } // setDelays
 
 function setGains (value) {
-container.querySelectorAll("audio-delay").forEach(d => d.setAttribute("mix", -1*value));
+container.querySelectorAll("audio-gain").forEach(g => g.setAttribute("gain", -1*value));
 } // setGains
 
 function series (count) {

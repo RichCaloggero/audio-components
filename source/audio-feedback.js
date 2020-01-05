@@ -13,8 +13,8 @@ return html`
 <ui-boolean label="bypass" value="{{bypass}}"></ui-boolean>
 <ui-number label="mix" value="{{mix}}" min="0" max="1" step="0.1"></ui-number>
 
-<ui-number label="delay" value="{{delay}}" min="0" max="1.0" step="0.000001"></ui-number>
-<ui-number label="gain" value="{{gain}}" min="-1" max="1" step="0.1"></ui-number>
+<ui-number label="delay" value="{{delay}}" min="0" max="1.0" step="0.000002"></ui-number>
+<ui-number label="gain" min="-0.99" value="{{gain}}" max="0.99" step="0.01"></ui-number>
 </fieldset>
 <slot></slot>
 `; // html
@@ -41,12 +41,14 @@ childrenReady(this)
 .then(children => {
 const target = this.components(children)[0];
 this.component = new Feedback(this.audio, target);
+this.component.gain = this.gain;
+this.component.delay = this.delay;
 signalReady(this);
 }); // childrenReady
 } // connectedCallback
 
-delayChanged (value) {if (this.component) this.component.setDelay(value);}
-gainChanged (value) {if (this.component) this.component.setGain(value);}
+delayChanged (value) {if(this.component) this.component.delay = value;}
+gainChanged (value) {if(this.component) this.component.gain = value;}
 
 } // class AudioFeedback
 

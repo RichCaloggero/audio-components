@@ -69,9 +69,9 @@ super.connectedCallback ();
 signalReady(this);
 } // connectedCallback
 
-xChanged (value) {this.component.panner.positionX.value = value;}
-yChanged (value) {this.component.panner.positionY.value = value;}
-zChanged (value) {this.component.panner.positionZ.value = value;}
+xChanged (value) {this.component.x = value;}
+yChanged (value) {this.component.y = value;}
+zChanged (value) {this.component.z = value;}
 
 orientationXChanged (value) {this.component.panner.orientationX.value = value;}
 orientationYChanged (value) {this.component.panner.orientationY.value = value;}

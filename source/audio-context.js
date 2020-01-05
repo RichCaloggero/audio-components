@@ -9,15 +9,18 @@ export function registerAudioPlayer (x) {audioPlayer = x;}
 // audio-context
 let instanceCount = 0;
 export let shadowRoot = null;
-
 export let audio;
-export const automationInterval = 10; // milliseconds
+export let automationInterval = 70; // milliseconds
 let automationQueue = [];
 let automator = null;
 let _automation = false;
 
-// the following maintains a map of elements and method calls on their underlying components
-// signalReady() runs these each time an element becomes ready
+/* the following maintains a map of elements and method calls on their underlying components.
+signalReady() runs these each time an element becomes ready.
+Only used for methods common to all elements like mix() and bypass() which need to be called when the subclass component is ready.
+for methods defined in the subclass, call the method in connectedCallback() for that element.
+this avoids having to call methods common to all elements in the subclass.
+*/
 
 const iMap = new Map();
 function doIfInitialized(element, method, value) {
@@ -90,16 +93,19 @@ static get is() { return "audio-context";}
 
 static get properties() {
 return {
+id: String,
 hide: String,
 label: String,
+sampleRate: Number,
+
 mix: {type: Number, notify: true, observer: "_mix"},
 bypass: {type: Boolean, notify: true, observer: "_bypass"},
 "silent-bypass": {type: Boolean, notify: true, observer: "_silentBypass"},
 enableAutomation: {type: Boolean, value: false, notify: true, observer: "_enableAutomation"}, // enableAutomation
 showListener: {type: Boolean, value: false, notify: true, observer: "_showListener"},
 recordMode: {type: Boolean, value: false, notify: true, observer: "_recordMode"},
-id: {type: String, notify:true, observer: "setId"}	,
 shortcuts: {type: String, notify:true, observer: "shortcutsChanged"},
+automationInterval: {type: Number, notify: true, observer: "automationIntervalChanged"},
 
 listenerX: {type: Number, value: 0, notify: true, observer: "listenerXChanged"},
 listenerY: {type: Number, value: 0, notify: true, observer: "listenerYChanged"},
@@ -128,7 +134,7 @@ return;
 } // if
 
 if (!audio) {
-audio = new AudioContext();
+audio = new AudioContext({sampleRate: this.sampleRate});
 console.debug(`${this.id}: creating new audio context`);
 } // if
 
@@ -148,6 +154,8 @@ if (!shadowRoot) shadowRoot = this.shadowRoot;
 //console.debug(`connected: ${this.id}`);
 } // connectedCallback
 
+automationIntervalChanged (value) {if (value && !Number.isNaN(value)) automationInterval = value;}
+ 
 listenerXChanged (value) {this.audio.listener.setPosition(this.listenerX, this.listenerY, this.listenerZ);}
 listenerYChanged (value) {this.audio.listener.setPosition(this.listenerX, this.listenerY, this.listenerZ);}
 listenerZChanged (value) {this.audio.listener.setPosition(this.listenerX, this.listenerY, this.listenerZ);}
@@ -223,7 +231,7 @@ else throw new Error(`${this.id}: ${e} is null or invalid -- cannot connect`);
 _enableAutomation (value) {
 if (value) {
 startAutomation();
-this.dispatchEvent(new CustomEvent("startAutomation"));
+this.dispatchEvent(new CustomEvent("startAutomation", {detail: {interval: automationInterval}}));
 } else {
 stopAutomation();
 this.dispatchEvent(new CustomEvent("stopAutomation"));
@@ -314,33 +322,34 @@ statusMessage(`Render complete: ${Math.round(10*buffer.duration/60)/10} minutes 
 } // render
 
 setId (value) {this.id = value;}
-
-
-_setParameterValue (parameter, value) {
-//console.log (`_setParameterValue (${parameter}, ${value}`);
-if (! parameter) return;
-
-try {
-if (Number.isNaN(value)) {
-throw new Error ("value not a number");
-} // if
-
-if (!(parameter.setValueAtTime instanceof Function)) throw new Error ("first argument must be a valid audioParam");
-
-parameter.setValueAtTime (value, audio.currentTime);
-return parameter;
-
-} catch (e) {
-let message = `_setParameterValue (${parameter}, ${value}): ${e}`;
-alert (message);
-alert (e.stack);
-} // catch
-} // _setParameterValue
 } // class _AudioContext_
 
 customElements.define(_AudioContext_.is, _AudioContext_);
 
+
 /// utility functions
+
+
+export function _setParam (parameter, value) {
+//console.log (`_setParameterValue (${parameter}, ${value}`);
+if (! parameter) return;
+
+try {
+if (parameter instanceof AudioParam) {
+if (automator) parameter.linearRampToValueAtTime(value, audio.currentTime);
+else parameter.value = value;
+
+} else {
+parameter = value;
+} // if
+
+return parameter;
+
+} catch (e) {
+let message = `_setParam (${parameter}, ${value}): ${e}`;
+alert(`${message}\n${e.stack}`);
+} // catch
+} // _setParam
 
 export function childrenReady (element) {
 //console.log(`childrenReady: ${element.id}`);
@@ -405,7 +414,10 @@ return;
 } // if
 } // signalReady
 
-export function startAutomation () {
+export function startAutomation () {automator = setInterval(() => automationQueue.forEach(e => e.automate()), automationInterval);} // startAutomation
+export function stopAutomation () {clearInterval(automator); automator = null;}
+
+/*export function startAutomation () {
 _automation = true;
 const _tick = () => {
 automationQueue.forEach(e => e.automate());
@@ -423,6 +435,7 @@ _tick();
 export function stopAutomation () {
 _automation = false;
 } // stopAutomation
+*/
 
 
 export function addToAutomationQueue (element) {

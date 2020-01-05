@@ -8,9 +8,10 @@ const elementList = [
 // connectors
 //"./audio-context.js",
 "./audio-series.js",
-"./audio-split.js",
 "./audio-parallel.js",
+"./audio-split.js",
 "./audio-channelSwap.js",
+"./audio-feedback.js",
 
 // processors
 "./audio-player.js",

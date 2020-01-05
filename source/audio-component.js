@@ -1,4 +1,4 @@
-import {statusMessage} from "./audio-context.js";
+import {_setParam, statusMessage} from "./audio-context.js";
 
 const registry = {};
 function registerComponent (name, parent) {
@@ -140,12 +140,12 @@ c.output.connect(next.input);
 console.log(`- connected ${c.name} to ${next.name}`);
 
 if (feedForward && c !== last) {
-c.output.connect(this.wet);
+c.wet.connect(this.wet);
 console.log(`- feedForward: connected ${c.name} to ${this.name} wet`);
 } // if
 
 if (feedBack) {
-c.output.connect(this.input);
+c.wet.connect(this.input);
 console.log(`- feedBack: connected ${c.name} to ${this.name} input`);
 } // if
 
@@ -159,6 +159,11 @@ throw new Error (`series: ${c.name} and ${next.name} must both be AudioComponent
 if (last.output) {
 last.output.connect(this.wet);
 console.log(`- connected ${last.name} to ${this.name} wet`);
+
+if (feedBack) {
+last.wet.connect(this.input);
+console.log(`- feedBack: connected ${last.name} to ${this.name} input`);
+} // if
 } // if
 
 this.components = components;
@@ -290,26 +295,25 @@ this.isPlaying = false;
 export class Feedback extends AudioComponent {
 constructor (audio, target) {
 super (audio, "feedback");
-this.delay = audio.createDelay();
-this.gain = audio.createGain();
+this._delay = audio.createDelay();
+this._gain = audio.createGain();
 this.target = target;
 
 this.input.connect(this.target.input);
 this.target.output.connect(this.wet);
 this.connectFeedback();
 
-this.delay.delayTime.value = 0;
-this.gain.gain.value = 0.5;
 } // constructor
+
+set gain (value) {this._gain.gain.value = value;}
+set delay (value) {this._delay.delayTime.value = value;}
 
 bypass (value) {
 super.bypass (value);
-if (!value && this.wet && this.delay && this.gain) this.connectFeedback();
+if (!value && this.wet && this._delay && this._gain) this.connectFeedback();
 } // bypass
 
-connectFeedback () {this.wet.connect(this.delay).connect(this.gain).connect(this.input);}
-setGain (value) {this.gain.gain.value = value;}
-setDelay (value) {this.delay.delayTime.value = value;}
+connectFeedback () {this.wet.connect(this._delay).connect(this._gain).connect(this.input);}
 } // class Feedback
 
 export class Panner extends AudioComponent {
@@ -324,15 +328,23 @@ this.panner.panningModel = "HRTF";
 this.panner.setOrientation(0, 0, 0);
 audio.listener.setOrientation(0,0,-1,0,1,0);
 } // constructor
+
+set x (value) {__set(this, "positionX", value);}
+set y (value) {__set(this, "positionY", value);}
+set z (value) {__set(this, "positionZ", value);}
+
+
 } // class Panner
 
 export class Gain extends AudioComponent {
 constructor (audio, _gain = 1.0, parent) {
 super (audio, "gain", parent);
-this.node = this.gain = this.input;
-this.gain.gain.value = _gain;
-this.gain.connect(this.wet);
+this.node = this.output;
+this.input.connect(this.output);
+this.node.gain.value = _gain;
 } // constructor
+
+set gain (value) {this.node.gain.value = value;}
 } // class Gain
 
 export class Binaural extends AudioComponent {
@@ -504,3 +516,6 @@ return filter;
 
 function random (min, max) {return Math.random() * Math.abs(max-min) + min;}
 
+function __set (object, name, value) {
+if (object.node && name in object.node) _setParam(object.node[name], value);
+} // __set
