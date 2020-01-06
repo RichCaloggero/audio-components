@@ -1,7 +1,7 @@
 <!doctype html>
 <head>
 <meta charset="utf-8">
-<title>feedback</title>
+<title>Phase Panner</title>
 <!--<script src="./resonance-audio.min.js" crossorigin="anonymous"></script>-->
 <script src="loader.js"></script>
 </head>
@@ -12,13 +12,13 @@
 <label for="crossover">crossover: </label>
 <input id="crossover" type="number" min="500" value="1000" max="2500" step="10" accesskey="c">
 
-<br><label for="q">q: </label>
-<input id="q" type="range" min="0" value="1" max="10" step=".1" accesskey="q">
+<label>Q: <input id="q" type="range" min="0" value="1" max="10" step=".1" accesskey="q"></label>
+<label>phase: <input id="phase" type="range" min="0" value="0" max="90" step=".1" accesskey="p"></label>
 
 </fieldset>
 
 
-<audio-context sample-rate="88200" automation-interval="100" hide="bypass" label="test" shortcuts="enableAutomation alt shift r">
+<audio-context automation-interval="100" hide="bypass" label="Phase Panner" shortcuts="enableAutomation alt shift r">
 <audio-series>
 <audio-player label="player" shortcuts="src alt shift u" src="media/D2_02_Thats What Love Will Make You Do.flac"></audio-player>
 
@@ -84,6 +84,13 @@ filters().forEach(f => f.setAttribute("frequency", Number(e.target.value)))
 document.querySelector("#q").addEventListener("change", e => {
 filters().forEach(f => f.setAttribute("q", Number(e.target.value)))
 }); // change
+
+document.querySelector("#phase").addEventListener("change", e => {
+document.querySelector("#lowband audio-stereo-processor").setAttribute("rotation", Number(e.target.value));
+document.querySelector("#highband audio-stereo-processor").setAttribute("rotation", -1 * Number(e.target.value));
+}); // change
+
+document.querySelectorAll("#parameters input").forEach(e => e.dispatchEvent(new CustomEvent("change")));
 
 function filters () {return container.querySelectorAll("#lowband audio-filter, #highband audio-filter");}
 
