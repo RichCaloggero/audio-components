@@ -29,6 +29,7 @@ constructor () {
 super ();
 instanceCount += 1;
 this.id = `${AudioSplit.is}-${instanceCount}`;
+this.container = true;
 } // constructor
 
 connectedCallback () {

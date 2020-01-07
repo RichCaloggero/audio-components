@@ -28,8 +28,7 @@ constructor () {
 super ();
 instanceCount += 1;
 this.id = `${AudioParallel.is}-${instanceCount}`;
-//this.ui = false;
-//this.hide = "bypass, mix";
+this.container = true;
 } // constructor
 
 connectedCallback () {

@@ -4,7 +4,7 @@ import {bufferToWave} from "./bufferToWave.js";
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
 
 let audioPlayer;
-export function registerAudioPlayer (x) {audioPlayer = x;}
+export function registerAudioPlayer (x) {if (x) audioPlayer = x; return audioPlayer;}
 
 // audio-context
 let instanceCount = 0;
@@ -97,6 +97,7 @@ id: String,
 hide: String,
 label: String,
 sampleRate: Number,
+depth: Number,
 
 mix: {type: Number, notify: true, observer: "_mix"},
 bypass: {type: Boolean, notify: true, observer: "_bypass"},
@@ -125,6 +126,8 @@ constructor () {
 super ();
 instanceCount += 1;
 this.id = `${_AudioContext_.is}-${instanceCount}`;
+this.container = false;
+this.depth = 0;
 this._ready = false;
 this.ui = true;
 
@@ -151,7 +154,8 @@ this.hideControls();
 // when this.shadowRoot becomes set for the first time, store it since it will be shadow root of the audio-context itself
 if (!shadowRoot) shadowRoot = this.shadowRoot;
 
-//console.debug(`connected: ${this.id}`);
+this.depth = depth(this);
+console.debug(`connected: ${this.id} at depth ${this.depth}`);
 } // connectedCallback
 
 automationIntervalChanged (value) {if (value && !Number.isNaN(value)) automationInterval = value;}
@@ -515,3 +519,17 @@ root.shadowRoot? enumerateAll(root.shadowRoot) : []
 
 function round (n) {return Math.round(n*10)/10;}
 
+export function depth (start, top = "audio-context") {
+let e = start;
+while (!(e && e instanceof _AudioContext_)) e = e.parentElement;
+console.debug(`depth: ${e.id}, ${e instanceof _AudioContext_}`);
+
+let _depth = 0;
+while (e && !e.matches("audio-context")) {
+if (!e.container || e.label) _depth += 1;
+console.debug(`- ${_depth}`);
+e = e.parentElement;
+} // while
+
+return _depth;
+} // depth

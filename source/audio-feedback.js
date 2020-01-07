@@ -33,6 +33,7 @@ constructor () {
 super ();
 instanceCount += 1;
 this.id = `${AudioFeedback.is}-${instanceCount}`;
+this.container = true;
 } // constructor
 
 connectedCallback () {

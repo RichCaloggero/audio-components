@@ -95,21 +95,6 @@ else player.currentTime = player.duration;
 } // forward
 
 
-/*updateAudioSource () {
-this.shadowRoot.querySelector(".play").setAttribute("aria-pressed", "false")
-if (!this.audioBuffer) {
-alert("no buffer");
-return;
-} // if
-
-if (this.audioSource) this.audioSource.disconnect();
-this.audioSource = this.audio.createBufferSource();
-this.audioSource.buffer = this.audioBuffer;
-this.audioSource.connect (this.component.output);
-this.component.audioSource = this.audioSource;
-this.audioSource.addEventListener("ended", () => this.updateAudioSource());
-} // updateSource
-*/
 
 
 handleSpecialKeys (e) {

@@ -28,6 +28,7 @@ constructor () {
 super ();
 instanceCount += 1;
 this.id = `${AudioSeries.is}-${instanceCount}`;
+this.container = true;
 } // constructor
 
 connectedCallback () {

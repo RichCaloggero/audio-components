@@ -32,6 +32,7 @@ constructor () {
 super ();
 instanceCount += 1;
 this.id = `${AudioControl.is}-${instanceCount}`;
+this.container = true;
 this._init = false;
 this.target = null;
 this.parameters = [];
