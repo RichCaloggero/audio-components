@@ -9,7 +9,7 @@ static get template () {
 return html`
 
 <fieldset class="audio-convolver">
-<legend><h2>[[label]]</h2></legend>
+<legend><h2 aria-level$="[[depth]]">[[label]]</h2></legend>
 <ui-boolean label="bypass" value="{{bypass}}"></ui-boolean>
 <ui-number label="mix" value="{{mix}}"></ui-number>
 <ui-list label="impulse" value="{{impulse}}" values="{{impulses}}"></ui-list>

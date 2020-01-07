@@ -8,6 +8,8 @@ class AudioSplit extends _AudioContext_ {
 static get template () {
 return html`
 <fieldset class="audio-split">
+<legend><h2 aria-level$="[[depth]]">[[label]]</h2></legend>
+
 <ui-boolean label="bypass" value="{{bypass}}"></ui-boolean>
 <ui-number label="mix" value="{{mix}}" min="-1.0" max="1.0" step="0.1"></ui-number>
 </fieldset>

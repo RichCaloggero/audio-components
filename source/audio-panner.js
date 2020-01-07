@@ -9,7 +9,7 @@ class AudioPanner extends _AudioContext_ {
 static get template () {
 return html`
 <fieldset class="audio-panner">
-<legend><h2>[[label]]</h2></legend>
+<legend><h2 aria-level$="[[depth]]">[[label]]</h2></legend>
 
 <ui-boolean label="bypass" value="{{bypass}}"></ui-boolean>
 <ui-number label="mix" value="{{mix}}"></ui-number>

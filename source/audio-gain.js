@@ -8,7 +8,7 @@ class AudioGain extends _AudioContext_ {
 static get template () {
 return html`
 <fieldset>
-<legend><h2>{{label}}</h2></legend>
+<legend><h2 aria-level$="[[depth]]">{{label}}</h2></legend>
 <ui-number label="gain" value="{{gain}}" min="{{min}}" max="{{max}}" step="{{step}}"></ui-number>
 </fieldset>
 `; // html

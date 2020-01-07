@@ -9,7 +9,7 @@ class AudioReverb extends _AudioContext_{
 static get template () {
 return html`
 <fieldset class="audio-reverb">
-<legend><h2>[[label]]</h2></legend>
+<legend><h2 aria-level$="[[depth]]">[[label]]</h2></legend>
 <ui-boolean name="bypass" label="bypass" value="{{bypass}}"></ui-boolean>
 <ui-number label="mix" value="{{mix}}" min="0.0" max="1.0" step="0.1""></ui-number>
 

@@ -10,7 +10,7 @@ class AudioCompressor extends _AudioContext_ {
 static get template () {
 return html`
 <fieldset class="audio-compressor">
-<legend><h2>[[label]]</h2></legend>
+<legend><h2 aria-level$="[[depth]]">[[label]]</h2></legend>
 <ui-boolean label="bypass" value="{{bypass}}"></ui-boolean>
 
 <ui-number label="ratio" value="{{ratio}}" min="0.0" max="100.0"></ui-number>

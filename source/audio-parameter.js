@@ -8,7 +8,7 @@ class AudioParameter extends _AudioContext_ {
 static get template () {
 return html`
 <fieldset class="audio-parameter">
-<legend><h3 aria-level="{{depth}}">[[label]]</h3></legend>
+<legend><h3 aria-level$="[[depth]]">[[label]]</h3></legend>
 <ui-text label="function" value="{{function}}" shortcut="alt shift f"></ui-text>
 </fieldset>
 <slot></slot>

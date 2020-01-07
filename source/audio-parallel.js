@@ -8,7 +8,7 @@ class AudioParallel extends _AudioContext_ {
 static get template () {
 return html`
 <fieldset class="audio-parallel">
-<legend><h2>[[label]]</h2></legend>
+<legend><h2 aria-level$="[[depth]]">[[label]]</h2></legend>
 <ui-boolean label="bypass" value="{{bypass}}"></ui-boolean>
 <ui-number label="mix" value="{{mix}}" min="-1" max="1" step=".1"></ui-number>
 </fieldset>

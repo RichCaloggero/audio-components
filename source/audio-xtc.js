@@ -10,7 +10,7 @@ class AudioXtc extends _AudioContext_{
 static get template () {
 return html`
 <fieldset class="audio-xtc">
-<legend><h2>[[label]]</h2></legend>
+<legend><h2 aria-level$="[[depth]]">[[label]]</h2></legend>
 <ui-boolean label="bypass" value="{{bypass}}"></ui-boolean>
 <ui-number label="mix" value="{{mix}}" min="0.0" max="1.0" step="0.1"></ui-number>
 <ui-number label="delay" type="number" value="{{delay}}" min="0.0" max="0.5" step="0.00001"></ui-number>

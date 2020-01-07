@@ -8,7 +8,7 @@ class AudioOscillator extends _AudioContext_ {
 static get template () {
 return html`
 <fieldset class="audio-oscillator">
-<legend><h2>[[label]]</h2></legend>
+<legend><h2 aria-level$="[[depth]]">[[label]]</h2></legend>
 
 <ui-list label="type" value="{{type}}" values='["sine", "square", "sawtooth", "triangle"]'></ui-list>
 <ui-number label="frequency" value="{{frequency}}" min="{{min}}" max="{{max}}" step="{{step}}"></ui-number>

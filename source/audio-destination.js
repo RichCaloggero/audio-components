@@ -11,7 +11,7 @@ class AudioDestination extends _AudioContext_ {
 static get template () {
 return html`
 <fieldset class="audio-destination">
-<legend><h2>Speakers</h2></legend>
+<legend><h2 aria-level$="[[depth]]">Speakers</h2></legend>
 </fieldset>
 `; // html
 }  // get template

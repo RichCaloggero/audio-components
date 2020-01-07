@@ -15,6 +15,7 @@ let automationQueue = [];
 let automator = null;
 let _automation = false;
 
+
 /* the following maintains a map of elements and method calls on their underlying components.
 signalReady() runs these each time an element becomes ready.
 Only used for methods common to all elements like mix() and bypass() which need to be called when the subclass component is ready.
@@ -97,7 +98,8 @@ id: String,
 hide: String,
 label: String,
 sampleRate: Number,
-depth: Number,
+depth: {type: Number, notify:true, value: 0},
+container: {type: Boolean, notify:true, value: false, observer: "containerChanged"},
 
 mix: {type: Number, notify: true, observer: "_mix"},
 bypass: {type: Boolean, notify: true, observer: "_bypass"},
@@ -127,7 +129,6 @@ super ();
 instanceCount += 1;
 this.id = `${_AudioContext_.is}-${instanceCount}`;
 this.container = false;
-this.depth = 0;
 this._ready = false;
 this.ui = true;
 
@@ -157,6 +158,8 @@ if (!shadowRoot) shadowRoot = this.shadowRoot;
 this.depth = depth(this);
 console.debug(`connected: ${this.id} at depth ${this.depth}`);
 } // connectedCallback
+
+containerChanged (value) {this.depth = depth(this);}
 
 automationIntervalChanged (value) {if (value && !Number.isNaN(value)) automationInterval = value;}
  
@@ -522,14 +525,13 @@ function round (n) {return Math.round(n*10)/10;}
 export function depth (start, top = "audio-context") {
 let e = start;
 while (!(e && e instanceof _AudioContext_)) e = e.parentElement;
-console.debug(`depth: ${e.id}, ${e instanceof _AudioContext_}`);
 
-let _depth = 0;
+let _depth = 1;
 while (e && !e.matches("audio-context")) {
 if (!e.container || e.label) _depth += 1;
-console.debug(`- ${_depth}`);
 e = e.parentElement;
 } // while
 
+console.debug(`depth: ${e.id}, ${e.container}, depth ${_depth}`);
 return _depth;
 } // depth
