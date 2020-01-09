@@ -2,208 +2,23 @@
 <head>
 <meta charset="utf-8">
 <title>test</title>
-<!--<script src="./resonance-audio.min.js" crossorigin="anonymous"></script>-->
-<script src="loader.js"></script>
 </head>
 <body>
-<fieldset id="parameters">
-<legend><h2>Parameters</h2></legend>
-<div id="statusMessage" role="status"></div>
-<label>randomize: <input id="randomize" type="checkbox"></label>
- <label>filter type: <input id="type" type="text" value="allpass" accesskey="t"></label>
-<label>q: <input id="q" type="range" min="0.1" value="4.3" max="20" step="0.1" accesskey="q"></label>
-
-<label>min frequency: <input id="minFrequency" type="range"  min="128" value="128" max="5000" step="20"></label>
-<label>frequency base: <input id="base" type="range"  min="0" value="1.5" max="2" step="0.1"></label>
-<label>frequency range: <input id="frequencyRange" type="range" min="0.1" value="1" max="2" step="0.1"></label>
-<label>rate: <input id="rate" type="range" min="0.1" value="1" max="20" step="0.1"></label>
-</fieldset>
-
-
-<audio-context hide="bypass" label="test" shortcuts="enableAutomation alt shift r">
-<audio-series>
-<audio-player label="player" shortcuts="src alt shift u" src="media/5. Song For My Father.mp3"></audio-player>
-
-<audio-series id="master" label="master" mix="0.4">
-
-<audio-series id="container">
-
-<audio-split label="split" hide="bypass" id="split" swap-outputs>
-<audio-parallel id="left"></audio-parallel>
-
-<audio-series>
-<audio-gain gain="-1"></audio-gain>
-<audio-parallel id="right"></audio-parallel>
-</audio-series>
-</audio-split>
-
-<audio-filter label="bass" type="lowshelf" hide="mix, detune, q, type"></audio-filter>
-</audio-series><!-- container -->
-
-<audio-compressor label="compressor" hide="mix"></audio-compressor>
-</audio-series><!-- master -->
-
-<audio-destination label="speakers"></audio-destination>
-</audio-series>
-</audio-context>
-
+<label>text: <input type="text" id="source"></label>
+<div id="message" role="status"></div>
 <script>
-const bandCount = 25;
-const container = document.querySelector("#container");
-const parameters = document.querySelector("#parameters");
-let automationEnabled = false;
+const a = document.createElement("audio");
+a.setAttribute("crossorigin", "anonymous");
+a.addEventListener("error", (e) => statusMessage(`media error: ${e.target.error}`));
 
-const s = document.querySelector("#split");
-const left = document.querySelector("#left");
-const right = document.querySelector("#right");
-
-for (let i=0; i<2*bandCount; i++) {
-const c = document.createElement("audio-control");
-const f = document.createElement("audio-filter");
-const p = document.createElement("audio-parameter");
-
-c.appendChild(f);
-c.appendChild(p);
-(isEven(i)? left : right)
-.appendChild(c);
-} // for
-//container.appendChild(s);
-//setType();
-//setQ();
-//setFrequencies();
-let automate = _automate;
-//automate(...getValues());
-
-parameters.addEventListener("change", parametersChanged);
-document.querySelector("audio-context").addEventListener("startAutomation", () => {
-automationEnabled = true;
-statusMessage("Automation started.")
+document.querySelector("#source").addEventListener("change", e => {
+a.src = e.target.value;
 });
-
-document.querySelector("audio-context").addEventListener("stopAutomation", () => {
-automationEnabled = false;
-setFrequencies();
-setQ();
-setType();
-statusMessage("Automation stopped and frequencies reset.")
-});
-
-function parametersChanged (e) {
-const parameter = e.target;
-const value = parameter.value;
-
-switch (parameter.id) {
-case "q": setQ(Number(value)); return;
-case "type": setType(value); return;
-case "randomize": automate = parameter.checked? _automateRandomly : _automate;
-
-default: if (automationEnabled) automate();
-} // switch
-} // parametersChanged
-
-function setQ (value = _valueOf("#q")) {
-filters(left).forEach(f => f.setAttribute("q", value));
-filters(right).forEach(f => f.setAttribute("q", value));
-} // setQ
-
-function setType (value = _valueOf("#type")) {
-filters(left).forEach(f => f.setAttribute("type", value));
-filters(right).forEach(f => f.setAttribute("type", value));
-} // setType
-
-function setFrequencies () {
-filters(left).forEach((f,i) => f.setAttribute("frequency",
-frequency(i))); // left
-
-filters(right).forEach((f,i) => f.setAttribute("frequency",
-frequency(i))); // right
-} // setFrequencies
-
-function frequencies (count) {return series(count).map(i => frequency(i));}
-
-function frequency (index, min = _valueOf("#minFrequency"), base = _valueOf("#base")) {
-return min * Math.pow(base, index);
-} // frequency
-
-function filters (container) {return container.querySelectorAll("audio-filter");}
-function params () {return s.querySelectorAll("audio-parameter");}
-
-function series (count) {
-const s = [];
-for (let i=0; i<count; i++) s[i] = i;
-return s;
-} // series
-
-function getValues () {
-return [
-_valueOf("#frequencyRange"),
-_valueOf("#minFrequency"),
-_valueOf("#rate")
-];
-} // getValues
-
-function _valueOf(selector) {
-const element = document.querySelector(selector);
-return element.type === "number" || element.type === "range"?
-Number(element.value) : element.value;
-} // getValue
-
-function _automate (minFrequency = _valueOf("#minFrequency"), frequencyRange = _valueOf("#frequencyRange"), rate = _valueOf("#rate"), base = _valueOf("#base")) {
-params().forEach((p,i) => {
-const freq = frequency(i);
-const range = base * freq;
-const phase = i/13;
-const func = `${range} * 0.5*sin(${rate}*t + ${phase})`;
-
-p.setAttribute("name", "frequency");
-p.setAttribute("function", func);
-//alert(func);
-}); // forEach
-
-statusMessage("non-random automation set.");
-} // _automate
-
-function _automateRandomly (minFrequency = _valueOf("#minFrequency"), frequencyRange = _valueOf("#frequencyRange"), rate = _valueOf("#rate"), base = _valueOf("#base")) {
-params().forEach((p,i) => {
-const freq = random(minFrequency, Math.max(...frequencies(bandCount/2)));
-const range = base * freq;
-const phase = i/13;
-const func = `${range} * 0.5*sin(${rate}*t + ${phase})`;
-
-p.setAttribute("name", "frequency");
-p.setAttribute("function", func);
-//alert(func);
-}); // forEach
-
-statusMessage("random automation set.");
-} // _automateRandomly
-
-
-
-
-
-function random (a=0 , b=1) {
-return Math.abs(b-a) * Math.random() + Math.min(a,b);
-} // random
-
-function isEven (x) {return x%2 === 0;}
 
 function statusMessage (text) {
-const status = document.querySelector("#parameters #statusMessage");
-const p = document.createElement("p");
-p.textContent = text;
-status.innerHTML = "";
-status.appendChild(p);
+document.querySelector("#message").appendChild(document.createTextNode(text));
 } // statusMessage
-
-function zip(a1, a2) {
-if (a1.length === a2.length)
-return a1.map((x,i) => [x, a2[i]]);
-
-alert ("zip: lengths must be equal");
-return [];
-} // zip
-
+statusMessage("Ready.");
 
 </script>
 

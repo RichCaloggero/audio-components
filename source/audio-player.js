@@ -38,6 +38,7 @@ this.component.input = null;
 if (this.audio && this.audio instanceof AudioContext && this.audio.createMediaElementSource) {
 this.audioElement = document.createElement("audio");
 this.audioElement.setAttribute("crossorigin", "anonymous");
+this.audioElement.addEventListener("error", e => statusMessage(`${this.id}: ${e.target.error.message}`));
 this.audioSource = this.audio.createMediaElementSource(this.audioElement);
 this.audioSource.connect(this.component.output);
 this.component.audioSource = this.audioSource;
@@ -66,20 +67,16 @@ isPlaying () {return this.shadowRoot.querySelector(".play").getAttribute("aria-p
 play (e) {
 const player = this.audioElement;
 if (player.paused) {
-try {
 player.play();
-
-} catch (e) {
-statusMessage(`audio-player: ${e}`);
-} // try
 e.target.textContent = "pause";
+
 } else {
 player.pause();
 e.target.textContent = "play";
 } // if
 
 e.target.focus();
-//console.log(`${this.id}: player is ${player.paused? "paused" : "playing"}`);
+//console.debug(`${this.id}: player is ${player.paused? "paused" : "playing"}`);
 } // play
 
 back (e) {

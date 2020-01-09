@@ -138,7 +138,7 @@ return;
 
 if (!audio) {
 audio = new AudioContext({sampleRate: this.sampleRate});
-console.debug(`${this.id}: creating new audio context`);
+//console.debug(`${this.id}: creating new audio context`);
 } // if
 
 this.audio = audio;
@@ -155,12 +155,10 @@ this.hideControls();
 if (!shadowRoot) shadowRoot = this.shadowRoot;
 
 if (this.matches("audio-context")) {
-console.debug(`connected: ${this.id}, ${this.container}`);
+//console.debug(`connected: ${this.id}, ${this.container}`);
 childrenReady(this).then (children => {
-//console.debug(`-- children: ${children.length}`);
 enumerateNonUi(this)
 .forEach(e => e.depth = depth(e));
-
 signalReady(this);
 }).catch (error => statusMessage(error)); ;
 } // if
@@ -210,9 +208,12 @@ this.hide.trim().split(",").map(x => x.trim().toLowerCase())
 : [];
 
 if (!label) {
+// hide everything if no label
 this.uiControls().forEach(element => element.hidden = true);
 if (this.shadowRoot) this.shadowRoot.children[0].hidden = true;
+
 } else {
+// hide only those elements whose label or name listed in hide attribute
 this.uiControls().filter(x => x.name || x.label).forEach(element => {
 const name = (element.name || element.label).trim().toLowerCase();
 //console.debug(`- checking ${element.id} ${name}`);
@@ -225,7 +226,7 @@ if (name && hide.includes(name)) element.hidden = true;
 uiControls () {
 const selectors = "ui-list,ui-text,ui-number,ui-boolean";
 const controls = Array.from(this.shadowRoot.querySelectorAll(selectors));
-//console.log(`${this.id}: controls ${controls.length} ${controls.map(x => x.name || x.label || x.id || x)}`);
+//console.debug(`${this.id}: controls ${controls.length} ${controls.map(x => x.name || x.label || x.id || x)}`);
 return controls;
 } // uiControls
 
@@ -346,7 +347,7 @@ customElements.define(_AudioContext_.is, _AudioContext_);
 
 
 export function _setParam (parameter, value) {
-//console.log (`_setParameterValue (${parameter}, ${value}`);
+//console.debug (`_setParameterValue (${parameter}, ${value}`);
 if (! parameter) return;
 
 try {
@@ -367,20 +368,20 @@ alert(`${message}\n${e.stack}`);
 } // _setParam
 
 export function childrenReady (element) {
-//console.log(`childrenReady: ${element.id}`);
+//console.debug(`childrenReady: ${element.id}`);
 const children = Array.from(element.children);
 if (!children || children.length === 0) {
-//console.log(`- childrenReady: recursion bottomed out at ${element.id}`);
+//console.debug(`- childrenReady: recursion bottomed out at ${element.id}`);
 return (ready(element));
 } // if
 const undefinedDescendants = Array.from(element.querySelectorAll(":not(:defined)"));
-//console.log(`- ${undefinedDescendants.length} undefined descendants`);
+//console.debug(`- ${undefinedDescendants.length} undefined descendants`);
 
 return new Promise((resolve, reject) => {
 Promise.all(undefinedDescendants.map(e => customElements.whenDefined(e.localName)))
 .then(x => {
 //const undefinedChildren = children.filter(e => e.matches(":not(:defined)"));
-//console.log(`childrenReady: ${element} has ${undefinedChildren.length} undefined children`);
+//console.debug(`childrenReady: ${element} has ${undefinedChildren.length} undefined children`);
 
 console.log(`
 ${element.id}: waiting for ${children.length} children
@@ -398,7 +399,7 @@ console.log(`${element.id} is ready (via flag).`);
 return element;
 } // if
 
-//console.log(`ready: waiting for ${element.id}`);
+//console.debug(`ready: waiting for ${element.id}`);
 return new Promise ((resolve, reject) => {
 element.addEventListener("elementReady", e => {
 console.log(`${e.target.id} is ready (via event).`);
@@ -415,7 +416,7 @@ export function signalReady (element) {
 if (element && element instanceof _AudioContext_) {
 element._ready = true;
 element.dispatchEvent(new CustomEvent("elementReady"));
-//console.log(`signalReady dispatched on ${element.id}`);
+//console.debug(`signalReady dispatched on ${element.id}`);
 
 if (iMap.has(element)) {
 iMap.get(element)
@@ -455,7 +456,7 @@ _automation = false;
 
 export function addToAutomationQueue (element) {
 automationQueue.push (element);
-console.log (`added ${element.label || element.id} to automation queue`);
+console.debug(`added ${element.label || element.id} to automation queue`);
 } // addToAutomationQueue
 
 export function removeFromAutomationQueue (element) {
@@ -501,7 +502,7 @@ return x.type && x.type === "checkbox"? x.checked : x.value
 _to.forEach((x,i) => {
 if (x instanceof HTMLInputElement && x.type=== "checkbox") {
 x.checked = Boolean(values[i]);
-console.debug("- checkbox: ", x);
+//console.debug("- checkbox: ", x);
 x.dispatchEvent(new Event("click"));
 } else {
 x.value = values[i];
@@ -540,17 +541,10 @@ let e = start;
 //while (e && !e.matches("audio-context")) e = e.parentElement;
 
 let _depth = 1;
-try {
 while (e && !e.matches("audio-context")) {
 if (!e.container || e.label) _depth += 1;
 e = e.parentElement;
 } // while
-
-} catch (error) {
-console.debug(error);
-console.debug(`depth: ${_depth}: ${e.id}, "${e.label}", ${e.container}`);
-//debugger;
-} // try
 
 return _depth;
 } // depth
