@@ -45,34 +45,41 @@ childrenReady(this)
 .then(children => {
 if (children.length < 2) throw new Error(`${this.id}: need two or more children`);
 this.component = new AudioComponent(this.audio, "control", this);
+// first child is target (element we're controlling); remaining children are audi-parameter definitions
 this.target = children[0];
 
+// connect through target element's component
 const targetComponent = this.target.component;
 this.component.input.connect(targetComponent.input);
 targetComponent.output.connect(this.component.wet);
 
+// if it has a node property, then we can manipulate AudioParam objects on that node directly
 const targetNode = targetComponent.node;
 if (targetNode) {
-children.slice(1)
-.filter(p => {
+// filter parameter defs on whether name attribute present on target node
+children.slice(1).filter(p => {
 return !p.function && p.name in targetNode;
 }).forEach(p => {
+// audioParam we want to manipulate
 const param = targetNode[p.name];
+// the component generating the signal to send to the audioParam
 const automator = p.children[0].component;
-if (param && param instanceof AudioParam) {
+
+if (automator && automator instanceof AudioComponent && param && param instanceof AudioParam) {
 automator.output.connect(param);
-console.debug(`${this.id}: connected ${p.children[0].id} to ${p.name} of ${this.target.id}`);
+console.log (`${this.id}: connected ${p.children[0].id} to audioParam ${p.name} of ${this.target.id}`);
 
 }else {
 throw new Error(`${this.id}: ${p.name} parameter of ${target.id} is not an AudioParam`);
 } // if
 }); // forEach
-console.debug("-- connected");
 
 } else {
-console.debug(`${this.id} "${this.label}": no target node`);
+//console.debug(`${this.id} "${this.label}": no target node`);
 } // if targetNode
 
+// start js-based automation for this element
+// (this starts even if no suitable parameter definitions present; should only start if needed)
 this.start();
 signalReady(this);
 
@@ -80,7 +87,7 @@ signalReady(this);
 } // connectedCallback
 
 
-automate (_stop) {
+automate () {
 const target = this.target;
 this.parameters.forEach(parameter => {
 const p = target[parameter.name];
