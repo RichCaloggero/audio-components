@@ -70,7 +70,7 @@ throw new Error(`${this.id}: ${p.name} parameter of ${target.id} is not an Audio
 console.debug("-- connected");
 
 } else {
-console.debug(`${this.id}: no target node`);
+console.debug(`${this.id} "${this.label}": no target node`);
 } // if targetNode
 
 this.start();

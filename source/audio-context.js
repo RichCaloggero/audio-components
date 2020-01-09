@@ -99,7 +99,7 @@ hide: String,
 label: String,
 sampleRate: Number,
 depth: {type: Number, notify:true, value: 0},
-container: {type: Boolean, notify:true, value: false, observer: "containerChanged"},
+container: {type: Boolean, notify:true, value: false},
 
 mix: {type: Number, notify: true, observer: "_mix"},
 bypass: {type: Boolean, notify: true, observer: "_bypass"},
@@ -128,7 +128,6 @@ constructor () {
 super ();
 instanceCount += 1;
 this.id = `${_AudioContext_.is}-${instanceCount}`;
-this.container = false;
 this._ready = false;
 this.ui = true;
 
@@ -155,11 +154,15 @@ this.hideControls();
 // when this.shadowRoot becomes set for the first time, store it since it will be shadow root of the audio-context itself
 if (!shadowRoot) shadowRoot = this.shadowRoot;
 
-this.depth = depth(this);
-console.debug(`connected: ${this.id} at depth ${this.depth}`);
+if (this.matches("audio-context")) {
+console.debug(`connected: ${this.id}, ${this.container}`);
+childrenReady(this).then (children => {
+console.debug(`-- children: ${children.length}`);
+signalReady(this);
+}).catch (error => statusMessage(error)); ;
+} // if
 } // connectedCallback
 
-containerChanged (value) {this.depth = depth(this);}
 
 automationIntervalChanged (value) {if (value && !Number.isNaN(value)) automationInterval = value;}
  
@@ -289,9 +292,9 @@ this.parentElement.appendChild(container);
 const newContext = container.children[0];
 const statusMessage = (text) => this.shadowRoot.querySelector("#statusMessage").textContent = text;
 
-copyAllValues(this, newContext);
 
-setTimeout(() => {
+newContext.addEventListener("elementReady", () => {
+//setTimeout(() => {
 const audioSource = audio.createBufferSource();
 audioSource.buffer = buffer;
 audioPlayer.audioSource = audioSource;
@@ -304,6 +307,7 @@ newContext.enableAutomation = true;
 newContext._enableAutomation(true);
 console.debug(`recording: automation enabled for ${automationQueue.length} elements...`);
 } // if
+copyAllValues(this, newContext);
 
 audioSource.start();
 statusMessage("Rendering audio, please wait...");
@@ -325,7 +329,8 @@ this.enableAutomation = automationEnabled;
 
 statusMessage(`Render complete: ${Math.round(10*buffer.duration/60)/10} minutes of audio rendered.`);
 }).catch(error => statusMessage(`render: ${error}\n${error.stack}\n`));
-}, 3000);
+}); // newContext ready
+//}, 3000);
 } // render
 
 setId (value) {this.id = value;}

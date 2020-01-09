@@ -93,6 +93,9 @@ document.querySelector("#highband audio-stereo-processor").setAttribute("rotatio
 document.querySelectorAll("#parameters input").forEach(e => e.dispatchEvent(new CustomEvent("change")));
 
 function filters () {return container.querySelectorAll("#lowband audio-filter, #highband audio-filter");}
+document.querySelector("audio-context").addEventListener("elementReady", e => statusMessage(`${e.target.label || ""} ready.`));
+
+function statusMessage (text) {document.querySelector("#statusMessage").appendChild(document.createTextNode(`${text}\n`));}
 
 </script>
 
