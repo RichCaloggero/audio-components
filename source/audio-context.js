@@ -157,7 +157,10 @@ if (!shadowRoot) shadowRoot = this.shadowRoot;
 if (this.matches("audio-context")) {
 console.debug(`connected: ${this.id}, ${this.container}`);
 childrenReady(this).then (children => {
-console.debug(`-- children: ${children.length}`);
+//console.debug(`-- children: ${children.length}`);
+enumerateNonUi(this)
+.forEach(e => e.depth = depth(e));
+
 signalReady(this);
 }).catch (error => statusMessage(error)); ;
 } // if
@@ -525,18 +528,29 @@ root.shadowRoot? enumerateAll(root.shadowRoot) : []
 ].flat(Infinity);
 } // enumerateAll
 
+function enumerateNonUi (root) {
+return enumerateAll(root)
+.filter(x => x instanceof _AudioContext_);
+} // enumerateNonUi
+
 function round (n) {return Math.round(n*10)/10;}
 
-export function depth (start, top = "audio-context") {
+export function depth (start, top = _AudioContext_) {
 let e = start;
-while (!(e && e instanceof _AudioContext_)) e = e.parentElement;
+//while (e && !e.matches("audio-context")) e = e.parentElement;
 
 let _depth = 1;
+try {
 while (e && !e.matches("audio-context")) {
 if (!e.container || e.label) _depth += 1;
 e = e.parentElement;
 } // while
 
-console.debug(`depth: ${e.id}, ${e.container}, depth ${_depth}`);
+} catch (error) {
+console.debug(error);
+console.debug(`depth: ${_depth}: ${e.id}, "${e.label}", ${e.container}`);
+//debugger;
+} // try
+
 return _depth;
 } // depth
