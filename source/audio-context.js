@@ -10,7 +10,7 @@ export function registerAudioPlayer (x) {if (x) audioPlayer = x; return audioPla
 let instanceCount = 0;
 export let shadowRoot = null;
 export let audio;
-export let automationInterval = 70; // milliseconds
+export let automationInterval = 0.070; // seconds
 let automationQueue = [];
 let automator = null;
 let _automation = false;
@@ -42,6 +42,9 @@ return html`
 <fieldset class="audio-context">
 <legend><h1>[[label]]</h1></legend>
 <ui-boolean label="enable automation" value="{{enableAutomation}}" shortcut="alt shift r"></ui-boolean>
+<ui-number label="automationInterval" value="{{automationInterval}}" min="0.01" max="3.0" step="0.01"></ui-number>
+
+
 <ui-boolean label="showListener" value="{{showListener}}"></ui-boolean>
 <ui-boolean label="enable record mode" class="enable-record-mode" value="{{recordMode}}"></ui-boolean>
 
@@ -108,7 +111,7 @@ enableAutomation: {type: Boolean, value: false, notify: true, observer: "_enable
 showListener: {type: Boolean, value: false, notify: true, observer: "_showListener"},
 recordMode: {type: Boolean, value: false, notify: true, observer: "_recordMode"},
 shortcuts: {type: String, notify:true, observer: "shortcutsChanged"},
-automationInterval: {type: Number, notify: true, observer: "automationIntervalChanged"},
+automationInterval: {type: Number, value: 0.05, notify: true, observer: "automationIntervalChanged"},
 
 listenerX: {type: Number, value: 0, notify: true, observer: "listenerXChanged"},
 listenerY: {type: Number, value: 0, notify: true, observer: "listenerYChanged"},
@@ -430,7 +433,7 @@ return;
 } // if
 } // signalReady
 
-export function startAutomation () {automator = setInterval(() => automationQueue.forEach(e => e.automate()), automationInterval);} // startAutomation
+export function startAutomation () {automator = setInterval(() => automationQueue.forEach(e => e.automate()), 1000*automationInterval);} // startAutomation
 export function stopAutomation () {clearInterval(automator); automator = null;}
 
 /*export function startAutomation () {
