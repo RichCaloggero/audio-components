@@ -4,16 +4,21 @@
 <title>test</title>
 </head>
 <body>
-<label>text: <input type="text" id="source"></label>
+<label>quantity: <input type="range" id="q" helpText="some quantity"></label>
 <div id="message" role="status"></div>
 <script>
-const a = document.createElement("audio");
-a.setAttribute("crossorigin", "anonymous");
-a.addEventListener("error", (e) => statusMessage(`media error: ${e.target.error}`));
+document.body.addEventListener("keydown", displayHelpText);
 
-document.querySelector("#source").addEventListener("change", e => {
-a.src = e.target.value;
-});
+function displayHelpText (e) {
+const input = e.target;
+const key = e.key;
+const text = e.target.getAttribute("helpText");
+if (key === "F1" && text) {
+e.target.setAttribute("title", text);
+e.target.focus();
+setTimeout(() => e.target.removeAttribute("title"), 2000);
+} // if
+}
 
 function statusMessage (text) {
 document.querySelector("#message").appendChild(document.createTextNode(text));

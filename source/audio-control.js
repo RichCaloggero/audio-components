@@ -134,6 +134,7 @@ return new Function (parameter,
 function  toRange (x, a,b) {return (Math.abs(a-b) * (x+1)/2) + a;}
 function s (x, l=-1.0, u=1.0) {return toRange(Math.sin(x), l,u);}
 function c (x, l=-1.0, u=1.0) {return toRange(Math.cos(x), l,u);}
+function r(a=0, b=1) {return toRange(Math.random(), a, b);}
 return ${text};
 } // Math
 `); // new Function
