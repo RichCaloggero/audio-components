@@ -30,7 +30,7 @@ const elementList = [
 "./audio-verb.js",
 "./audio-stereoProcessor.js",
 "./audio-gen.js",
-//"./audio-fixedDelay.js",
+"./audio-fixedDelay.js",
 
 // automation
 "./audio-control.js",

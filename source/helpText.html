@@ -5,12 +5,14 @@
 </head>
 <body>
 <label>quantity: <input type="range" id="q" helpText="how many widgets"></label>
-<label>name: <input type="text" id="name" helpText="first and last names"></label>
+<br><label>name: <input type="text" id="name" helpText="first and last names"></label>
+<br><label>option: <select helpText="widget options"><option>extra filler</option><option>service plan</option></select></label>
 
 
 <script>
 document.body.addEventListener("keydown", displayHelpText);
-document.body.addEventListener("focusout", removeHelpText);
+document.body.addEventListener("focusout", e => removeHelpText(e.target));
+document.body.addEventListener("input", e => removeHelpText(e.target));
 
 function displayHelpText (e) {
 const input = e.target;
@@ -22,16 +24,11 @@ e.target.focus();
 } // if
 } // displayHelpText
 
-function removeHelpText (e) {
-if (e.target.hasAttribute("helpText") && e.target.hasAttribute("title")) {
-setTimeout(() => e.target.removeAttribute("title"), 0);
+function removeHelpText (target) {
+if (target.hasAttribute("helpText") && target.hasAttribute("title")) {
+setTimeout(() => target.removeAttribute("title"), 0);
 } // if
 } // removeHelpText
-
-function statusMessage (text) {
-document.querySelector("#message").appendChild(document.createTextNode(text));
-} // statusMessage
-statusMessage("Ready.");
 
 </script>
 

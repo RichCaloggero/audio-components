@@ -1,0 +1,18 @@
+<!doctype html>
+<head>
+<meta charset="utf-8">
+<title>Fixed Delay</title>
+<!--<script src="./resonance-audio.min.js" crossorigin="anonymous"></script>-->
+<script src="loader.js"></script>
+</head>
+<body>
+<audio-context automation-interval="100" hide="bypass" label="test" shortcuts="enableAutomation alt shift r">
+<audio-series>
+<audio-player label="player" shortcuts="src alt shift u" src="media/D2_02_Thats What Love Will Make You Do.flac"></audio-player>
+<audio-fixed-delay label="fixed delay" delay="22050"></audio-fixed-delay>
+<audio-destination label="speakers"></audio-destination>
+</audio-series>
+</audio-context>
+
+</body>
+</html>
