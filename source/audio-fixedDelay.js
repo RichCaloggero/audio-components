@@ -12,7 +12,7 @@ return html`
 
 <ui-boolean label="bypass" value="{{bypass}}"></ui-boolean>
 <ui-number label="mix" value="{{mix}}" min="-1.0" max="1.0" step="0.1"></ui-number>
-<ui-number label="delay" type="number" value="{{delay}}" min="0" max="96000" step="1"></ui-number>
+<ui-number label="delay" type="number" value="{{delay}}" min="0" max="128" step="1"></ui-number>
 </fieldset>
 `; // html
 } // get template
@@ -30,16 +30,18 @@ constructor () {
 super ();
 instanceCount += 1;
 this.id = `${AudioFixedDelay.is}-${instanceCount}`;
-
-this.component = new FixedDelay(this.audio, this);
+this.component = new FixedDelay(this.audio, this.delay, this);
 } // constructor
 
 connectedCallback () {
 super.connectedCallback();
-signalReady(this);
+//signalReady(this);
 } // connectedCallback
 
-delayChanged (value) {this.component.sampleCount = value;}
+delayChanged (value) {
+this.component.sampleCount = value;
+console.debug(`${this.id}: changed sample count to ${value}`);
+} // delayChanged
 } // class AudioFixedDelay
 
 customElements.define(AudioFixedDelay.is, AudioFixedDelay);

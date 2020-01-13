@@ -1,5 +1,6 @@
-class _FixedDelay extends AudioWorkletProcessor {
+const maxBufferLength = 128; // samples
 
+class _FixedDelay extends AudioWorkletProcessor {
 constructor () {
 super ();
 this.sampleCount = 0; // samples
@@ -16,11 +17,14 @@ console.log("_FixedDelay AudioWorkletProcessor initialized...");
 } // constructor
 
 set sampleCount (count) {
+if (count < 0) count = 0;
+else if (count > maxBufferLength) count = maxBufferLength;
 this.delayBuffer = [
 new Float32Array(count),
 new Float32Array(count)
 ];
 this._sampleCount = count;
+console.debug(`_FixedDelay.sampleCount: ${this._sampleCount}`);
 } // set sampleCount
 
 process (inputs, outputs, parameters) {
@@ -37,7 +41,9 @@ return true;
 registerProcessor("fixed-delay", _FixedDelay);
 
 function processChannel (_count, _in, _out, _delay) {
+if (_count > 0) {
 _out.set(_delay, 0);
-_out.set(_in.slice(0, _count), _count);
-_delay.set(_in.slice(_in.length-_count, _in.length-_count), 0);
+_delay.set(_in.slice(-_count), 0);
+} // if
+_out.set(_in.slice(0, maxBufferLength-_count), _count);
 } // processChannel
