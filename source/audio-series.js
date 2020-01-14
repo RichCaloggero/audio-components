@@ -11,6 +11,11 @@ return html`
 <legend><h2 aria-level$="[[depth]]">[[label]]</h2></legend>
 <ui-boolean label="bypass" value="{{bypass}}"></ui-boolean>
 <ui-number label="mix" value="{{mix}}" min="-1.0" max="1.0" step="0.1"></ui-number>
+
+<div class="feedBackControls" hidden>
+<ui-number label="feedback delay" type="number" value="{{delay}}" min="0" step="0.00001"></ui-number>
+<ui-number label="feedback gain" value="{{gain}}" min="-0.99" max="0.99" step="0.01"></ui-number>
+</div>
 </fieldset>
 <slot></slot>
 `; // html
@@ -19,8 +24,10 @@ static get is() { return "audio-series";}
 
 static get properties () {
 return {
-"feed-forward": Boolean,
-"feed-back": Boolean
+feedForward: Boolean,
+feedBack: {type: Boolean, notify: true, observer: "feedBackChanged"},
+delay: {type: Number, value: 0, notify: true, observer: "delayChanged"},
+gain: {type: Number, value: 0.5, notify: true, observer: "gainChanged"},
 };
 } // static properties
 
@@ -35,14 +42,25 @@ connectedCallback () {
 super.connectedCallback();
 childrenReady(this).then(children => {
 //console.log(`- connectedCallback.then: found ${children.length} children`);
-this.component = new Series(this.audio, this.components(children), this["feed-forward"], this["feed-back"], this);
-//if (this.uiControls().every(x => x.hidden)) this.shadowRoot.querySelector("legend").hidden = true;
+this.component = new Series(this.audio, this.components(children), this.feedForward, this.feedBack, this);
 signalReady(this);
 }).catch(error => {
 console.log(`${this.id}: ${error}\n${error.stack}`);
 alert(`${this.id}: ${error}`);
 }); // catch
 } // connectedCallback
+
+feedBackChanged (value) {
+if (value) {
+this.shadowRoot.querySelector(".feedBackControls").removeAttribute("hidden");
+} else {
+this.shadowRoot.querySelector(".feedBackControls").setAttribute("hidden", "");
+} // if
+} // feedBackChanged
+
+delayChanged (value) {if(this.component) this.component.delay = value;}
+gainChanged (value) {if(this.component) this.component.gain = value;}
+
 } // class AudioSeries
 
 customElements.define(AudioSeries.is, AudioSeries);

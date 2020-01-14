@@ -144,12 +144,6 @@ c.wet.connect(this.wet);
 console.log(`- feedForward: connected ${c.name} to ${this.name} wet`);
 } // if
 
-/*if (feedBack) {
-c.wet.connect(this.input);
-console.log(`- feedBack: connected ${c.name} to ${this.name} input`);
-} // if
-*/
-
 } else {
 throw new Error (`series: ${c.name} and ${next.name} must both be AudioComponents`);
 } // if
@@ -160,15 +154,22 @@ throw new Error (`series: ${c.name} and ${next.name} must both be AudioComponent
 if (last.output) {
 last.output.connect(this.wet);
 console.log(`- connected ${last.name} to ${this.name} wet`);
+} // if
 
 if (feedBack) {
-this.wet.connect(this.input);
+this._delay = audio.createDelay();
+this._gain = audio.createGain();
+this._delay.delayTime.value = 0;
+this._gain.gain.value = 0.5;
+this.wet.connect(this._delay).connect(this._gain).connect(this.input);
 console.log(`- feedBack: connected ${this.name}.wet to ${this.name}.input`);
-} // if
 } // if
 
 this.components = components;
 } // constructor
+
+set gain (value) {if (this._gain) {this._gain.gain.value = value; console.debug(`${this.cid}: feedback gain set to ${value}`);}}
+set delay (value) {if (this._delay) this._delay.delayTime.value = value;}
 } // class Series
 
 export class Parallel extends AudioComponent {
@@ -243,6 +244,12 @@ this.filter.detune.value = detune;
 this.input.connect(this.filter);
 this.filter.connect(this.wet);
 } // constructor
+
+set type (value) {this.filter.type = value;}
+set frequency (value) {this.filter.frequency.value = value;}
+set q (value) {this.filter.Q.value = value;}
+set gain (value) {this.filter.gain.value = value;}
+set detune (value) {this.filter.detune.value = value;}
 } // class Filter
 
 export class Delay extends AudioComponent {
