@@ -41,8 +41,9 @@ static get template () {
 return html`
 <fieldset class="audio-context">
 <legend><h1>[[label]]</h1></legend>
-<ui-boolean label="enable automation" value="{{enableAutomation}}" shortcut="alt shift r"></ui-boolean>
+<ui-boolean label="enable automation" value="{{enableAutomation}}" shortcut="alt shift a"></ui-boolean>
 <ui-number label="automationInterval" value="{{automationInterval}}" min="0.01" max="3.0" step="0.01"></ui-number>
+<ui-boolean label="enable analyzer" value="{{enableAnalyzer}}" shortcut="alt shift x"></ui-boolean>
 
 
 <ui-boolean label="showListener" value="{{showListener}}"></ui-boolean>
@@ -108,6 +109,7 @@ mix: {type: Number, notify: true, observer: "_mix"},
 bypass: {type: Boolean, notify: true, observer: "_bypass"},
 "silent-bypass": {type: Boolean, notify: true, observer: "_silentBypass"},
 enableAutomation: {type: Boolean, value: false, notify: true, observer: "_enableAutomation"}, // enableAutomation
+enableAnalyzer: {type: Boolean, value: false, notify: true, observer: "_enableAnalyzer"},
 showListener: {type: Boolean, value: false, notify: true, observer: "_showListener"},
 recordMode: {type: Boolean, value: false, notify: true, observer: "_recordMode"},
 shortcuts: {type: String, notify:true, observer: "shortcutsChanged"},
@@ -145,6 +147,7 @@ audio = new AudioContext({sampleRate: 88200});
 } // if
 
 this.audio = audio;
+this.analyzer = audio.createAnalyzerNode();
 } // constructor
 
 
@@ -254,6 +257,16 @@ stopAutomation();
 this.dispatchEvent(new CustomEvent("stopAutomation"));
 } // if
 } // _enableAutomation
+
+_enableAnalyzer (value) {
+if (audioPlayer) {
+if (value) {
+audioPlayer.output.connect(this.analyzer);
+} else {
+audioPlayer.output.disconnect(this.analyzer);
+} // if
+} // if
+} // _enableAnalyzer
 
 _showListener (value) {if (shadowRoot) shadowRoot.querySelector("#listener").hidden = !value;}
 
