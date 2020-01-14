@@ -2,17 +2,21 @@
 <head>
 <meta charset="utf-8">
 <title>Fixed Delay</title>
-<!--<script src="./resonance-audio.min.js" crossorigin="anonymous"></script>-->
 <script src="loader.js"></script>
 </head>
 <body>
-<audio-context automation-interval="100" hide="bypass" label="test" shortcuts="enableAutomation alt shift r">
+<audio-context automation-interval="0.1" hide="bypass" label="test" shortcuts="enableAutomation alt shift r">
 <audio-series>
 <audio-player label="player" shortcuts="src alt shift u" src="media/D2_02_Thats What Love Will Make You Do.flac"></audio-player>
-<audio-split>
-<audio-gain></audio-gain>
-<audio-fixed-delay label="fixed delay" delay="128"></audio-fixed-delay>
-</audio-split>
+
+<audio-series id="master" label="master">
+<audio-filter label="filter" type="lowpass" hide="mix, gain, detune"></audio-filter>
+<audio-series label="feedback" hide="mix" feed-back>
+<audio-channelSwap></audio-channelSwap>
+<audio-fixed-delay label="fixed delay" delay="1" hide="mix, bypass"></audio-fixed-delay>
+<audio-gain label="feedback gain" hide="bypass, mix"></audio-gain>
+</audio-series>
+</audio-series>
 
 <audio-destination label="speakers"></audio-destination>
 </audio-series>

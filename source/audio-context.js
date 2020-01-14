@@ -140,7 +140,7 @@ return;
 } // if
 
 if (!audio) {
-audio = new AudioContext({sampleRate: this.sampleRate});
+audio = new AudioContext({sampleRate: 88200});
 //console.debug(`${this.id}: creating new audio context`);
 } // if
 

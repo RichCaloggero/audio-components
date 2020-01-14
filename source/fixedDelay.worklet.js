@@ -31,9 +31,9 @@ process (inputs, outputs, parameters) {
 const inputBuffer = inputs[0];
 const outputBuffer = outputs[0];
 
-if (inputBuffer.length > 0 && inputBuffer.length <= 2) {
+//if (inputBuffer.length > 0 && inputBuffer.length <= 2) {
 inputBuffer.forEach((channel, i) => processChannel(this._sampleCount, channel, outputBuffer[i], this.delayBuffer[i]));
-} // if
+//} // if
 return true;
 } // process
 } // class StereoProcessor

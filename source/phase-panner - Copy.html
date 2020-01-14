@@ -25,15 +25,19 @@
 <audio-series id="master" label="master" mix="-1">
 
 <audio-series id="container" >
-<!--<audio-parallel>
+<audio-parallel>
 
 <audio-series bypass silent-bypass id="delayband" label="feedback delay" hide="mix">
 <audio-filter frequency="750" q="1"></audio-filter>
-<audio-feedback label="delay" type="number" hide="mix, bypass">
+<audio-feedback label="delay" delay="0" hide="mix, bypass, delay">
+<audio-series>
 <audio-channelSwap></audio-channelSwap>
+<audio-fixed-delay label="fixed delay" delay="1"></audio-fixed-delay>
+</audio-series>
 </audio-feedback>
+</audio-series>
 
-</audio-series><audio-series silent-bypass id="lowband" label="low band" hide="mix">
+<audio-series silent-bypass id="lowband" label="low band" hide="mix">
 <audio-filter type="lowpass" frequency="1000" q="4"></audio-filter>
 <audio-channelSwap></audio-channelSwap>
 <audio-control>
@@ -51,7 +55,6 @@
 <audio-gain label="gain" gain="2.0" hide="mix, bypass"></audio-gain>
 </audio-series>
 </audio-parallel>
--->
 
 </audio-series><!-- container -->
 

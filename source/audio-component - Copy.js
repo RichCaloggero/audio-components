@@ -144,11 +144,10 @@ c.wet.connect(this.wet);
 console.log(`- feedForward: connected ${c.name} to ${this.name} wet`);
 } // if
 
-/*if (feedBack) {
+if (feedBack) {
 c.wet.connect(this.input);
 console.log(`- feedBack: connected ${c.name} to ${this.name} input`);
 } // if
-*/
 
 } else {
 throw new Error (`series: ${c.name} and ${next.name} must both be AudioComponents`);
@@ -162,8 +161,8 @@ last.output.connect(this.wet);
 console.log(`- connected ${last.name} to ${this.name} wet`);
 
 if (feedBack) {
-this.wet.connect(this.input);
-console.log(`- feedBack: connected ${this.name}.wet to ${this.name}.input`);
+last.wet.connect(this.input);
+console.log(`- feedBack: connected ${last.name} to ${this.name} input`);
 } // if
 } // if
 
@@ -232,17 +231,23 @@ this.compressor.connect(this.wet);
 } // class Compressor
 
 export class Filter extends AudioComponent {
-constructor (audio, type = "lowpass", frequency = 300, q = 1.0, gain = 1.0, detune = 0.0) {
+constructor (audio, _type = "lowpass", _frequency = 300, _q = 1.0, _gain = 0.0, _detune = 0.0) {
 super (audio, "filter");
 this.node = this.filter = this.audio.createBiquadFilter();
-this.filter.type = type;
-this.filter.frequency.value = frequency;
-this.filter.Q.value = q;
-this.filter.gain.value = gain;
-this.filter.detune.value = detune;
+this.filter.type = _type;
+this.filter.frequency.value = _frequency;
+this.filter.Q.value = _q;
+this.filter.gain.value = _gain;
+this.filter.detune.value = _detune;
 this.input.connect(this.filter);
 this.filter.connect(this.wet);
 } // constructor
+
+set type (value) {this.filter.type = value;}
+set frequency (value) {this.filter.frequency.value = value;}
+set q (value) {this.filter.Q.value = value;}
+set gain (value) {this.filter.gain.value = value;}
+set detune (value) {this.filter.detune.value = value;}
 } // class Filter
 
 export class Delay extends AudioComponent {
@@ -296,7 +301,8 @@ this.isPlaying = false;
 export class Feedback extends AudioComponent {
 constructor (audio, target) {
 super (audio, "feedback");
-this._delay = audio.createDelay();
+this._delay = new FixedDelay(audio);
+//this._delay = audio.createDelay();
 this._gain = audio.createGain();
 this.target = target;
 
@@ -307,14 +313,17 @@ this.connectFeedback();
 } // constructor
 
 set gain (value) {this._gain.gain.value = value;}
-set delay (value) {this._delay.delayTime.value = value;}
+set delay (value) {this._delay.sampleCount = value;}
 
 bypass (value) {
 super.bypass (value);
 if (!value && this.wet && this._delay && this._gain) this.connectFeedback();
 } // bypass
 
-connectFeedback () {this.wet.connect(this._delay).connect(this._gain).connect(this.input);}
+connectFeedback () {
+this.wet.connect(this._delay.input);
+this._delay.output.connect(this._gain).connect(this.input);
+}
 } // class Feedback
 
 export class Panner extends AudioComponent {
@@ -476,30 +485,6 @@ m.connect(this.wet);
 } // constructor
 } // class ChannelSwap
 
-export class FixedDelay extends AudioComponent {
-constructor (audio, delay = 0, parent) {
-super (audio, "fixedDelay", parent);
-console.debug(`${this.cid}: instantiated with delay ${delay}`);
-this.processor = null;
-audio.audioWorklet.addModule("fixedDelay.worklet.js")
-.then(() => {
-this.processor = new AudioWorkletNode(audio, "fixed-delay");
-this.input.connect(this.processor).connect(this.wet);
-this.sampleCount = this._sampleCount;
-signalReady(parent);
-}).catch(e => alert(`${this.cid}: ${e}`));
-} // constructor
-
-set sampleCount (value) {
-this._sampleCount = value;
-if (this.processor) {
-this.processor.port.postMessage(["sampleCount", this._sampleCount]);
-} // if
-} // set sampleCount
-
-} // class FixedDelay
-
-
 export class Verb extends AudioComponent {
 constructor (audio, elementCount = 500, parent) {
 super (audio, "Verb", parent);
@@ -530,6 +515,29 @@ d.wet.gain.value = random(minGain, maxGain);
 statusMessage(`${this.name}: ${this.elements.length} delays changed`);
 } // setDelays
 } // class Verb
+
+export class FixedDelay extends AudioComponent {
+constructor (audio, delay = 0, parent) {
+super (audio, "fixedDelay", parent);
+console.debug(`${this.cid}: instantiated with delay ${delay}`);
+this.processor = null;
+audio.audioWorklet.addModule("fixedDelay.worklet.js")
+.then(() => {
+this.processor = new AudioWorkletNode(audio, "fixed-delay");
+this.input.connect(this.processor).connect(this.wet);
+this.sampleCount = this._sampleCount;
+signalReady(parent);
+}).catch(e => alert(`${this.cid}: ${e}`));
+} // constructor
+
+set sampleCount (value) {
+this._sampleCount = value;
+if (this.processor) {
+this.processor.port.postMessage(["sampleCount", this._sampleCount]);
+} // if
+} // set sampleCount
+
+} // class FixedDelay
 
 
 	function createFilterBank (audio, frequencies) {
