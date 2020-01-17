@@ -22,40 +22,45 @@
 <audio-series>
 <audio-player label="player" shortcuts="src alt shift u" src="media/D2_02_Thats What Love Will Make You Do.flac"></audio-player>
 
-<audio-series id="master" label="master" mix="-1">
+<audio-series id="master" label="master" mix="-0.4">
 
 <audio-series id="container" >
-<!--<audio-parallel>
+<audio-parallel>
 
-<audio-series bypass silent-bypass id="delayband" label="feedback delay" hide="mix">
-<audio-filter frequency="750" q="1"></audio-filter>
-<audio-feedback label="delay" type="number" hide="mix, bypass">
+<audio-series silent-bypass id="delayband" label="feedback delay" hide="mix">
+<audio-filter bypass type="lowpass" label="filter" frequency="1000" q="1" hide="detune, mix, gain, type"></audio-filter>
+<audio-series id="sideband" label="side" hide="mix">
 <audio-channelSwap></audio-channelSwap>
-</audio-feedback>
+<audio-channelSwap mix="-0.5"></audio-channelSwap>
+<audio-gain gain="5.0"></audio-gain>
+</audio-series>
+<audio-series bypass label="feedback" feed-back gain="-0.75" hide="mix">
+<audio-channelSwap></audio-channelSwap>
+<audio-fixed-delay label="fixed delay" delay="7" hide="mix, bypass"></audio-fixed-delay>
+</audio-series>
 
 </audio-series><audio-series silent-bypass id="lowband" label="low band" hide="mix">
 <audio-filter type="lowpass" frequency="1000" q="4"></audio-filter>
 <audio-channelSwap></audio-channelSwap>
 <audio-control>
-<audio-stereo-processor label="rotate low" hide="bypass, mix, width, center, balance"></audio-stereo-processor>
-<audio-parameter label="control rotate low" name="rotation" function="s(t/4, -66,66)"></audio-parameter>
+<audio-stereo-processor label="rotate low" rotate="-45" hide="bypass, mix, width, center, balance"></audio-stereo-processor>
+<audio-parameter label="control rotate low" name="rotation" function="s(t/2, -90,90)"></audio-parameter>
 </audio-control>
 
 </audio-series><audio-series silent-bypass id="highband" label="high band" hide="mix">
 <audio-filter type="highpass" frequency="1000" q="4"></audio-filter>
 <audio-channelSwap></audio-channelSwap>
 <audio-control>
-<audio-stereo-processor label="rotate high" hide="bypass, mix,  width, center, balance"></audio-stereo-processor>
-<audio-parameter label="control rotate high" name="rotation" function="s(t, -33,33)"></audio-parameter>
+<audio-stereo-processor label="rotate high" rotate="57" hide="bypass, mix,  width, center, balance"></audio-stereo-processor>
+<audio-parameter label="control rotate high" name="rotation" function="c(t/2, -66,66)"></audio-parameter>
 </audio-control>
 <audio-gain label="gain" gain="2.0" hide="mix, bypass"></audio-gain>
 </audio-series>
 </audio-parallel>
--->
 
 </audio-series><!-- container -->
 
-<audio-filter label="bass" type="lowshelf" frequency="200" gain="10" hide="mix, type, q, detune"></audio-filter>
+<audio-filter label="bass" type="lowshelf" frequency="200" gain="14" hide="mix, type, q, detune"></audio-filter>
 </audio-series><!-- master -->
 <audio-gain label="volume" gain="2.5" max="5" hide="mix, bypass"></audio-gain>
 <audio-compressor bypass label="compressor" ratio="2" threshold="-30" knee="20" attack="0.2" release="5.0" hide="mix"></audio-compressor>
