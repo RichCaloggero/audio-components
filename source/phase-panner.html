@@ -10,9 +10,9 @@
 <legend><h2>Parameters</h2></legend>
 <div id="statusMessage" role="status"></div>
 <label for="crossover">crossover: </label>
-<input id="crossover" type="number" min="500" value="700" max="2500" step="10" accesskey="c">
-<label>overlap: <input type="range" id="overlap" min="0" value="0" max="50">%</label>
-<label>Q: <input id="q" type="range" min="0" value="4.0" max="10" step=".1" accesskey="q"></label>
+<input id="crossover" type="number" min="500" value="650" max="2500" step="10" accesskey="c">
+<label>overlap: <input type="range" id="overlap" min="0" value="35" max="50">%</label>
+<label>Q: <input id="q" type="range" min="0" value="0.75" max="10" step=".1" accesskey="q"></label>
  <label>phase: <input id="phase" type="range" min="0" value="0" max="90" step=".1" accesskey="p"></label>
 
 </fieldset>
@@ -21,6 +21,11 @@
 <audio-context sample-rate="88200" automation-interval="0.05" hide="bypass" label="Phase Panner" shortcuts="enableAutomation alt shift a">
 <audio-series>
 <audio-player label="player" shortcuts="src alt shift u" src="media/D2_02_Thats What Love Will Make You Do.flac"></audio-player>
+
+<audio-split label="wide delay" hide="mix">
+<audio-gain></audio-gain>
+<audio-delay label="widen" delay="0.010" hide="bypass, mix"></audio-delay>
+</audio-split>
 
 <audio-series id="master" label="master" mix="-0.4">
 

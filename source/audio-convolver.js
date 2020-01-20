@@ -11,7 +11,7 @@ return html`
 <fieldset class="audio-convolver">
 <legend><h2 aria-level$="[[depth]]">[[label]]</h2></legend>
 <ui-boolean label="bypass" value="{{bypass}}"></ui-boolean>
-<ui-number label="mix" value="{{mix}}"></ui-number>
+<ui-number label="mix" value="{{mix}}" min="-1" max="1" step="0.05"></ui-number>
 <ui-list label="impulse" value="{{impulse}}" values="{{impulses}}"></ui-list>
 </fieldset>
 `; // html
@@ -25,13 +25,14 @@ path: {type: String, value: "."},
 extension: {type: String, value: ".wav"},
 impulse: {type: String, notify: true, observer: "impulseChanged"},
 impulses: {type: String, notify: true, value: `[
+"Block Inside",
+"Bottle Hall",
 "Cement Blocks 2",
 "Cement Blocks 1",
 "Chateau de Logne, Outside",
 "Conic Long Echo Hall",
 "Deep Space",
 "Derlon Sanctuary",
-"Bottle Hall",
 "Direct Cabinet N1",
 "Direct Cabinet N2",
 "Direct Cabinet N3",
@@ -82,18 +83,35 @@ impulseChanged (value) {
 //console.debug(`${this.id}.impulseChanged: ${value}`);
 if (value) {
 const url = `${this.path}/${value}${this.extension}`;
-//console.debug(`- url is ${url}`);
-loadImpulse(url, (buffer) => {
+console.debug(`- url is ${url}`);
+loadImpulse(url, buffer => {
 this.component.setImpulse(buffer);
-}); // load
+});
 } // if
 } // impulseChanged
 } // class AudioConvolver
 
 customElements.define(AudioConvolver.is, AudioConvolver);
 
+function loadImpulse (url, callback) {
+//statusMessage(`Loading ${url}...`);
+fetch(url)
+.then(response=> {
+//alert ("response");
+if (response.ok) return response.arrayBuffer();
+else throw new Error(response.statusText);
+ }).then(data => {
+//alert ("decoding...");
+return audio.decodeAudioData(data);
+}).then (buffer => {
+//alert ("calling callback with buffer");
+if (buffer) callback(buffer);
+else throw new Error("No buffer");
+}).catch(error => statusMessage(error));
+} // loadImpulse
 
-function decodeBuffer(arrayBuffer, callback) {
+
+/*function decodeBuffer(arrayBuffer, callback) {
 audio.decodeAudioData(arrayBuffer, function (audioBuffer) {
 if (typeof callback === "function" && audioBuffer !== null) {
 callback(audioBuffer);
@@ -121,5 +139,4 @@ statusMessage("loadImpulse: response is null");
 
 request.send();
 } // loadImpulse
-
-
+*/

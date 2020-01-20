@@ -1,39 +1,22 @@
 <!doctype html>
 <head>
 <meta charset="utf-8">
-<title>test</title>
+<title>reverb test</title>
+<!--<script src="./resonance-audio.min.js" crossorigin="anonymous"></script>-->
+<script src="loader.js"></script>
 </head>
 <body>
-<label>quantity: <input type="range" id="q" helpText="how many widgets"></label>
-<label>name: <input type="text" id="name" helpText="first and last names"></label>
+<audio-context sample-rate="88200" automation-interval="0.05" hide="bypass" label="Phase Panner" shortcuts="enableAutomation alt shift a">
+<audio-series>
+<audio-player label="player" shortcuts="src alt shift u" src="media/D2_02_Thats What Love Will Make You Do.flac"></audio-player>
 
+<audio-convolver label="convolver" path="./impulses" default-extension=".wav" ></audio-convolver>
 
-<script>
-document.body.addEventListener("keydown", displayHelpText);
-document.body.addEventListener("focusout", removeHelpText);
+<audio-gain label="volume" gain="2.5" max="5" hide="mix, bypass"></audio-gain>
 
-function displayHelpText (e) {
-const input = e.target;
-const key = e.key;
-const text = e.target.getAttribute("helpText");
-if (key === "F1" && text) {
-e.target.setAttribute("title", text);
-e.target.focus();
-} // if
-} // displayHelpText
-
-function removeHelpText (e) {
-if (e.target.hasAttribute("helpText") && e.target.hasAttribute("title")) {
-setTimeout(() => e.target.removeAttribute("title"), 0);
-} // if
-} // removeHelpText
-
-function statusMessage (text) {
-document.querySelector("#message").appendChild(document.createTextNode(text));
-} // statusMessage
-statusMessage("Ready.");
-
-</script>
+<audio-destination label="speakers"></audio-destination>
+</audio-series>
+</audio-context>
 
 </body>
 </html>

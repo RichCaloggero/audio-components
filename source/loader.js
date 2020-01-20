@@ -27,7 +27,7 @@ const elementList = [
 "./audio-equalizer.js",
 "./audio-resonance.js",
 "./audio-xtc.js",
-"./audio-verb.js",
+"./audio-reverb.js",
 "./audio-stereoProcessor.js",
 "./audio-gen.js",
 "./audio-fixedDelay.js",
