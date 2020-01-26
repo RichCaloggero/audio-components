@@ -2,6 +2,7 @@
 
 import {bufferToWave} from "./bufferToWave.js";
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
+import {difference} from "./setops.js";
 
 let audioPlayer;
 export function registerAudioPlayer (x) {if (x) audioPlayer = x; return audioPlayer;}
@@ -25,16 +26,32 @@ this avoids having to call methods common to all elements in the subclass.
 
 const iMap = new Map();
 function doIfInitialized(element, method, value) {
-if (element.component) {
-element.component[method](value);
-return;
-} // if
-
+if (! method) return;
+if (element._ready) {
+runMethod(element, method, value);
+} else {
+console.debug(`${element.id} doIfInitialized: deferring...`);
 const queue = iMap.has(element)? iMap.get(element) : [];
 queue.push({method: method, value: value});
 iMap.set(element, queue);
+//alert(`defering ${element.id}.${method}...`);
 //console.debug(`defering ${element.id}.${method}...`);
+} // if
 } // doIfInitialized
+
+function runMethod (element, method, value) {
+if (method instanceof Function) {
+console.debug(`${element.id} runMethod: running function`);
+return method.call(element, value);
+} else if (element.component && element.component[method]) {
+console.debug(`${element.id} runMethod: calling ${method} on component`);
+return element.component[method](value);
+} else {
+throw new Error (`${element.id}: runMethod - method ${method} is invalid`);
+} // if
+} // runMethod
+
+
 
 export class _AudioContext_ extends PolymerElement {
 static get template () {
@@ -44,7 +61,6 @@ return html`
 <ui-boolean label="enable automation" value="{{enableAutomation}}" shortcut="alt shift a"></ui-boolean>
 <ui-number label="automationInterval" value="{{automationInterval}}" min="0.01" max="3.0" step="0.01"></ui-number>
 <ui-boolean label="enable analyser" value="{{enableAnalyser}}" shortcut="alt shift x"></ui-boolean>
-
 
 <ui-boolean label="showListener" value="{{showListener}}"></ui-boolean>
 <ui-boolean label="enable record mode" class="enable-record-mode" value="{{recordMode}}"></ui-boolean>
@@ -100,12 +116,13 @@ static get properties() {
 return {
 id: String,
 hide: String,
+hideOnBypass: {type: Boolean, value: false},
 label: String,
 sampleRate: Number,
 depth: {type: Number, notify:true, value: 0},
 container: {type: Boolean, notify:true, value: false},
 
-mix: {type: Number, notify: true, observer: "_mix"},
+mix: {type: Number, value: 0, notify: true, observer: "_mix"},
 bypass: {type: Boolean, notify: true, observer: "_bypass"},
 "silent-bypass": {type: Boolean, notify: true, observer: "_silentBypass"},
 enableAutomation: {type: Boolean, value: false, notify: true, observer: "_enableAutomation"}, // enableAutomation
@@ -148,6 +165,8 @@ audio = new AudioContext({sampleRate: 88200});
 
 this.audio = audio;
 this.analyser = null;
+this.hide = "";
+this._hide = [];
 } // constructor
 
 
@@ -155,18 +174,20 @@ connectedCallback () {
 super.connectedCallback();
 // if is element with a UI, then hide it if no label or name attribute present in HTML
 // hide controls in UI elements that have label or name if control's label or name mentioned in hide attribute's value
+this._hide = this.hide.toLowerCase().trim().split(",").map(x => x.trim());
 this.hideControls();
 
 // when this.shadowRoot becomes set for the first time, store it since it will be shadow root of the audio-context itself
 if (!shadowRoot) shadowRoot = this.shadowRoot;
 
+// if this is the real top level element in the tree, then wait on all children, add depth info to each legend in all child ui,  and dispatch event when the entire tree is ready
 if (this.matches("audio-context")) {
 //console.debug(`connected: ${this.id}, ${this.container}`);
 childrenReady(this).then (children => {
 enumerateNonUi(this)
 .forEach(e => e.depth = depth(e));
 signalReady(this);
-}).catch (error => statusMessage(error)); ;
+}).catch (error => statusMessage(`${this.id}.connectedCallback: ${error}`));
 } // if
 } // connectedCallback
 
@@ -209,9 +230,12 @@ p.shortcut = shortcut.shortcut;
 hideControls () {
 const label = this.label?
 this.label.trim() : "";
+this.label = label;
+
 const hide = this.hide?
 this.hide.trim().split(",").map(x => x.trim().toLowerCase())
 : [];
+this._hide = hide;
 
 if (!label) {
 // hide everything if no label
@@ -229,17 +253,78 @@ if (name && hide.includes(name)) element.hidden = true;
 } // if
 } // hideControls
 
+hideAllExcept (labels) {
+if (labels instanceof Array) {
+const all = new Set(this.uiControls());
+const show = new Set(this.labelsToControls(labels));
+const hide = new Set (difference(all, show));
+console.debug(`${this.id}._hideAllExcept ${labels}: ${all.size}, ${hide.size}, ${show.size}`);
+
+hide.forEach(x => x.hidden = true);
+show.forEach(x => x.hidden = false);
+} // if
+} // hideAllExcept
+
+hideOnly (labels) {
+if (labels instanceof Array) {
+
+const all = new Set(this.uiControls());
+const hide = new Set(this.labelsToControls(labels));
+const show = new Set (difference(all, hide));
+console.debug(`${this.id}._hideOnly ${labels}: ${all.size}, ${hide.size}, ${show.size}`);
+
+hide.forEach(x => x.hidden = true);
+show.forEach(x => x.hidden = false);
+} // if
+} // hideOnly 
+
+labelsToControls (labels) {return this.uiControls().filter(x => labels.includes(x.label));}
+
 uiControls () {
+if (this._ready && this.shadowRoot) {
+const ui = this.shadowRoot.children[0];
+
+if (ui) {
+const selectors = ".panel,ui-list,ui-text,ui-number,ui-boolean,button";
+return Array.from(ui.querySelectorAll(selectors));
+} // if
+} // if
+
+return [];
+} // uiControls
+
+/*uiControls () {
 const selectors = "ui-list,ui-text,ui-number,ui-boolean";
 const controls = Array.from(this.shadowRoot.querySelectorAll(selectors));
 //console.debug(`${this.id}: controls ${controls.length} ${controls.map(x => x.name || x.label || x.id || x)}`);
 return controls;
 } // uiControls
+*/
 
 
-_mix (value) {doIfInitialized(this, "mix", value);}
-_bypass (value) {doIfInitialized(this, "bypass", value);}
-_silentBypass (value) {doIfInitialized(this, "silentBypass", value);}
+_mix (value) {if (this._ready) this.component.mix(value);}
+_silentBypass (value) {if (this._ready) this.component.silentBypass(value);}
+
+_bypass (value) {
+if (this._ready) {
+this.component.bypass(value);
+this._hideOnBypass(value);
+} // if
+} // _bypass
+
+
+_hideOnBypass (value) {
+if (!this.findContext()) return;
+if (!this.findContext().hideOnBypass) return;
+
+if (value) {
+this.hideAllExcept(["bypass"]);
+if (this.shadowRoot.querySelector("slot")) this.shadowRoot.querySelector("slot").setAttribute("hidden", "");
+} else {
+this.hideOnly(this._hide);
+if (this.shadowRoot.querySelector("slot")) this.shadowRoot.querySelector("slot").removeAttribute("hidden");
+} // if
+} // _hideOnBypass
 
 components (elements) {
 return elements.map(e => {
@@ -354,7 +439,20 @@ statusMessage(`Render complete: ${Math.round(10*buffer.duration/60)/10} minutes 
 //}, 3000);
 } // render
 
+
+
 setId (value) {this.id = value;}
+
+findContext () {
+let element = this;
+while (element && element instanceof _AudioContext_ && !element.matches("audio-context")) element = element.parentElement;
+
+if (element.matches("audio-context")) return element;
+else return null;
+} // findContext
+
+
+
 } // class _AudioContext_
 
 customElements.define(_AudioContext_.is, _AudioContext_);
@@ -420,6 +518,7 @@ return element;
 return new Promise ((resolve, reject) => {
 element.addEventListener("elementReady", e => {
 console.log(`${e.target.id} is ready (via event).`);
+e.target._ready = true;
 resolve(e.target);
 });
 });
@@ -435,10 +534,10 @@ element._ready = true;
 element.dispatchEvent(new CustomEvent("elementReady"));
 //console.debug(`signalReady dispatched on ${element.id}`);
 
-if (iMap.has(element)) {
-iMap.get(element)
-.forEach(item => element.component[item.method](item.value));
-iMap.delete(element);
+if (element.component) {
+element.component.bypass(element.bypass);
+element.component.mix(element.mix);
+element._hideOnBypass(element.bypass);
 } // if
 
 } else {
@@ -502,7 +601,7 @@ function parseShortcuts (text) {
 return text.split(",").map(definition => {
 //console.debug(`- definition: ${definition}`);
 const tokens = definition.match(/(\w)+/g);
-if (tokens.length < 2) throw new Error(`${definition}: invalid shortcut definition`);
+if (tokens.length < 3) throw new Error(`${definition}: invalid shortcut definition; must contain a parameter name, followed by at least one key identifier which must include at least one modifier: control, shift, or alt.`);
 return {parameter: tokens[0], shortcut: tokens.slice(1).join(" ")};
 });
 } // parseShortcuts
@@ -565,3 +664,12 @@ e = e.parentElement;
 
 return _depth;
 } // depth
+
+function _hide (element) {element.style.display = "none";}
+function _unhide (element) {element.style.display = "block";}
+
+function stringToSet (s = "", separator = ",") {
+return new Set (
+s.split(separator).map(x => x.trim())
+); // new Set
+} // stringToSet

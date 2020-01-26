@@ -8,9 +8,16 @@
 <body>
 <audio-context sample-rate="88200" automation-interval="0.05" hide="bypass" label="Phase Panner" shortcuts="enableAutomation alt shift a">
 <audio-series>
-<audio-player label="player" shortcuts="src alt shift u" src="media/D2_02_Thats What Love Will Make You Do.flac"></audio-player>
+<audio-player src="media/19-50-19.mp3" label="player" shortcuts="src alt shift u"></audio-player>
 
-<audio-convolver label="convolver" path="./impulses" default-extension=".wav" ></audio-convolver>
+<audio-series label="master">
+<audio-series>
+<audio-channelSwap mix="-0.5"></audio-channelSwap>
+<audio-gain label="side gain" gain="-1" min="-1" max="1" step="0.05"></audio-gain>
+</audio-series>
+<audio-convolver label="reverb" path="./impulses"></audio-convolver>
+
+</audio-series>
 
 <audio-gain label="volume" gain="2.5" max="5" hide="mix, bypass"></audio-gain>
 

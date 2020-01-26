@@ -77,6 +77,8 @@ this.component = new Convolver(this.audio);
 connectedCallback () {
 super.connectedCallback ();
 signalReady(this);
+debugger;
+if (this.impulses && !this.impulse) this.impulse = this.impulses[0];
 } // connectedCallback
 
 impulseChanged (value) {
