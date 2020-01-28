@@ -27,7 +27,7 @@
 <audio-delay label="widen" delay="0.010" hide="bypass, mix"></audio-delay>
 </audio-split>
 
-<audio-series id="master" label="master" mix="-0.4">
+<audio-series id="master" label="master" mix="-0.5">
 
 <audio-series id="container" >
 <audio-parallel>
@@ -49,7 +49,7 @@
 <audio-channelSwap></audio-channelSwap>
 <audio-control>
 <audio-stereo-processor label="rotate low" rotate="-45" hide="bypass, mix, width, center, balance"></audio-stereo-processor>
-<audio-parameter label="control rotate low" name="rotation" function="s(t/2, -90,90)"></audio-parameter>
+<audio-parameter label="control rotate low" name="rotation" function="s(t/2, -135,135)"></audio-parameter>
 </audio-control>
 
 </audio-series><audio-series silent-bypass id="highband" label="high band" hide="mix">
@@ -57,7 +57,7 @@
 <audio-channelSwap></audio-channelSwap>
 <audio-control>
 <audio-stereo-processor label="rotate high" rotate="57" hide="bypass, mix,  width, center, balance"></audio-stereo-processor>
-<audio-parameter label="control rotate high" name="rotation" function="c(t/2, -66,66)"></audio-parameter>
+<audio-parameter label="control rotate high" name="rotation" function="-1*s(t/7, -90,90)"></audio-parameter>
 </audio-control>
 <audio-gain label="gain" gain="2.0" hide="mix, bypass"></audio-gain>
 </audio-series>

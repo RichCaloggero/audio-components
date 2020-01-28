@@ -17,42 +17,6 @@ let automator = null;
 let _automation = false;
 
 
-/* the following maintains a map of elements and method calls on their underlying components.
-signalReady() runs these each time an element becomes ready.
-Only used for methods common to all elements like mix() and bypass() which need to be called when the subclass component is ready.
-for methods defined in the subclass, call the method in connectedCallback() for that element.
-this avoids having to call methods common to all elements in the subclass.
-*/
-
-const iMap = new Map();
-function doIfInitialized(element, method, value) {
-if (! method) return;
-if (element._ready) {
-runMethod(element, method, value);
-} else {
-console.debug(`${element.id} doIfInitialized: deferring...`);
-const queue = iMap.has(element)? iMap.get(element) : [];
-queue.push({method: method, value: value});
-iMap.set(element, queue);
-//alert(`defering ${element.id}.${method}...`);
-//console.debug(`defering ${element.id}.${method}...`);
-} // if
-} // doIfInitialized
-
-function runMethod (element, method, value) {
-if (method instanceof Function) {
-console.debug(`${element.id} runMethod: running function`);
-return method.call(element, value);
-} else if (element.component && element.component[method]) {
-console.debug(`${element.id} runMethod: calling ${method} on component`);
-return element.component[method](value);
-} else {
-throw new Error (`${element.id}: runMethod - method ${method} is invalid`);
-} // if
-} // runMethod
-
-
-
 export class _AudioContext_ extends PolymerElement {
 static get template () {
 return html`
@@ -115,14 +79,14 @@ static get is() { return "audio-context";}
 static get properties() {
 return {
 id: String,
-hide: String,
+hide: {type: String, notify: true, observer: "hideChanged"},
 hideOnBypass: {type: Boolean, value: false},
-label: String,
+label: {type: String, value: "", notify: true, observer: "labelChanged"},
 sampleRate: Number,
 depth: {type: Number, notify:true, value: 0},
 container: {type: Boolean, notify:true, value: false},
 
-mix: {type: Number, value: 0, notify: true, observer: "_mix"},
+mix: {type: Number, value: 1.0, notify: true, observer: "_mix"},
 bypass: {type: Boolean, notify: true, observer: "_bypass"},
 "silent-bypass": {type: Boolean, notify: true, observer: "_silentBypass"},
 enableAutomation: {type: Boolean, value: false, notify: true, observer: "_enableAutomation"}, // enableAutomation
@@ -172,10 +136,6 @@ this._hide = [];
 
 connectedCallback () {
 super.connectedCallback();
-// if is element with a UI, then hide it if no label or name attribute present in HTML
-// hide controls in UI elements that have label or name if control's label or name mentioned in hide attribute's value
-this._hide = this.hide.toLowerCase().trim().split(",").map(x => x.trim());
-this.hideControls();
 
 // when this.shadowRoot becomes set for the first time, store it since it will be shadow root of the audio-context itself
 if (!shadowRoot) shadowRoot = this.shadowRoot;
@@ -190,6 +150,76 @@ signalReady(this);
 }).catch (error => statusMessage(`${this.id}.connectedCallback: ${error}`));
 } // if
 } // connectedCallback
+
+labelChanged (value) {
+if (!value || !value.trim()) {
+this.hideUI ("including descendents");
+return "";
+} else {
+this.restoreUI();
+return value.trim();
+} // if
+} // labelChanged
+
+hideChanged (value) {
+if (!value) return "";
+const _hide = value.toLowerCase().trim();
+this._hide = _hide.split(",").map(x => x.trim());
+//console.debug(`hideChanged ${this.id}: this._hide`);
+return _hide;
+} // hideChanged
+
+restoreUI () {
+if (!this.shadowRoot) return;
+Array.from(this.shadowRoot.children).forEach(x => x.hidden = false);
+if (this.shadowRoot.querySelector("slot")) this.shadowRoot.querySelector("slot").removeAttribute("hidden");
+} // restoreUI
+
+hideUI (includeDescendents) {
+if (!this.shadowRoot) return;
+Array.from(this.shadowRoot.children).forEach(x => x.hidden = true);
+if (includeDescendents && this.shadowRoot.querySelector("slot")) this.shadowRoot.querySelector("slot").hidden = false;
+} // hideUI
+
+hideAllExcept (labels) {
+if (labels instanceof Array) {
+const all = new Set(this.uiControls());
+const show = new Set(this.labelsToControls(labels));
+const hide = new Set (difference(all, show));
+//console.debug(`${this.id}._hideAllExcept ${labels}: ${all.size}, ${hide.size}, ${show.size}`);
+
+hide.forEach(x => x.hidden = true);
+show.forEach(x => x.hidden = false);
+} // if
+} // hideAllExcept
+
+hideOnly (labels) {
+if (labels instanceof Array) {
+
+const all = new Set(this.uiControls());
+const hide = new Set(this.labelsToControls(labels));
+const show = new Set (difference(all, hide));
+//console.debug(`${this.id}._hideOnly ${labels}: ${all.size}, ${hide.size}, ${show.size}`);
+
+hide.forEach(x => x.hidden = true);
+show.forEach(x => x.hidden = false);
+} // if
+} // hideOnly 
+
+labelsToControls (labels) {return this.uiControls().filter(x => labels.includes(x.label));}
+
+uiControls () {
+if (this._ready && this.shadowRoot) {
+const ui = this.shadowRoot;
+
+if (ui) {
+const selectors = ".panel,ui-list,ui-text,ui-number,ui-boolean,button";
+return Array.from(ui.querySelectorAll(selectors));
+} // if
+} // if
+
+return [];
+} // uiControls
 
 
 automationIntervalChanged (value) {if (value && !Number.isNaN(value)) automationInterval = value;}
@@ -227,82 +257,8 @@ p.shortcut = shortcut.shortcut;
 }); // forEach
 } // shortcutsChanged
 
-hideControls () {
-const label = this.label?
-this.label.trim() : "";
-this.label = label;
 
-const hide = this.hide?
-this.hide.trim().split(",").map(x => x.trim().toLowerCase())
-: [];
-this._hide = hide;
-
-if (!label) {
-// hide everything if no label
-this.uiControls().forEach(element => element.hidden = true);
-if (this.shadowRoot) this.shadowRoot.children[0].hidden = true;
-
-} else {
-// hide only those elements whose label or name listed in hide attribute
-this.uiControls().filter(x => x.name || x.label).forEach(element => {
-const name = (element.name || element.label).trim().toLowerCase();
-//console.debug(`- checking ${element.id} ${name}`);
-
-if (name && hide.includes(name)) element.hidden = true;
-}); // forEach
-} // if
-} // hideControls
-
-hideAllExcept (labels) {
-if (labels instanceof Array) {
-const all = new Set(this.uiControls());
-const show = new Set(this.labelsToControls(labels));
-const hide = new Set (difference(all, show));
-console.debug(`${this.id}._hideAllExcept ${labels}: ${all.size}, ${hide.size}, ${show.size}`);
-
-hide.forEach(x => x.hidden = true);
-show.forEach(x => x.hidden = false);
-} // if
-} // hideAllExcept
-
-hideOnly (labels) {
-if (labels instanceof Array) {
-
-const all = new Set(this.uiControls());
-const hide = new Set(this.labelsToControls(labels));
-const show = new Set (difference(all, hide));
-console.debug(`${this.id}._hideOnly ${labels}: ${all.size}, ${hide.size}, ${show.size}`);
-
-hide.forEach(x => x.hidden = true);
-show.forEach(x => x.hidden = false);
-} // if
-} // hideOnly 
-
-labelsToControls (labels) {return this.uiControls().filter(x => labels.includes(x.label));}
-
-uiControls () {
-if (this._ready && this.shadowRoot) {
-const ui = this.shadowRoot.children[0];
-
-if (ui) {
-const selectors = ".panel,ui-list,ui-text,ui-number,ui-boolean,button";
-return Array.from(ui.querySelectorAll(selectors));
-} // if
-} // if
-
-return [];
-} // uiControls
-
-/*uiControls () {
-const selectors = "ui-list,ui-text,ui-number,ui-boolean";
-const controls = Array.from(this.shadowRoot.querySelectorAll(selectors));
-//console.debug(`${this.id}: controls ${controls.length} ${controls.map(x => x.name || x.label || x.id || x)}`);
-return controls;
-} // uiControls
-*/
-
-
-_mix (value) {if (this._ready) this.component.mix(value);}
+_mix (value) {if (this._ready) this.component.mix(value); return value;}
 _silentBypass (value) {if (this._ready) this.component.silentBypass(value);}
 
 _bypass (value) {
@@ -311,7 +267,6 @@ this.component.bypass(value);
 this._hideOnBypass(value);
 } // if
 } // _bypass
-
 
 _hideOnBypass (value) {
 if (!this.findContext()) return;
@@ -451,6 +406,7 @@ if (element.matches("audio-context")) return element;
 else return null;
 } // findContext
 
+uiRoot () {return this.shadowRoot? this.shadowRoot.querySelector("fieldset,div") : null;}
 
 
 } // class _AudioContext_
