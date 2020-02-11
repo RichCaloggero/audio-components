@@ -8,6 +8,10 @@
  *   lib/mixins/property-effects.js
  */
 
+
+// tslint:disable:variable-name Describing an API that's defined elsewhere.
+// tslint:disable:no-any describes the API as best we are able today
+
 import {dedupingMixin} from '../utils/mixin.js';
 
 import {root, isAncestor, isDescendant, get, translate, isPath, set, normalize} from '../utils/path.js';
@@ -287,8 +291,8 @@ interface PropertyEffectsConstructor {
    * Called to evaluate a previously parsed binding part based on a set of
    * one or more changed dependencies.
    *
-   * @param inst Element that should be used as scope for
-   *   binding dependencies
+   * @param inst Element that should be used as
+   *     scope for binding dependencies
    * @param part Binding part metadata
    * @param path Property/path that triggered this effect
    * @param props Bag of current property changes
@@ -296,13 +300,13 @@ interface PropertyEffectsConstructor {
    * @param hasPaths True with `props` contains one or more paths
    * @returns Value the binding part evaluated to
    */
-  _evaluateBinding(inst: this|null, part: BindingPart|null, path: string, props: object|null, oldProps: object|null, hasPaths: boolean): any;
+  _evaluateBinding(inst: PropertyEffects, part: BindingPart|null, path: string, props: object|null, oldProps: object|null, hasPaths: boolean): any;
 }
 
 export {PropertyEffectsConstructor};
 
 interface PropertyEffects extends TemplateStamp, PropertyAccessors, PropertiesChanged {
-  readonly PROPERTY_EFFECT_TYPES: any;
+  readonly PROPERTY_EFFECT_TYPES: {[key: string]: string};
 
   /**
    * Stamps the provided template and performs instance-time setup for
@@ -448,7 +452,8 @@ interface PropertyEffects extends TemplateStamp, PropertyAccessors, PropertiesCh
    *
    * @param property Property name
    * @param type Effect type, from this.PROPERTY_EFFECT_TYPES
-   * @returns True if the prototype/instance has an effect of this type
+   * @returns True if the prototype/instance has an effect of this
+   *     type
    */
   _hasPropertyEffect(property: string, type?: string): boolean;
 
@@ -457,7 +462,8 @@ interface PropertyEffects extends TemplateStamp, PropertyAccessors, PropertiesCh
    * accessor for the given property.
    *
    * @param property Property name
-   * @returns True if the prototype/instance has an effect of this type
+   * @returns True if the prototype/instance has an effect of this
+   *     type
    */
   _hasReadOnlyEffect(property: string): boolean;
 
@@ -466,16 +472,18 @@ interface PropertyEffects extends TemplateStamp, PropertyAccessors, PropertiesCh
    * property effect for the given property.
    *
    * @param property Property name
-   * @returns True if the prototype/instance has an effect of this type
+   * @returns True if the prototype/instance has an effect of this
+   *     type
    */
   _hasNotifyEffect(property: string): boolean;
 
   /**
-   * Returns whether the current prototype/instance has a "reflect to attribute"
-   * property effect for the given property.
+   * Returns whether the current prototype/instance has a "reflect to
+   * attribute" property effect for the given property.
    *
    * @param property Property name
-   * @returns True if the prototype/instance has an effect of this type
+   * @returns True if the prototype/instance has an effect of this
+   *     type
    */
   _hasReflectEffect(property: string): boolean;
 
@@ -484,7 +492,8 @@ interface PropertyEffects extends TemplateStamp, PropertyAccessors, PropertiesCh
    * property effect for the given property.
    *
    * @param property Property name
-   * @returns True if the prototype/instance has an effect of this type
+   * @returns True if the prototype/instance has an effect of this
+   *     type
    */
   _hasComputedEffect(property: string): boolean;
 
@@ -614,8 +623,10 @@ interface PropertyEffects extends TemplateStamp, PropertyAccessors, PropertiesCh
    *     this.items.splice(1, 1, {name: 'Sam'});
    *     this.items.push({name: 'Bob'});
    *     this.notifySplices('items', [
-   *       { index: 1, removed: [{name: 'Todd'}], addedCount: 1, object: this.items, type: 'splice' },
-   *       { index: 3, removed: [], addedCount: 1, object: this.items, type: 'splice'}
+   *       { index: 1, removed: [{name: 'Todd'}], addedCount: 1,
+   *         object: this.items, type: 'splice' },
+   *       { index: 3, removed: [], addedCount: 1,
+   *         object: this.items, type: 'splice'}
    *     ]);
    *
    * @param path Path that should be notified.
@@ -781,7 +792,8 @@ interface PropertyEffects extends TemplateStamp, PropertyAccessors, PropertiesCh
    * full API docs.
    *
    * @param property Property name
-   * @param method Function or name of observer method to call
+   * @param method Function or name of observer method
+   *     to call
    * @param dynamicFn Whether the method name should be included as
    *   a dependency to the effect.
    */

@@ -8,6 +8,10 @@
  *   lib/utils/settings.js
  */
 
+
+// tslint:disable:variable-name Describing an API that's defined elsewhere.
+// tslint:disable:no-any describes the API as best we are able today
+
 import {pathFromUrl} from './resolve-url.js';
 
 export {setRootPath};
@@ -51,3 +55,29 @@ export {setAllowTemplateFromDomModule};
  * Sets `lookupTemplateFromDomModule` globally for all elements
  */
 declare function setAllowTemplateFromDomModule(allowDomModule: boolean): void;
+
+export {setLegacyOptimizations};
+
+
+/**
+ * Sets `legacyOptimizations` globally for all elements to enable optimizations
+ * when only legacy based elements are used.
+ */
+declare function setLegacyOptimizations(useLegacyOptimizations: boolean): void;
+
+export {setSyncInitialRender};
+
+
+/**
+ * Sets `syncInitialRender` globally for all elements to enable synchronous
+ * initial rendering.
+ */
+declare function setSyncInitialRender(useSyncInitialRender: boolean): void;
+
+export {setCancelSyntheticClickEvents};
+
+
+/**
+ * Sets `setCancelSyntheticEvents` globally for all elements to cancel synthetic click events.
+ */
+declare function setCancelSyntheticClickEvents(useCancelSyntheticClickEvents: boolean): void;

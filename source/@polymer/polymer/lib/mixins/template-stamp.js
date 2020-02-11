@@ -22,6 +22,53 @@ const templateExtensions = {
   'dom-if': true,
   'dom-repeat': true
 };
+
+let placeholderBugDetect = false;
+let placeholderBug = false;
+
+function hasPlaceholderBug() {
+  if (!placeholderBugDetect) {
+    placeholderBugDetect = true;
+    const t = document.createElement('textarea');
+    t.placeholder = 'a';
+    placeholderBug = t.placeholder === t.textContent;
+  }
+  return placeholderBug;
+}
+
+/**
+ * Some browsers have a bug with textarea, where placeholder text is copied as
+ * a textnode child of the textarea.
+ *
+ * If the placeholder is a binding, this can break template stamping in two
+ * ways.
+ *
+ * One issue is that when the `placeholder` attribute is removed when the
+ * binding is processed, the textnode child of the textarea is deleted, and the
+ * template info tries to bind into that node.
+ *
+ * With `legacyOptimizations` in use, when the template is stamped and the
+ * `textarea.textContent` binding is processed, no corresponding node is found
+ * because it was removed during parsing. An exception is generated when this
+ * binding is updated.
+ *
+ * With `legacyOptimizations` not in use, the template is cloned before
+ * processing and this changes the above behavior. The cloned template also has
+ * a value property set to the placeholder and textContent. This prevents the
+ * removal of the textContent when the placeholder attribute is removed.
+ * Therefore the exception does not occur. However, there is an extra
+ * unnecessary binding.
+ *
+ * @param {!Node} node Check node for placeholder bug
+ * @return {void}
+ */
+function fixPlaceholder(node) {
+  if (hasPlaceholderBug() && node.localName === 'textarea' && node.placeholder
+        && node.placeholder === node.textContent) {
+    node.textContent = null;
+  }
+}
+
 function wrapTemplateExtension(node) {
   let is = node.getAttribute('is');
   if (is && templateExtensions[is]) {
@@ -104,6 +151,9 @@ function createNodeEventHandler(context, eventName, methodName) {
  * @mixinFunction
  * @polymer
  * @summary Element class mixin that provides basic template parsing and stamping
+ * @template T
+ * @param {function(new:T)} superClass Class to apply mixin to.
+ * @return {function(new:T)} superClass with mixin applied.
  */
 export const TemplateStamp = dedupingMixin(
     /**
@@ -194,20 +244,33 @@ export const TemplateStamp = dedupingMixin(
      * @param {TemplateInfo=} outerTemplateInfo Template metadata from the outer
      *   template, for parsing nested templates
      * @return {!TemplateInfo} Parsed template metadata
+     * @nocollapse
      */
     static _parseTemplate(template, outerTemplateInfo) {
       // since a template may be re-used, memo-ize metadata
       if (!template._templateInfo) {
-        let templateInfo = template._templateInfo = {};
+        // TODO(rictic): fix typing
+        let /** ? */ templateInfo = template._templateInfo = {};
         templateInfo.nodeInfoList = [];
         templateInfo.stripWhiteSpace =
           (outerTemplateInfo && outerTemplateInfo.stripWhiteSpace) ||
           template.hasAttribute('strip-whitespace');
-        this._parseTemplateContent(template, templateInfo, {parent: null});
+         // TODO(rictic): fix typing
+         this._parseTemplateContent(
+             template, templateInfo, /** @type {?} */ ({parent: null}));
       }
       return template._templateInfo;
     }
 
+    /**
+     * See docs for _parseTemplateNode.
+     *
+     * @param {!HTMLTemplateElement} template .
+     * @param {!TemplateInfo} templateInfo .
+     * @param {!NodeInfo} nodeInfo .
+     * @return {boolean} .
+     * @nocollapse
+     */
     static _parseTemplateContent(template, templateInfo, nodeInfo) {
       return this._parseTemplateNode(template.content, templateInfo, nodeInfo);
     }
@@ -224,18 +287,20 @@ export const TemplateStamp = dedupingMixin(
      * @param {!NodeInfo} nodeInfo Node metadata for current template.
      * @return {boolean} `true` if the visited node added node-specific
      *   metadata to `nodeInfo`
+     * @nocollapse
      */
     static _parseTemplateNode(node, templateInfo, nodeInfo) {
-      let noted;
-      let element = /** @type {Element} */(node);
+      let noted = false;
+      let element = /** @type {!HTMLTemplateElement} */ (node);
       if (element.localName == 'template' && !element.hasAttribute('preserve-content')) {
         noted = this._parseTemplateNestedTemplate(element, templateInfo, nodeInfo) || noted;
       } else if (element.localName === 'slot') {
         // For ShadyDom optimization, indicating there is an insertion point
         templateInfo.hasInsertionPoint = true;
       }
+      fixPlaceholder(element);
       if (element.firstChild) {
-        noted = this._parseTemplateChildNodes(element, templateInfo, nodeInfo) || noted;
+        this._parseTemplateChildNodes(element, templateInfo, nodeInfo);
       }
       if (element.hasAttributes && element.hasAttributes()) {
         noted = this._parseTemplateNodeAttributes(element, templateInfo, nodeInfo) || noted;
@@ -284,9 +349,10 @@ export const TemplateStamp = dedupingMixin(
             continue;
           }
         }
-        let childInfo = { parentIndex, parentInfo: nodeInfo };
+        let childInfo =
+            /** @type {!NodeInfo} */ ({parentIndex, parentInfo: nodeInfo});
         if (this._parseTemplateNode(node, templateInfo, childInfo)) {
-          childInfo.infoIndex = templateInfo.nodeInfoList.push(/** @type {!NodeInfo} */(childInfo)) - 1;
+          childInfo.infoIndex = templateInfo.nodeInfoList.push(childInfo) - 1;
         }
         // Increment if not removed
         if (node.parentNode) {
@@ -311,12 +377,15 @@ export const TemplateStamp = dedupingMixin(
      * @param {!NodeInfo} nodeInfo Node metadata for current template.
      * @return {boolean} `true` if the visited node added node-specific
      *   metadata to `nodeInfo`
+     * @nocollapse
      */
     static _parseTemplateNestedTemplate(node, outerTemplateInfo, nodeInfo) {
-      let templateInfo = this._parseTemplate(node, outerTemplateInfo);
+      // TODO(rictic): the type of node should be non-null
+      let element = /** @type {!HTMLTemplateElement} */ (node);
+      let templateInfo = this._parseTemplate(element, outerTemplateInfo);
       let content = templateInfo.content =
-        node.content.ownerDocument.createDocumentFragment();
-      content.appendChild(node.content);
+          element.content.ownerDocument.createDocumentFragment();
+      content.appendChild(element.content);
       nodeInfo.templateInfo = templateInfo;
       return true;
     }
@@ -326,10 +395,12 @@ export const TemplateStamp = dedupingMixin(
      * for nodes of interest.
      *
      * @param {Element} node Node to parse
-     * @param {TemplateInfo} templateInfo Template metadata for current template
-     * @param {NodeInfo} nodeInfo Node metadata for current template.
+     * @param {!TemplateInfo} templateInfo Template metadata for current
+     *     template
+     * @param {!NodeInfo} nodeInfo Node metadata for current template.
      * @return {boolean} `true` if the visited node added node-specific
      *   metadata to `nodeInfo`
+     * @nocollapse
      */
     static _parseTemplateNodeAttributes(node, templateInfo, nodeInfo) {
       // Make copy of original attribute list, since the order may change
@@ -356,6 +427,7 @@ export const TemplateStamp = dedupingMixin(
      * @param {string} value Attribute value
      * @return {boolean} `true` if the visited node added node-specific
      *   metadata to `nodeInfo`
+     * @nocollapse
      */
     static _parseTemplateNodeAttribute(node, templateInfo, nodeInfo, name, value) {
       // events (on-*)
@@ -385,6 +457,7 @@ export const TemplateStamp = dedupingMixin(
      *
      * @param {HTMLTemplateElement} template Template to retrieve `content` for
      * @return {DocumentFragment} Content fragment
+     * @nocollapse
      */
     static _contentForTemplate(template) {
       let templateInfo = /** @type {HTMLTemplateElementWithInfo} */ (template)._templateInfo;

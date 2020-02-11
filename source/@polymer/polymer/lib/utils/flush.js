@@ -8,35 +8,8 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 */
 import './boot.js';
-/* eslint-disable no-unused-vars */
-import { Debouncer } from '../utils/debounce.js';  // used in type annotations
-/* eslint-enable no-unused-vars */
-
-let debouncerQueue = [];
-
-/**
- * Adds a `Debouncer` to a list of globally flushable tasks.
- *
- * @param {!Debouncer} debouncer Debouncer to enqueue
- * @return {void}
- */
-export const enqueueDebouncer = function(debouncer) {
-  debouncerQueue.push(debouncer);
-};
-
-function flushDebouncers() {
-  const didFlush = Boolean(debouncerQueue.length);
-  while (debouncerQueue.length) {
-    try {
-      debouncerQueue.shift().flush();
-    } catch(e) {
-      setTimeout(() => {
-        throw e;
-      });
-    }
-  }
-  return didFlush;
-}
+import {enqueueDebouncer, flushDebouncers} from '../utils/debounce.js';
+export {enqueueDebouncer};
 
 /**
  * Forces several classes of asynchronously queued tasks to flush:

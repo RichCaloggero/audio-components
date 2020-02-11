@@ -11,6 +11,7 @@ import '../utils/boot.js';
 
 import { dedupingMixin } from '../utils/mixin.js';
 import { microTask } from '../utils/async.js';
+import { wrap } from '../utils/wrap.js';
 
 /** @const {!AsyncInterface} */
 const microtask = microTask;
@@ -32,6 +33,9 @@ const microtask = microTask;
  * @polymer
  * @summary Element class mixin for reacting to property changes from
  *   generated property accessors.
+ * @template T
+ * @param {function(new:T)} superClass Class to apply mixin to.
+ * @return {function(new:T)} superClass with mixin applied.
  */
 export const PropertiesChanged = dedupingMixin(
     /**
@@ -54,6 +58,7 @@ export const PropertiesChanged = dedupingMixin(
      * @param {!Object} props Object whose keys are names of accessors.
      * @return {void}
      * @protected
+     * @nocollapse
      */
     static createProperties(props) {
       const proto = this.prototype;
@@ -73,6 +78,7 @@ export const PropertiesChanged = dedupingMixin(
      * @return {string} Attribute name corresponding to the given property.
      *
      * @protected
+     * @nocollapse
      */
     static attributeNameForProperty(property) {
       return property.toLowerCase();
@@ -84,6 +90,7 @@ export const PropertiesChanged = dedupingMixin(
      * @param {string} name Name of property
      *
      * @protected
+     * @nocollapse
      */
     static typeForProperty(name) { } //eslint-disable-line no-unused-vars
 
@@ -106,7 +113,7 @@ export const PropertiesChanged = dedupingMixin(
      */
     _createPropertyAccessor(property, readOnly) {
       this._addPropertyToAttributeMap(property);
-      if (!this.hasOwnProperty('__dataHasAccessor')) {
+      if (!this.hasOwnProperty(JSCompiler_renameProperty('__dataHasAccessor', this))) {
         this.__dataHasAccessor = Object.assign({}, this.__dataHasAccessor);
       }
       if (!this.__dataHasAccessor[property]) {
@@ -124,7 +131,7 @@ export const PropertiesChanged = dedupingMixin(
      * @override
      */
     _addPropertyToAttributeMap(property) {
-      if (!this.hasOwnProperty('__dataAttributes')) {
+      if (!this.hasOwnProperty(JSCompiler_renameProperty('__dataAttributes', this))) {
         this.__dataAttributes = Object.assign({}, this.__dataAttributes);
       }
       if (!this.__dataAttributes[property]) {
@@ -157,6 +164,7 @@ export const PropertiesChanged = dedupingMixin(
 
     constructor() {
       super();
+      /** @type {boolean} */
       this.__dataEnabled = false;
       this.__dataReady = false;
       this.__dataInvalid = false;
@@ -492,6 +500,9 @@ export const PropertiesChanged = dedupingMixin(
      */
     _valueToNodeAttribute(node, value, attribute) {
       const str = this._serializeValue(value);
+      if (attribute === 'class' || attribute === 'name' || attribute === 'slot') {
+        node = /** @type {?Element} */(wrap(node));
+      }
       if (str === undefined) {
         node.removeAttribute(attribute);
       } else {

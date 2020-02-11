@@ -11,6 +11,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 import { Class } from './class.js';
 import { Polymer } from '../../polymer-legacy.js';
 import { dedupingMixin } from '../utils/mixin.js';
+import { templatize } from '../utils/templatize.js';
 
 const UndefinedArgumentError = class extends Error {
   constructor(message, arg) {
@@ -27,10 +28,10 @@ const UndefinedArgumentError = class extends Error {
 
 /**
  * Wraps effect functions to catch `UndefinedArgumentError`s and warn.
- * 
+ *
  * @param {Object=} effect Effect metadata object
  * @param {Object=} fnName Name of user function, if known
- * @return {?Object} Effect metadata object
+ * @return {?Object|undefined} Effect metadata object
  */
 function wrapEffect(effect, fnName) {
   if (effect && effect.fn) {
@@ -40,7 +41,7 @@ function wrapEffect(effect, fnName) {
         fn.apply(this, arguments);
       } catch (e) {
         if (e instanceof UndefinedArgumentError) {
-          console.warn(`Argument '${e.arg}'${fnName ?` for method '${fnName}'` : ''} was undefined. Ensure it has an undefined check.`);
+          console.warn(`Argument '${e.arg}'${fnName ?` for method '${fnName}'` : ''} was undefined. Ensure it has a default value, or else ensure the method handles the argument being undefined.`);
         } else {
           throw e;
         }
@@ -54,11 +55,11 @@ function wrapEffect(effect, fnName) {
  * Mixin to selectively add back Polymer 1.x's `undefined` rules
  * governing when observers & computing functions run based
  * on all arguments being defined (reference https://www.polymer-project.org/1.0/docs/devguide/observers#multi-property-observers).
- * 
+ *
  * When loaded, all legacy elements (defined with `Polymer({...})`)
  * will have the mixin applied. The mixin only restores legacy data handling
  * if `_legacyUndefinedCheck: true` is set on the element's prototype.
- * 
+ *
  * This mixin is intended for use to help migration from Polymer 1.x to
  * 2.x+ by allowing legacy code to work while identifying observers and
  * computing functions that need undefined checks to work without
@@ -72,15 +73,14 @@ function wrapEffect(effect, fnName) {
 export const LegacyDataMixin = dedupingMixin(superClass => {
 
   /**
-   * @constructor
-   * @extends {superClass}
    * @unrestricted
-   * @private   */
+   * @private
+   */
   class LegacyDataMixin extends superClass {
     /**
      * Overrides `Polymer.PropertyEffects` to add `undefined` argument
      * checking to match Polymer 1.x style rules
-     * 
+     *
      * @param {!Array<!MethodArg>} args Array of argument metadata
      * @param {string} path Property/path name that triggered the method effect
      * @param {Object} props Bag of current property changes
@@ -94,11 +94,12 @@ export const LegacyDataMixin = dedupingMixin(superClass => {
       // undefined or not. Multi-property observers must have all arguments defined
       if (this._legacyUndefinedCheck && vals.length > 1) {
         for (let i=0; i<vals.length; i++) {
-          if (vals[i] === undefined) {
+          if (vals[i] === undefined ||
+              (args[i].wildcard && vals[i].base === undefined)) {
             // Break out of effect's control flow; will be caught in
             // wrapped property effect function below
             const name = args[i].name;
-            throw new UndefinedArgumentError(`Argument '${name}' is undefined. Ensure it has an undefined check.`, name);
+            throw new UndefinedArgumentError(`Argument '${name}' is undefined.`, name);
           }
         }
       }
@@ -108,7 +109,7 @@ export const LegacyDataMixin = dedupingMixin(superClass => {
     /**
      * Overrides `Polyer.PropertyEffects` to wrap effect functions to
      * catch `UndefinedArgumentError`s and warn.
-     * 
+     *
      * @param {string} property Property that should trigger the effect
      * @param {string} type Effect type, from this.PROPERTY_EFFECT_TYPES
      * @param {Object=} effect Effect metadata object
@@ -129,9 +130,13 @@ export const LegacyDataMixin = dedupingMixin(superClass => {
      * @param {Object=} effect Effect metadata object
      * @return {void}
      * @protected
+     * @nocollapse
      */
     static _addTemplatePropertyEffect(templateInfo, prop, effect) {
-      return super._addTemplatePropertyEffect(templateInfo, prop, wrapEffect(effect));
+      // TODO(https://github.com/google/closure-compiler/issues/3240):
+      //     Change back to just super.methodCall()
+      return superClass._addTemplatePropertyEffect.call(
+          this, templateInfo, prop, wrapEffect(effect));
     }
 
   }
@@ -143,11 +148,39 @@ export const LegacyDataMixin = dedupingMixin(superClass => {
 // LegacyDataMixin is applied to base class _before_ metaprogramming, to
 // ensure override of _addPropertyEffect et.al. are used by metaprogramming
 // performed in _finalizeClass
-Polymer.Class = (info, mixin) => Class(info, 
-  superClass => mixin ? 
-    mixin(LegacyDataMixin(superClass)) : 
+Polymer.Class = (info, mixin) => Class(info,
+  superClass => mixin ?
+    mixin(LegacyDataMixin(superClass)) :
     LegacyDataMixin(superClass)
 );
+
+// Apply LegacyDataMixin to Templatizer instances as well, and defer
+// runtime switch to the root's host (_methodHost)
+/**
+ * @mixinFunction
+ * @polymer
+ */
+const TemplatizeMixin =
+  dedupingMixin(superClass => {
+    /**
+     * @constructor
+     * @extends {HTMLElement}
+     */
+    const legacyBase = LegacyDataMixin(superClass);
+    /**
+     * @private
+     */
+    class TemplateLegacy extends legacyBase {
+      get _legacyUndefinedCheck() {
+        return this._methodHost && this._methodHost._legacyUndefinedCheck;
+      }
+    }
+    /** @type {!Polymer_PropertyEffects} */
+    TemplateLegacy.prototype._methodHost;
+    return TemplateLegacy;
+  });
+
+templatize.mixin = TemplatizeMixin;
 
 console.info('LegacyDataMixin will be applied to all legacy elements.\n' +
               'Set `_legacyUndefinedCheck: true` on element class to enable.');

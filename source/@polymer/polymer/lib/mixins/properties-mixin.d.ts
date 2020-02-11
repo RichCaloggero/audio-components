@@ -8,7 +8,13 @@
  *   lib/mixins/properties-mixin.js
  */
 
+
+// tslint:disable:variable-name Describing an API that's defined elsewhere.
+// tslint:disable:no-any describes the API as best we are able today
+
 import {dedupingMixin} from '../utils/mixin.js';
+
+import {register, incrementInstanceCount} from '../utils/telemetry.js';
 
 import {PropertiesChanged} from './properties-changed.js';
 

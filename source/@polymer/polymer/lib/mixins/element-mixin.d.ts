@@ -8,6 +8,10 @@
  *   lib/mixins/element-mixin.js
  */
 
+
+// tslint:disable:variable-name Describing an API that's defined elsewhere.
+// tslint:disable:no-any describes the API as best we are able today
+
 import {dedupingMixin} from '../utils/mixin.js';
 
 import {stylesFromTemplate, stylesFromModuleImports} from '../utils/style-gather.js';
@@ -94,24 +98,42 @@ interface ElementMixinConstructor {
   new(...args: any[]): ElementMixin;
 
   /**
-   * Overrides `PropertyAccessors` to add map of dynamic functions on
+   * Overrides `PropertyEffects` to add map of dynamic functions on
    * template info, for consumption by `PropertyEffects` template binding
    * code. This map determines which method templates should have accessors
    * created for them.
+   *
+   * @param template Template
+   * @param templateInfo Template metadata for current template
+   * @param nodeInfo Node metadata for current template.
+   * @returns .
    */
-  _parseTemplateContent(template: any, templateInfo: any, nodeInfo: any): any;
+  _parseTemplateContent(template: HTMLTemplateElement, templateInfo: TemplateInfo, nodeInfo: NodeInfo): boolean;
 
   /**
    * Override of PropertiesChanged createProperties to create accessors
    * and property effects for all of the properties.
+   *
+   * @param props .
    */
-  createProperties(props: any): void;
+  createProperties(props: object): void;
+
+  /**
+   * Overrides `PropertyEffects` to warn on use of undeclared properties in
+   * template.
+   *
+   * @param templateInfo Template metadata to add effect to
+   * @param prop Property that should trigger the effect
+   * @param effect Effect metadata object
+   */
+  _addTemplatePropertyEffect(templateInfo: object|null, prop: string, effect?: object|null): void;
 
   /**
    * Override of PropertiesMixin _finalizeClass to create observers and
    * find the template.
    */
   _finalizeClass(): void;
+  _prepareTemplate(): void;
 
   /**
    * Creates observers for the given `observers` array.
@@ -238,22 +260,6 @@ interface ElementMixin extends PropertyEffects, TemplateStamp, PropertyAccessors
   resolveUrl(url: string, base?: string): string;
 }
 
-export {register};
-
-
-/**
- * Registers a class prototype for telemetry purposes.
- */
-declare function register(prototype: HTMLElement|null): void;
-
-export {dumpRegistrations};
-
-
-/**
- * Logs all elements registered with an `is` to the console.
- */
-declare function dumpRegistrations(): void;
-
 export {updateStyles};
 
 
@@ -271,5 +277,9 @@ export {updateStyles};
  * These properties are retained unless a value of `null` is set.
  */
 declare function updateStyles(props?: object|null): void;
+
+import {TemplateInfo} from '../../interfaces';
+
+import {NodeInfo} from '../../interfaces';
 
 import {StampedTemplate} from '../../interfaces';

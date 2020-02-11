@@ -8,11 +8,17 @@
  *   lib/legacy/legacy-data-mixin.js
  */
 
+
+// tslint:disable:variable-name Describing an API that's defined elsewhere.
+// tslint:disable:no-any describes the API as best we are able today
+
 import {Class} from './class.js';
 
 import {Polymer} from '../../polymer-legacy.js';
 
 import {dedupingMixin} from '../utils/mixin.js';
+
+import {templatize} from '../utils/templatize.js';
 
 declare class UndefinedArgumentError extends Error {
   constructor(message: any, arg: any);
@@ -44,4 +50,18 @@ interface LegacyDataMixinConstructor {
 export {LegacyDataMixinConstructor};
 
 interface LegacyDataMixin {
+}
+
+declare function TemplatizeMixin<T extends new (...args: any[]) => {}>(base: T): T & TemplatizeMixinConstructor;
+
+interface TemplatizeMixinConstructor {
+  new(...args: any[]): TemplatizeMixin;
+}
+
+export {TemplatizeMixinConstructor};
+
+interface TemplatizeMixin {
+}
+
+declare class legacyBase extends HTMLElement {
 }

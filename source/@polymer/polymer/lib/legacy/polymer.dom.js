@@ -8,7 +8,7 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 */
 import '../utils/boot.js';
-
+import { wrap } from '../utils/wrap.js';
 import '../utils/settings.js';
 import { FlattenedNodesObserver } from '../utils/flattened-nodes-observer.js';
 export { flush, enqueueDebouncer as addDebouncer } from '../utils/flush.js';
@@ -39,14 +39,18 @@ export const matchesSelector = function(node, selector) {
 /**
  * Node API wrapper class returned from `Polymer.dom.(target)` when
  * `target` is a `Node`.
- *
+ * @implements {PolymerDomApi}
+ * @unrestricted
  */
-export class DomApi {
+class DomApiNative {
 
   /**
-   * @param {Node} node Node for which to create a Polymer.dom helper object.
+   * @param {!Node} node Node for which to create a Polymer.dom helper object.
    */
   constructor(node) {
+    if (window['ShadyDOM'] && window['ShadyDOM']['inUse']) {
+      window['ShadyDOM']['patch'](node);
+    }
     this.node = node;
   }
 
@@ -56,7 +60,8 @@ export class DomApi {
    *
    * @param {function(this:HTMLElement, { target: !HTMLElement, addedNodes: !Array<!Element>, removedNodes: !Array<!Element> }):void} callback Called when direct or distributed children
    *   of this element changes
-   * @return {!FlattenedNodesObserver} Observer instance
+   * @return {!PolymerDomApi.ObserveHandle} Observer instance
+   * @override
    */
   observeNodes(callback) {
     return new FlattenedNodesObserver(
@@ -66,9 +71,10 @@ export class DomApi {
   /**
    * Disconnects an observer previously created via `observeNodes`
    *
-   * @param {!FlattenedNodesObserver} observerHandle Observer instance
+   * @param {!PolymerDomApi.ObserveHandle} observerHandle Observer instance
    *   to disconnect.
    * @return {void}
+   * @override
    */
   unobserveNodes(observerHandle) {
     observerHandle.disconnect();
@@ -88,9 +94,10 @@ export class DomApi {
    * @param {Node} node Node to test
    * @return {boolean} Returns true if the given `node` is contained within
    *   this element's light or shadow DOM.
+   * @override
    */
   deepContains(node) {
-    if (this.node.contains(node)) {
+    if (wrap(this.node).contains(node)) {
       return true;
     }
     let n = node;
@@ -98,7 +105,7 @@ export class DomApi {
     // walk from node to `this` or `document`
     while (n && n !== doc && n !== this.node) {
       // use logical parentnode, or native ShadowRoot host
-      n = n.parentNode || n.host;
+      n = wrap(n).parentNode || wrap(n).host;
     }
     return n === this.node;
   }
@@ -110,9 +117,10 @@ export class DomApi {
    * exists. If the node is connected to a document this is either a
    * shadowRoot or the document; otherwise, it may be the node
    * itself or a node or document fragment containing it.
+   * @override
    */
   getOwnerRoot() {
-    return this.node.getRootNode();
+    return wrap(this.node).getRootNode();
   }
 
   /**
@@ -120,10 +128,11 @@ export class DomApi {
    * an empty array. It is equivalent to `<slot>.addignedNodes({flatten:true})`.
    *
    * @return {!Array<!Node>} Array of assigned nodes
+   * @override
    */
   getDistributedNodes() {
     return (this.node.localName === 'slot') ?
-      this.node.assignedNodes({flatten: true}) :
+      wrap(this.node).assignedNodes({flatten: true}) :
       [];
   }
 
@@ -131,13 +140,14 @@ export class DomApi {
    * Returns an array of all slots this element was distributed to.
    *
    * @return {!Array<!HTMLSlotElement>} Description
+   * @override
    */
   getDestinationInsertionPoints() {
     let ip$ = [];
-    let n = this.node.assignedSlot;
+    let n = wrap(this.node).assignedSlot;
     while (n) {
       ip$.push(n);
-      n = n.assignedSlot;
+      n = wrap(n).assignedSlot;
     }
     return ip$;
   }
@@ -153,12 +163,13 @@ export class DomApi {
   importNode(node, deep) {
     let doc = this.node instanceof Document ? this.node :
       this.node.ownerDocument;
-    return doc.importNode(node, deep);
+    return wrap(doc).importNode(node, deep);
   }
 
   /**
    * @return {!Array<!Node>} Returns a flattened list of all child nodes and
    * nodes assigned to child slots.
+   * @override
    */
   getEffectiveChildNodes() {
     return FlattenedNodesObserver.getFlattenedNodes(
@@ -171,6 +182,7 @@ export class DomApi {
    *
    * @param {string} selector Selector to filter nodes against
    * @return {!Array<!HTMLElement>} List of flattened child elements
+   * @override
    */
   queryDistributedElements(selector) {
     let c$ = this.getEffectiveChildNodes();
@@ -188,7 +200,8 @@ export class DomApi {
    * For shadow roots, returns the currently focused element within this
    * shadow root.
    *
-   * @return {Node|undefined} Currently focused element
+   * return {Node|undefined} Currently focused element
+   * @override
    */
   get activeElement() {
     let node = this.node;
@@ -200,7 +213,7 @@ function forwardMethods(proto, methods) {
   for (let i=0; i < methods.length; i++) {
     let method = methods[i];
     /* eslint-disable valid-jsdoc */
-    proto[method] = /** @this {DomApi} */ function() {
+    proto[method] = /** @this {DomApiNative} */ function() {
       return this.node[method].apply(this.node, arguments);
     };
     /* eslint-enable */
@@ -212,7 +225,7 @@ function forwardReadOnlyProperties(proto, properties) {
     let name = properties[i];
     Object.defineProperty(proto, name, {
       get: function() {
-        const domApi = /** @type {DomApi} */(this);
+        const domApi = /** @type {DomApiNative} */(this);
         return domApi.node[name];
       },
       configurable: true
@@ -225,14 +238,14 @@ function forwardProperties(proto, properties) {
     let name = properties[i];
     Object.defineProperty(proto, name, {
       /**
-       * @this {DomApi}
+       * @this {DomApiNative}
        * @return {*} .
        */
       get: function() {
         return this.node[name];
       },
       /**
-       * @this {DomApi}
+       * @this {DomApiNative}
        * @param {*} value .
        */
       set: function(value) {
@@ -259,7 +272,7 @@ export class EventApi {
    * @return {!EventTarget} The node this event was dispatched to
    */
   get rootTarget() {
-    return this.event.composedPath()[0];
+    return this.path[0];
   }
 
   /**
@@ -285,105 +298,168 @@ export class EventApi {
  * @param {boolean=} deep
  * @return {!Node}
  */
-DomApi.prototype.cloneNode;
+DomApiNative.prototype.cloneNode;
 /**
  * @function
  * @param {!Node} node
  * @return {!Node}
  */
-DomApi.prototype.appendChild;
+DomApiNative.prototype.appendChild;
 /**
  * @function
  * @param {!Node} newChild
  * @param {Node} refChild
  * @return {!Node}
  */
-DomApi.prototype.insertBefore;
+DomApiNative.prototype.insertBefore;
 /**
  * @function
  * @param {!Node} node
  * @return {!Node}
  */
-DomApi.prototype.removeChild;
+DomApiNative.prototype.removeChild;
 /**
  * @function
  * @param {!Node} oldChild
  * @param {!Node} newChild
  * @return {!Node}
  */
-DomApi.prototype.replaceChild;
+DomApiNative.prototype.replaceChild;
 /**
  * @function
  * @param {string} name
  * @param {string} value
  * @return {void}
  */
-DomApi.prototype.setAttribute;
+DomApiNative.prototype.setAttribute;
 /**
  * @function
  * @param {string} name
  * @return {void}
  */
-DomApi.prototype.removeAttribute;
+DomApiNative.prototype.removeAttribute;
 /**
  * @function
  * @param {string} selector
  * @return {?Element}
  */
-DomApi.prototype.querySelector;
+DomApiNative.prototype.querySelector;
 /**
  * @function
  * @param {string} selector
  * @return {!NodeList<!Element>}
  */
-DomApi.prototype.querySelectorAll;
+DomApiNative.prototype.querySelectorAll;
 
 /** @type {?Node} */
-DomApi.prototype.parentNode;
+DomApiNative.prototype.parentNode;
 /** @type {?Node} */
-DomApi.prototype.firstChild;
+DomApiNative.prototype.firstChild;
 /** @type {?Node} */
-DomApi.prototype.lastChild;
+DomApiNative.prototype.lastChild;
 /** @type {?Node} */
-DomApi.prototype.nextSibling;
+DomApiNative.prototype.nextSibling;
 /** @type {?Node} */
-DomApi.prototype.previousSibling;
+DomApiNative.prototype.previousSibling;
 /** @type {?HTMLElement} */
-DomApi.prototype.firstElementChild;
+DomApiNative.prototype.firstElementChild;
 /** @type {?HTMLElement} */
-DomApi.prototype.lastElementChild;
+DomApiNative.prototype.lastElementChild;
 /** @type {?HTMLElement} */
-DomApi.prototype.nextElementSibling;
+DomApiNative.prototype.nextElementSibling;
 /** @type {?HTMLElement} */
-DomApi.prototype.previousElementSibling;
+DomApiNative.prototype.previousElementSibling;
 /** @type {!Array<!Node>} */
-DomApi.prototype.childNodes;
+DomApiNative.prototype.childNodes;
 /** @type {!Array<!HTMLElement>} */
-DomApi.prototype.children;
+DomApiNative.prototype.children;
 /** @type {?DOMTokenList} */
-DomApi.prototype.classList;
+DomApiNative.prototype.classList;
 
 /** @type {string} */
-DomApi.prototype.textContent;
+DomApiNative.prototype.textContent;
 /** @type {string} */
-DomApi.prototype.innerHTML;
+DomApiNative.prototype.innerHTML;
 
-forwardMethods(DomApi.prototype, [
-  'cloneNode', 'appendChild', 'insertBefore', 'removeChild',
-  'replaceChild', 'setAttribute', 'removeAttribute',
-  'querySelector', 'querySelectorAll'
-]);
+let DomApiImpl = DomApiNative;
 
-forwardReadOnlyProperties(DomApi.prototype, [
-  'parentNode', 'firstChild', 'lastChild',
-  'nextSibling', 'previousSibling', 'firstElementChild',
-  'lastElementChild', 'nextElementSibling', 'previousElementSibling',
-  'childNodes', 'children', 'classList'
-]);
+if (window['ShadyDOM'] && window['ShadyDOM']['inUse'] && window['ShadyDOM']['noPatch'] && window['ShadyDOM']['Wrapper']) {
 
-forwardProperties(DomApi.prototype, [
-  'textContent', 'innerHTML'
-]);
+  /**
+   * @private
+   * @extends {HTMLElement}
+   */
+  class Wrapper extends window['ShadyDOM']['Wrapper'] {}
+
+  // copy bespoke API onto wrapper
+  Object.getOwnPropertyNames(DomApiNative.prototype).forEach((prop) => {
+    if (prop != 'activeElement') {
+      Wrapper.prototype[prop] = DomApiNative.prototype[prop];
+    }
+  });
+
+  // Note, `classList` is here only for legacy compatibility since it does not
+  // trigger distribution in v1 Shadow DOM.
+  forwardReadOnlyProperties(Wrapper.prototype, [
+    'classList'
+  ]);
+
+  DomApiImpl = Wrapper;
+
+  Object.defineProperties(EventApi.prototype, {
+
+    // Returns the "lowest" node in the same root as the event's currentTarget.
+    // When in `noPatch` mode, this must be calculated by walking the event's
+    // path.
+    localTarget: {
+      get() {
+        const current = this.event.currentTarget;
+        const currentRoot = current && dom(current).getOwnerRoot();
+        const p$ = this.path;
+        for (let i = 0; i < p$.length; i++) {
+          const e = p$[i];
+          if (dom(e).getOwnerRoot() === currentRoot) {
+            return e;
+          }
+        }
+      },
+      configurable: true
+    },
+
+    path: {
+      get() {
+        return window['ShadyDOM']['composedPath'](this.event);
+      },
+      configurable: true
+    }
+  });
+
+} else {
+
+  // Methods that can provoke distribution or must return the logical, not
+  // composed tree.
+  forwardMethods(DomApiNative.prototype, [
+    'cloneNode', 'appendChild', 'insertBefore', 'removeChild',
+    'replaceChild', 'setAttribute', 'removeAttribute',
+    'querySelector', 'querySelectorAll'
+  ]);
+
+  // Properties that should return the logical, not composed tree. Note, `classList`
+  // is here only for legacy compatibility since it does not trigger distribution
+  // in v1 Shadow DOM.
+  forwardReadOnlyProperties(DomApiNative.prototype, [
+    'parentNode', 'firstChild', 'lastChild',
+    'nextSibling', 'previousSibling', 'firstElementChild',
+    'lastElementChild', 'nextElementSibling', 'previousElementSibling',
+    'childNodes', 'children', 'classList'
+  ]);
+
+  forwardProperties(DomApiNative.prototype, [
+    'textContent', 'innerHTML', 'className'
+  ]);
+}
+
+export const DomApi = DomApiImpl;
 
 /**
  * Legacy DOM and Event manipulation API wrapper factory used to abstract
@@ -396,19 +472,25 @@ forwardProperties(DomApi.prototype, [
  *
  * @summary Legacy DOM and Event manipulation API wrapper factory used to
  * abstract differences between native Shadow DOM and "Shady DOM."
- * @param {(Node|Event)=} obj Node or event to operate on
- * @return {!DomApi|!EventApi} Wrapper providing either node API or event API
+ * @param {(Node|Event|DomApiNative|EventApi)=} obj Node or event to operate on
+ * @return {!DomApiNative|!EventApi} Wrapper providing either node API or event API
  */
 export const dom = function(obj) {
   obj = obj || document;
-  if (!obj.__domApi) {
-    let helper;
+  if (obj instanceof DomApiImpl) {
+    return /** @type {!DomApi} */(obj);
+  }
+  if (obj instanceof EventApi) {
+    return /** @type {!EventApi} */(obj);
+  }
+  let helper = obj['__domApi'];
+  if (!helper) {
     if (obj instanceof Event) {
       helper = new EventApi(obj);
     } else {
-      helper = new DomApi(obj);
+      helper = new DomApiImpl(/** @type {Node} */(obj));
     }
-    obj.__domApi = helper;
+    obj['__domApi'] = helper;
   }
-  return obj.__domApi;
+  return helper;
 };

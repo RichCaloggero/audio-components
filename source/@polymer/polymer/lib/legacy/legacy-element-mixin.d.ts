@@ -8,6 +8,10 @@
  *   lib/legacy/legacy-element-mixin.js
  */
 
+
+// tslint:disable:variable-name Describing an API that's defined elsewhere.
+// tslint:disable:no-any describes the API as best we are able today
+
 import {ElementMixin} from '../mixins/element-mixin.js';
 
 import {GestureEventListeners} from '../mixins/gesture-event-listeners.js';
@@ -25,6 +29,8 @@ import {Debouncer} from '../utils/debounce.js';
 import {timeOut, microTask} from '../utils/async.js';
 
 import {get} from '../utils/path.js';
+
+import {scopeSubtree} from '../utils/scope-subtree.js';
 
 export {LegacyElementMixin};
 
@@ -59,14 +65,15 @@ export {LegacyElementMixinConstructor};
 
 interface LegacyElementMixin extends ElementMixin, PropertyEffects, TemplateStamp, PropertyAccessors, PropertiesChanged, PropertiesMixin, GestureEventListeners {
   isAttached: boolean;
-  _debouncers: {[key: string]: Function|null};
+  _debouncers: {[key: string]: Function|null}|null;
 
   /**
    * Return the element whose local dom within which this element
    * is contained. This is a shorthand for
    * `this.getRootNode().host`.
    */
-  readonly domHost: any;
+  readonly domHost: Node|null;
+  is: string;
 
   /**
    * Overrides the default `Polymer.PropertyEffects` implementation to
@@ -385,7 +392,8 @@ interface LegacyElementMixin extends ElementMixin, PropertyEffects, TemplateStam
    * to children that are insertion points.
    *
    * @param selector Selector to run.
-   * @returns List of effective child nodes that match selector.
+   * @returns List of effective child nodes that match
+   *     selector.
    */
   queryAllEffectiveChildren(selector: string): Node[];
 
@@ -437,10 +445,11 @@ interface LegacyElementMixin extends ElementMixin, PropertyEffects, TemplateStam
    * No-op for backwards compatibility. This should now be handled by
    * ShadyCss library.
    *
-   * @param container Unused
-   * @param shouldObserve Unused
+   * @param container Container element to scope
+   * @param shouldObserve if true, start a mutation observer for added nodes to the container
+   * @returns Returns a new MutationObserver on `container` if `shouldObserve` is true.
    */
-  scopeSubtree(container: any, shouldObserve: any): void;
+  scopeSubtree(container: Element, shouldObserve?: boolean): MutationObserver|null;
 
   /**
    * Returns the computed style value for the given property.
@@ -475,7 +484,7 @@ interface LegacyElementMixin extends ElementMixin, PropertyEffects, TemplateStam
    * `flush()` immediately invokes the debounced callback if the debouncer
    * is active.
    */
-  debounce(jobName: string, callback: () => void, wait: number): object;
+  debounce(jobName: string, callback: () => void, wait?: number): object;
 
   /**
    * Returns whether a named debouncer is active.
@@ -505,7 +514,8 @@ interface LegacyElementMixin extends ElementMixin, PropertyEffects, TemplateStam
    * By default (if no waitTime is specified), async callbacks are run at
    * microtask timing, which will occur before paint.
    *
-   * @param callback The callback function to run, bound to `this`.
+   * @param callback The callback function to run, bound to
+   *     `this`.
    * @param waitTime Time to wait before calling the
    *   `callback`.  If unspecified or 0, the callback will be run at microtask
    *   timing (before paint).
@@ -580,7 +590,7 @@ interface LegacyElementMixin extends ElementMixin, PropertyEffects, TemplateStam
    * @param node Element to apply the transform to.
    * Defaults to `this`.
    */
-  translate3d(x: number, y: number, z: number, node?: Element|null): void;
+  translate3d(x: number|string, y: number|string, z: number|string, node?: Element|null): void;
 
   /**
    * Removes an item from an array, if it exists.
@@ -592,7 +602,8 @@ interface LegacyElementMixin extends ElementMixin, PropertyEffects, TemplateStam
    * If the array is passed directly, **no change
    * notification is generated**.
    *
-   * @param arrayOrPath Path to array from which to remove the item
+   * @param arrayOrPath Path to array from
+   *     which to remove the item
    *   (or the array itself).
    * @param item Item to remove.
    * @returns Array containing item removed.

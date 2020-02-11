@@ -59,11 +59,11 @@ super.connectedCallback();
 signalReady(this);
 } // connectedCallback
 
-typeChanged (value) {if(value) this.component.type = value;}
-frequencyChanged (value) {if (Number(value)) this.component.frequency = value;}
-qChanged (value) {if (Number(value)) this.component.q = value;}
-gainChanged (value) {if (Number(value)) this.component.gain = value;}
-detuneChanged (value) {if (Number(value)) this.component.detune = value;}
+typeChanged (value) {if(this._ready && value) this.component.type = value;}
+frequencyChanged (value) {if (this._ready && Number(value)) this.component.frequency = value;}
+qChanged (value) {if (this._ready && Number(value)) this.component.q = value;}
+gainChanged (value) {if (this._ready && Number(value)) this.component.gain = value;}
+detuneChanged (value) {if (this._ready && Number(value)) this.component.detune = value;}
 } // class AudioFilter
 
 customElements.define(AudioFilter.is, AudioFilter);

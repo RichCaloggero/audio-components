@@ -1,49 +1,47 @@
 {
-  "_args": [
-    [
-      "@polymer/polymer@3.1.0",
-      "C:\\Users\\rich\\projects\\polymer-test.git"
-    ]
-  ],
-  "_from": "@polymer/polymer@3.1.0",
-  "_id": "@polymer/polymer@3.1.0",
+  "_from": "@polymer/polymer",
+  "_id": "@polymer/polymer@3.3.1",
   "_inBundle": false,
-  "_integrity": "sha512-hwN8IMERsFATz/9dSMxYHL+84J9uBkPuuarxJWlTsppZ4CAYTZKnepBfNrKoyNsafBmA3yXBiiKPPf+fJtza7A==",
+  "_integrity": "sha512-8KaB48tzyMjdsHdxo5KvCAaqmTe7rYDzQAoj/pyEfq9Fp4YfUaS+/xqwYj0GbiDAUNzwkmEQ7dw9cgnRNdKO8A==",
   "_location": "/@polymer/polymer",
   "_phantomChildren": {},
   "_requested": {
-    "type": "version",
+    "type": "tag",
     "registry": true,
-    "raw": "@polymer/polymer@3.1.0",
+    "raw": "@polymer/polymer",
     "name": "@polymer/polymer",
     "escapedName": "@polymer%2fpolymer",
     "scope": "@polymer",
-    "rawSpec": "3.1.0",
+    "rawSpec": "",
     "saveSpec": null,
-    "fetchSpec": "3.1.0"
+    "fetchSpec": "latest"
   },
   "_requiredBy": [
+    "#USER",
     "/"
   ],
-  "_resolved": "https://registry.npmjs.org/@polymer/polymer/-/polymer-3.1.0.tgz",
-  "_spec": "3.1.0",
-  "_where": "C:\\Users\\rich\\projects\\polymer-test.git",
+  "_resolved": "https://registry.npmjs.org/@polymer/polymer/-/polymer-3.3.1.tgz",
+  "_shasum": "9ad48992d2a96775f80b0673f3a615d6df8a3dfc",
+  "_spec": "@polymer/polymer",
+  "_where": "C:\\Users\\Rich\\Projects\\audio-components.git",
   "author": {
     "name": "The Polymer Project Authors"
   },
   "bugs": {
     "url": "https://github.com/Polymer/polymer/issues"
   },
+  "bundleDependencies": false,
   "dependencies": {
-    "@webcomponents/shadycss": "^1.5.2"
+    "@webcomponents/shadycss": "^1.9.1"
   },
+  "deprecated": false,
   "description": "The Polymer library makes it easy to create your own web components. Give your element some markup and properties, and then use it on a site. Polymer provides features like dynamic templates and data binding to reduce the amount of boilerplate you need to write",
   "devDependencies": {
     "@polymer/gen-closure-declarations": "^0.5.0",
     "@polymer/gen-typescript-declarations": "^1.5.1",
     "@polymer/iron-component-page": "^3.0.0-pre.12",
     "@polymer/test-fixture": "^3.0.0-pre.12",
-    "@webcomponents/webcomponentsjs": "^2.1.3",
+    "@webcomponents/webcomponentsjs": "^2.2.10",
     "babel-eslint": "^7.2.3",
     "babel-preset-minify": "^0.2.0",
     "del": "^3.0.0",
@@ -51,18 +49,18 @@
     "eslint-plugin-html": "^4.0.6",
     "fs-extra": "^5.0.0",
     "google-closure-compiler": "^20180204.0.0",
-    "gulp": "^4.0.0",
+    "gulp": "^4.0.2",
     "gulp-babel": "^6.1.2",
     "gulp-eslint": "^4.0.0",
     "gulp-if": "^2.0.1",
     "gulp-replace": "^0.6.1",
     "gulp-size": "^3.0.0",
     "gulp-vulcanize": "^7.0.0",
-    "lazypipe": "^1.0.1",
+    "lazypipe": "^1.0.2",
     "merge-stream": "^1.0.1",
     "parse5": "^4.0.0",
-    "polymer-build": "^3.1.0",
-    "polymer-cli": "^1.8.1",
+    "polymer-build": "^3.1.4",
+    "polymer-cli": "^1.9.9",
     "through2": "^2.0.0",
     "typescript": "^2.9.2",
     "wct-browser-legacy": "^1.0.2"
@@ -82,6 +80,7 @@
   "homepage": "https://github.com/Polymer/polymer",
   "license": "BSD-3-Clause",
   "main": "polymer-element.js",
+  "module": "polymer-element.js",
   "name": "@polymer/polymer",
   "publishConfig": {
     "access": "public"
@@ -105,5 +104,5 @@
     "serve": "polymer serve --npm --module-resolution=node",
     "test": "npm run lint && polymer test --npm --module-resolution=node"
   },
-  "version": "3.1.0"
+  "version": "3.3.1"
 }

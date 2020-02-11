@@ -8,6 +8,9 @@
  *   lib/legacy/templatizer-behavior.js
  */
 
+
+// tslint:disable:variable-name Describing an API that's defined elsewhere.
+
 import {TemplateInstanceBase, templatize, modelForElement} from '../utils/templatize.js';
 
 export {Templatizer};

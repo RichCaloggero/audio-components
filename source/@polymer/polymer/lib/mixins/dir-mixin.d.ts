@@ -8,6 +8,10 @@
  *   lib/mixins/dir-mixin.js
  */
 
+
+// tslint:disable:variable-name Describing an API that's defined elsewhere.
+// tslint:disable:no-any describes the API as best we are able today
+
 import {PropertyAccessors} from './property-accessors.js';
 
 import {dedupingMixin} from '../utils/mixin.js';
@@ -42,7 +46,13 @@ import {PropertiesChangedConstructor, PropertiesChanged} from './properties-chan
 
 interface DirMixinConstructor {
   new(...args: any[]): DirMixin;
-  _processStyleText(cssText: any, baseURI: any): any;
+
+  /**
+   * @param cssText .
+   * @param baseURI .
+   * @returns .
+   */
+  _processStyleText(cssText: string, baseURI: string): string;
 
   /**
    * Replace `:dir` in the given CSS text

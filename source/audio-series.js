@@ -1,4 +1,4 @@
-import {html} from "./@polymer/polymer/polymer-element.js";
+import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
 import {AudioComponent, Series} from "./audio-component.js";
 import {_AudioContext_, childrenReady, signalReady} from "./audio-context.js";
 
@@ -12,6 +12,7 @@ return html`
 <style>
 .hidden {display: none;}
 </style>
+
 <ui-boolean label="bypass" value="{{bypass}}"></ui-boolean>
 <ui-number label="mix" value="{{mix}}" min="-1.0" max="1.0" step="0.1"></ui-number>
 
@@ -34,7 +35,6 @@ delay: {type: Number, value: 0, notify: true, observer: "delayChanged"},
 gain: {type: Number, value: 0.5, notify: true, observer: "gainChanged"},
 };
 } // static properties
-
 constructor () {
 super ();
 instanceCount += 1;
@@ -45,7 +45,7 @@ this.container = true;
 connectedCallback () {
 super.connectedCallback();
 childrenReady(this).then(children => {
-//console.log(`- connectedCallback.then: found ${children.length} children`);
+console.debug(`- connectedCallback.then: found ${children.length} children`);
 this.component = new Series(this.audio, this.components(children), this.feedForward, this.feedBack, this);
 if (this.feedBack) {
 this.component.gain = this.gain;
@@ -59,15 +59,15 @@ console.debug(`${this.id}: ${error}\n${error.stack}`);
 } // connectedCallback
 
 feedBackChanged (value) {
-if (value) {
-this.shadowRoot.querySelector(".feedBackControls").classList.remove("hidden");
+if (this._ready && value) {
+this.showPanel(".feedbackControls");
 } else {
-this.shadowRoot.querySelector(".feedBackControls").classList.add("hidden");
+this.hidePanel(".feedBackControls");
 } // if
 } // feedBackChanged
 
-delayChanged (value) {if(this.component) this.component.delay = value;}
-gainChanged (value) {if(this.component) this.component.gain = value;}
+delayChanged (value) {if(this._ready) this.component.delay = value;}
+gainChanged (value) {if(this._ready) this.component.gain = value;}
 
 } // class AudioSeries
 

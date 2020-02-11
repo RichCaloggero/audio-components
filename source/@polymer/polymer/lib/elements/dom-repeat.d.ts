@@ -8,6 +8,10 @@
  *   lib/elements/dom-repeat.js
  */
 
+
+// tslint:disable:variable-name Describing an API that's defined elsewhere.
+// tslint:disable:no-any describes the API as best we are able today
+
 import {PolymerElement} from '../../polymer-element.js';
 
 import {TemplateInstanceBase, templatize, modelForElement} from '../utils/templatize.js';
@@ -21,6 +25,8 @@ import {OptionalMutableData} from '../mixins/mutable-data.js';
 import {matches, translate} from '../utils/path.js';
 
 import {timeOut, microTask} from '../utils/async.js';
+
+import {hideElementsGlobally} from '../utils/hide-template-controls.js';
 
 export {DomRepeat};
 

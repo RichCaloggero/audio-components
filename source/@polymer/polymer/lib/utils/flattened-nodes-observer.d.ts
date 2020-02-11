@@ -8,6 +8,10 @@
  *   lib/utils/flattened-nodes-observer.js
  */
 
+
+// tslint:disable:variable-name Describing an API that's defined elsewhere.
+// tslint:disable:no-any describes the API as best we are able today
+
 import {calculateSplices} from './array-splice.js';
 
 import {microTask} from './async.js';
@@ -55,26 +59,14 @@ export {FlattenedNodesObserver};
 declare class FlattenedNodesObserver {
 
   /**
-   * @param target Node on which to listen for changes.
-   * @param callback Function called when there are additions
-   * or removals from the target's list of flattened nodes.
+   * eslint-disable-next-line
    */
-  constructor(target: HTMLElement, callback: ((p0: {target: HTMLElement, addedNodes: Element[], removedNodes: Element[]}) => void)|null);
+  constructor(target: any, callback: any);
 
   /**
-   * Returns the list of flattened nodes for the given `node`.
-   * This list consists of a node's children and, for any children
-   * that are `<slot>` elements, the expanded flattened list of `assignedNodes`.
-   * For example, if the observed node has children `<a></a><slot></slot><b></b>`
-   * and the `<slot>` has one `<div>` assigned to it, then the flattened
-   * nodes list is `<a></a><div></div><b></b>`. If the `<slot>` has other
-   * `<slot>` elements assigned to it, these are flattened as well.
-   *
-   * @param node The node for which to
-   *      return the list of flattened nodes.
-   * @returns The list of flattened nodes for the given `node`.
+   * eslint-disable-next-line
    */
-  static getFlattenedNodes(node: HTMLElement|HTMLSlotElement): Node[];
+  static getFlattenedNodes(node: any): any;
 
   /**
    * Activates an observer. This method is automatically called when

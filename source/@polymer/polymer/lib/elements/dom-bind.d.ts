@@ -8,11 +8,16 @@
  *   lib/elements/dom-bind.js
  */
 
+
+// tslint:disable:variable-name Describing an API that's defined elsewhere.
+
 import {PropertyEffects} from '../mixins/property-effects.js';
 
 import {OptionalMutableData} from '../mixins/mutable-data.js';
 
 import {GestureEventListeners} from '../mixins/gesture-event-listeners.js';
+
+import {hideElementsGlobally} from '../utils/hide-template-controls.js';
 
 export {DomBind};
 
@@ -31,7 +36,14 @@ declare class DomBind extends
   OptionalMutableData(
   GestureEventListeners(
   HTMLElement))) {
-  attributeChangedCallback(): void;
+
+  /**
+   * @param name Name of attribute that changed
+   * @param old Old attribute value
+   * @param value New attribute value
+   * @param namespace Attribute namespace.
+   */
+  attributeChangedCallback(name: string, old: string|null, value: string|null, namespace: string|null): void;
   connectedCallback(): void;
   disconnectedCallback(): void;
 

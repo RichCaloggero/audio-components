@@ -49,7 +49,8 @@ import './boot.js';
 
 import { PropertyEffects } from '../mixins/property-effects.js';
 import { MutableData } from '../mixins/mutable-data.js';
-import { strictTemplatePolicy } from '../utils/settings.js';
+import { strictTemplatePolicy } from './settings.js';
+import { wrap } from './wrap.js';
 
 // Base class for HTMLTemplateElement extension that has property effects
 // machinery for propagating host properties to children. This is an ES5
@@ -97,10 +98,14 @@ function upgradeTemplate(template, constructor) {
 /**
  * Base class for TemplateInstance.
  * @constructor
+ * @extends {HTMLElement}
  * @implements {Polymer_PropertyEffects}
  * @private
  */
-const base = PropertyEffects(class {});
+const templateInstanceBase = PropertyEffects(
+    // This cast shouldn't be neccessary, but Closure doesn't understand that
+    // "class {}" is a constructor function.
+    /** @type {function(new:Object)} */(class {}));
 
 /**
  * @polymer
@@ -108,13 +113,17 @@ const base = PropertyEffects(class {});
  * @appliesMixin PropertyEffects
  * @unrestricted
  */
-class TemplateInstanceBase extends base {
+class TemplateInstanceBase extends templateInstanceBase {
   constructor(props) {
     super();
     this._configureProperties(props);
+    /** @type {!StampedTemplate} */
     this.root = this._stampTemplate(this.__dataHost);
     // Save list of stamped children
-    let children = this.children = [];
+    let children = [];
+    /** @suppress {invalidCasts} */
+    this.children = /** @type {!NodeList} */ (children);
+    // Polymer 1.x did not use `Polymer.dom` here so not bothering.
     for (let n = this.root.firstChild; n; n=n.nextSibling) {
       children.push(n);
       n.__templatizeInstance = this;
@@ -219,11 +228,11 @@ class TemplateInstanceBase extends base {
         } else if (n.localName === 'slot') {
           if (hide) {
             n.__polymerReplaced__ = document.createComment('hidden-slot');
-            n.parentNode.replaceChild(n.__polymerReplaced__, n);
+            wrap(wrap(n).parentNode).replaceChild(n.__polymerReplaced__, n);
           } else {
             const replace = n.__polymerReplaced__;
             if (replace) {
-              replace.parentNode.replaceChild(n, replace);
+              wrap(wrap(replace).parentNode).replaceChild(n, replace);
             }
           }
         }
@@ -291,6 +300,7 @@ class TemplateInstanceBase extends base {
    *
    * @param {Event} event Event to dispatch
    * @return {boolean} Always true.
+   * @override
    */
    dispatchEvent(event) { // eslint-disable-line no-unused-vars
      return true;
@@ -314,7 +324,10 @@ TemplateInstanceBase.prototype.__hostProps;
  * @implements {Polymer_MutableData}
  * @private
  */
-const MutableTemplateInstanceBase = MutableData(TemplateInstanceBase);
+const MutableTemplateInstanceBase = MutableData(
+    // This cast shouldn't be necessary, but Closure doesn't seem to understand
+    // this constructor.
+    /** @type {function(new:TemplateInstanceBase)} */(TemplateInstanceBase));
 
 function findMethodHost(template) {
   // Technically this should be the owner of the outermost template.
@@ -331,15 +344,25 @@ function findMethodHost(template) {
  * @suppress {missingProperties} class.prototype is not defined for some reason
  */
 function createTemplatizerClass(template, templateInfo, options) {
-  // Anonymous class created by the templatize
-  let base = options.mutableData ?
-    MutableTemplateInstanceBase : TemplateInstanceBase;
   /**
    * @constructor
-   * @extends {base}
+   * @extends {TemplateInstanceBase}
+   */
+  let templatizerBase = options.mutableData ?
+    MutableTemplateInstanceBase : TemplateInstanceBase;
+
+  // Affordance for global mixins onto TemplatizeInstance
+  if (templatize.mixin) {
+    templatizerBase = templatize.mixin(templatizerBase);
+  }
+
+  /**
+   * Anonymous class created by the templatize
+   * @constructor
    * @private
    */
-  let klass = class extends base { };
+  let klass = class extends templatizerBase { };
+  /** @override */
   klass.prototype.__templatizeOptions = options;
   klass.prototype._bindTemplate(template);
   addNotifyEffects(klass, template, templateInfo, options);
@@ -347,18 +370,25 @@ function createTemplatizerClass(template, templateInfo, options) {
 }
 
 /**
+ * Adds propagate effects from the template to the template instance for
+ * properties that the host binds to the template using the `_host_` prefix.
+ * 
  * @suppress {missingProperties} class.prototype is not defined for some reason
  */
 function addPropagateEffects(template, templateInfo, options) {
   let userForwardHostProp = options.forwardHostProp;
-  if (userForwardHostProp) {
+  if (userForwardHostProp && templateInfo.hasHostProps) {
     // Provide data API and property effects on memoized template class
     let klass = templateInfo.templatizeTemplateClass;
     if (!klass) {
-      let base = options.mutableData ? MutableDataTemplate : DataTemplate;
+      /**
+       * @constructor
+       * @extends {DataTemplate}
+       */
+      let templatizedBase = options.mutableData ? MutableDataTemplate : DataTemplate;
       /** @private */
       klass = templateInfo.templatizeTemplateClass =
-        class TemplatizedTemplate extends base {};
+        class TemplatizedTemplate extends templatizedBase {};
       // Add template - >instances effects
       // and host <- template effects
       let hostProps = templateInfo.hostProps;
@@ -406,6 +436,11 @@ function addNotifyEffects(klass, template, templateInfo, options) {
   }
   if (options.forwardHostProp && template.__dataHost) {
     for (let hprop in hostProps) {
+      // As we're iterating hostProps in this function, note whether
+      // there were any, for an optimization in addPropagateEffects
+      if (!templateInfo.hasHostProps) {
+        templateInfo.hasHostProps = true;
+      }
       klass.prototype._addPropertyEffect(hprop,
         klass.prototype.PROPERTY_EFFECT_TYPES.NOTIFY,
         {fn: createNotifyHostPropEffect()});
@@ -501,8 +536,8 @@ function createNotifyHostPropEffect() {
  * @param {Polymer_PropertyEffects=} owner Owner of the template instances;
  *   any optional callbacks will be bound to this owner.
  * @param {Object=} options Options dictionary (see summary for details)
- * @return {function(new:TemplateInstanceBase)} Generated class bound to the template
- *   provided
+ * @return {function(new:TemplateInstanceBase, Object=)} Generated class bound
+ *   to the template provided
  * @suppress {invalidCasts}
  */
 export function templatize(template, owner, options) {
@@ -521,6 +556,10 @@ export function templatize(template, owner, options) {
   let templateInfo = ctor._parseTemplate(template);
   // Get memoized base class for the prototypical template, which
   // includes property effects for binding template & forwarding
+  /**
+   * @constructor
+   * @extends {TemplateInstanceBase}
+   */
   let baseClass = templateInfo.templatizeInstanceClass;
   if (!baseClass) {
     baseClass = createTemplatizerClass(template, templateInfo, options);
@@ -531,9 +570,13 @@ export function templatize(template, owner, options) {
   // Subclass base class and add reference for this specific template
   /** @private */
   let klass = class TemplateInstance extends baseClass {};
+  /** @override */
   klass.prototype._methodHost = findMethodHost(template);
-  klass.prototype.__dataHost = template;
-  klass.prototype.__templatizeOwner = owner;
+  /** @override */
+  klass.prototype.__dataHost = /** @type {!DataTemplate} */ (template);
+  /** @override */
+  klass.prototype.__templatizeOwner = /** @type {!Object} */ (owner);
+  /** @override */
   klass.prototype.__hostProps = templateInfo.hostProps;
   klass = /** @type {function(new:TemplateInstanceBase)} */(klass); //eslint-disable-line no-self-assign
   return klass;
@@ -576,7 +619,7 @@ export function modelForElement(template, node) {
     } else {
       // Still in a template scope, keep going up until
       // a __templatizeInstance is found
-      node = node.parentNode;
+      node = wrap(node).parentNode;
     }
   }
   return null;

@@ -1,15 +1,17 @@
 /**
-@license
-Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
-*/
+ * @fileoverview
+ * @suppress {checkPrototypalTypes}
+ * @license Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
+ * This code may only be used under the BSD style license found at
+ * http://polymer.github.io/LICENSE.txt The complete set of authors may be found
+ * at http://polymer.github.io/AUTHORS.txt The complete set of contributors may
+ * be found at http://polymer.github.io/CONTRIBUTORS.txt Code distributed by
+ * Google as part of the polymer project is also subject to an additional IP
+ * rights grant found at http://polymer.github.io/PATENTS.txt
+ */
 
 import '../utils/boot.js';
-
+import { wrap } from '../utils/wrap.js';
 import { dedupingMixin } from '../utils/mixin.js';
 import { root, isAncestor, isDescendant, get, translate, isPath, set, normalize } from '../utils/path.js';
 /* for notify, reflect */
@@ -36,7 +38,7 @@ const TYPES = {
   READ_ONLY: '__readOnly'
 };
 
-/** @const {RegExp} */
+/** @const {!RegExp} */
 const capitalAttributeRegex = /[A-Z]/;
 
 /**
@@ -56,8 +58,6 @@ let DataTrigger; //eslint-disable-line no-unused-vars
  * }}
  */
 let DataEffect; //eslint-disable-line no-unused-vars
-
-let PropertyEffectsType; //eslint-disable-line no-unused-vars
 
 /**
  * Ensures that the model has an own-property map of effects for the given type.
@@ -104,10 +104,10 @@ function ensureOwnEffectMap(model, type) {
  * Runs all effects of a given type for the given set of property changes
  * on an instance.
  *
- * @param {!PropertyEffectsType} inst The instance with effects to run
- * @param {Object} effects Object map of property-to-Array of effects
- * @param {Object} props Bag of current property changes
- * @param {Object=} oldProps Bag of previous values for changed properties
+ * @param {!Polymer_PropertyEffects} inst The instance with effects to run
+ * @param {?Object} effects Object map of property-to-Array of effects
+ * @param {?Object} props Bag of current property changes
+ * @param {?Object=} oldProps Bag of previous values for changed properties
  * @param {boolean=} hasPaths True with `props` contains one or more paths
  * @param {*=} extraArgs Additional metadata to pass to effect function
  * @return {boolean} True if an effect ran for this property
@@ -118,7 +118,9 @@ function runEffects(inst, effects, props, oldProps, hasPaths, extraArgs) {
     let ran = false;
     let id = dedupeId++;
     for (let prop in props) {
-      if (runEffectsForProperty(inst, effects, id, prop, props, oldProps, hasPaths, extraArgs)) {
+      if (runEffectsForProperty(
+              inst, /** @type {!Object} */ (effects), id, prop, props, oldProps,
+              hasPaths, extraArgs)) {
         ran = true;
       }
     }
@@ -130,8 +132,8 @@ function runEffects(inst, effects, props, oldProps, hasPaths, extraArgs) {
 /**
  * Runs a list of effects for a given property.
  *
- * @param {!PropertyEffectsType} inst The instance with effects to run
- * @param {Object} effects Object map of property-to-Array of effects
+ * @param {!Polymer_PropertyEffects} inst The instance with effects to run
+ * @param {!Object} effects Object map of property-to-Array of effects
  * @param {number} dedupeId Counter used for de-duping effects
  * @param {string} prop Name of changed property
  * @param {*} props Changed properties
@@ -175,15 +177,15 @@ function runEffectsForProperty(inst, effects, dedupeId, prop, props, oldProps, h
  * If no trigger is given, the path is deemed to match.
  *
  * @param {string} path Path or property that changed
- * @param {DataTrigger} trigger Descriptor
+ * @param {?DataTrigger} trigger Descriptor
  * @return {boolean} Whether the path matched the trigger
  */
 function pathMatchesTrigger(path, trigger) {
   if (trigger) {
-    let triggerPath = trigger.name;
+    let triggerPath = /** @type {string} */ (trigger.name);
     return (triggerPath == path) ||
-      (trigger.structured && isAncestor(triggerPath, path)) ||
-      (trigger.wildcard && isDescendant(triggerPath, path));
+        !!(trigger.structured && isAncestor(triggerPath, path)) ||
+        !!(trigger.wildcard && isDescendant(triggerPath, path));
   } else {
     return true;
   }
@@ -195,7 +197,7 @@ function pathMatchesTrigger(path, trigger) {
  * Calls the method with `info.methodName` on the instance, passing the
  * new and old values.
  *
- * @param {!PropertyEffectsType} inst The instance the effect will be run on
+ * @param {!Polymer_PropertyEffects} inst The instance the effect will be run on
  * @param {string} property Name of property
  * @param {Object} props Bag of current property changes
  * @param {Object} oldProps Bag of previous values for changed properties
@@ -223,7 +225,7 @@ function runObserverEffect(inst, property, props, oldProps, info) {
  * `notify: true` to ensure object sub-property notifications were
  * sent.
  *
- * @param {!PropertyEffectsType} inst The instance with effects to run
+ * @param {!Polymer_PropertyEffects} inst The instance with effects to run
  * @param {Object} notifyProps Bag of properties to notify
  * @param {Object} props Bag of current property changes
  * @param {Object} oldProps Bag of previous values for changed properties
@@ -259,7 +261,8 @@ function runNotifyEffects(inst, notifyProps, props, oldProps, hasPaths) {
  * Dispatches {property}-changed events with path information in the detail
  * object to indicate a sub-path of the property was changed.
  *
- * @param {!PropertyEffectsType} inst The element from which to fire the event
+ * @param {!Polymer_PropertyEffects} inst The element from which to fire the
+ *     event
  * @param {string} path The path that was changed
  * @param {Object} props Bag of current property changes
  * @return {boolean} Returns true if the path was notified
@@ -279,11 +282,13 @@ function notifyPath(inst, path, props) {
  * Dispatches {property}-changed events to indicate a property (or path)
  * changed.
  *
- * @param {!PropertyEffectsType} inst The element from which to fire the event
- * @param {string} eventName The name of the event to send ('{property}-changed')
+ * @param {!Polymer_PropertyEffects} inst The element from which to fire the
+ *     event
+ * @param {string} eventName The name of the event to send
+ *     ('{property}-changed')
  * @param {*} value The value of the changed property
- * @param {string | null | undefined} path If a sub-path of this property changed, the path
- *   that changed (optional).
+ * @param {string | null | undefined} path If a sub-path of this property
+ *     changed, the path that changed (optional).
  * @return {void}
  * @private
  * @suppress {invalidCasts}
@@ -296,7 +301,7 @@ function dispatchNotifyEvent(inst, eventName, value, path) {
   if (path) {
     detail.path = path;
   }
-  /** @type {!HTMLElement} */(inst).dispatchEvent(new CustomEvent(eventName, { detail }));
+  wrap(/** @type {!HTMLElement} */(inst)).dispatchEvent(new CustomEvent(eventName, { detail }));
 }
 
 /**
@@ -305,7 +310,7 @@ function dispatchNotifyEvent(inst, eventName, value, path) {
  * Dispatches a non-bubbling event named `info.eventName` on the instance
  * with a detail object containing the new `value`.
  *
- * @param {!PropertyEffectsType} inst The instance the effect will be run on
+ * @param {!Polymer_PropertyEffects} inst The instance the effect will be run on
  * @param {string} property Name of property
  * @param {Object} props Bag of current property changes
  * @param {Object} oldProps Bag of previous values for changed properties
@@ -334,7 +339,8 @@ function runNotifyEffect(inst, property, props, oldProps, info, hasPaths) {
  * scope's name for that path first.
  *
  * @param {CustomEvent} event Notification event (e.g. '<property>-changed')
- * @param {!PropertyEffectsType} inst Host element instance handling the notification event
+ * @param {!Polymer_PropertyEffects} inst Host element instance handling the
+ *     notification event
  * @param {string} fromProp Child element property that was bound
  * @param {string} toPath Host property/path that was bound
  * @param {boolean} negate Whether the binding was negated
@@ -365,7 +371,7 @@ function handleNotification(event, inst, fromProp, toPath, negate) {
  *
  * Sets the attribute named `info.attrName` to the given property value.
  *
- * @param {!PropertyEffectsType} inst The instance the effect will be run on
+ * @param {!Polymer_PropertyEffects} inst The instance the effect will be run on
  * @param {string} property Name of property
  * @param {Object} props Bag of current property changes
  * @param {Object} oldProps Bag of previous values for changed properties
@@ -391,9 +397,9 @@ function runReflectEffect(inst, property, props, oldProps, info) {
  * computed before other effects (binding propagation, observers, and notify)
  * run.
  *
- * @param {!PropertyEffectsType} inst The instance the effect will be run on
- * @param {!Object} changedProps Bag of changed properties
- * @param {!Object} oldProps Bag of previous values for changed properties
+ * @param {!Polymer_PropertyEffects} inst The instance the effect will be run on
+ * @param {?Object} changedProps Bag of changed properties
+ * @param {?Object} oldProps Bag of previous values for changed properties
  * @param {boolean} hasPaths True with `props` contains one or more paths
  * @return {void}
  * @private
@@ -403,8 +409,8 @@ function runComputedEffects(inst, changedProps, oldProps, hasPaths) {
   if (computeEffects) {
     let inputProps = changedProps;
     while (runEffects(inst, computeEffects, inputProps, oldProps, hasPaths)) {
-      Object.assign(oldProps, inst.__dataOld);
-      Object.assign(changedProps, inst.__dataPending);
+      Object.assign(/** @type {!Object} */ (oldProps), inst.__dataOld);
+      Object.assign(/** @type {!Object} */ (changedProps), inst.__dataPending);
       inputProps = inst.__dataPending;
       inst.__dataPending = null;
     }
@@ -416,10 +422,10 @@ function runComputedEffects(inst, changedProps, oldProps, hasPaths) {
  * values of the arguments specified in the `info` object and setting the
  * return value to the computed property specified.
  *
- * @param {!PropertyEffectsType} inst The instance the effect will be run on
+ * @param {!Polymer_PropertyEffects} inst The instance the effect will be run on
  * @param {string} property Name of property
- * @param {Object} props Bag of current property changes
- * @param {Object} oldProps Bag of previous values for changed properties
+ * @param {?Object} props Bag of current property changes
+ * @param {?Object} oldProps Bag of previous values for changed properties
  * @param {?} info Effect metadata
  * @return {void}
  * @private
@@ -438,8 +444,8 @@ function runComputedEffect(inst, property, props, oldProps, info) {
  * Computes path changes based on path links set up using the `linkPaths`
  * API.
  *
- * @param {!PropertyEffectsType} inst The instance whose props are changing
- * @param {string | !Array<(string|number)>} path Path that has changed
+ * @param {!Polymer_PropertyEffects} inst The instance whose props are changing
+ * @param {string} path Path that has changed
  * @param {*} value Value of changed path
  * @return {void}
  * @private
@@ -544,7 +550,7 @@ function addEffectForBindingPart(constructor, templateInfo, binding, part, index
  * there is no support for _path_ bindings via custom binding parts,
  * as this is specific to Polymer's path binding syntax.
  *
- * @param {!PropertyEffectsType} inst The instance the effect will be run on
+ * @param {!Polymer_PropertyEffects} inst The instance the effect will be run on
  * @param {string} path Name of property
  * @param {Object} props Bag of current property changes
  * @param {Object} oldProps Bag of previous values for changed properties
@@ -581,7 +587,7 @@ function runBindingEffect(inst, path, props, oldProps, info, hasPaths, nodeList)
  * Sets the value for an "binding" (binding) effect to a node,
  * either as a property or attribute.
  *
- * @param {!PropertyEffectsType} inst The instance owning the binding effect
+ * @param {!Polymer_PropertyEffects} inst The instance owning the binding effect
  * @param {Node} node Target node for binding
  * @param {!Binding} binding Binding metadata
  * @param {!BindingPart} part Binding part metadata
@@ -666,7 +672,8 @@ function shouldAddListener(binding) {
  * Setup compound binding storage structures, notify listeners, and dataHost
  * references onto the bound nodeList.
  *
- * @param {!PropertyEffectsType} inst Instance that bas been previously bound
+ * @param {!Polymer_PropertyEffects} inst Instance that bas been previously
+ *     bound
  * @param {TemplateInfo} templateInfo Template metadata
  * @return {void}
  * @private
@@ -720,6 +727,12 @@ function setupCompoundStorage(node, binding) {
     storage[target] = literals;
     // Configure properties with their literal parts
     if (binding.literal && binding.kind == 'property') {
+      // Note, className needs style scoping so this needs wrapping.
+      // We may also want to consider doing this for `textContent` and
+      // `innerHTML`.
+      if (target === 'className') {
+        node = wrap(node);
+      }
       node[target] = binding.literal;
     }
   }
@@ -729,7 +742,8 @@ function setupCompoundStorage(node, binding) {
  * Adds a 2-way binding notification event listener to the node specified
  *
  * @param {Object} node Child element to add listener to
- * @param {!PropertyEffectsType} inst Host element instance to handle notification event
+ * @param {!Polymer_PropertyEffects} inst Host element instance to handle
+ *     notification event
  * @param {Binding} binding Binding metadata
  * @return {void}
  * @private
@@ -793,7 +807,7 @@ function createMethodEffect(model, sig, type, effectFn, methodInfo, dynamicFn) {
  * functions call this function to invoke the method, then use the return
  * value accordingly.
  *
- * @param {!PropertyEffectsType} inst The instance the effect will be run on
+ * @param {!Polymer_PropertyEffects} inst The instance the effect will be run on
  * @param {string} property Name of property
  * @param {Object} props Bag of current property changes
  * @param {Object} oldProps Bag of previous values for changed properties
@@ -963,6 +977,19 @@ function parseArg(rawArg) {
   return a;
 }
 
+function getArgValue(data, props, path) {
+  let value = get(data, path);
+  // when data is not stored e.g. `splices`, get the value from changedProps
+  // TODO(kschaaf): Note, this can cause a rare issue where the wildcard
+  // info.value could pull a stale value out of changedProps during a reentrant
+  // change that sets the value back to undefined.
+  // https://github.com/Polymer/polymer/issues/5479
+  if (value === undefined) {
+    value = props[path];
+  }
+  return value;
+}
+
 // data api
 
 /**
@@ -970,7 +997,7 @@ function parseArg(rawArg) {
  *
  * Note: this implementation only accepts normalized paths
  *
- * @param {!PropertyEffectsType} inst Instance to send notifications to
+ * @param {!Polymer_PropertyEffects} inst Instance to send notifications to
  * @param {Array} array The array the mutations occurred on
  * @param {string} path The path to the array that was mutated
  * @param {Array} splices Array of splice records
@@ -978,11 +1005,8 @@ function parseArg(rawArg) {
  * @private
  */
 function notifySplices(inst, array, path, splices) {
-  let splicesPath = path + '.splices';
-  inst.notifyPath(splicesPath, { indexSplices: splices });
+  inst.notifyPath(path + '.splices', { indexSplices: splices });
   inst.notifyPath(path + '.length', array.length);
-  // Null here to allow potentially large splice records to be GC'ed.
-  inst.__data[splicesPath] = {indexSplices: null};
 }
 
 /**
@@ -991,7 +1015,7 @@ function notifySplices(inst, array, path, splices) {
  *
  * Note: this implementation only accepts normalized paths
  *
- * @param {!PropertyEffectsType} inst Instance to send notifications to
+ * @param {!Polymer_PropertyEffects} inst Instance to send notifications to
  * @param {Array} array The array the mutations occurred on
  * @param {string} path The path to the array that was mutated
  * @param {number} index Index at which the array mutation occurred
@@ -1055,12 +1079,14 @@ function upper(name) {
  * @appliesMixin PropertyAccessors
  * @summary Element class mixin that provides meta-programming for Polymer's
  * template binding and data observation system.
+ * @template T
+ * @param {function(new:T)} superClass Class to apply mixin to.
+ * @return {function(new:T)} superClass with mixin applied.
  */
 export const PropertyEffects = dedupingMixin(superClass => {
 
   /**
    * @constructor
-   * @extends {superClass}
    * @implements {Polymer_PropertyAccessors}
    * @implements {Polymer_TemplateStamp}
    * @unrestricted
@@ -1107,7 +1133,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
       this.__dataClientsInitialized;
       /** @type {!Object} */
       this.__data;
-      /** @type {!Object} */
+      /** @type {!Object|null} */
       this.__dataPending;
       /** @type {!Object} */
       this.__dataOld;
@@ -1127,11 +1153,15 @@ export const PropertyEffects = dedupingMixin(superClass => {
       this.__templateInfo;
     }
 
+    /**
+     * @return {!Object<string, string>} Effect prototype property name map.
+     */
     get PROPERTY_EFFECT_TYPES() {
       return TYPES;
     }
 
     /**
+     * @override
      * @return {void}
      */
     _initializeProperties() {
@@ -1190,6 +1220,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * an instance to add effects at runtime.  See that method for
      * full API docs.
      *
+     * @override
      * @param {string} property Property that should trigger the effect
      * @param {string} type Effect type, from this.PROPERTY_EFFECT_TYPES
      * @param {Object=} effect Effect metadata object
@@ -1209,6 +1240,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
     /**
      * Removes the given property effect.
      *
+     * @override
      * @param {string} property Property the effect was associated with
      * @param {string} type Effect type, from this.PROPERTY_EFFECT_TYPES
      * @param {Object=} effect Effect metadata object to remove
@@ -1226,9 +1258,11 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * Returns whether the current prototype/instance has a property effect
      * of a certain type.
      *
+     * @override
      * @param {string} property Property name
      * @param {string=} type Effect type, from this.PROPERTY_EFFECT_TYPES
-     * @return {boolean} True if the prototype/instance has an effect of this type
+     * @return {boolean} True if the prototype/instance has an effect of this
+     *     type
      * @protected
      */
     _hasPropertyEffect(property, type) {
@@ -1240,8 +1274,10 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * Returns whether the current prototype/instance has a "read only"
      * accessor for the given property.
      *
+     * @override
      * @param {string} property Property name
-     * @return {boolean} True if the prototype/instance has an effect of this type
+     * @return {boolean} True if the prototype/instance has an effect of this
+     *     type
      * @protected
      */
     _hasReadOnlyEffect(property) {
@@ -1252,8 +1288,10 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * Returns whether the current prototype/instance has a "notify"
      * property effect for the given property.
      *
+     * @override
      * @param {string} property Property name
-     * @return {boolean} True if the prototype/instance has an effect of this type
+     * @return {boolean} True if the prototype/instance has an effect of this
+     *     type
      * @protected
      */
     _hasNotifyEffect(property) {
@@ -1261,11 +1299,13 @@ export const PropertyEffects = dedupingMixin(superClass => {
     }
 
     /**
-     * Returns whether the current prototype/instance has a "reflect to attribute"
-     * property effect for the given property.
+     * Returns whether the current prototype/instance has a "reflect to
+     * attribute" property effect for the given property.
      *
+     * @override
      * @param {string} property Property name
-     * @return {boolean} True if the prototype/instance has an effect of this type
+     * @return {boolean} True if the prototype/instance has an effect of this
+     *     type
      * @protected
      */
     _hasReflectEffect(property) {
@@ -1276,8 +1316,10 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * Returns whether the current prototype/instance has a "computed"
      * property effect for the given property.
      *
+     * @override
      * @param {string} property Property name
-     * @return {boolean} True if the prototype/instance has an effect of this type
+     * @return {boolean} True if the prototype/instance has an effect of this
+     *     type
      * @protected
      */
     _hasComputedEffect(property) {
@@ -1301,6 +1343,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * `path` can be a path string or array of path parts as accepted by the
      * public API.
      *
+     * @override
      * @param {string | !Array<number|string>} path Path to set
      * @param {*} value Value to set
      * @param {boolean=} shouldNotify Set to true if this change should
@@ -1335,7 +1378,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
         }
         this.__dataHasPaths = true;
         if (this._setPendingProperty(/**@type{string}*/(path), value, shouldNotify)) {
-          computeLinkedPaths(this, path, value);
+          computeLinkedPaths(this, /**@type{string}*/ (path), value);
           return true;
         }
       } else {
@@ -1363,6 +1406,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      *
      * Users may override this method to provide alternate approaches.
      *
+     * @override
      * @param {!Node} node The node to set a property on
      * @param {string} prop The property to set
      * @param {*} value The value to set
@@ -1375,6 +1419,10 @@ export const PropertyEffects = dedupingMixin(superClass => {
       // implement a whitelist of tag & property values that should never
       // be reset (e.g. <input>.value && <select>.value)
       if (value !== node[prop] || typeof value == 'object') {
+        // Note, className needs style scoping so this needs wrapping.
+        if (prop === 'className') {
+          node = /** @type {!Node} */(wrap(node));
+        }
         node[prop] = value;
       }
     }
@@ -1480,6 +1528,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * pending property changes can later be flushed via a call to
      * `_flushClients`.
      *
+     * @override
      * @param {Object} client PropertyEffects client to enqueue
      * @return {void}
      * @protected
@@ -1494,6 +1543,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
     /**
      * Overrides superclass implementation.
      *
+     * @override
      * @return {void}
      * @protected
      */
@@ -1507,6 +1557,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * Flushes any clients previously enqueued via `_enqueueClient`, causing
      * their `_flushProperties` method to run.
      *
+     * @override
      * @return {void}
      * @protected
      */
@@ -1555,6 +1606,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * `_flushProperties` call on client dom and before any element
      * observers are called.
      *
+     * @override
      * @return {void}
      * @protected
      */
@@ -1569,6 +1621,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * Property names must be simple properties, not paths.  Batched
      * path propagation is not supported.
      *
+     * @override
      * @param {Object} props Bag of one or more key-value pairs whose key is
      *   a property and value is the new value to set for that property.
      * @param {boolean=} setReadOnly When true, any private values set in
@@ -1623,6 +1676,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * Runs each class of effects for the batch of changed properties in
      * a specific order (compute, propagate, reflect, observe, notify).
      *
+     * @override
      * @param {!Object} currentProps Bag of all current accessor values
      * @param {?Object} changedProps Bag of properties changed since the last
      *   call to `_propertiesChanged`
@@ -1669,6 +1723,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * Called to propagate any property changes to stamped template nodes
      * managed by this element.
      *
+     * @override
      * @param {Object} changedProps Bag of changed properties
      * @param {Object} oldProps Bag of previous values for changed properties
      * @param {boolean} hasPaths True with `props` contains one or more paths
@@ -1691,6 +1746,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * Aliases one data path as another, such that path notifications from one
      * are routed to the other.
      *
+     * @override
      * @param {string | !Array<string|number>} to Target path to link.
      * @param {string | !Array<string|number>} from Source path to link.
      * @return {void}
@@ -1709,6 +1765,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * Note, the path to unlink should be the target (`to`) used when
      * linking the paths.
      *
+     * @override
      * @param {string | !Array<string|number>} path Target path to unlink.
      * @return {void}
      * @public
@@ -1730,8 +1787,10 @@ export const PropertyEffects = dedupingMixin(superClass => {
      *     this.items.splice(1, 1, {name: 'Sam'});
      *     this.items.push({name: 'Bob'});
      *     this.notifySplices('items', [
-     *       { index: 1, removed: [{name: 'Todd'}], addedCount: 1, object: this.items, type: 'splice' },
-     *       { index: 3, removed: [], addedCount: 1, object: this.items, type: 'splice'}
+     *       { index: 1, removed: [{name: 'Todd'}], addedCount: 1,
+     *         object: this.items, type: 'splice' },
+     *       { index: 3, removed: [], addedCount: 1,
+     *         object: this.items, type: 'splice'}
      *     ]);
      *
      * @param {string} path Path that should be notified.
@@ -1747,9 +1806,11 @@ export const PropertyEffects = dedupingMixin(superClass => {
      *   Note that splice records _must_ be normalized such that they are
      *   reported in index order (raw results from `Object.observe` are not
      *   ordered and must be normalized/merged before notifying).
+     *
+     * @override
      * @return {void}
      * @public
-    */
+     */
     notifySplices(path, splices) {
       let info = {path: ''};
       let array = /** @type {Array} */(get(this, path, info));
@@ -1763,6 +1824,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * `undefined` (this method does not throw when dereferencing undefined
      * paths).
      *
+     * @override
      * @param {(string|!Array<(string|number)>)} path Path to the value
      *   to read.  The path may be specified as a string (e.g. `foo.bar.baz`)
      *   or an array of path parts (e.g. `['foo.bar', 'baz']`).  Note that
@@ -1787,6 +1849,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * this method does nothing (this method does not throw when
      * dereferencing undefined paths).
      *
+     * @override
      * @param {(string|!Array<(string|number)>)} path Path to the value
      *   to write.  The path may be specified as a string (e.g. `'foo.bar.baz'`)
      *   or an array of path parts (e.g. `['foo.bar', 'baz']`).  Note that
@@ -1799,7 +1862,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      *   When specified, no notification will occur.
      * @return {void}
      * @public
-    */
+     */
     set(path, value, root) {
       if (root) {
         set(root, path, value);
@@ -1821,6 +1884,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * This method notifies other paths to the same array that a
      * splice occurred to the array.
      *
+     * @override
      * @param {string | !Array<string|number>} path Path to array.
      * @param {...*} items Items to push onto array
      * @return {number} New length of the array.
@@ -1846,6 +1910,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * This method notifies other paths to the same array that a
      * splice occurred to the array.
      *
+     * @override
      * @param {string | !Array<string|number>} path Path to array.
      * @return {*} Item that was removed.
      * @public
@@ -1871,6 +1936,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * This method notifies other paths to the same array that a
      * splice occurred to the array.
      *
+     * @override
      * @param {string | !Array<string|number>} path Path to array.
      * @param {number} start Index from which to start removing/inserting.
      * @param {number=} deleteCount Number of items to remove.
@@ -1926,6 +1992,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * This method notifies other paths to the same array that a
      * splice occurred to the array.
      *
+     * @override
      * @param {string | !Array<string|number>} path Path to array.
      * @return {*} Item that was removed.
      * @public
@@ -1950,6 +2017,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * This method notifies other paths to the same array that a
      * splice occurred to the array.
      *
+     * @override
      * @param {string | !Array<string|number>} path Path to array.
      * @param {...*} items Items to insert info array
      * @return {number} New length of the array.
@@ -1973,11 +2041,12 @@ export const PropertyEffects = dedupingMixin(superClass => {
      *     this.item.user.name = 'Bob';
      *     this.notifyPath('item.user.name');
      *
+     * @override
      * @param {string} path Path that should be notified.
      * @param {*=} value Value at the path (optional).
      * @return {void}
      * @public
-    */
+     */
     notifyPath(path, value) {
       /** @type {string} */
       let propPath;
@@ -2002,6 +2071,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * an instance to add effects at runtime.  See that method for
      * full API docs.
      *
+     * @override
      * @param {string} property Property name
      * @param {boolean=} protectedSetter Creates a custom protected setter
      *   when `true`.
@@ -2022,8 +2092,10 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * an instance to add effects at runtime.  See that method for
      * full API docs.
      *
+     * @override
      * @param {string} property Property name
-     * @param {string|function(*,*)} method Function or name of observer method to call
+     * @param {string|function(*,*)} method Function or name of observer method
+     *     to call
      * @param {boolean=} dynamicFn Whether the method name should be included as
      *   a dependency to the effect.
      * @return {void}
@@ -2046,6 +2118,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * an instance to add effects at runtime.  See that method for
      * full API docs.
      *
+     * @override
      * @param {string} expression Method expression
      * @param {boolean|Object=} dynamicFn Boolean or object map indicating
      *   whether method names should be included as a dependency to the effect.
@@ -2065,6 +2138,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * an instance to add effects at runtime.  See that method for
      * full API docs.
      *
+     * @override
      * @param {string} property Property name
      * @return {void}
      * @protected
@@ -2084,9 +2158,11 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * an instance to add effects at runtime.  See that method for
      * full API docs.
      *
+     * @override
      * @param {string} property Property name
      * @return {void}
      * @protected
+     * @suppress {missingProperties} go/missingfnprops
      */
     _createReflectedProperty(property) {
       let attr = this.constructor.attributeNameForProperty(property);
@@ -2108,6 +2184,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * an instance to add effects at runtime.  See that method for
      * full API docs.
      *
+     * @override
      * @param {string} property Name of computed property to set
      * @param {string} expression Method expression
      * @param {boolean|Object=} dynamicFn Boolean or object map indicating
@@ -2138,37 +2215,23 @@ export const PropertyEffects = dedupingMixin(superClass => {
      */
     _marshalArgs(args, path, props) {
       const data = this.__data;
-      let values = [];
+      const values = [];
       for (let i=0, l=args.length; i<l; i++) {
-        let arg = args[i];
-        let name = arg.name;
-        let v;
-        if (arg.literal) {
-          v = arg.value;
-        } else {
-          if (arg.structured) {
-            v = get(data, name);
-            // when data is not stored e.g. `splices`
-            if (v === undefined) {
-              v = props[name];
-            }
+        let {name, structured, wildcard, value, literal} = args[i];
+        if (!literal) {
+          if (wildcard) {
+            const matches = isDescendant(name, path);
+            const pathValue = getArgValue(data, props, matches ? path : name);
+            value = {
+              path: matches ? path : name,
+              value: pathValue,
+              base: matches ? get(data, name) : pathValue
+            };
           } else {
-            v = data[name];
+            value = structured ? getArgValue(data, props, name) : data[name];
           }
         }
-        if (arg.wildcard) {
-          // Only send the actual path changed info if the change that
-          // caused the observer to run matched the wildcard
-          let baseChanged = (name.indexOf(path + '.') === 0);
-          let matches = (path.indexOf(name) === 0 && !baseChanged);
-          values[i] = {
-            path: matches ? path : name,
-            value: matches ? props[path] : v,
-            base: v
-          };
-        } else {
-          values[i] = v;
-        }
+        values[i] = value;
       }
       return values;
     }
@@ -2210,6 +2273,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * @param {Object=} effect Effect metadata object
      * @return {void}
      * @protected
+     * @nocollapse
      */
     static addPropertyEffect(property, type, effect) {
       this.prototype._addPropertyEffect(property, type, effect);
@@ -2224,6 +2288,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      *   a dependency to the effect.
      * @return {void}
      * @protected
+     * @nocollapse
      */
     static createPropertyObserver(property, method, dynamicFn) {
       this.prototype._createPropertyObserver(property, method, dynamicFn);
@@ -2241,6 +2306,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * @return {void}
      *   whether method names should be included as a dependency to the effect.
      * @protected
+     * @nocollapse
      */
     static createMethodObserver(expression, dynamicFn) {
       this.prototype._createMethodObserver(expression, dynamicFn);
@@ -2253,6 +2319,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * @param {string} property Property name
      * @return {void}
      * @protected
+     * @nocollapse
      */
     static createNotifyingProperty(property) {
       this.prototype._createNotifyingProperty(property);
@@ -2273,6 +2340,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      *   when `true`.
      * @return {void}
      * @protected
+     * @nocollapse
      */
     static createReadOnlyProperty(property, protectedSetter) {
       this.prototype._createReadOnlyProperty(property, protectedSetter);
@@ -2285,6 +2353,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * @param {string} property Property name
      * @return {void}
      * @protected
+     * @nocollapse
      */
     static createReflectedProperty(property) {
       this.prototype._createReflectedProperty(property);
@@ -2303,6 +2372,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      *   method names should be included as a dependency to the effect.
      * @return {void}
      * @protected
+     * @nocollapse
      */
     static createComputedProperty(property, expression, dynamicFn) {
       this.prototype._createComputedProperty(property, expression, dynamicFn);
@@ -2319,6 +2389,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      *   bindings
      * @return {!TemplateInfo} Template metadata object
      * @protected
+     * @nocollapse
      */
     static bindTemplate(template) {
       return this.prototype._bindTemplate(template);
@@ -2337,6 +2408,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * create and link an instance of the template metadata associated with a
      * particular stamping.
      *
+     * @override
      * @param {!HTMLTemplateElement} template Template containing binding
      *   bindings
      * @param {boolean=} instanceBinding When false (default), performs
@@ -2347,6 +2419,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * @return {!TemplateInfo} Template metadata object; for `runtimeBinding`,
      *   this is an instance of the prototypical template info
      * @protected
+     * @suppress {missingProperties} go/missingfnprops
      */
     _bindTemplate(template, instanceBinding) {
       let templateInfo = this.constructor._parseTemplate(template);
@@ -2385,6 +2458,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * @param {Object=} effect Effect metadata object
      * @return {void}
      * @protected
+     * @nocollapse
      */
     static _addTemplatePropertyEffect(templateInfo, prop, effect) {
       let hostProps = templateInfo.hostProps = templateInfo.hostProps || {};
@@ -2445,6 +2519,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * Removes and unbinds the nodes previously contained in the provided
      * DocumentFragment returned from `_stampTemplate`.
      *
+     * @override
      * @param {!StampedTemplate} dom DocumentFragment previously returned
      *   from `_stampTemplate` associated with the nodes to be removed
      * @return {void}
@@ -2481,7 +2556,6 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * with one or more metadata objects capturing the source(s) of the
      * binding.
      *
-     * @override
      * @param {Node} node Node to parse
      * @param {TemplateInfo} templateInfo Template metadata for current template
      * @param {NodeInfo} nodeInfo Node metadata for current template node
@@ -2489,9 +2563,13 @@ export const PropertyEffects = dedupingMixin(superClass => {
      *   metadata to `nodeInfo`
      * @protected
      * @suppress {missingProperties} Interfaces in closure do not inherit statics, but classes do
+     * @nocollapse
      */
     static _parseTemplateNode(node, templateInfo, nodeInfo) {
-      let noted = super._parseTemplateNode(node, templateInfo, nodeInfo);
+      // TODO(https://github.com/google/closure-compiler/issues/3240):
+      //     Change back to just super.methodCall()
+      let noted = propertyEffectsBase._parseTemplateNode.call(
+        this, node, templateInfo, nodeInfo);
       if (node.nodeType === Node.TEXT_NODE) {
         let parts = this._parseBindings(node.textContent, templateInfo);
         if (parts) {
@@ -2514,7 +2592,6 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * with one or more metadata objects capturing the source(s) of the
      * binding.
      *
-     * @override
      * @param {Element} node Node to parse
      * @param {TemplateInfo} templateInfo Template metadata for current template
      * @param {NodeInfo} nodeInfo Node metadata for current template node
@@ -2524,6 +2601,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      *   metadata to `nodeInfo`
      * @protected
      * @suppress {missingProperties} Interfaces in closure do not inherit statics, but classes do
+     * @nocollapse
      */
     static _parseTemplateNodeAttribute(node, templateInfo, nodeInfo, name, value) {
       let parts = this._parseBindings(value, templateInfo);
@@ -2543,6 +2621,11 @@ export const PropertyEffects = dedupingMixin(superClass => {
         // Initialize attribute bindings with any literal parts
         let literal = literalFromParts(parts);
         if (literal && kind == 'attribute') {
+          // Ensure a ShadyCSS template scoped style is not removed
+          // when a class$ binding's initial literal value is set.
+          if (name == 'class' && node.hasAttribute('class')) {
+            literal += ' ' + node.getAttribute(name);
+          }
           node.setAttribute(name, literal);
         }
         // Clear attribute before removing, since IE won't allow removing
@@ -2564,7 +2647,10 @@ export const PropertyEffects = dedupingMixin(superClass => {
         addBinding(this, templateInfo, nodeInfo, kind, name, parts, literal);
         return true;
       } else {
-        return super._parseTemplateNodeAttribute(node, templateInfo, nodeInfo, name, value);
+        // TODO(https://github.com/google/closure-compiler/issues/3240):
+        //     Change back to just super.methodCall()
+        return propertyEffectsBase._parseTemplateNodeAttribute.call(
+          this, node, templateInfo, nodeInfo, name, value);
       }
     }
 
@@ -2573,7 +2659,6 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * binding the properties that a nested template depends on to the template
      * as `_host_<property>`.
      *
-     * @override
      * @param {Node} node Node to parse
      * @param {TemplateInfo} templateInfo Template metadata for current template
      * @param {NodeInfo} nodeInfo Node metadata for current template node
@@ -2581,9 +2666,13 @@ export const PropertyEffects = dedupingMixin(superClass => {
      *   metadata to `nodeInfo`
      * @protected
      * @suppress {missingProperties} Interfaces in closure do not inherit statics, but classes do
+     * @nocollapse
      */
     static _parseTemplateNestedTemplate(node, templateInfo, nodeInfo) {
-      let noted = super._parseTemplateNestedTemplate(node, templateInfo, nodeInfo);
+      // TODO(https://github.com/google/closure-compiler/issues/3240):
+      //     Change back to just super.methodCall()
+      let noted = propertyEffectsBase._parseTemplateNestedTemplate.call(
+        this, node, templateInfo, nodeInfo);
       // Merge host props into outer template and add bindings
       let hostProps = nodeInfo.templateInfo.hostProps;
       let mode = '{';
@@ -2637,6 +2726,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * @param {Object} templateInfo Current template metadata
      * @return {Array<!BindingPart>} Array of binding part metadata
      * @protected
+     * @nocollapse
      */
     static _parseBindings(text, templateInfo) {
       let parts = [];
@@ -2709,8 +2799,8 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * Called to evaluate a previously parsed binding part based on a set of
      * one or more changed dependencies.
      *
-     * @param {this} inst Element that should be used as scope for
-     *   binding dependencies
+     * @param {!Polymer_PropertyEffects} inst Element that should be used as
+     *     scope for binding dependencies
      * @param {BindingPart} part Binding part metadata
      * @param {string} path Property/path that triggered this effect
      * @param {Object} props Bag of current property changes
@@ -2718,6 +2808,7 @@ export const PropertyEffects = dedupingMixin(superClass => {
      * @param {boolean} hasPaths True with `props` contains one or more paths
      * @return {*} Value the binding part evaluated to
      * @protected
+     * @nocollapse
      */
     static _evaluateBinding(inst, part, path, props, oldProps, hasPaths) {
       let value;
@@ -2739,9 +2830,6 @@ export const PropertyEffects = dedupingMixin(superClass => {
     }
 
   }
-
-  // make a typing for closure :P
-  PropertyEffectsType = PropertyEffects;
 
   return PropertyEffects;
 });

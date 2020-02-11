@@ -11,6 +11,7 @@ import './boot.js';
 
 import { calculateSplices } from './array-splice.js';
 import { microTask } from './async.js';
+import { wrap } from './wrap.js';
 
 /**
  * Returns true if `node` is a slot element
@@ -62,8 +63,9 @@ function isSlot(node) {
  *
  * @summary Class that listens for changes (additions or removals) to
  * "flattened nodes" on a given `node`.
+ * @implements {PolymerDomApi.ObserveHandle}
  */
-export class FlattenedNodesObserver {
+export let FlattenedNodesObserver = class {
 
   /**
    * Returns the list of flattened nodes for the given `node`.
@@ -79,15 +81,17 @@ export class FlattenedNodesObserver {
    * @return {!Array<!Node>} The list of flattened nodes for the given `node`.
    * @nocollapse See https://github.com/google/closure-compiler/issues/2763
    */
+  // eslint-disable-next-line
   static getFlattenedNodes(node) {
+    const wrapped = wrap(node);
     if (isSlot(node)) {
       node = /** @type {!HTMLSlotElement} */(node); // eslint-disable-line no-self-assign
-      return node.assignedNodes({flatten: true});
+      return wrapped.assignedNodes({flatten: true});
     } else {
-      return Array.from(node.childNodes).map((node) => {
+      return Array.from(wrapped.childNodes).map((node) => {
         if (isSlot(node)) {
           node = /** @type {!HTMLSlotElement} */(node); // eslint-disable-line no-self-assign
-          return node.assignedNodes({flatten: true});
+          return wrap(node).assignedNodes({flatten: true});
         } else {
           return [node];
         }
@@ -100,6 +104,7 @@ export class FlattenedNodesObserver {
    * @param {?function(this: Element, { target: !HTMLElement, addedNodes: !Array<!Element>, removedNodes: !Array<!Element> }):void} callback Function called when there are additions
    * or removals from the target's list of flattened nodes.
    */
+  // eslint-disable-next-line
   constructor(target, callback) {
     /**
      * @type {MutationObserver}
@@ -142,12 +147,12 @@ export class FlattenedNodesObserver {
   connect() {
     if (isSlot(this._target)) {
       this._listenSlots([this._target]);
-    } else if (this._target.children) {
+    } else if (wrap(this._target).children) {
       this._listenSlots(
-          /** @type {!NodeList<!Node>} */ (this._target.children));
+          /** @type {!NodeList<!Node>} */ (wrap(this._target).children));
       if (window.ShadyDOM) {
         this._shadyChildrenObserver =
-          ShadyDOM.observeChildren(this._target, (mutations) => {
+          window.ShadyDOM.observeChildren(this._target, (mutations) => {
             this._processMutations(mutations);
           });
       } else {
@@ -168,15 +173,16 @@ export class FlattenedNodesObserver {
    * the observer.
    *
    * @return {void}
+   * @override
    */
   disconnect() {
     if (isSlot(this._target)) {
       this._unlistenSlots([this._target]);
-    } else if (this._target.children) {
+    } else if (wrap(this._target).children) {
       this._unlistenSlots(
-          /** @type {!NodeList<!Node>} */ (this._target.children));
+          /** @type {!NodeList<!Node>} */ (wrap(this._target).children));
       if (window.ShadyDOM && this._shadyChildrenObserver) {
-        ShadyDOM.unobserveChildren(this._shadyChildrenObserver);
+        window.ShadyDOM.unobserveChildren(this._shadyChildrenObserver);
         this._shadyChildrenObserver = null;
       } else if (this._nativeChildrenObserver) {
         this._nativeChildrenObserver.disconnect();
@@ -305,4 +311,4 @@ export class FlattenedNodesObserver {
     }
   }
 
-}
+};

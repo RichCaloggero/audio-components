@@ -15,6 +15,8 @@ import { enqueueDebouncer, flush } from '../utils/flush.js';
 import { OptionalMutableData } from '../mixins/mutable-data.js';
 import { matches, translate } from '../utils/path.js';
 import { timeOut, microTask } from '../utils/async.js';
+import { wrap } from '../utils/wrap.js';
+import { hideElementsGlobally } from '../utils/hide-template-controls.js';
 
 /**
  * @constructor
@@ -295,7 +297,7 @@ export class DomRepeat extends domRepeatBase {
     this.__sortFn = null;
     this.__filterFn = null;
     this.__observePaths = null;
-    /** @type {?function(new:Polymer.TemplateInstanceBase, *)} */
+    /** @type {?function(new:TemplateInstanceBase, Object=)} */
     this.__ctor = null;
     this.__isDetached = true;
     this.template = null;
@@ -319,13 +321,15 @@ export class DomRepeat extends domRepeatBase {
    */
   connectedCallback() {
     super.connectedCallback();
-    this.style.display = 'none';
+    if (!hideElementsGlobally()) {
+      this.style.display = 'none';
+    }
     // only perform attachment if the element was previously detached.
     if (this.__isDetached) {
       this.__isDetached = false;
-      let parent = this.parentNode;
+      let wrappedParent = wrap(wrap(this).parentNode);
       for (let i=0; i<this.__instances.length; i++) {
-        this.__attachInstance(i, parent);
+        this.__attachInstance(i, wrappedParent);
       }
     }
   }
@@ -381,7 +385,7 @@ export class DomRepeat extends domRepeatBase {
             if (prop == this.as) {
               this.items[idx] = value;
             }
-            let path = translate(this.as, 'items.' + idx, prop);
+            let path = translate(this.as, `${JSCompiler_renameProperty('items', this)}.${idx}`, prop);
             this.notifyPath(path, value);
           }
         }
@@ -583,15 +587,17 @@ export class DomRepeat extends domRepeatBase {
 
   __detachInstance(idx) {
     let inst = this.__instances[idx];
+    const wrappedRoot = wrap(inst.root);
     for (let i=0; i<inst.children.length; i++) {
       let el = inst.children[i];
-      inst.root.appendChild(el);
+      wrappedRoot.appendChild(el);
     }
     return inst;
   }
 
   __attachInstance(idx, parent) {
     let inst = this.__instances[idx];
+    // Note, this is pre-wrapped as an optimization
     parent.insertBefore(inst.root, this);
   }
 
@@ -625,7 +631,7 @@ export class DomRepeat extends domRepeatBase {
     }
     let beforeRow = this.__instances[instIdx + 1];
     let beforeNode = beforeRow ? beforeRow.children[0] : this;
-    this.parentNode.insertBefore(inst.root, beforeNode);
+    wrap(wrap(this).parentNode).insertBefore(inst.root, beforeNode);
     this.__instances[instIdx] = inst;
     return inst;
   }

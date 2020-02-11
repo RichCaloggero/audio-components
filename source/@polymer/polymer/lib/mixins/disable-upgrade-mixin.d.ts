@@ -8,6 +8,10 @@
  *   lib/mixins/disable-upgrade-mixin.js
  */
 
+
+// tslint:disable:variable-name Describing an API that's defined elsewhere.
+// tslint:disable:no-any describes the API as best we are able today
+
 import {ElementMixin} from './element-mixin.js';
 
 import {dedupingMixin} from '../utils/mixin.js';
@@ -58,7 +62,14 @@ export {DisableUpgradeMixinConstructor};
 interface DisableUpgradeMixin extends ElementMixin, PropertyEffects, TemplateStamp, PropertyAccessors, PropertiesChanged, PropertiesMixin {
   _initializeProperties(): void;
   _enableProperties(): void;
-  attributeChangedCallback(name: any, old: any, value: any, namespace: any): void;
+
+  /**
+   * @param name Attribute name.
+   * @param old The previous value for the attribute.
+   * @param value The new value for the attribute.
+   * @param namespace The XML namespace for the attribute.
+   */
+  attributeChangedCallback(name: string, old: string|null, value: string|null, namespace: string|null): void;
   connectedCallback(): void;
   disconnectedCallback(): void;
 }

@@ -53,6 +53,7 @@ registerAudioPlayer(this.component);
 connectedCallback () {
 super.connectedCallback ();
 signalReady(this);
+console.debug(`${this.id} called signalReady()`);
 } // connectedCallback
 
 

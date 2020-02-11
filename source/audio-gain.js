@@ -40,7 +40,7 @@ super.connectedCallback();
 signalReady(this);
 } // connectedCallback
 
-gainChanged (value) {this.component.gain = value;}
+gainChanged (value) {if (this._ready) this.component.gain = value;}
 } // class AudioGain
 
 customElements.define(AudioGain.is, AudioGain);

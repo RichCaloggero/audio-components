@@ -8,6 +8,10 @@
  *   lib/legacy/polymer.dom.js
  */
 
+
+// tslint:disable:variable-name Describing an API that's defined elsewhere.
+// tslint:disable:no-any describes the API as best we are able today
+
 import {FlattenedNodesObserver} from '../utils/flattened-nodes-observer.js';
 
 export {flush, enqueueDebouncer as addDebouncer} from '../utils/flush.js';
@@ -24,19 +28,19 @@ export {matchesSelector};
  */
 declare function matchesSelector(node: Node, selector: string): boolean;
 
-export {DomApi};
-
 /**
  * Node API wrapper class returned from `Polymer.dom.(target)` when
  * `target` is a `Node`.
  */
-declare class DomApi {
+declare class DomApiNative {
 
   /**
    * For shadow roots, returns the currently focused element within this
    * shadow root.
+   *
+   * return {Node|undefined} Currently focused element
    */
-  readonly activeElement: Node|null|undefined;
+  readonly activeElement: any;
   parentNode: Node|null;
   firstChild: Node|null;
   lastChild: Node|null;
@@ -55,7 +59,7 @@ declare class DomApi {
   /**
    * @param node Node for which to create a Polymer.dom helper object.
    */
-  constructor(node: Node|null);
+  constructor(node: Node);
 
   /**
    * Returns an instance of `FlattenedNodesObserver` that
@@ -190,4 +194,4 @@ export {dom};
  *
  * @returns Wrapper providing either node API or event API
  */
-declare function dom(obj?: Node|Event|null): DomApi|EventApi;
+declare function dom(obj?: Node|Event|DomApiNative|EventApi|null): DomApiNative|EventApi;

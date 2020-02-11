@@ -8,6 +8,10 @@
  *   lib/utils/debounce.js
  */
 
+
+// tslint:disable:variable-name Describing an API that's defined elsewhere.
+// tslint:disable:no-any describes the API as best we are able today
+
 export {Debouncer};
 
 declare class Debouncer {
@@ -65,6 +69,11 @@ declare class Debouncer {
   cancel(): void;
 
   /**
+   * Cancels a debouncer's async callback.
+   */
+  _cancelAsync(): void;
+
+  /**
    * Flushes an active debouncer and returns a reference to itself.
    */
   flush(): void;
@@ -76,5 +85,23 @@ declare class Debouncer {
    */
   isActive(): boolean;
 }
+
+export {enqueueDebouncer};
+
+
+/**
+ * Adds a `Debouncer` to a list of globally flushable tasks.
+ */
+declare function enqueueDebouncer(debouncer: Debouncer): void;
+
+export {flushDebouncers};
+
+
+/**
+ * Flushes any enqueued debouncers
+ *
+ * @returns Returns whether any debouncers were flushed
+ */
+declare function flushDebouncers(): boolean;
 
 import {AsyncInterface} from '../../interfaces';

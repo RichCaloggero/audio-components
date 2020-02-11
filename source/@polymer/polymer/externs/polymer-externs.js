@@ -41,13 +41,16 @@ PolymerInit.prototype.extends;
 PolymerInit.prototype.properties;
 /** @type {(!Array<string> | undefined)} */
 PolymerInit.prototype.observers;
-/** @type {(!HTMLTemplateElement | string | undefined)} */
+/** @type {(!HTMLTemplateElement | string | undefined | null)} */
 PolymerInit.prototype.template;
 /** @type {(!Object<string, *> | undefined)} */
 PolymerInit.prototype.hostAttributes;
 /** @type {(!Object<string, string> | undefined)} */
 PolymerInit.prototype.listeners;
+/** @type {(!Object| !Array<!Object> | undefined)} */
+PolymerInit.prototype.behaviors;
 
+/** @record */
 let PolymerElementConstructor = function () {};
 /** @type {(string | undefined)} */
 PolymerElementConstructor.is;
@@ -57,7 +60,7 @@ PolymerElementConstructor.extends;
 PolymerElementConstructor.properties;
 /** @type {(!Array<string> | undefined)} */
 PolymerElementConstructor.observers;
-/** @type {(!HTMLTemplateElement | string | undefined)} */
+/** @type {(!HTMLTemplateElement | string | undefined | null)} */
 PolymerElementConstructor.template;
 
 /** @interface */
@@ -79,6 +82,26 @@ function Polymer(init){}
 Polymer.sanitizeDOMValue;
 
 /**
+ * @type {boolean}
+ */
+Polymer.passiveTouchGestures;
+
+/**
+ * @type {boolean}
+ */
+Polymer.strictTemplatePolicy;
+
+/**
+ * @type {boolean}
+ */
+Polymer.allowTemplateFromDomModule;
+
+/**
+ * @type {string}
+ */
+Polymer.rootPath;
+
+/**
  * @param {string} string
  * @param {Object} obj
  * @return {string}
@@ -89,6 +112,8 @@ function JSCompiler_renameProperty(string, obj) {}
 function PolymerTelemetry() {}
 /** @type {number} */
 PolymerTelemetry.instanceCount;
+/** @type {function():void} */
+PolymerTelemetry.incrementInstanceCount;
 /** @type {Array<HTMLElement>} */
 PolymerTelemetry.registrations;
 /** @type {function(HTMLElement)} */
@@ -104,6 +129,12 @@ Polymer.telemetry;
 /** @type {string} */
 Polymer.version;
 
+/** @type {boolean} */
+Polymer.legacyOptimizations;
+
+/** @type {boolean} */
+Polymer.syncInitialRender;
+
 // nb. This is explicitly 'var', as Closure Compiler checks that this is the case.
 /**
  * @constructor
@@ -111,6 +142,29 @@ Polymer.version;
  * @implements {Polymer_LegacyElementMixin}
  */
 var PolymerElement = function() {};
+
+/**
+ * The tag name of the cutom element type.
+ * @type {string|undefined}
+ */
+PolymerElement.is;
+/**
+ * The template to stamp when creating this element type.
+ * @type {!HTMLTemplateElement|undefined|null}
+ */
+PolymerElement.template;
+/**
+ * The properties of the cutom element type.
+ * @type {!PolymerElementProperties|undefined}
+ */
+PolymerElement.properties;
+/**
+ * The observers of this custom element type.
+ * @type {!Array<string>|undefined}
+ */
+PolymerElement.observers;
+/** @type {!PolymerInit|undefined} */
+PolymerElement.generatedFrom;
 
 /**
  * On create callback.
@@ -174,7 +228,7 @@ var PolymerDeepPropertyChange;
  * @constructor
  * @template T
  */
-let DomRepeatEvent = function() {};
+var DomRepeatEvent = function() {};
 
 /**
  * @type {{

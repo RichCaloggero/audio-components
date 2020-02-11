@@ -63,8 +63,8 @@ return html`
 <label>Shift <input type="checkbox" class="shift"></label>
 <label>key <input type="text" class="key"></label>
 <button class="ok">OK</button>
-</div><!-- .body -->
-</div><!-- dialog -->
+</div>
+</div>
 -->
 
 <div role="region" aria-label="status" id="statusMessage" aria-live="polite"></div>
@@ -224,7 +224,9 @@ return [];
 
 automationIntervalChanged (value) {if (value && !Number.isNaN(value)) automationInterval = value;}
  
-listenerXChanged (value) {this.audio.listener.setPosition(this.listenerX, this.listenerY, this.listenerZ);}
+listenerXChanged (value) {
+console.debug(`listenerXChanged:, ${value}, ${this.audio}, ${this.audio.listener}`);
+this.audio.listener.setPosition(this.listenerX, this.listenerY, this.listenerZ);}
 listenerYChanged (value) {this.audio.listener.setPosition(this.listenerX, this.listenerY, this.listenerZ);}
 listenerZChanged (value) {this.audio.listener.setPosition(this.listenerX, this.listenerY, this.listenerZ);}
 

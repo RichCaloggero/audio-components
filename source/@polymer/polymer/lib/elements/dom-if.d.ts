@@ -8,6 +8,9 @@
  *   lib/elements/dom-if.js
  */
 
+
+// tslint:disable:variable-name Describing an API that's defined elsewhere.
+
 import {PolymerElement} from '../../polymer-element.js';
 
 import {templatize} from '../utils/templatize.js';
@@ -19,6 +22,8 @@ import {enqueueDebouncer, flush} from '../utils/flush.js';
 import {microTask} from '../utils/async.js';
 
 import {root} from '../utils/path.js';
+
+import {hideElementsGlobally} from '../utils/hide-template-controls.js';
 
 export {DomIf};
 

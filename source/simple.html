@@ -1,18 +1,20 @@
 <!doctype html>
+<html>
 <head>
 <meta charset="utf-8">
 <title>Simple</title>
 <script src="loader.js"></script>
 </head>
 <body>
-<audio-context hide-on-bypass sample-rate="88200" automation-interval="0.05" hide="bypass" label="Phase Panner" shortcuts="enableAutomation alt shift a">
-<audio-series>
+<audio-context automation-interval="0.05" hide="bypass" label="Simple" shortcuts="enableAutomation alt shift a">
+<audio-series id="main">
 <audio-player label="player" shortcuts="src alt shift u" src="media/D2_02_Thats What Love Will Make You Do.flac"></audio-player>
 
-<audio-series id="master" label="master" delay="0.5" >
+<!--<audio-series id="master" label="master" delay="0.5" >
 <audio-filter  hide="detune, gain"></audio-filter>
 <audio-gain label="volume"></audio-gain>
 </audio-series>
+-->
 
 <audio-destination label="speakers"></audio-destination>
 </audio-series>

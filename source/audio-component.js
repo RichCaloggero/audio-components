@@ -119,7 +119,7 @@ console.log(`- channel 2: ${channel2.name} connected`);
 export class Series extends AudioComponent {
 constructor (audio, components, feedForward = false, feedBack = false, parent) {
 super (audio, "series");
-//console.debug(`Series: connecting ${components.length} components in series:`);
+console.debug(`Series: connecting ${components.length} components in series:`);
 //if (components.length < 2) throw new Error("Series: need two or more components");
 const first = components[0];
 const last = components[components.length-1];
@@ -507,7 +507,7 @@ this.processor.port.postMessage(["sampleCount", this._sampleCount]);
 } // class FixedDelay
 
 
-export class Verb extends AudioComponent {
+/*export class Verb extends AudioComponent {
 constructor (audio, elementCount = 500, parent) {
 super (audio, "Verb", parent);
 this.elements = [];
@@ -537,6 +537,7 @@ d.wet.gain.value = random(minGain, maxGain);
 statusMessage(`${this.name}: ${this.elements.length} delays changed`);
 } // setDelays
 } // class Verb
+*/
 
 
 	function createFilterBank (audio, frequencies) {
