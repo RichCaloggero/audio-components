@@ -1,9 +1,16 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
 let instanceCount = 0;
 let shadowRoot;
+const logAppend = true;
 
 export  const module = class TestTop extends PolymerElement {
 static get is () {return "test-top";}
+
+static get properties () {
+return {
+hide: {type: String, value: "bypass", observer: "hideChanged", notify: true}
+}; // return
+} // get properties
 
 static get template () {
 return html`
@@ -17,7 +24,10 @@ return html`
 constructor () {
 super();
 instanceCount += 1;
-this.id = `${module.is}-${instanceCount}`;
+this.id = `${module.name}-${instanceCount}`;
+this.module = module;
+this.name = module.name;
+this._ready = false;
 
 //report (this.id, "constructor", module.name, this.children.length);
 } // constructor
@@ -26,10 +36,20 @@ connectedCallback () {
 super.connectedCallback();
 if (!shadowRoot) shadowRoot = this.shadowRoot;
 
-waitForChildren(this, () => {
-report (this.id, "connectedCallback", module.name, this.children.length);
+if (this.name === "TestTop") waitForChildren(this, (children) => {
+statusMessage(`${this.id} ready: ${children.length} children connected`, "append");
+statusMessage(`- all connections complete`);
+runPropertyEffects(this);
 }); // waitForChildren
 } // connectedCallback
+
+hideChanged (value) {
+if (this._ready) {
+statusMessage(`${this.id}: setting hide to ${value}`);
+} else {
+statusMessage(`${this.id}: not ready; cannot set hide to ${value}`);
+} // if
+} // hideChanged
 
 } // class TestTop
 customElements.define(module.is, module);
@@ -40,7 +60,7 @@ const text = `${id}: ${caller} in ${moduleName} has ${childCount} children`;
 statusMessage(text, "append");
 } // report
 
-export function statusMessage (text, append) {
+export function statusMessage (text, append = logAppend) {
 const p = document.createElement("p");
 p.appendChild(document.createTextNode(text));
 if (shadowRoot) {
@@ -55,17 +75,39 @@ status.appendChild(p);
 export function waitForChildren (element, callback) {
 let children = Array.from(element.children);
 element.addEventListener("elementReady", handleReady);
+element.addEventListener("elementReady", handleChildReady);
+//statusMessage (`${element.id}: waiting for ${children.length} children`);
 
-function handleReady (e) {
+function handleChildReady (e) {
 if (!children.includes(e.target)) return;
+//statusMessage(`${element.id}: child ${e.target.id} is ready`);
+
+// remove this child and we're done if no more children left to process
 children = children.filter(x => x !== e.target);
 if (children.length > 0) return;
-element.removeEventListener("elementReady", handleReady);
-callback.call(element);
+
+// no more children left, so remove this handler and signal ready on this element
+element.removeEventListener("elementReady", handleChildReady);
+//statusMessage(`${element.id}: all children ready`);
 signalReady(element);
+} // handleChildReady
+
+function handleReady (e) {
+if (e.target !== element) return;
+element.removeEventListener("elementReady", handleReady);
+element._ready = true;
+callback.call(element, element.children);
 } // handleReady
 } // waitForChildren
 
 export function signalReady (element) {
 element.dispatchEvent(new CustomEvent("elementReady", {bubbles: true}));
 } // signalReady
+
+export function runPropertyEffects (element) {
+const module = element.module;
+for (let name in module.properties) {
+const definition = module.properties[name];
+if (definition.observer) element[definition.observer].call(element, element[name]);
+} // for
+} // runPropertyEffects 
