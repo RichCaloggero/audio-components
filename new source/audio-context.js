@@ -17,7 +17,7 @@ let automator = null;
 let _automation = false;
 
 
-export class _AudioContext_ extends PolymerElement {
+export  const module = class _AudioContext_ extends PolymerElement {
 static get template () {
 return html`
 <fieldset class="audio-context">
@@ -113,9 +113,12 @@ upZ: {type: Number, value: 0, notify: true, observer: "upZChanged"},
 constructor () {
 super ();
 instanceCount += 1;
-this.id = `${_AudioContext_.is}-${instanceCount}`;
+this.id = `${module.is}-${instanceCount}`;
+this.module = module;
 this._ready = false;
-this.ui = true;
+this.analyser = null;
+this.hide = "";
+this._hide = [];
 
 if (! window.AudioContext) {
 alert ("webaudio not available");
@@ -128,9 +131,6 @@ audio = new AudioContext({sampleRate: 88200});
 } // if
 
 this.audio = audio;
-this.analyser = null;
-this.hide = "";
-this._hide = [];
 } // constructor
 
 
@@ -141,17 +141,18 @@ super.connectedCallback();
 if (!shadowRoot) shadowRoot = this.shadowRoot;
 
 // if this is the real top level element in the tree, then wait on all children, add depth info to each legend in all child ui,  and dispatch event when the entire tree is ready
-if (this.matches("audio-context")) {
+//if (this.matches("audio-context")) {
+if (this.module.name === "_AudioContext") {
 //console.debug(`connected: ${this.id}, ${this.container}`);
-childrenReady(this).then (children => {
+childrenReady(this, children => {
 enumerateNonUi(this)
 .forEach(e => e.depth = depth(e));
-signalReady(this);
-}).catch (error => statusMessage(`${this.id}.connectedCallback: ${error}`));
+});
 } // if
 } // connectedCallback
 
 labelChanged (value) {
+if (!this._ready) return;
 if (!value || !value.trim()) {
 this.hideUI ("including descendents");
 return "";
@@ -162,12 +163,47 @@ return value.trim();
 } // labelChanged
 
 hideChanged (value) {
-if (!value) return "";
-const _hide = value.toLowerCase().trim();
-this._hide = _hide.split(",").map(x => x.trim());
-//console.debug(`hideChanged ${this.id}: this._hide`);
-return _hide;
+if (!this._ready) return "";
+this._hide = value?
+value.trim().toLowerCase().match(/\w+/g)
+: [];
+return value;
 } // hideChanged
+
+_mix (value) {if (this._ready) this.component.mix(value); return value;}
+_silentBypass (value) {if (this._ready) this.component.silentBypass(value);}
+
+_bypass (value) {
+if (this._ready) {
+this.component.bypass(value);
+this._hideOnBypass(value);
+} // if
+} // _bypass
+
+_hideOnBypass (value) {
+if (!this.label || !this.findContext()) return;
+if (!this.findContext().hideOnBypass) return;
+
+if (value) {
+this.hideAllExcept(["bypass"]);
+if (this.shadowRoot.querySelector("slot")) this.shadowRoot.querySelector("slot").hidden = true;
+} else {
+this.hideOnly(this._hide);
+if (this.shadowRoot.querySelector("slot")) this.shadowRoot.querySelector("slot").hidden = false;
+} // if
+} // _hideOnBypass
+
+hideOnly (...labels) {
+this.uiControls()
+.filter(x => labels.includes(x.label))
+.forEach(x => x.hidden = true);
+} // hideOnly
+
+hideAllExcept (...labels) {
+this.uiControls()
+.filter(x => !labels.includes(x.label))
+.forEach(x => x.hidden = true);
+} // hideAllExcept
 
 restoreUI () {
 if (!this.shadowRoot) return;
@@ -181,32 +217,7 @@ Array.from(this.shadowRoot.children).forEach(x => x.hidden = true);
 if (includeDescendents && this.shadowRoot.querySelector("slot")) this.shadowRoot.querySelector("slot").hidden = false;
 } // hideUI
 
-hideAllExcept (labels) {
-if (labels instanceof Array) {
-const all = new Set(this.uiControls());
-const show = new Set(this.labelsToControls(labels));
-const hide = new Set (difference(all, show));
-//console.debug(`${this.id}._hideAllExcept ${labels}: ${all.size}, ${hide.size}, ${show.size}`);
-
-hide.forEach(x => x.hidden = true);
-show.forEach(x => x.hidden = false);
-} // if
-} // hideAllExcept
-
-hideOnly (labels) {
-if (labels instanceof Array) {
-
-const all = new Set(this.uiControls());
-const hide = new Set(this.labelsToControls(labels));
-const show = new Set (difference(all, hide));
-//console.debug(`${this.id}._hideOnly ${labels}: ${all.size}, ${hide.size}, ${show.size}`);
-
-hide.forEach(x => x.hidden = true);
-show.forEach(x => x.hidden = false);
-} // if
-} // hideOnly 
-
-labelsToControls (labels) {return this.uiControls().filter(x => labels.includes(x.label));}
+labelsToControls (...labels) {return this.uiControls().filter(x => labels.includes(x.label));}
 
 uiControls () {
 if (this._ready && this.shadowRoot) {
@@ -224,19 +235,17 @@ return [];
 
 automationIntervalChanged (value) {if (value && !Number.isNaN(value)) automationInterval = value;}
  
-listenerXChanged (value) {
-console.debug(`listenerXChanged:, ${value}, ${this.audio}, ${this.audio.listener}`);
-this.audio.listener.setPosition(this.listenerX, this.listenerY, this.listenerZ);}
-listenerYChanged (value) {this.audio.listener.setPosition(this.listenerX, this.listenerY, this.listenerZ);}
-listenerZChanged (value) {this.audio.listener.setPosition(this.listenerX, this.listenerY, this.listenerZ);}
+listenerXChanged (value) {if (this._ready) this.audio.listener.setPosition(this.listenerX, this.listenerY, this.listenerZ);}
+listenerYChanged (value) {if (this._ready) this.audio.listener.setPosition(this.listenerX, this.listenerY, this.listenerZ);}
+listenerZChanged (value) {if (this._ready) this.audio.listener.setPosition(this.listenerX, this.listenerY, this.listenerZ);}
 
-forwardXChanged (value) {this.audio.listener.setOrientation(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ);}
-forwardYChanged (value) {this.audio.listener.setOrientation(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ);}
-forwardZChanged (value) {this.audio.listener.setOrientation(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ);}
+forwardXChanged (value) {if (this._ready) this.audio.listener.setOrientation(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ);}
+forwardYChanged (value) {if (this._ready) this.audio.listener.setOrientation(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ);}
+forwardZChanged (value) {if (this._ready) this.audio.listener.setOrientation(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ);}
 
-upXChanged (value) {this.audio.listener.setOrientation(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ);}
-upYChanged (value) {this.audio.listener.setOrientation(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ);}
-upZChanged (value) {this.audio.listener.setOrientation(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ);}
+upXChanged (value) {if (this._ready) this.audio.listener.setOrientation(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ);}
+upYChanged (value) {if (this._ready) this.audio.listener.setOrientation(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ);}
+upZChanged (value) {if (this._ready) this.audio.listener.setOrientation(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ);}
 
 shortcutsChanged (value) {
 const root = this.shadowRoot;
@@ -259,29 +268,6 @@ p.shortcut = shortcut.shortcut;
 }); // forEach
 } // shortcutsChanged
 
-
-_mix (value) {if (this._ready) this.component.mix(value); return value;}
-_silentBypass (value) {if (this._ready) this.component.silentBypass(value);}
-
-_bypass (value) {
-if (this._ready) {
-this.component.bypass(value);
-this._hideOnBypass(value);
-} // if
-} // _bypass
-
-_hideOnBypass (value) {
-if (!this.findContext()) return;
-if (!this.findContext().hideOnBypass) return;
-
-if (value) {
-this.hideAllExcept(["bypass"]);
-if (this.shadowRoot.querySelector("slot")) this.shadowRoot.querySelector("slot").setAttribute("hidden", "");
-} else {
-this.hideOnly(this._hide);
-if (this.shadowRoot.querySelector("slot")) this.shadowRoot.querySelector("slot").removeAttribute("hidden");
-} // if
-} // _hideOnBypass
 
 components (elements) {
 return elements.map(e => {
@@ -440,69 +426,6 @@ alert(`${message}\n${e.stack}`);
 } // catch
 } // _setParam
 
-export function childrenReady (element) {
-//console.debug(`childrenReady: ${element.id}`);
-const children = Array.from(element.children);
-if (!children || children.length === 0) {
-//console.debug(`- childrenReady: recursion bottomed out at ${element.id}`);
-return (ready(element));
-} // if
-const undefinedDescendants = Array.from(element.querySelectorAll(":not(:defined)"));
-//console.debug(`- ${undefinedDescendants.length} undefined descendants`);
-
-return new Promise((resolve, reject) => {
-Promise.all(undefinedDescendants.map(e => customElements.whenDefined(e.localName)))
-.then(x => {
-//const undefinedChildren = children.filter(e => e.matches(":not(:defined)"));
-//console.debug(`childrenReady: ${element} has ${undefinedChildren.length} undefined children`);
-
-console.log(`
-${element.id}: waiting for ${children.length} children
-- ${children.map(e => e.nodeName.toLowerCase())}
-`);
-resolve(Promise.all(children.map(child => ready(child))));
-}); // Promise.all.then
-}); // new Promise
-} // childrenReady
-
-function ready (element) {
-if (element && element instanceof _AudioContext_) {
-if (element._ready) {
-console.log(`${element.id} is ready (via flag).`);
-return element;
-} // if
-
-//console.debug(`ready: waiting for ${element.id}`);
-return new Promise ((resolve, reject) => {
-element.addEventListener("elementReady", e => {
-console.log(`${e.target.id} is ready (via event).`);
-e.target._ready = true;
-resolve(e.target);
-});
-});
-
-} else {
-throw new Error (`ready: ${element.id} is invalid`);
-} // if
-} // ready
-
-export function signalReady (element) {
-if (element && element instanceof _AudioContext_) {
-element._ready = true;
-element.dispatchEvent(new CustomEvent("elementReady"));
-//console.debug(`signalReady dispatched on ${element.id}`);
-
-if (element.component) {
-element.component.bypass(element.bypass);
-element.component.mix(element.mix);
-element._hideOnBypass(element.bypass);
-} // if
-
-} else {
-console.log(`signalReady: ${element} invalid`);
-return;
-} // if
-} // signalReady
 
 export function startAutomation () {automator = setInterval(() => automationQueue.forEach(e => e.automate()), 1000*automationInterval);} // startAutomation
 export function stopAutomation () {clearInterval(automator); automator = null;}
@@ -608,7 +531,53 @@ return enumerateAll(root)
 .filter(x => x instanceof _AudioContext_);
 } // enumerateNonUi
 
-function round (n) {return Math.round(n*10)/10;}
+
+/// connection utilities
+
+export function childrenReady(element, callback) {
+let children = Array.from(element.children);
+element.addEventListener("elementReady", handleReady);
+if (children.length === 0) return signalReady(element);
+
+element.addEventListener("elementReady", handleChildReady);
+//statusMessage (`${element.id}: waiting for ${children.length} children`);
+
+function handleChildReady (e) {
+if (!children.includes(e.target)) return;
+//statusMessage(`${element.id}: child ${e.target.id} is ready`);
+
+// remove this child and we're done if no more children left to process
+children = children.filter(x => x !== e.target);
+if (children.length > 0) return;
+
+// no more children left, so remove this handler and signal ready on this element
+element.removeEventListener("elementReady", handleChildReady);
+//statusMessage(`${element.id}: all children ready`);
+signalReady(element);
+} // handleChildReady
+
+function handleReady (e) {
+if (e.target !== element) return;
+element.removeEventListener("elementReady", handleReady);
+element._ready = true;
+callback.call(element, element.children);
+runPropertyEffects(element);
+} // handleReady
+} // childrenReady
+
+export function signalReady (element) {
+element.dispatchEvent(new CustomEvent("elementReady", {bubbles: true}));
+} // signalReady
+
+export function runPropertyEffects (element) {
+const module = element.module;
+for (let name in module.properties) {
+const definition = module.properties[name];
+if (definition.observer) element[definition.observer].call(element, element[name]);
+} // for
+} // runPropertyEffects 
+
+/// random utilities
 
 export function depth (start, top = _AudioContext_) {
 let e = start;
@@ -622,6 +591,8 @@ e = e.parentElement;
 
 return _depth;
 } // depth
+function round (n) {return Math.round(n*10)/10;}
+
 
 function _hide (element) {element.style.display = "none";}
 function _unhide (element) {element.style.display = "block";}

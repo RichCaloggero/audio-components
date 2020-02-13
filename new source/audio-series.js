@@ -48,8 +48,6 @@ super.connectedCallback();
 childrenReady(this), children => {
 console.debug(`- ${this.id} connected: with ${children.length} children`);
 this.component = new Series(this.audio, this.components(children), this.feedForward, this.feedBack, this);
-runPropertyEffects(this);
-signalReady(this);
 });
 } // connectedCallback
 
