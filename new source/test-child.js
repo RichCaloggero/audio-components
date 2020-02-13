@@ -17,9 +17,8 @@ this.module = module;
 connectedCallback () {
 super.connectedCallback();
 
-waitForChildren(this, children => {
 statusMessage(`${this.id} ready: ${this.children.length} children connected`, "append");
-});
+this.isReady = true;
 } // connectedCallback
 
 } // class TestChild

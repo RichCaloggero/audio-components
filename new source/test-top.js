@@ -32,6 +32,17 @@ this._ready = false;
 //report (this.id, "constructor", module.name, this.children.length);
 } // constructor
 
+get isReady () {return this._ready;}
+set isReady (value) {
+if (value) {
+this._ready = true;
+runPropertyEffects(this);
+signalReady(this);
+} else {
+this._ready = false;
+} // if
+} // set isReady
+
 connectedCallback () {
 super.connectedCallback();
 if (!shadowRoot) shadowRoot = this.shadowRoot;
@@ -74,8 +85,6 @@ status.appendChild(p);
 export function waitForChildren (element, callback) {
 let children = Array.from(element.children);
 
-element.addEventListener("elementReady", handleReady);
-if (children.length === 0) return signalReady(element);
 
 element.addEventListener("elementReady", handleChildReady);
 //statusMessage (`${element.id}: waiting for ${children.length} children`);
@@ -91,16 +100,10 @@ if (children.length > 0) return;
 // no more children left, so remove this handler and signal ready on this element
 element.removeEventListener("elementReady", handleChildReady);
 //statusMessage(`${element.id}: all children ready`);
-signalReady(element);
-} // handleChildReady
 
-function handleReady (e) {
-if (e.target !== element) return;
-element.removeEventListener("elementReady", handleReady);
-element._ready = true;
 callback.call(element, element.children);
-runPropertyEffects(this);
-} // handleReady
+element.isReady = true;
+} // handleChildReady
 } // waitForChildren
 
 export function signalReady (element) {

@@ -38,8 +38,7 @@ this.component = new Gain(this.audio, this.gain, this);
 
 connectedCallback () {
 super.connectedCallback();
-childrenReady(this, children => {
-});
+this.isReady = true;
 } // connectedCallback
 
 gainChanged (value) {if (this._ready) this.component.gain = value;}
