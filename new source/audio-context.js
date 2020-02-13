@@ -258,7 +258,9 @@ upYChanged (value) {if (this._ready) this.audio.listener.setOrientation(this.for
 upZChanged (value) {if (this._ready) this.audio.listener.setOrientation(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ);}
 
 shortcutsChanged (value) {
-const root = this.shadowRoot;
+if (!this.isReady) return;
+if (!value) return;
+	const root = this.shadowRoot;
 if (! root) return;
 
 const parameters = Array.from(root.querySelectorAll("ui-number, ui-boolean, ui-text, ui-list"));
@@ -488,10 +490,10 @@ alert (message);
 } // statusMessage
 
 function parseShortcuts (text) {
-//console.debug(`parseShortcuts:  ${text}`);
+console.debug(`parseShortcuts:  ${text}`);
 return text.split(",").map(definition => {
 //console.debug(`- definition: ${definition}`);
-const tokens = definition.match(/(\w)+/g);
+const tokens = definition.match(/\w+/g);
 if (tokens.length < 3) throw new Error(`${definition}: invalid shortcut definition; must contain a parameter name, followed by at least one key identifier which must include at least one modifier: control, shift, or alt.`);
 return {parameter: tokens[0], shortcut: tokens.slice(1).join(" ")};
 });
@@ -562,14 +564,14 @@ if (children.length > 0) return;
 element.removeEventListener("elementReady", handleChildReady);
 //statusMessage(`${element.id}: all children ready`);
 
-if (callback && callback instanceof Function) callback.call(element, children);
+if (callback && callback instanceof Function) callback.call(element, Array.from(element.children));
 element.isReady;
 } // handleChildReady
 } // childrenReady
 
 export function signalReady (element) {
 element.dispatchEvent(new CustomEvent("elementReady", {bubbles: true}));
-statusMessage(`${this.module.name}: sent ready signal`, "append");
+//statusMessage(`${element.module.name}: sent ready signal`, "append");
 } // signalReady
 
 export function runPropertyEffects (element) {

@@ -1,5 +1,5 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {module as _audioContext_, statusMessage, shadowRoot, registerAudioPlayer} from "./audio-context.js";
+import {module as _AudioContext_, statusMessage, shadowRoot, registerAudioPlayer} from "./audio-context.js";
 import {AudioComponent} from "./audio-component.js";
 import {handleUserKey} from "./ui.js";
 
