@@ -30,8 +30,8 @@ step: {type: Number, value: 0.1}, // step
 constructor () {
 super ();
 instanceCount += 1;
-this.module = module;
 this.id = `${module.is}-${instanceCount}`;
+this.module = module;
 
 this.component = new Gain(this.audio, this.gain, this);
 } // constructor

@@ -8,21 +8,20 @@ const elementList = [
 // connectors
 "./audio-context.js",
 "./audio-series.js",
-/*"./audio-parallel.js",
+"./audio-parallel.js",
 "./audio-split.js",
 "./audio-channelSwap.js",
-"./audio-feedback.js",
-*/
+//"./audio-feedback.js",
 
 // processors
 "./audio-player.js",
 "./audio-destination.js",
-//"./audio-oscillator.js",
+"./audio-oscillator.js",
 
 "./audio-gain.js",
-/*"./audio-filter.js",
+"./audio-filter.js",
 "./audio-delay.js",
-"./audio-convolver.js",
+/*"./audio-convolver.js",
 "./audio-compressor.js",
 "./audio-panner.js",
 "./audio-equalizer.js",
