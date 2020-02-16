@@ -21,21 +21,20 @@ const elementList = [
 "./audio-gain.js",
 "./audio-filter.js",
 "./audio-delay.js",
-/*"./audio-convolver.js",
+"./audio-convolver.js",
 "./audio-compressor.js",
 "./audio-panner.js",
-"./audio-equalizer.js",
+"./audio-stereoProcessor.js",
+/*"./audio-equalizer.js",
 "./audio-resonance.js",
 "./audio-xtc.js",
-"./audio-stereoProcessor.js",
 "./audio-gen.js",
 "./audio-fixedDelay.js",
+*/
 
 // automation
 "./audio-control.js",
 "./audio-parameter.js",
-*/
-
 ]; // element list
 
 

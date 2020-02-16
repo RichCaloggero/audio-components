@@ -1,4 +1,4 @@
-import {_setParam, signalReady, statusMessage} from "./audio-context.js";
+import {_setParam, statusMessage} from "./audio-context.js";
 
 const registry = {};
 function registerComponent (name, parent) {
@@ -30,6 +30,7 @@ this.dry.connect(this.output);
 
 this.mix(1.0);
 this.bypass(false);
+console.debug(`component ${name} created`);
 } // constructor
 
 silentBypass (value) {
@@ -493,7 +494,7 @@ audio.audioWorklet.addModule("fixedDelay.worklet.js")
 this.processor = new AudioWorkletNode(audio, "fixed-delay");
 this.input.connect(this.processor).connect(this.wet);
 this.sampleCount = this._sampleCount;
-signalReady(parent);
+//signalReady(parent);
 }).catch(e => alert(`${this.cid}: ${e}`));
 } // constructor
 

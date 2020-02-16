@@ -78,13 +78,12 @@ static get is() { return "audio-context";}
 
 static get properties() {
 return {
-id: String,
+//id: String,
 hide: {type: String, notify: true, observer: "hideChanged"},
 hideOnBypass: {type: Boolean, value: false},
 label: {type: String, value: "", notify: true, observer: "labelChanged"},
 sampleRate: Number,
-depth: {type: Number, notify:true, value: 0},
-container: {type: Boolean, notify:true, value: false},
+depth: {type: Number, notify:true},
 
 mix: {type: Number, value: 1.0, notify: true, observer: "_mix"},
 bypass: {type: Boolean, notify: true, observer: "_bypass"},
@@ -116,18 +115,23 @@ instanceCount += 1;
 this.id = `${module.is}-${instanceCount}`;
 this.module = module;
 this._ready = false;
-this.analyser = null;
-this.hide = "";
 this._hide = [];
 
-if (! window.AudioContext) {
+if (! AudioContext) {
 alert ("webaudio not available");
+throw new Error("web audio not available");
 return;
 } // if
 
 if (!audio) {
-audio = new AudioContext({sampleRate: 88200});
-//console.debug(`${this.id}: creating new audio context`);
+try {
+audio = new AudioContext();
+} catch (e) {
+throw new Error(`${e}: cannot create a new audio context; aborting`);
+} // try
+
+} else {
+//console.debug(`${this.id}: using ${audio}...`);
 } // if
 
 this.audio = audio;
@@ -138,7 +142,8 @@ set isReady (value) {
 if (value) {
 this._ready = true;
 runPropertyEffects(this);
-signalReady(this);
+//signalReady(this);
+setTimeout(() => signalReady(this), 0);
 } else {
 this._ready = false;
 } // if
@@ -153,10 +158,11 @@ if (!shadowRoot) shadowRoot = this.shadowRoot;
 // if this is the real top level element in the tree, then wait on all children, add depth info to each legend in all child ui,  and dispatch event when the entire tree is ready
 //if (this.matches("audio-context")) {
 if (this.module.name === "_AudioContext") {
-//console.debug(`connected: ${this.id}, ${this.container}`);
+console.debug(`audio-context connected...`);
+
 childrenReady(this, children => {
-enumerateNonUi(this)
-.forEach(e => e.depth = depth(e));
+//enumerateNonUi(this)
+//.forEach(e => e.depth = depth(e));
 });
 } // if
 } // connectedCallback
@@ -191,8 +197,9 @@ this._hideOnBypass(value);
 } // _bypass
 
 _hideOnBypass (value) {
+if (!this._ready) return;
 if (!this.label || !this.findContext()) return;
-if (!this.findContext().hideOnBypass) return;
+//if (!this.findContext().hideOnBypass) return;
 
 if (value) {
 this.hideAllExcept(["bypass"]);
@@ -282,6 +289,7 @@ p.shortcut = shortcut.shortcut;
 
 
 components (elements) {
+if (!elements) elements = [];
 return elements.map(e => {
 if (e && e.component) return e.component;
 else throw new Error(`${this.id}: ${e} is null or invalid -- cannot connect`);
@@ -289,6 +297,7 @@ else throw new Error(`${this.id}: ${e} is null or invalid -- cannot connect`);
 } // components
 
 _enableAutomation (value) {
+if (!this._ready) return;
 if (value) {
 startAutomation();
 this.dispatchEvent(new CustomEvent("startAutomation", {detail: {interval: automationInterval}}));
@@ -299,6 +308,7 @@ this.dispatchEvent(new CustomEvent("stopAutomation"));
 } // _enableAutomation
 
 _enableAnalyser (value) {
+if (!this._ready) return;
 if (audioPlayer) {
 if (value) {
 this.analyser = new Analyser(audio);
@@ -408,6 +418,9 @@ else return null;
 
 uiRoot () {return this.shadowRoot? this.shadowRoot.querySelector("fieldset,div") : null;}
 
+hidePanel (selector) {if (this.uiRoot()) this.uiRoot().querySelector(selector).hidden = true;}
+showPanel (selector) {if (this.uiRoot()) this.uiRoot().querySelector(selector).hidden = false;}
+
 
 } // class _AudioContext_
 
@@ -473,7 +486,7 @@ automationQueue = automationQueue.filter(e => e != element);
 } // removeFromAutomationQueue
 
 
-export function statusMessage (message, log) {
+export function statusMessage (message, log = true) {
 const p = document.createElement("p");
 p.appendChild(document.createTextNode(message));
 if (shadowRoot) {
@@ -540,7 +553,7 @@ root.shadowRoot? enumerateAll(root.shadowRoot) : []
 
 function enumerateNonUi (root) {
 return enumerateAll(root)
-.filter(x => x instanceof _AudioContext_);
+.filter(x => x instanceof module);
 } // enumerateNonUi
 
 
@@ -550,41 +563,45 @@ export function childrenReady(element, callback) {
 let children = Array.from(element.children);
 
 element.addEventListener("elementReady", handleChildReady);
-//statusMessage (`${element.id}: waiting for ${children.length} children`);
+statusMessage (`${element.id}: waiting for ${children.length} children`);
 
 function handleChildReady (e) {
+//statusMessage(`handle ${e.target.id}?`);
 if (!children.includes(e.target)) return;
-//statusMessage(`${element.id}: child ${e.target.id} is ready`);
+statusMessage(`${element.id}: child ${e.target.id} is ready`);
 
 // remove this child and we're done if no more children left to process
 children = children.filter(x => x !== e.target);
+statusMessage(`${element.id}: ${children.length} children left`);
 if (children.length > 0) return;
 
 // no more children left, so remove this handler and signal ready on this element
 element.removeEventListener("elementReady", handleChildReady);
-//statusMessage(`${element.id}: all children ready`);
+statusMessage(`${element.id}: all children ready`);
 
-if (callback && callback instanceof Function) callback.call(element, Array.from(element.children));
-element.isReady;
+callback.call(element, Array.from(element.children));
+element.isReady = true;
 } // handleChildReady
 } // childrenReady
 
-export function signalReady (element) {
+function signalReady (element) {
+statusMessage(`${element.module.name}: sent ready signal`, "append");
 element.dispatchEvent(new CustomEvent("elementReady", {bubbles: true}));
-//statusMessage(`${element.module.name}: sent ready signal`, "append");
 } // signalReady
 
-export function runPropertyEffects (element) {
+function runPropertyEffects (element) {
 const module = element.module;
 for (let name in module.properties) {
+if (module.properties.hasOwnProperty(name)) {
 const definition = module.properties[name];
 if (definition.observer) element[definition.observer].call(element, element[name]);
+} // if
 } // for
 } // runPropertyEffects 
 
 /// random utilities
 
-export function depth (start, top = _AudioContext_) {
+export function depth (start, top = module) {
 let e = start;
 //while (e && !e.matches("audio-context")) e = e.parentElement;
 

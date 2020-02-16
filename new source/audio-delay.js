@@ -1,5 +1,5 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {module as _AudioContext_, signalReady} from "./audio-context.js";
+import {module as _AudioContext_} from "./audio-context.js";
 import {Delay} from "./audio-component.js";
 
 let instanceCount  = 0;

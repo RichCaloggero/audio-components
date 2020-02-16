@@ -1,5 +1,5 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {module as _AudioContext_, childrenReady, signalReady} from "./audio-context.js";
+import {module as _AudioContext_, childrenReady} from "./audio-context.js";
 import {Split} from "./audio-component.js";
 
 let instanceCount = 0;

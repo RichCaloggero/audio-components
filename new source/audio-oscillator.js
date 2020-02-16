@@ -1,5 +1,5 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {module as _AudioContext_, signalReady, statusMessage} from "./audio-context.js";
+import {module as _AudioContext_, statusMessage} from "./audio-context.js";
 import {Oscillator} from "./audio-component.js";
 
 let instanceCount = 0;

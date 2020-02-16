@@ -33,14 +33,19 @@ instanceCount += 1;
 this.id = `${module.is}-${instanceCount}`;
 this.module = module;
 
-this.component = new AudioComponent(this.audio, "player");
-this.component.input = null;
 
+} // constructor
+
+connectedCallback () {
+super.connectedCallback ();
+this.component = new AudioComponent(this.audio, "player");
 if (this.audio && this.audio instanceof AudioContext && this.audio.createMediaElementSource) {
 this.audioElement = document.createElement("audio");
 this.audioElement.setAttribute("crossorigin", "anonymous");
 this.audioElement.addEventListener("error", e => statusMessage(`${this.id}: ${e.target.error.message}`));
 this.audioSource = this.audio.createMediaElementSource(this.audioElement);
+
+this.component.input = null;
 this.audioSource.connect(this.component.output);
 this.component.audioSource = this.audioSource;
 this.component.src = "";
@@ -49,18 +54,14 @@ this.audioSource = this.component.audioSource = null;
 } // if
 
 registerAudioPlayer(this.component);
-} // constructor
-
-connectedCallback () {
-super.connectedCallback ();
 this.isReady = true;
-console.debug(`${this.id} called signalReady()`);
 } // connectedCallback
 
 
 srcChanged (value) {
 if (this.isReady && value && this.audioElement) {
 this.audioElement.src = this.component.src = value;
+console.debug(`${this.id}: src is ${value}`);
 } // if
 } // srcChanged
 

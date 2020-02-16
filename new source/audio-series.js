@@ -1,6 +1,6 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
 import {AudioComponent, Series} from "./audio-component.js";
-import {module as _AudioContext_, childrenReady, signalReady} from "./audio-context.js";
+import {module as _AudioContext_, statusMessage, childrenReady} from "./audio-context.js";
 
 let instanceCount = 0;
 
@@ -46,8 +46,8 @@ this.container = true;
 connectedCallback () {
 super.connectedCallback();
 childrenReady(this, children => {
-console.debug(`- ${this.id} connected: with ${children.length} children`);
 this.component = new Series(this.audio, this.components(children), this.feedForward, this.feedBack, this);
+statusMessage(`- ${this.id} connected: with ${children.length} children`);
 });
 } // connectedCallback
 
