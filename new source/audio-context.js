@@ -78,9 +78,8 @@ static get is() { return "audio-context";}
 
 static get properties() {
 return {
-//id: String,
-hide: {type: String, notify: true, observer: "hideChanged"},
-hideOnBypass: {type: Boolean, value: false},
+//hide: {type: String, notify: true, observer: "hideChanged"},
+//hideOnBypass: {type: Boolean, value: false},
 label: {type: String, value: "", notify: true, observer: "labelChanged"},
 sampleRate: Number,
 depth: {type: Number, notify:true},
@@ -112,8 +111,8 @@ upZ: {type: Number, value: 0, notify: true, observer: "upZChanged"},
 constructor () {
 super ();
 instanceCount += 1;
-this.id = `${module.is}-${instanceCount}`;
 this.module = module;
+this.id = `${module.is}-${instanceCount}`;
 this._ready = false;
 this._hide = [];
 
@@ -142,8 +141,8 @@ set isReady (value) {
 if (value) {
 this._ready = true;
 runPropertyEffects(this);
-//signalReady(this);
-setTimeout(() => signalReady(this), 0);
+signalReady(this);
+//setTimeout(() => signalReady(this), 0);
 } else {
 this._ready = false;
 } // if
@@ -154,6 +153,8 @@ super.connectedCallback();
 
 // when this.shadowRoot becomes set for the first time, store it since it will be shadow root of the audio-context itself
 if (!shadowRoot) shadowRoot = this.shadowRoot;
+
+console.debug(`${this.id} connected with label ${this.label}`);
 
 // if this is the real top level element in the tree, then wait on all children, add depth info to each legend in all child ui,  and dispatch event when the entire tree is ready
 //if (this.matches("audio-context")) {
@@ -168,13 +169,14 @@ childrenReady(this, children => {
 } // connectedCallback
 
 labelChanged (value) {
-if (!this._ready) return;
-if (!value || !value.trim()) {
-this.hideUI ("including descendents");
-return "";
-} else {
+//if (!this._ready) return;
+console.debug(`${this.id}: labelChanged to "${value}"`);
+if (value) {
 this.restoreUI();
-return value.trim();
+console.debug(`${this.id}: UI restored`);
+} else {
+this.hideUI ();
+console.debug(`${this.id}: UI hidden`);
 } // if
 } // labelChanged
 
@@ -223,15 +225,14 @@ this.uiControls()
 } // hideAllExcept
 
 restoreUI () {
-if (!this.shadowRoot) return;
-Array.from(this.shadowRoot.children).forEach(x => x.hidden = false);
+this.uiRoot().forEach(x => x.hidden = false);
 if (this.shadowRoot.querySelector("slot")) this.shadowRoot.querySelector("slot").removeAttribute("hidden");
 } // restoreUI
 
 hideUI (includeDescendents) {
-if (!this.shadowRoot) return;
-Array.from(this.shadowRoot.children).forEach(x => x.hidden = true);
-if (includeDescendents && this.shadowRoot.querySelector("slot")) this.shadowRoot.querySelector("slot").hidden = false;
+this.uiRoot().forEach(x => x.hidden = true);
+if (includeDescendents && this.shadowRoot.querySelector("slot")) this.shadowRoot.querySelector("slot").hidden = true;
+console.debug(`${this.id}: UI hidden`);
 } // hideUI
 
 labelsToControls (...labels) {return this.uiControls().filter(x => labels.includes(x.label));}
@@ -416,7 +417,9 @@ if (element.matches("audio-context")) return element;
 else return null;
 } // findContext
 
-uiRoot () {return this.shadowRoot? this.shadowRoot.querySelector("fieldset,div") : null;}
+uiRoot () {
+return this.shadowRoot? Array.from(this.shadowRoot.children).filter(x => !x.matches("slot, style")) : [];
+} // uiRoot
 
 hidePanel (selector) {if (this.uiRoot()) this.uiRoot().querySelector(selector).hidden = true;}
 showPanel (selector) {if (this.uiRoot()) this.uiRoot().querySelector(selector).hidden = false;}
@@ -563,21 +566,21 @@ export function childrenReady(element, callback) {
 let children = Array.from(element.children);
 
 element.addEventListener("elementReady", handleChildReady);
-statusMessage (`${element.id}: waiting for ${children.length} children`);
+//statusMessage (`${element.id}: waiting for ${children.length} children`);
 
 function handleChildReady (e) {
 //statusMessage(`handle ${e.target.id}?`);
 if (!children.includes(e.target)) return;
-statusMessage(`${element.id}: child ${e.target.id} is ready`);
+//statusMessage(`${element.id}: child ${e.target.id} is ready`);
 
 // remove this child and we're done if no more children left to process
 children = children.filter(x => x !== e.target);
-statusMessage(`${element.id}: ${children.length} children left`);
+//statusMessage(`${element.id}: ${children.length} children left`);
 if (children.length > 0) return;
 
 // no more children left, so remove this handler and signal ready on this element
 element.removeEventListener("elementReady", handleChildReady);
-statusMessage(`${element.id}: all children ready`);
+//statusMessage(`${element.id}: all children ready`);
 
 callback.call(element, Array.from(element.children));
 element.isReady = true;
@@ -585,7 +588,7 @@ element.isReady = true;
 } // childrenReady
 
 function signalReady (element) {
-statusMessage(`${element.module.name}: sent ready signal`, "append");
+//statusMessage(`${element.module.name}: sent ready signal`, "append");
 element.dispatchEvent(new CustomEvent("elementReady", {bubbles: true}));
 } // signalReady
 

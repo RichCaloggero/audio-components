@@ -30,7 +30,7 @@ this.dry.connect(this.output);
 
 this.mix(1.0);
 this.bypass(false);
-console.debug(`component ${name} created`);
+//console.debug(`component ${name} created`);
 } // constructor
 
 silentBypass (value) {
