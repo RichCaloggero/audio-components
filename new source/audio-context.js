@@ -146,6 +146,7 @@ value.trim().toLowerCase().match(/\w+/g)
 : [];
 } // set hide
 
+
 get isReady () {return this._ready;}
 set isReady (value) {
 if (value) {
@@ -175,12 +176,12 @@ this.hideOnly([]);
 
 // if this is the real top level element in the tree, then wait on all children, add depth info to each legend in all child ui,  and dispatch event when the entire tree is ready
 //if (this.matches("audio-context")) {
-if (this.module.name === "_AudioContext") {
+if (this.module.name === module.name) {
 console.debug(`audio-context connected...`);
 
 childrenReady(this, children => {
-//enumerateNonUi(this)
-//.forEach(e => e.depth = depth(e));
+enumerateNonUi(this)
+.forEach(e => e.depth = depth(e));
 });
 } // if
 } // connectedCallback
@@ -202,11 +203,11 @@ value.trim().toLowerCase().match(/\w+/g)
 : [];
 } // hideChanged
 
-_mix (value) {if (this._ready) this.component.mix(value); return value;}
-_silentBypass (value) {if (this._ready) this.component.silentBypass(value);}
+_mix (value) {if (this._ready && this.component) this.component.mix(value);}
+_silentBypass (value) {if (this._ready && this.component) this.component.silentBypass(value);}
 
 _bypass (value) {
-if (this._ready) {
+if (this._ready && this.component) {
 this.component.bypass(value);
 this._hideOnBypass(value);
 } // if
@@ -428,7 +429,7 @@ statusMessage(`Render complete: ${Math.round(10*buffer.duration/60)/10} minutes 
 
 
 
-setId (value) {this.id = value;}
+//setId (value) {this.id = value;}
 
 findContext () {
 let element = this;
