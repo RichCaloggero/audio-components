@@ -7,12 +7,12 @@
 <script src="test-leaf.js"ttttt type="module" crossorigin="anonymous"></script>
 </head>
 <body>
-<test-root id="root" hide="mix, bypass">
+<test-root hide-on-bypass id="root" hide="mix, bypass">
 <test-branch id="outer-branch" branch-attribute="second level attribute value">
 <test-leaf leaf-attribute="leaf attribute value 1"></test-leaf>
 
 <test-branch id="inner-branch">
- <test-leaf leaf-attribute="leaf attribute value 2"></test-leaf>
+ <test-leaf hide-on-bypass leaf-attribute="leaf attribute value 2"></test-leaf>
 </test-branch>
 
 <test-leaf leaf-attribute="leaf attribute value 3"></test-leaf>

@@ -78,9 +78,12 @@ static get is() { return "audio-context";}
 
 static get properties() {
 return {
-//hide: {type: String, notify: true, observer: "hideChanged"},
-//hideOnBypass: {type: Boolean, value: false},
-label: {type: String, value: "", notify: true, observer: "labelChanged"},
+hide: String,
+//hide: {type: String, value: "", observer: "hideChanged"},
+hideOnBypass: Boolean,
+label: String,
+//label: {type: String, value: "", notify: true, /*observer: "labelChanged"*/},
+
 sampleRate: Number,
 depth: {type: Number, notify:true},
 
@@ -136,6 +139,13 @@ throw new Error(`${e}: cannot create a new audio context; aborting`);
 this.audio = audio;
 } // constructor
 
+get hide () {return this._hide;}
+set hide (value) {
+this._hide = value?
+value.trim().toLowerCase().match(/\w+/g)
+: [];
+} // set hide
+
 get isReady () {return this._ready;}
 set isReady (value) {
 if (value) {
@@ -154,7 +164,14 @@ super.connectedCallback();
 // when this.shadowRoot becomes set for the first time, store it since it will be shadow root of the audio-context itself
 if (!shadowRoot) shadowRoot = this.shadowRoot;
 
-console.debug(`${this.id} connected with label ${this.label}`);
+if (this.label) {
+console.debug(`${this.id} connected with label ${this.label}, hide ${this._hide} ${typeof(this._hide[0])}`);
+this.restoreUI();
+this.hideOnly(this._hide);
+} else {
+this.hideUI();
+this.hideOnly([]);
+} // if
 
 // if this is the real top level element in the tree, then wait on all children, add depth info to each legend in all child ui,  and dispatch event when the entire tree is ready
 //if (this.matches("audio-context")) {
@@ -169,23 +186,20 @@ childrenReady(this, children => {
 } // connectedCallback
 
 labelChanged (value) {
-//if (!this._ready) return;
+if (this._ready) {
 console.debug(`${this.id}: labelChanged to "${value}"`);
 if (value) {
 this.restoreUI();
-console.debug(`${this.id}: UI restored`);
 } else {
 this.hideUI ();
-console.debug(`${this.id}: UI hidden`);
+} // if
 } // if
 } // labelChanged
 
 hideChanged (value) {
-if (!this._ready) return "";
 this._hide = value?
 value.trim().toLowerCase().match(/\w+/g)
 : [];
-return value;
 } // hideChanged
 
 _mix (value) {if (this._ready) this.component.mix(value); return value;}
@@ -199,10 +213,7 @@ this._hideOnBypass(value);
 } // _bypass
 
 _hideOnBypass (value) {
-if (!this._ready) return;
-if (!this.label || !this.findContext()) return;
-//if (!this.findContext().hideOnBypass) return;
-
+if (this._ready && this.label && this.findContext().hideOnBypass) {
 if (value) {
 this.hideAllExcept(["bypass"]);
 if (this.shadowRoot.querySelector("slot")) this.shadowRoot.querySelector("slot").hidden = true;
@@ -210,18 +221,33 @@ if (this.shadowRoot.querySelector("slot")) this.shadowRoot.querySelector("slot")
 this.hideOnly(this._hide);
 if (this.shadowRoot.querySelector("slot")) this.shadowRoot.querySelector("slot").hidden = false;
 } // if
+} // if
 } // _hideOnBypass
 
 hideOnly (...labels) {
-this.uiControls()
-.filter(x => labels.includes(x.label))
-.forEach(x => x.hidden = true);
+// why is this received as an array of arrays rather than a simple array of strings
+// caller passes it as an array of strings
+const hide = labels.flat(Infinity);
+console.debug(`${this.id}.hideOnly ${hide.length} ${typeof(hide[0])}`);
+
+if (hide.length > 0) {
+this.uiControls().forEach(x => {
+const label = x.label? x.label.trim().toLowerCase() : "";
+x.hidden = hide.includes(label.toLowerCase());
+});
+} // if
 } // hideOnly
 
 hideAllExcept (...labels) {
-this.uiControls()
-.filter(x => !labels.includes(x.label))
-.forEach(x => x.hidden = true);
+const hide = labels.flat(Infinity);
+console.debug(`${this.id}.hideAllExcept ${hide.length} ${typeof(hide[0])}`);
+
+if (hide.length > 0) {
+this.uiControls().forEach(x => {
+const label = x.label? x.label.trim().toLowerCase() : "";
+x.hidden = !hide.includes(label)
+});
+} // if
 } // hideAllExcept
 
 restoreUI () {
@@ -232,19 +258,14 @@ if (this.shadowRoot.querySelector("slot")) this.shadowRoot.querySelector("slot")
 hideUI (includeDescendents) {
 this.uiRoot().forEach(x => x.hidden = true);
 if (includeDescendents && this.shadowRoot.querySelector("slot")) this.shadowRoot.querySelector("slot").hidden = true;
-console.debug(`${this.id}: UI hidden`);
 } // hideUI
 
 labelsToControls (...labels) {return this.uiControls().filter(x => labels.includes(x.label));}
 
 uiControls () {
-if (this._ready && this.shadowRoot) {
-const ui = this.shadowRoot;
-
-if (ui) {
+if (this.shadowRoot) {
 const selectors = ".panel,ui-list,ui-text,ui-number,ui-boolean,button";
-return Array.from(ui.querySelectorAll(selectors));
-} // if
+return Array.from(this.shadowRoot.querySelectorAll(selectors));
 } // if
 
 return [];
@@ -411,18 +432,27 @@ setId (value) {this.id = value;}
 
 findContext () {
 let element = this;
-while (element && element instanceof _AudioContext_ && !element.matches("audio-context")) element = element.parentElement;
+while (element && element instanceof module && element.module.name !== module.name) element = element.parentElement;
 
-if (element.matches("audio-context")) return element;
-else return null;
+return element.module.name === module.name? element : null;
 } // findContext
 
 uiRoot () {
 return this.shadowRoot? Array.from(this.shadowRoot.children).filter(x => !x.matches("slot, style")) : [];
 } // uiRoot
 
-hidePanel (selector) {if (this.uiRoot()) this.uiRoot().querySelector(selector).hidden = true;}
-showPanel (selector) {if (this.uiRoot()) this.uiRoot().querySelector(selector).hidden = false;}
+hidePanel (selector) {
+this.uiRoot().forEach(x =>
+x.querySelectorAll(selector).forEach(x => x.hidden = true)
+);
+} //  hidePanel
+
+
+hidePanel (selector) {
+this.uiRoot().forEach(x =>
+x.querySelectorAll(selector).forEach(x => x.hidden = false)
+);
+} //  hidePanel
 
 
 } // class _AudioContext_

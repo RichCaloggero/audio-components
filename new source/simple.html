@@ -6,12 +6,12 @@
 <script src="loader.js"></script>
 </head>
 <body>
-<audio-context id="top" automation-interval="0.05" hide="bypass" label="Simple" shortcuts="enableAutomation alt shift a">
+<audio-context hide-on-bypass id="top" automation-interval="0.05" hide="bypass" label="Simple" shortcuts="enableAutomation alt shift a">
 <audio-series id="main">
 <audio-player id="player" label="player" src="try this.mp3"></audio-player>
 
 <audio-series id="master" label="master" delay="0.5" >
-<audio-stereo-processor id="stereo"></audio-stereo-processor>
+<audio-filter label="filter" hide="q, detune, gain, type, mix"></audio-filter>
 </audio-series>
 
 <audio-destination id="destination" label="speakers"></audio-destination>
