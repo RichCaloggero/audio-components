@@ -323,9 +323,11 @@ if (!this._ready) return;
 if (value) {
 startAutomation();
 this.dispatchEvent(new CustomEvent("startAutomation", {detail: {interval: automationInterval}}));
+//console.debug("automation started");
 } else {
 stopAutomation();
 this.dispatchEvent(new CustomEvent("stopAutomation"));
+//console.debug("automation stopped");
 } // if
 } // _enableAutomation
 

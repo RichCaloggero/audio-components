@@ -75,7 +75,7 @@ throw new Error(`${this.id}: ${p.name} parameter of ${target.id} is not an Audio
 */
 console.debug(`${this.id} "${this.label}": no target node`);
 
-children.slice(1).forEach(p => updateParameter(this, p.name, p.text, p.type));
+//children.slice(1).forEach(p => updateParameter(this, p.name, p.text, p.type));
 
 //} // if targetNode
 
@@ -84,7 +84,7 @@ children.slice(1).forEach(p => updateParameter(this, p.name, p.text, p.type));
 this.start();
 console.debug(`${this.id} added to automation queue`);
 
-});
+}); // childrenReady
 } // connectedCallback
 
 
@@ -128,7 +128,6 @@ stop () {
 removeFromAutomationQueue(this);
 } // stop
 
-
 } // class AudioControl
 
 customElements.define(module.is, module);
@@ -143,7 +142,6 @@ const parameter = index >= 0? parameters[index] : {};
 parameter.name = _name;
 parameter.text = _text;
 parameter.type = _type;
-console.debug("- parameter: ", parameter);
 
 
 if (parameter.text) {

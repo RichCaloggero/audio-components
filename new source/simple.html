@@ -6,6 +6,7 @@
 <script src="loader.js"></script>
 </head>
 <body>
+<div id="status" aria-live="polite"></div>
 <audio-context hide-on-bypass id="top" automation-interval="0.05" hide="bypass" label="Simple" shortcuts="enableAutomation alt shift a">
 <audio-series id="main">
 <audio-player id="player" label="player" src="country balad.mp3"></audio-player>
@@ -21,6 +22,11 @@
 <audio-destination id="destination" label="speakers"></audio-destination>
 </audio-series>
 </audio-context>
+
+<script>
+const status = document.querySelector("#status");
+document.querySelector("audio-context").addEventListener("startAutomation", () => status.textContent = "Automation Started.");
+document.querySelector("audio-context").addEventListener("stopAutomation", () => status.textContent = "Automation stopped.");
 
 </body>
 </html>
