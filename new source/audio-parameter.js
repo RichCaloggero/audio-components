@@ -1,6 +1,6 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
 import {module as _AudioContext_, childrenReady, statusMessage} from "./audio-context.js";
-import {updateParameter} from "./audio-control.js";
+//import {updateParameter} from "./audio-control.js";
 
 let instanceCount  = 0;
 
@@ -40,6 +40,8 @@ this.container = true;
 
 connectedCallback () {
 super.connectedCallback();
+
+
 this.isReady = true;
 /*childrenReady(this, children => {
 });
@@ -48,6 +50,7 @@ this.isReady = true;
 
 
 _update (_name = "", _function = "", _type = "") {
+if (!this._ready) return;
 console.debug(`${this.id}: requesting update for ${_name}, ${_function}, ${_type}...`);
 //if (!this._ready) return;
 if (!_name) return;
@@ -56,7 +59,8 @@ statusMessage(`${this.id}: parameter ${_name} - cannot set both function and typ
 return;
 } // if
 
-updateParameter(this.parentElement, _name, _function, _type);
+console.debug(`- calling ${this.parentElement.id}.updateParameter`);
+this.parentElement.updateParameter(_name, _function, _type);
 } // update
 } // class AudioParameter
 

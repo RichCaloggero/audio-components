@@ -13,8 +13,8 @@
 <audio-series id="master" label="master" feed-back delay="0.5" >
 <audio-filter label="filter" hide="q, detune, gain, type, mix"></audio-filter>
 <audio-control>
-<audio-stereo-processor label="rotate" hide="mix, center, balance, width"></audio-stereo-processor>
-<audio-parameter label="automate rotate" name="rotate" function="s(t, 0,90)"></audio-parameter>
+<audio-delay label="delay" audio-delay>
+<audio-parameter label="control delay" name="delay" function="s(t, 0,.01)"></audio-parameter>
 </audio-control>
 </audio-series>
 

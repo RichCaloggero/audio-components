@@ -94,15 +94,16 @@ const p = target[parameter.name];
 try {
 if (parameter.function) {
 const value = parameter.function(this.audio.currentTime);
-console.debug(`parameter ${this.target.id}.${parameter.name} = ${value} at time ${this.audio.currentTime}`);
 
 if (p instanceof AudioParam) {
 //p.value = value;
 //p.linearRampToValueAtTime(value, audio.currentTime);
 p.exponentialRampToValueAtTime(value, automationInterval);
 //p.setValueAtTime(value, audio.currentTime);
+
 } else {
 target[parameter.name] = value;
+console.debug(`parameter ${this.target.id}.${parameter.name} = ${value} at time ${this.audio.currentTime}`);
 } // if
 
 } // if
@@ -121,33 +122,12 @@ addToAutomationQueue (this);
 stop () {
 removeFromAutomationQueue(this);
 } // stop
-} // class AudioControl
 
-customElements.define(module.is, module);
-
-
-export function compileFunction (text, parameter = "t") {
-try {
-return new Function (parameter,
-`with (Math) {
-function  toRange (x, a,b) {return (Math.abs(a-b) * (x+1)/2) + a;}
-function s (x, l=-1.0, u=1.0) {return toRange(Math.sin(x), l,u);}
-function c (x, l=-1.0, u=1.0) {return toRange(Math.cos(x), l,u);}
-function r(a=0, b=1) {return toRange(Math.random(), a, b);}
-return ${text};
-} // Math
-`); // new Function
-
-} catch (e) {
-alert (e);
-return null;
-} // try
-} // compileFunction
-
-export function updateParameter (controller, _name, _text, _type) {
+updateParameter (_name, _text, _type) {
 console.debug(`${controller.id}.updateParameter: ${_name} ${_text}`);
 if (!_name ) return;
-const parameters = controller.parameters;
+const parameters = this.parameters;
+console.debug("- parameters: ", parameters);
 const index = parameters.findIndex(p => p.name === _name);
 const parameter = index >= 0? parameters[index] : {};
 parameter.name = _name;
@@ -176,4 +156,28 @@ if (controller._init) statusMessage(`Automation disabled for ${parameter.name}`)
 if (index < 0) parameters.push(parameter);
 console.debug("- - updated ", index, parameter);
 } // updateParameter
+
+} // class AudioControl
+
+customElements.define(module.is, module);
+
+
+export function compileFunction (text, parameter = "t") {
+try {
+return new Function (parameter,
+`with (Math) {
+function  toRange (x, a,b) {return (Math.abs(a-b) * (x+1)/2) + a;}
+function s (x, l=-1.0, u=1.0) {return toRange(Math.sin(x), l,u);}
+function c (x, l=-1.0, u=1.0) {return toRange(Math.cos(x), l,u);}
+function r(a=0, b=1) {return toRange(Math.random(), a, b);}
+return ${text};
+} // Math
+`); // new Function
+
+} catch (e) {
+alert (e);
+return null;
+} // try
+} // compileFunction
+
 
