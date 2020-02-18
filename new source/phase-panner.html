@@ -1,0 +1,121 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Phase Panner</title>
+<!--<script src="./resonance-audio.min.js" crossorigin="anonymous"></script>-->
+<script src="loader.js"></script>
+</head>
+<body>
+<fieldset id="parameters">
+<legend><h2>Parameters</h2></legend>
+<div id="statusMessage" role="status"></div>
+<label for="crossover">crossover: </label>
+<input id="crossover" type="number" min="500" value="650" max="2500" step="10" accesskey="c">
+<label>overlap: <input type="range" id="overlap" min="0" value="35" max="50">%</label>
+<label>Q: <input id="q" type="range" min="0" value="0.75" max="10" step=".1" accesskey="q"></label>
+ <label>phase: <input id="phase" type="range" min="0" value="0" max="90" step=".1" accesskey="p"></label>
+
+</fieldset>
+
+
+<audio-context hide-on-bypass automation-interval="0.05" hide="bypass" label="Phase Panner" shortcuts="enableAutomation alt shift a">
+<audio-series>
+<audio-player label="player" shortcuts="src alt shift u" src="media/D2_02_Thats What Love Will Make You Do.flac"></audio-player>
+
+<audio-split label="wide delay" hide="mix">
+<audio-gain></audio-gain>
+<audio-delay label="widen" delay="0.010" hide="bypass, mix"></audio-delay>
+</audio-split>
+
+<audio-series id="master" label="master" mix="-0.5">
+
+<audio-series id="container" >
+<audio-parallel>
+
+<audio-series silent-bypass id="delayband" label="feedback delay" hide="mix">
+<audio-filter bypass type="lowpass" label="filter" frequency="1000" q="1" hide="detune, mix, gain, type"></audio-filter>
+<audio-series id="sideband" label="side" hide="mix">
+<audio-channelSwap></audio-channelSwap>
+<audio-channelSwap mix="-0.5"></audio-channelSwap>
+<audio-gain gain="5.0"></audio-gain>
+</audio-series>
+
+</audio-series><audio-series silent-bypass id="lowband" label="low band" hide="mix">
+<audio-filter type="lowpass" frequency="1000" q="4"></audio-filter>
+<audio-channelSwap></audio-channelSwap>
+<audio-control>
+<audio-stereo-processor label="rotate low" rotate="-45" hide="bypass, mix, width, center, balance"></audio-stereo-processor>
+<audio-parameter label="control rotate low" name="rotation" function="s(t/2, -135,135)"></audio-parameter>
+</audio-control>
+
+</audio-series><audio-series silent-bypass id="highband" label="high band" hide="mix">
+<audio-filter type="highpass" frequency="1000" q="4"></audio-filter>
+<audio-channelSwap></audio-channelSwap>
+<audio-control>
+<audio-stereo-processor label="rotate high" rotate="57" hide="bypass, mix,  width, center, balance"></audio-stereo-processor>
+<audio-parameter label="control rotate high" name="rotation" function="-1*s(t/7, -90,90)"></audio-parameter>
+</audio-control>
+<audio-gain label="gain" gain="2.0" hide="mix, bypass"></audio-gain>
+</audio-series>
+</audio-parallel>
+
+</audio-series><!-- container -->
+
+<audio-filter label="bass" type="lowshelf" frequency="200" gain="14" hide="mix, type, q, detune"></audio-filter>
+</audio-series><!-- master -->
+<audio-gain label="volume" gain="2.5" max="5" hide="mix, bypass"></audio-gain>
+<audio-compressor bypass label="compressor" ratio="2" threshold="-30" knee="20" attack="0.2" release="5.0" hide="mix"></audio-compressor>
+
+<audio-destination label="speakers"></audio-destination>
+</audio-series>
+</audio-context>
+
+<script>
+const parameters = document.querySelector("#parameters");
+const container = document.querySelector("#container");
+const master = document.querySelector("#master");
+
+parameters.addEventListener("change", parametersChanged);
+
+function parametersChanged (e) {
+const parameter = e.target;
+const value = parameter.value;
+
+switch (parameter.id) {
+case "crossover": case "overlap": const frequency = Number(_valueOf("#crossover"));
+const overlap = Number(_valueOf("#overlap"))/100 * frequency;
+setFrequency("#lowband", frequency + overlap);
+setFrequency("#highband", frequency - overlap);
+setFrequency("#delayband", frequency);
+break;
+
+case "q": filters().forEach(f => f.setAttribute("q", Number(value)));
+break;
+
+case "phase": const rotation = Number(value);
+setRotation("#lowband", rotation);
+setRotation("#highband", -1*rotation);
+break;
+
+
+} // switch
+} // parametersChanged
+
+function setFrequency (band, value) {document.querySelector(`${band} audio-filter`).setAttribute("frequency", Number(value));}
+function setRotation (band, value) {document.querySelector(`${band} audio-stereo-processor`).setAttribute("rotation", Number(value));}
+function filters () {return container.querySelectorAll("#lowband audio-filter, #highband audio-filter");}
+
+document.querySelector("audio-context").addEventListener("elementReady", e => {
+document.querySelectorAll("#parameters input").forEach(e => e.dispatchEvent(new CustomEvent("change", {bubbles: true})));
+statusMessage(`${e.target.label || ""} ready.`)
+});
+
+function _valueOf (selector) {return document.querySelector(selector).value;}
+
+function statusMessage (text) {document.querySelector("#statusMessage").appendChild(document.createTextNode(`${text}\n`));}
+
+</script>
+
+</body>
+</html>

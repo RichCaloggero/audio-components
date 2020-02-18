@@ -9,14 +9,10 @@ static get template () {
 return html`
 <fieldset class="audio-series">
 <legend><h2 aria-level$="[[depth]]">[[label]]</h2></legend>
-<style>
-.hidden {display: none;}
-</style>
-
 <ui-boolean label="bypass" value="{{bypass}}"></ui-boolean>
 <ui-number label="mix" value="{{mix}}" min="-1.0" max="1.0" step="0.1"></ui-number>
 
-<fieldset class="feedBackControls hidden panel">
+<fieldset class="feedback-controls panel">
 <legend><h2 aria-level$="{{depth}}">Feedback Controls</h2></legend>
 <ui-number label="delay" type="number" value="{{delay}}" min="0" step="0.00001"></ui-number>
 <ui-number label="gain" value="{{gain}}" min="-0.99" max="0.99" step="0.01"></ui-number>
@@ -47,7 +43,7 @@ connectedCallback () {
 super.connectedCallback();
 childrenReady(this, children => {
 this.component = new Series(this.audio, this.components(children), this.feedForward, this.feedBack, this);
-statusMessage(`- ${this.id} connected: with ${children.length} children`);
+console.log(`- ${this.id} connected: with ${children.length} children`);
 });
 } // connectedCallback
 
@@ -55,9 +51,9 @@ feedBackChanged (value) {
 if (this._ready && value) {
 this.component.gain = this.gain;
 this.component.delay = this.delay;
-this.showPanel(".feedbackControls");
+this.showPanel(".feedback-controls");
 } else {
-this.hidePanel(".feedBackControls");
+this.hidePanel(".feedback-controls");
 } // if
 } // feedBackChanged
 

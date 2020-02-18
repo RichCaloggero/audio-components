@@ -115,6 +115,7 @@ constructor () {
 super ();
 instanceCount += 1;
 this.module = module;
+this._id = this.getAttribute("id");
 this.id = `${module.is}-${instanceCount}`;
 this._ready = false;
 this._hide = [];
@@ -161,12 +162,13 @@ this._ready = false;
 
 connectedCallback () {
 super.connectedCallback();
+if (this._id) this.id = this._id;
 
 // when this.shadowRoot becomes set for the first time, store it since it will be shadow root of the audio-context itself
 if (!shadowRoot) shadowRoot = this.shadowRoot;
 
 if (this.label) {
-console.debug(`${this.id} connected with label ${this.label}, hide ${this._hide} ${typeof(this._hide[0])}`);
+console.log(`${this.id} connected with label ${this.label}, hide ${this._hide} ${typeof(this._hide[0])}`);
 this.restoreUI();
 this.hideOnly(this._hide);
 } else {
@@ -229,7 +231,7 @@ hideOnly (...labels) {
 // why is this received as an array of arrays rather than a simple array of strings
 // caller passes it as an array of strings
 const hide = labels.flat(Infinity);
-console.debug(`${this.id}.hideOnly ${hide.length} ${typeof(hide[0])}`);
+//console.debug(`${this.id}.hideOnly ${hide.length} ${typeof(hide[0])}`);
 
 if (hide.length > 0) {
 this.uiControls().forEach(x => {
@@ -240,8 +242,9 @@ x.hidden = hide.includes(label.toLowerCase());
 } // hideOnly
 
 hideAllExcept (...labels) {
+// also received array of arrays instead of array of strings
 const hide = labels.flat(Infinity);
-console.debug(`${this.id}.hideAllExcept ${hide.length} ${typeof(hide[0])}`);
+//console.debug(`${this.id}.hideAllExcept ${hide.length} ${typeof(hide[0])}`);
 
 if (hide.length > 0) {
 this.uiControls().forEach(x => {
@@ -435,7 +438,7 @@ findContext () {
 let element = this;
 while (element && element instanceof module && element.module.name !== module.name) element = element.parentElement;
 
-return element.module.name === module.name? element : null;
+return element && element.module.name === module.name? element : null;
 } // findContext
 
 uiRoot () {
@@ -443,17 +446,15 @@ return this.shadowRoot? Array.from(this.shadowRoot.children).filter(x => !x.matc
 } // uiRoot
 
 hidePanel (selector) {
-this.uiRoot().forEach(x =>
-x.querySelectorAll(selector).forEach(x => x.hidden = true)
-);
+if (this.shadowRoot)
+this.shadowRoot.querySelectorAll(selector).forEach(x => x.hidden = true);
 } //  hidePanel
 
 
-hidePanel (selector) {
-this.uiRoot().forEach(x =>
-x.querySelectorAll(selector).forEach(x => x.hidden = false)
-);
-} //  hidePanel
+showPanel (selector) {
+if (this.shadowRoot)
+this.shadowRoot.querySelectorAll(selector).forEach(x => x.hidden = false);
+} //  showPanel
 
 
 } // class _AudioContext_
