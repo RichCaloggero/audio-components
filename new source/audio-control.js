@@ -5,7 +5,6 @@ let debugCount = 10;
 
 
 let instanceCount  = 0;
-const userScope = Object.create(null);
 
 
 const module = class AudioControl extends _AudioContext_ {
@@ -37,7 +36,9 @@ this.parameters = [];
 
 connectedCallback () {
 super.connectedCallback ();
-childrenReady(this, children => {
+
+
+	childrenReady(this, children => {
 if (children.length < 2) throw new Error(`${this.id}: need two or more children`);
 this.component = new AudioComponent(this.audio, "control", this);
 // first child is target (element we're controlling); remaining children are audio-parameter definitions
@@ -51,7 +52,7 @@ targetComponent.output.connect(this.component.wet);
 
 // if it has a node property, then we can manipulate AudioParam objects on that node directly
 const targetNode = targetComponent.node;
-if (targetNode) {
+/*if (targetNode) {
 // filter parameter defs on whether name attribute present on target node
 children.slice(1).filter(p => {
 return !p.function && p.name in targetNode;
@@ -71,8 +72,12 @@ throw new Error(`${this.id}: ${p.name} parameter of ${target.id} is not an Audio
 }); // forEach
 
 } else {
+*/
 console.debug(`${this.id} "${this.label}": no target node`);
-} // if targetNode
+
+children.slice(1).forEach(p => updateParameter(this, p.name, p.text, p.type));
+
+//} // if targetNode
 
 // start js-based automation for this element
 // (this starts even if no suitable parameter definitions present; should only start if needed)
@@ -123,10 +128,15 @@ stop () {
 removeFromAutomationQueue(this);
 } // stop
 
-updateParameter (_name, _text, _type) {
+
+} // class AudioControl
+
+customElements.define(module.is, module);
+
+export function updateParameter (controller, _name, _text, _type) {
 console.debug(`${controller.id}.updateParameter: ${_name} ${_text}`);
 if (!_name ) return;
-const parameters = this.parameters;
+const parameters = controller.parameters;
 console.debug("- parameters: ", parameters);
 const index = parameters.findIndex(p => p.name === _name);
 const parameter = index >= 0? parameters[index] : {};
@@ -156,11 +166,6 @@ if (controller._init) statusMessage(`Automation disabled for ${parameter.name}`)
 if (index < 0) parameters.push(parameter);
 console.debug("- - updated ", index, parameter);
 } // updateParameter
-
-} // class AudioControl
-
-customElements.define(module.is, module);
-
 
 export function compileFunction (text, parameter = "t") {
 try {

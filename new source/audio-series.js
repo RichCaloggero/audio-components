@@ -42,8 +42,8 @@ this.container = true;
 connectedCallback () {
 super.connectedCallback();
 childrenReady(this, children => {
+console.log(`- ${this.id} connecting ${children.length} children`);
 this.component = new Series(this.audio, this.components(children), this.feedForward, this.feedBack, this);
-console.log(`- ${this.id} connected: with ${children.length} children`);
 });
 } // connectedCallback
 

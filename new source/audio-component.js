@@ -120,7 +120,7 @@ console.log(`- channel 2: ${channel2.name} connected`);
 export class Series extends AudioComponent {
 constructor (audio, components, feedForward = false, feedBack = false, parent) {
 super (audio, "series");
-console.debug(`Series: connecting ${components.length} components in series:`);
+//console.debug(`Series: connecting ${components.length} components in series:`);
 //if (components.length < 2) throw new Error("Series: need two or more components");
 const first = components[0];
 const last = components[components.length-1];
@@ -169,7 +169,7 @@ console.log(`- feedBack: connected ${this.name}.wet to ${this.name}.input`);
 this.components = components;
 } // constructor
 
-set gain (value) {if (this._gain) {this._gain.gain.value = value; console.debug(`${this.cid}: feedback gain set to ${value}`);}}
+set gain (value) {if (this._gain) {this._gain.gain.value = value;}}
 set delay (value) {if (this._delay) this._delay.delayTime.value = value;}
 } // class Series
 

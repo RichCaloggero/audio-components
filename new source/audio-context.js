@@ -153,8 +153,8 @@ set isReady (value) {
 if (value) {
 this._ready = true;
 runPropertyEffects(this);
-signalReady(this);
-//setTimeout(() => signalReady(this), 0);
+//signalReady(this);
+setTimeout(() => signalReady(this), 0);
 } else {
 this._ready = false;
 } // if
@@ -179,7 +179,7 @@ this.hideOnly([]);
 // if this is the real top level element in the tree, then wait on all children, add depth info to each legend in all child ui,  and dispatch event when the entire tree is ready
 //if (this.matches("audio-context")) {
 if (this.module.name === module.name) {
-console.debug(`audio-context connected...`);
+console.log(`audio-context connected...`);
 
 childrenReady(this, children => {
 enumerateNonUi(this)
@@ -233,12 +233,10 @@ hideOnly (...labels) {
 const hide = labels.flat(Infinity);
 //console.debug(`${this.id}.hideOnly ${hide.length} ${typeof(hide[0])}`);
 
-if (hide.length > 0) {
 this.uiControls().forEach(x => {
 const label = x.label? x.label.trim().toLowerCase() : "";
 x.hidden = hide.includes(label.toLowerCase());
 });
-} // if
 } // hideOnly
 
 hideAllExcept (...labels) {
@@ -246,12 +244,10 @@ hideAllExcept (...labels) {
 const hide = labels.flat(Infinity);
 //console.debug(`${this.id}.hideAllExcept ${hide.length} ${typeof(hide[0])}`);
 
-if (hide.length > 0) {
 this.uiControls().forEach(x => {
 const label = x.label? x.label.trim().toLowerCase() : "";
 x.hidden = !hide.includes(label)
 });
-} // if
 } // hideAllExcept
 
 restoreUI () {
@@ -599,15 +595,14 @@ let children = Array.from(element.children);
 
 element.addEventListener("elementReady", handleChildReady);
 //statusMessage (`${element.id}: waiting for ${children.length} children`);
+console.debug(`${element.id}: waiting for ${children.length} children`);
 
 function handleChildReady (e) {
-//statusMessage(`handle ${e.target.id}?`);
 if (!children.includes(e.target)) return;
-//statusMessage(`${element.id}: child ${e.target.id} is ready`);
 
 // remove this child and we're done if no more children left to process
 children = children.filter(x => x !== e.target);
-//statusMessage(`${element.id}: ${children.length} children left`);
+console.debug(`${element.id}: child ${e.target.id} is ready; ${children.length} remaining`);
 if (children.length > 0) return;
 
 // no more children left, so remove this handler and signal ready on this element

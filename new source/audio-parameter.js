@@ -1,6 +1,6 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
 import {module as _AudioContext_, childrenReady, statusMessage} from "./audio-context.js";
-//import {updateParameter} from "./audio-control.js";
+import {updateParameter} from "./audio-control.js";
 
 let instanceCount  = 0;
 
@@ -21,7 +21,8 @@ static get properties () {
 return {
 name: String,
 function: String,
-}; // return
+type: {type: String, value: ""},
+	}; // return
 } // get properties
 
 static get observers () {
@@ -50,17 +51,20 @@ this.isReady = true;
 
 
 _update (_name = "", _function = "", _type = "") {
-if (!this._ready) return;
-console.debug(`${this.id}: requesting update for ${_name}, ${_function}, ${_type}...`);
-//if (!this._ready) return;
+const controller = this.parentElement;
+//debugger;
+	if (!controller) return;
+	//if (!this._ready || !controller || !controller._ready) return;
+
+	console.debug(`${this.id}: requesting update for ${_name}, ${_function}, ${_type}...`);
 if (!_name) return;
 if (_function && _type) {
 statusMessage(`${this.id}: parameter ${_name} - cannot set both function and type; not updating...`);
 return;
 } // if
 
-console.debug(`- calling ${this.parentElement.id}.updateParameter`);
-this.parentElement.updateParameter(_name, _function, _type);
+console.debug(`- calling ${controller.id}.updateParameter`);
+updateParameter(controller, _name, _function, _type);
 } // update
 } // class AudioParameter
 
