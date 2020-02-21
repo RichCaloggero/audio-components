@@ -89,8 +89,8 @@ depth: {type: Number, notify:true},
 
 mix: {type: Number, value: 1.0, notify: true, observer: "_mix"},
 bypass: {type: Boolean, notify: true, observer: "_bypass"},
-"silent-bypass": {type: Boolean, notify: true, observer: "_silentBypass"},
-enableAutomation: {type: Boolean, value: false, notify: true, observer: "_enableAutomation"}, // enableAutomation
+silentBypass: Boolean,
+enableAutomation: {type: Boolean, value: false, notify: true, observer: "_enableAutomation"},
 enableAnalyser: {type: Boolean, value: false, notify: true, observer: "_enableAnalyser"},
 showListener: {type: Boolean, value: false, notify: true, observer: "_showListener"},
 recordMode: {type: Boolean, value: false, notify: true, observer: "_recordMode"},
@@ -152,8 +152,7 @@ get isReady () {return this._ready;}
 set isReady (value) {
 if (value) {
 this._ready = true;
-runPropertyEffects(this);
-//signalReady(this);
+setTimeout(() => runPropertyEffects(this), 0);
 setTimeout(() => signalReady(this), 0);
 } else {
 this._ready = false;
@@ -206,10 +205,10 @@ value.trim().toLowerCase().match(/\w+/g)
 } // hideChanged
 
 _mix (value) {if (this._ready && this.component) this.component.mix(value);}
-_silentBypass (value) {if (this._ready && this.component) this.component.silentBypass(value);}
 
 _bypass (value) {
 if (this._ready && this.component) {
+this.component.silentBypass(this.silentBypass);
 this.component.bypass(value);
 this._hideOnBypass(value);
 } // if
@@ -429,9 +428,6 @@ statusMessage(`Render complete: ${Math.round(10*buffer.duration/60)/10} minutes 
 } // render
 
 
-
-//setId (value) {this.id = value;}
-
 findContext () {
 let element = this;
 while (element && element instanceof module && element.module.name !== module.name) element = element.parentElement;
@@ -622,13 +618,19 @@ element.dispatchEvent(new CustomEvent("elementReady", {bubbles: true}));
 } // signalReady
 
 function runPropertyEffects (element) {
-const module = element.module;
-for (let name in module.properties) {
+Object.keys(element.module.properties).forEach(p => runObserver(p, element.module));
+Object.keys(module.properties).forEach(p => runObserver(p, module));
+
+function runObserver (name, module) {
 if (module.properties.hasOwnProperty(name)) {
 const definition = module.properties[name];
-if (definition.observer) element[definition.observer].call(element, element[name]);
+console.debug(`${element.id} in ${module.name}: ${name} = `, definition);
+if (name === "silentBypass") {
+console.debug(`- silentBypass ${element[name]}`);
 } // if
-} // for
+if (definition.observer && typeof(element[name]) !== "undefined") element[definition.observer].call(element, element[name]);
+} // if
+} // runObserver
 } // runPropertyEffects 
 
 /// random utilities

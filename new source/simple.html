@@ -11,15 +11,15 @@
 <audio-series id="main">
 <audio-player id="player" label="player" src="country balad.mp3"></audio-player>
 
-<audio-series id="master" label="master" feed-back delay="0.5" >
-<audio-filter label="filter" hide="q, detune, gain, type, mix"></audio-filter>
+<audio-series id="master" label="master" feed-back delay="0.5">
+<audio-filter bypass silent-bypass label="filter" frequency="600" hide="q, detune, gain, type, mix"></audio-filter>
 <audio-control>
-<audio-delay label="delay"></audio-delay>
-<audio-parameter label="control delay" name="delay" function="s(t, 0,.01)"></audio-parameter>
+<audio-stereo-processor id="rotator" label="rotate" hide="center, width, balance"></audio-stereo-processor>
+<audio-parameter label="control rotator" name="rotation" function="s(t, 0,90)"></audio-parameter>
 </audio-control>
 </audio-series>
 
-<audio-destination id="destination" label="speakers"></audio-destination>
+<audio-destination id="speakers" label="speakers"></audio-destination>
 </audio-series>
 </audio-context>
 
@@ -27,6 +27,7 @@
 const status = document.querySelector("#status");
 document.querySelector("audio-context").addEventListener("startAutomation", () => status.textContent = "Automation Started.");
 document.querySelector("audio-context").addEventListener("stopAutomation", () => status.textContent = "Automation stopped.");
+</script>
 
 </body>
 </html>

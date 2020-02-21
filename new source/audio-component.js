@@ -34,9 +34,11 @@ this.bypass(false);
 } // constructor
 
 silentBypass (value) {
+console.debug(`silentBypass: ${value}`);
 if (value) {
 this._silentBypass = true;
-this._bypass.gain.value = 0;} else {
+this._bypass.gain.value = 0;
+} else {
 this._silentBypass = false;
 this._bypass.gain.value = 1.0;
 } // if
