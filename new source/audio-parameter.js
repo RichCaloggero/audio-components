@@ -1,71 +1,121 @@
-import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {module as _AudioContext_, childrenReady, statusMessage} from "./audio-context.js";
-import {updateParameter} from "./audio-control.js";
+// audio-parameter.js
+// Native Web Component for parameter automation definition
+// Replaces Polymer-based AudioParameter
 
-let instanceCount  = 0;
+import { AudioComponentBase, statusMessage } from "./audio-component-base.js";
+import { updateParameter } from "./audio-control.js";
 
-const module = class AudioParameter extends _AudioContext_ {
-static get template () {
-return html`
-<fieldset class="audio-parameter">
-<legend><h3 aria-level$="[[depth]]">[[label]]</h3></legend>
-<ui-text label="function" value="{{function}}" shortcut="alt shift f"></ui-text>
-</fieldset>
-<slot></slot>
-`; // html
-} // get template
+let instanceCount = 0;
 
-static get is() { return "audio-parameter"; }
+class AudioParameter extends AudioComponentBase {
+	static get observedAttributes() {
+		return ['label', 'hide', 'name', 'function', 'type'];
+	}
 
-static get properties () {
-return {
-name: String,
-function: String,
-type: {type: String, value: ""},
-	}; // return
-} // get properties
+	constructor() {
+		super();
+		instanceCount++;
+		this.id = `audio-parameter-${instanceCount}`;
 
-static get observers () {
-return [
-"_update(name, function, type)"
-];
-} // get observers
+		// Mark as container element
+		this.container = true;
 
-constructor () {
-super ();
-instanceCount += 1;
-this.id = `${module.is}-${instanceCount}`;
-this.module = module;
-this.container = true;
-} // constructor
+		// Parameter-specific properties
+		this._paramName = '';
+		this._function = '';
+		this._paramType = '';
+	}
 
-connectedCallback () {
-super.connectedCallback();
+	get template() {
+		return `
+			<style>
+				:host { display: block; }
+				fieldset { border: 1px solid #ccc; padding: 1em; margin: 0.5em 0; }
+				legend h3 { margin: 0; font-size: 1em; }
+			</style>
+			<fieldset class="audio-parameter">
+				<legend><h3>${this._label}</h3></legend>
+				<ui-text label="function" shortcut="alt shift f"></ui-text>
+			</fieldset>
+			<slot></slot>
+		`;
+	}
 
+	connectedCallback() {
+		super.connectedCallback();
+		this.isReady = true;
+	}
 
-this.isReady = true;
-/*childrenReady(this, children => {
-});
-*/
-} // connectedCallback
+	_setupEventListeners() {
+		const functionEl = this.shadowRoot.querySelector('ui-text[label="function"]');
+		if (functionEl) {
+			functionEl.value = this._function;
+			functionEl.addEventListener('value-changed', (e) => {
+				this.function = e.detail.value;
+			});
+		}
+	}
 
+	attributeChangedCallback(name, oldValue, newValue) {
+		if (oldValue === newValue) return;
 
-_update (_name = "", _function = "", _type = "") {
-const controller = this.parentElement;
-//debugger;
-	if (!controller) return;
-	//if (!this._ready || !controller || !controller._ready) return;
+		switch (name) {
+			case 'name':
+				this._paramName = newValue || '';
+				this._update();
+				break;
+			case 'function':
+				this._function = newValue || '';
+				this._update();
+				break;
+			case 'type':
+				this._paramType = newValue || '';
+				this._update();
+				break;
+			default:
+				super.attributeChangedCallback(name, oldValue, newValue);
+		}
+	}
 
-	console.debug(`${this.id}: requesting update for ${_name}, ${_function}, ${_type}...`);
-if (!_name) return;
-if (_function && _type) {
-statusMessage(`${this.id}: parameter ${_name} - cannot set both function and type; not updating...`);
-return;
-} // if
+	// Name property (the parameter to automate on target)
+	get name() { return this._paramName; }
+	set name(value) {
+		this._paramName = value || '';
+		this._update();
+	}
 
-console.debug(`- calling ${controller.id}.updateParameter`);
-updateParameter(controller, _name, _function, _type);
-} // update
-} // class AudioParameter
+	// Function property (JS expression for automation)
+	get function() { return this._function; }
+	set function(value) {
+		this._function = value || '';
+		this._update();
+	}
 
-customElements.define(module.is, module);
+	// Type property
+	get type() { return this._paramType; }
+	set type(value) {
+		this._paramType = value || '';
+		this._update();
+	}
+
+	_update() {
+		const controller = this.parentElement;
+		if (!controller) return;
+
+		console.debug(`${this.id}: requesting update for ${this._paramName}, ${this._function}, ${this._paramType}...`);
+
+		if (!this._paramName) return;
+
+		if (this._function && this._paramType) {
+			statusMessage(`${this.id}: parameter ${this._paramName} - cannot set both function and type; not updating...`);
+			return;
+		}
+
+		console.debug(`- calling ${controller.id}.updateParameter`);
+		updateParameter(controller, this._paramName, this._function, this._paramType);
+	}
+}
+
+customElements.define('audio-parameter', AudioParameter);
+
+export { AudioParameter };

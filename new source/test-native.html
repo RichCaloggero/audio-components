@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Audio Components - Native Web Components Test</title>
+	<style>
+		body {
+			font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+			max-width: 1200px;
+			margin: 0 auto;
+			padding: 20px;
+			background: #f5f5f5;
+		}
+		h1 {
+			color: #333;
+		}
+		.info {
+			background: #e7f3ff;
+			border: 1px solid #2196F3;
+			padding: 1em;
+			border-radius: 4px;
+			margin-bottom: 1em;
+		}
+		audio-context {
+			background: white;
+			display: block;
+			padding: 1em;
+			border-radius: 8px;
+			box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+		}
+	</style>
+</head>
+<body>
+	<h1>Audio Components - Native Web Components Test</h1>
+
+	<div class="info">
+		<p><strong>Instructions:</strong></p>
+		<ul>
+			<li>Enter a media URL in the "Media URL" field (e.g., a .mp3 or .ogg file)</li>
+			<li>Click "Play" to start playback</li>
+			<li>Adjust gain, filter frequency, and other parameters to hear the effect</li>
+			<li>Toggle "bypass" on any component to bypass its processing</li>
+		</ul>
+	</div>
+
+	<audio-context label="Audio Components Test">
+		<audio-series label="Main Processing Chain">
+			<!-- Audio source -->
+			<audio-player label="Audio Source"></audio-player>
+
+			<!-- Gain stage -->
+			<audio-gain label="Master Gain" gain="0.8"></audio-gain>
+
+			<!-- Filter -->
+			<audio-filter label="EQ Filter" type="lowpass" frequency="2000" q="1"></audio-filter>
+
+			<!-- Parallel effects -->
+			<audio-parallel label="Effects">
+				<!-- Delay effect -->
+				<audio-delay label="Delay" delay="0.25" mix="0.3"></audio-delay>
+
+				<!-- Compressor -->
+				<audio-compressor label="Compressor" threshold="-24" ratio="4"></audio-compressor>
+			</audio-parallel>
+
+			<!-- Output -->
+			<audio-destination label="Output"></audio-destination>
+		</audio-series>
+	</audio-context>
+
+	<!-- Load all component modules -->
+	<script type="module">
+		// Import all components
+		import './audio-component-base.js';
+		import './ui.js';
+		import './ui-number.js';
+		import './ui-boolean.js';
+		import './ui-list.js';
+		import './ui-text.js';
+		import './audio-context.js';
+		import './audio-series.js';
+		import './audio-parallel.js';
+		import './audio-gain.js';
+		import './audio-filter.js';
+		import './audio-delay.js';
+		import './audio-player.js';
+		import './audio-destination.js';
+		import './audio-compressor.js';
+
+		console.log('All audio components loaded');
+
+		// Wait for audio-context to be ready
+		document.querySelector('audio-context').addEventListener('elementReady', () => {
+			console.log('Audio context is ready!');
+		});
+	</script>
+</body>
+</html>

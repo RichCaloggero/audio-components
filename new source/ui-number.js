@@ -1,166 +1,250 @@
-import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {UI, defineKey, hasModifierKeys} from "./ui.js";
+// ui-number.js
+// Native Web Component for numeric input control
+// Replaces Polymer-based UINumber
 
-let instanceCount  = 0;
+import { UIBase, defineKey, hasModifierKeys } from "./ui.js";
 
-class UINumber extends UI {
-static get template () {
-return html`
-<div class="ui-number">
-<label  for="input">[[label]]</label>
-<br><input id="input" type="[[type]]" value="{{value::change}}" min="[[min]]" max="[[max]]" step="[[step]]" on-keydown="handleSpecialKeys">
-</div>
-`; // html
-} // get template
+let instanceCount = 0;
 
-static get is() { return "ui-number"; }
+class UINumber extends UIBase {
+	static get observedAttributes() {
+		return ['label', 'name', 'value', 'shortcut', 'type', 'min', 'max', 'step'];
+	}
 
-static get properties () {
-return {
-label: String,
-type: {type: String, value: "range", notify: true},
-value: {type: Number, notify: true},
-min: {type: Number, value: 0.0},
-max: {type: Number, value: 1.0},
-step: {type: Number, value: .1},
-}; // return
-} // get properties
+	constructor() {
+		super();
+		instanceCount++;
+		this.id = `ui-number-${instanceCount}`;
 
+		this._type = 'range';
+		this._min = 0.0;
+		this._max = 1.0;
+		this._step = 0.1;
+		this._value = 0;
+	}
 
-constructor () {
-super ();
-instanceCount += 1;
-this.id = `ui-number-${instanceCount}`;
-} // constructor
+	get template() {
+		return `
+			<style>
+				:host { display: block; margin: 0.25em 0; }
+				.ui-number { display: flex; flex-direction: column; }
+				label { font-weight: bold; margin-bottom: 0.25em; }
+				input[type="range"] { width: 100%; }
+				input[type="number"] { width: 6em; }
+			</style>
+			<div class="ui-number">
+				<label for="input">${this._label}</label>
+				<input id="input" type="${this._type}" value="${this._value}" min="${this._min}" max="${this._max}" step="${this._step}">
+			</div>
+		`;
+	}
 
-connectedCallback () {
-super.connectedCallback();
-//if (this.shhortcut && this.uiElement) defineKey(this.shortcut, this.uiElement);
-} // connectedCallback
+	connectedCallback() {
+		super.connectedCallback();
+		// Sync value from attribute if present
+		if (this.hasAttribute('value')) {
+			this._value = Number(this.getAttribute('value'));
+		}
+		this._updateInputValue();
+	}
 
+	_setupEventListeners() {
+		const input = this.shadowRoot.querySelector('#input');
+		if (input) {
+			input.addEventListener('input', (e) => {
+				this._value = Number(e.target.value);
+				this._notifyValueChange(this._value);
+			});
+			input.addEventListener('change', (e) => {
+				this._value = Number(e.target.value);
+				this._notifyValueChange(this._value);
+			});
+			input.addEventListener('keydown', (e) => this._handleKeydown(e));
+		}
+	}
 
+	attributeChangedCallback(name, oldValue, newValue) {
+		if (oldValue === newValue) return;
 
-/*_keyChanged (value) {
-if (value) {
-let key = value.charAt(0);
-this.shadowRoot.querySelector ("input").setAttribute ("accesskey", key);
-} else {
-this.shadowRoot.querySelector ("input").removeAttribute ("accesskey");
-} // if
-} // _keyChanged
-*/
+		switch (name) {
+			case 'type':
+				this._type = newValue || 'range';
+				this._updateInputType();
+				break;
+			case 'min':
+				this._min = Number(newValue) || 0;
+				this._updateInputAttribute('min', this._min);
+				break;
+			case 'max':
+				this._max = Number(newValue) || 1;
+				this._updateInputAttribute('max', this._max);
+				break;
+			case 'step':
+				this._step = Number(newValue) || 0.1;
+				this._updateInputAttribute('step', this._step);
+				break;
+			case 'value':
+				this._value = Number(newValue) || 0;
+				this._updateInputValue();
+				break;
+			default:
+				super.attributeChangedCallback(name, oldValue, newValue);
+		}
+	}
 
+	// Type property
+	get type() { return this._type; }
+	set type(value) {
+		this._type = value || 'range';
+		this._updateInputType();
+	}
 
-handleSpecialKeys (e) {
-const input = e.target;
-const value = Number(input.value);
-const step = Number(this.step);
-//console.debug(`number: handling ${hasModifierKeys(e)}, ${e.key}, ${input.type} ${value}`);
+	// Min property
+	get min() { return this._min; }
+	set min(value) {
+		this._min = Number(value);
+		this._updateInputAttribute('min', this._min);
+	}
 
-if (super.handleSpecialKeys(e)) {
-//console.debug(`- parent did not handle it;`);
-switch (e.key) {
-/*case "Enter": if (!e.ctrlKey && this.reset instanceof Function) this.reset();
-else return true;
-break;
-*/
+	// Max property
+	get max() { return this._max; }
+	set max(value) {
+		this._max = Number(value);
+		this._updateInputAttribute('max', this._max);
+	}
 
-case "Home":
-if (e.ctrlKey) this.setMax ();
-else if (input.type === "number") return true;
-break;
+	// Step property
+	get step() { return this._step; }
+	set step(value) {
+		this._step = Number(value);
+		this._updateInputAttribute('step', this._step);
+	}
 
-case "End":
-if (e.ctrlKey) this.setMin ();
-else if (input.type === "number") return true;
-break;
+	// Value property
+	get value() { return this._value; }
+	set value(val) {
+		const newValue = Number(val);
+		if (this._value !== newValue) {
+			this._value = newValue;
+			this._updateInputValue();
+			this._notifyValueChange(this._value);
+		}
+	}
 
-case "PageUp": 
-if (hasModifierKeys(e)) return true;
-this.increase(10 * step);
-break;
+	_updateInputValue() {
+		const input = this.shadowRoot?.querySelector('#input');
+		if (input && input.value !== String(this._value)) {
+			input.value = this._value;
+		}
+	}
 
-case "PageDown": 
-if (hasModifierKeys(e)) return true;
-this.decrease(10 * step);
-break;
+	_updateInputAttribute(attr, value) {
+		const input = this.shadowRoot?.querySelector('#input');
+		if (input) {
+			input.setAttribute(attr, value);
+		}
+	}
 
-case "-": if(
-(input.type === "number" && e.shiftKey)
-|| (!hasModifierKeys(e)))  input.value = -1 * value;
-else return true;
-break;
+	_updateInputType() {
+		const input = this.shadowRoot?.querySelector('#input');
+		if (input) {
+			input.type = this._type;
+		}
+	}
 
-case "0": case "1":
-if (input.type === "number" || hasModifierKeys(e)) return true;
-input.value = Number(e.key);
-break;
+	_handleKeydown(e) {
+		const input = e.target;
+		const value = Number(input.value);
+		const step = Number(this._step);
 
+		// First let parent handle common shortcuts
+		if (super.handleSpecialKeys(e)) {
+			// Parent didn't handle it, check our own handlers
+			switch (e.key) {
+				case "Home":
+					if (e.ctrlKey) {
+						this.setMax();
+					} else if (this._type === "number") {
+						return; // let default behavior
+					}
+					break;
 
-default: return true;
-} // switch
-} // if
+				case "End":
+					if (e.ctrlKey) {
+						this.setMin();
+					} else if (this._type === "number") {
+						return; // let default behavior
+					}
+					break;
 
-input.dispatchEvent(new CustomEvent("change"));
-e.preventDefault();
-return false;
-} // handleSpecialKeys
+				case "PageUp":
+					if (hasModifierKeys(e)) return;
+					this.increase(10 * step);
+					break;
 
+				case "PageDown":
+					if (hasModifierKeys(e)) return;
+					this.decrease(10 * step);
+					break;
 
-reset () {
-this.value = (this.max - this.min) / 2.0 + this.min;
-} // reset
+				case "-":
+					if ((this._type === "number" && e.shiftKey) || !hasModifierKeys(e)) {
+						input.value = -1 * value;
+						this._value = Number(input.value);
+						this._notifyValueChange(this._value);
+					} else {
+						return;
+					}
+					break;
 
-setMax () {
-this.value = this.max;
-} // setMax
+				case "0":
+				case "1":
+					if (this._type === "number" || hasModifierKeys(e)) return;
+					input.value = Number(e.key);
+					this._value = Number(input.value);
+					this._notifyValueChange(this._value);
+					break;
 
-setMin () {
-this.value = this.min;
-} // setMin
+				default:
+					return; // don't prevent default for unhandled keys
+			}
+		}
 
-increase(step = this.step) {
-return (this.value = Number(this.clamp(Number(this.value) + step)));
-} // increase
+		e.preventDefault();
+	}
 
-decrease(step = this.step) {
-return (this.value = Number(this.clamp(Number(this.value) - step)));
-} // decrease
+	reset() {
+		this.value = (this._max - this._min) / 2.0 + this._min;
+	}
 
-clamp (value, min = this.min, max = this.max) {
-value = Number(value);
-min = Number(min);
-max = Number(max);
-if (value < min) return min;
-else if (value > max) return max;
-else return value;
-} // clamp
+	setMax() {
+		this.value = this._max;
+	}
 
-nameChanged (value) {
-if (! this.label) this.label = value;
-} // nameChanged
+	setMin() {
+		this.value = this._min;
+	}
 
-_position (e) {
-_AudioContext_._position (e.target);
-} // _position
+	increase(step = this._step) {
+		this.value = this.clamp(Number(this._value) + step);
+		return this._value;
+	}
 
-} // class UINumber
+	decrease(step = this._step) {
+		this.value = this.clamp(Number(this._value) - step);
+		return this._value;
+	}
 
+	clamp(value, min = this._min, max = this._max) {
+		value = Number(value);
+		min = Number(min);
+		max = Number(max);
+		if (value < min) return min;
+		else if (value > max) return max;
+		else return value;
+	}
+}
 
-customElements.define(UINumber.is, UINumber);
+customElements.define('ui-number', UINumber);
 
-
-function stepSize (n) {
-n = Math.abs(n);
-if (n > 1000) return 1000;
-if (n > 100) return 100;
-if (n > 10) return 10;
-if (n > 1) return 1;
-if (n > .1) return .1;
-if (n > .01) return .01;
-if (n > .001) return .001;
-if (n > .0001) return .0001;
-else return minStep;
-} // stepSize
-
-
+export { UINumber };

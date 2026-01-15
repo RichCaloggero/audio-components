@@ -1,110 +1,183 @@
-import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {module as _AudioContext_, statusMessage, shadowRoot, registerAudioPlayer} from "./audio-context.js";
-import {AudioComponent} from "./audio-component.js";
-import {handleUserKey} from "./ui.js";
+// audio-player.js
+// Native Web Component for audio file player
+// Replaces Polymer-based AudioPlayer
+
+import { AudioComponentBase, statusMessage } from "./audio-component-base.js";
+import { AudioComponent } from "./audio-component.js";
+import { handleUserKey } from "./ui.js";
+import { registerAudioPlayer } from "./audio-context.js";
 
 let instanceCount = 0;
 
-const module = class AudioPlayer extends _AudioContext_ {
-static get template () {
-return html`
-<fieldset class="audio-player">
-<legend><h2>[[label]]</h2></legend>
-<ui-text label="Media URL" shortcut="alt shift u" value="{{src}}"></ui-text>
-<button class="play" aria-pressed="false" on-click="play" on-keydown="handleSpecialKeys">Play</button>
-<button class="back" on-click="back">back</button>
-<button class="forward" on-click="forward">forward</button>
-</fieldset>
-`; // html
-} // get template
+class AudioPlayer extends AudioComponentBase {
+	static get observedAttributes() {
+		return ['label', 'hide', 'src'];
+	}
 
+	constructor() {
+		super();
+		instanceCount++;
+		this.id = `audio-player-${instanceCount}`;
 
-static get is() { return "audio-player"; }
+		this._src = '';
+		this.audioElement = null;
+		this.audioSource = null;
+	}
 
-static get properties() {
-return {
-src: {type: String, notify: true, observer: "srcChanged"},
-}; // return
-} // get properties
+	get template() {
+		return `
+			<style>
+				:host { display: block; }
+				fieldset { border: 1px solid #ccc; padding: 1em; margin: 0.5em 0; }
+				legend h2 { margin: 0; font-size: 1.1em; }
+				button { margin: 0.25em; padding: 0.5em 1em; }
+			</style>
+			<fieldset class="audio-player">
+				<legend><h2>${this._label}</h2></legend>
+				<ui-text label="Media URL" shortcut="alt shift u"></ui-text>
+				<button class="play" aria-pressed="false">Play</button>
+				<button class="back">back</button>
+				<button class="forward">forward</button>
+			</fieldset>
+		`;
+	}
 
-constructor () {
-super ();
-instanceCount += 1;
-this.id = `${module.is}-${instanceCount}`;
-this.module = module;
+	connectedCallback() {
+		super.connectedCallback();
 
+		// Create the audio component
+		this.component = new AudioComponent(this.audio, "player");
 
-} // constructor
+		// Create HTML audio element and media source
+		if (this.audio && this.audio instanceof window.AudioContext && this.audio.createMediaElementSource) {
+			this.audioElement = document.createElement("audio");
+			this.audioElement.setAttribute("crossorigin", "anonymous");
+			this.audioElement.addEventListener("error", e => {
+				statusMessage(`${this.id}: ${e.target.error?.message || 'Audio error'}`);
+			});
 
-connectedCallback () {
-super.connectedCallback ();
-this.component = new AudioComponent(this.audio, "player");
-if (this.audio && this.audio instanceof AudioContext && this.audio.createMediaElementSource) {
-this.audioElement = document.createElement("audio");
-this.audioElement.setAttribute("crossorigin", "anonymous");
-this.audioElement.addEventListener("error", e => statusMessage(`${this.id}: ${e.target.error.message}`));
-this.audioSource = this.audio.createMediaElementSource(this.audioElement);
+			this.audioSource = this.audio.createMediaElementSource(this.audioElement);
 
-this.component.input = null;
-this.audioSource.connect(this.component.output);
-this.component.audioSource = this.audioSource;
-this.component.src = "";
-} else {
-this.audioSource = this.component.audioSource = null;
-} // if
+			this.component.input = null;
+			this.audioSource.connect(this.component.output);
+			this.component.audioSource = this.audioSource;
+			this.component.src = "";
+		} else {
+			this.audioSource = this.component.audioSource = null;
+		}
 
-registerAudioPlayer(this.component);
-this.isReady = true;
-} // connectedCallback
+		// Register this player globally
+		registerAudioPlayer(this.component);
 
+		this.isReady = true;
+	}
 
-srcChanged (value) {
-if (this.isReady && value && this.audioElement) {
-this.audioElement.src = this.component.src = value;
-console.debug(`${this.id}: src is ${value}`);
-} // if
-} // srcChanged
+	_setupEventListeners() {
+		// Media URL input
+		const srcEl = this.shadowRoot.querySelector('ui-text[label="Media URL"]');
+		if (srcEl) {
+			srcEl.value = this._src;
+			srcEl.addEventListener('value-changed', (e) => {
+				this.src = e.detail.value;
+			});
+		}
 
-isPlaying () {return this.isReady? this.shadowRoot.querySelector(".play").getAttribute("aria-pressed") === "true" : false;}
+		// Play button
+		const playBtn = this.shadowRoot.querySelector('.play');
+		if (playBtn) {
+			playBtn.addEventListener('click', (e) => this._play(e));
+			playBtn.addEventListener('keydown', (e) => this._handleSpecialKeys(e));
+		}
 
-play (e) {
-if (!this.isReady) return;
-const player = this.audioElement;
-if (player.paused) {
-player.play();
-e.target.textContent = "pause";
+		// Back button
+		const backBtn = this.shadowRoot.querySelector('.back');
+		if (backBtn) {
+			backBtn.addEventListener('click', (e) => this._back(e));
+		}
 
-} else {
-player.pause();
-e.target.textContent = "play";
-} // if
+		// Forward button
+		const forwardBtn = this.shadowRoot.querySelector('.forward');
+		if (forwardBtn) {
+			forwardBtn.addEventListener('click', (e) => this._forward(e));
+		}
+	}
 
-e.target.focus();
-//console.debug(`${this.id}: player is ${player.paused? "paused" : "playing"}`);
-} // play
+	attributeChangedCallback(name, oldValue, newValue) {
+		if (oldValue === newValue) return;
 
-back (e) {
-if (!this.isReady) return;
-const player = this.audioElement;
-if (player.currentTime < 5) player.currentTime = 0;
-else player.currentTime = player.currentTime - 5.0;
-} // back
+		switch (name) {
+			case 'src':
+				this.src = newValue || '';
+				break;
+			default:
+				super.attributeChangedCallback(name, oldValue, newValue);
+		}
+	}
 
-forward (e) {
-if (!this.isReady) return;
-const player = this.audioElement;
-if (player.currentTime < player.duration) player.currentTime = player.currentTime + 5.0;
-else player.currentTime = player.duration;
-} // forward
+	// Source property
+	get src() { return this._src; }
+	set src(value) {
+		this._src = value || '';
+		if (this._ready && this._src && this.audioElement) {
+			this.audioElement.src = this.component.src = this._src;
+			console.debug(`${this.id}: src is ${this._src}`);
+		}
+	}
 
+	isPlaying() {
+		if (!this._ready) return false;
+		const playBtn = this.shadowRoot.querySelector(".play");
+		return playBtn?.getAttribute("aria-pressed") === "true";
+	}
 
+	_play(e) {
+		if (!this._ready || !this.audioElement) return;
 
+		const player = this.audioElement;
+		const button = e.target;
 
-handleSpecialKeys (e) {
-if (handleUserKey(e)) e.preventDefault();
-} // handleSpecialKeys
-} // class AudioPlayer
+		if (player.paused) {
+			player.play();
+			button.textContent = "pause";
+			button.setAttribute("aria-pressed", "true");
+		} else {
+			player.pause();
+			button.textContent = "play";
+			button.setAttribute("aria-pressed", "false");
+		}
 
-customElements.define(module.is, module);
+		button.focus();
+	}
 
+	_back(e) {
+		if (!this._ready || !this.audioElement) return;
 
+		const player = this.audioElement;
+		if (player.currentTime < 5) {
+			player.currentTime = 0;
+		} else {
+			player.currentTime = player.currentTime - 5.0;
+		}
+	}
+
+	_forward(e) {
+		if (!this._ready || !this.audioElement) return;
+
+		const player = this.audioElement;
+		if (player.currentTime < player.duration) {
+			player.currentTime = player.currentTime + 5.0;
+		} else {
+			player.currentTime = player.duration;
+		}
+	}
+
+	_handleSpecialKeys(e) {
+		if (handleUserKey(e)) {
+			e.preventDefault();
+		}
+	}
+}
+
+customElements.define('audio-player', AudioPlayer);
+
+export { AudioPlayer };

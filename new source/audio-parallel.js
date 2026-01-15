@@ -1,45 +1,82 @@
-import {html} from "./@polymer/polymer/polymer-element.js";
-import {Parallel} from "./audio-component.js";
-import {module as _AudioContext_, childrenReady} from "./audio-context.js";
+// audio-parallel.js
+// Native Web Component for parallel audio connection
+// Replaces Polymer-based AudioParallel
+
+import { AudioComponentBase, childrenReady } from "./audio-component-base.js";
+import { Parallel } from "./audio-component.js";
 
 let instanceCount = 0;
 
-const module = class AudioParallel extends _AudioContext_ {
-static get template () {
-return html`
-<fieldset class="audio-parallel">
-<legend><h2 aria-level$="[[depth]]">[[label]]</h2></legend>
-<ui-boolean label="bypass" value="{{bypass}}"></ui-boolean>
-<ui-number label="mix" value="{{mix}}" min="-1" max="1" step=".1"></ui-number>
-</fieldset>
+class AudioParallel extends AudioComponentBase {
+	static get observedAttributes() {
+		return ['label', 'hide', 'bypass', 'mix', 'silent-bypass', 'hide-on-bypass'];
+	}
 
-<slot></slot>
-`; // html
-} // get template
-static get is() { return "audio-parallel";}
+	constructor() {
+		super();
+		instanceCount++;
+		this.id = `audio-parallel-${instanceCount}`;
 
-static get properties () {
-return {
-label: String
-}; // return
-} // get properties
+		// Mark as container element
+		this.container = true;
+	}
 
-constructor () {
-super ();
-instanceCount += 1;
-this.id = `${module.is}-${instanceCount}`;
-this.module = module;
-this.container = true;
-} // constructor
+	get template() {
+		return `
+			<style>
+				:host { display: block; }
+				fieldset { border: 1px solid #ccc; padding: 1em; margin: 0.5em 0; }
+				legend h2 { margin: 0; font-size: 1.1em; }
+				legend[hidden] { display: none; }
+			</style>
+			<fieldset class="audio-parallel">
+				<legend><h2>${this._label}</h2></legend>
+				<ui-boolean label="bypass"></ui-boolean>
+				<ui-number label="mix" min="-1" max="1" step="0.1"></ui-number>
+			</fieldset>
+			<slot></slot>
+		`;
+	}
 
-connectedCallback () {
-super.connectedCallback();
-childrenReady(this, children => {
-//console.log(`- connectedCallback.then: found ${children.length} children`);
-this.component = new Parallel(this.audio, this.components(children));
-if (this.uiControls().every(x => x.hidden)) this.shadowRoot.querySelector("legend").hidden = true;
-});
-} // connectedCallback
-} // class AudioParallel
+	connectedCallback() {
+		super.connectedCallback();
 
-customElements.define(module.is, module);
+		// Wait for all child audio components to be ready before building our component
+		childrenReady(this, children => {
+			console.log(`${this.id}: all ${children.length} children ready, building parallel component`);
+
+			// Build the parallel component with child components
+			this.component = new Parallel(this.audio, this.components(children));
+
+			// Hide legend if all UI controls are hidden
+			if (this.uiControls().every(x => x.hidden)) {
+				const legend = this.shadowRoot.querySelector("legend");
+				if (legend) legend.hidden = true;
+			}
+		});
+	}
+
+	_setupEventListeners() {
+		// Bypass control
+		const bypassEl = this.shadowRoot.querySelector('ui-boolean[label="bypass"]');
+		if (bypassEl) {
+			bypassEl.value = this._bypass;
+			bypassEl.addEventListener('value-changed', (e) => {
+				this.bypass = e.detail.value;
+			});
+		}
+
+		// Mix control
+		const mixEl = this.shadowRoot.querySelector('ui-number[label="mix"]');
+		if (mixEl) {
+			mixEl.value = this._mix;
+			mixEl.addEventListener('value-changed', (e) => {
+				this.mix = e.detail.value;
+			});
+		}
+	}
+}
+
+customElements.define('audio-parallel', AudioParallel);
+
+export { AudioParallel };

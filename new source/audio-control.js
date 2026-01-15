@@ -1,186 +1,166 @@
-import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {module as _AudioContext_, childrenReady, addToAutomationQueue, removeFromAutomationQueue, automationInterval, statusMessage} from "./audio-context.js";
-import {AudioComponent} from "./audio-component.js";
-let debugCount = 10;
+// audio-control.js
+// Native Web Component for parameter automation control
+// Replaces Polymer-based AudioControl
 
+import {
+	AudioComponentBase,
+	childrenReady,
+	addToAutomationQueue,
+	removeFromAutomationQueue,
+	getAutomationInterval,
+	statusMessage
+} from "./audio-component-base.js";
+import { AudioComponent } from "./audio-component.js";
 
-let instanceCount  = 0;
+let instanceCount = 0;
 
+class AudioControl extends AudioComponentBase {
+	static get observedAttributes() {
+		return ['label', 'hide'];
+	}
 
-const module = class AudioControl extends _AudioContext_ {
-static get template () {
-return html`
-<div class="audio-control">
-</div>
-<slot></slot>
-`; // html
-} // get template
-static get is() { return "audio-control"; }
+	constructor() {
+		super();
+		instanceCount++;
+		this.id = `audio-control-${instanceCount}`;
 
-static get properties () {
-return {
-};
-} // properties
+		// Mark as container element
+		this.container = true;
 
+		this._init = false;
+		this.target = null;
+		this.parameters = [];
+	}
 
-constructor () {
-super ();
-instanceCount += 1;
-this.id = `${module.is}-${instanceCount}`;
-this.module = module;
-this.container = true;
-this._init = false;
-this.target = null;
-this.parameters = [];
-} // constructor
+	get template() {
+		return `
+			<style>
+				:host { display: block; }
+				.audio-control { margin: 0.5em 0; }
+			</style>
+			<div class="audio-control">
+			</div>
+			<slot></slot>
+		`;
+	}
 
-connectedCallback () {
-super.connectedCallback ();
+	connectedCallback() {
+		super.connectedCallback();
 
+		childrenReady(this, children => {
+			if (children.length < 2) {
+				throw new Error(`${this.id}: need two or more children`);
+			}
 
-	childrenReady(this, children => {
-if (children.length < 2) throw new Error(`${this.id}: need two or more children`);
-this.component = new AudioComponent(this.audio, "control", this);
-// first child is target (element we're controlling); remaining children are audio-parameter definitions
-this.target = children[0];
-console.debug(`${this.id}: target ${this.target.id}`);
+			this.component = new AudioComponent(this.audio, "control", this);
 
-// connect through target element's component
-const targetComponent = this.target.component;
-this.component.input.connect(targetComponent.input);
-targetComponent.output.connect(this.component.wet);
+			// First child is target (element we're controlling)
+			// Remaining children are audio-parameter definitions
+			this.target = children[0];
+			console.debug(`${this.id}: target ${this.target.id}`);
 
-// if it has a node property, then we can manipulate AudioParam objects on that node directly
-const targetNode = targetComponent.node;
-/*if (targetNode) {
-// filter parameter defs on whether name attribute present on target node
-children.slice(1).filter(p => {
-return !p.function && p.name in targetNode;
-}).forEach(p => {
-// audioParam we want to manipulate
-const param = targetNode[p.name];
-// the component generating the signal to send to the audioParam
-const automator = p.children[0].component;
+			// Connect through target element's component
+			const targetComponent = this.target.component;
+			this.component.input.connect(targetComponent.input);
+			targetComponent.output.connect(this.component.wet);
 
-if (automator && automator instanceof AudioComponent && param && param instanceof AudioParam) {
-automator.output.connect(param);
-console.log (`${this.id}: connected ${p.children[0].id} to audioParam ${p.name} of ${this.target.id}`);
+			console.debug(`${this.id} "${this._label}": no target node`);
 
-}else {
-throw new Error(`${this.id}: ${p.name} parameter of ${target.id} is not an AudioParam`);
-} // if
-}); // forEach
+			// Start JS-based automation for this element
+			this.start();
+			console.debug(`${this.id} added to automation queue`);
+		});
+	}
 
-} else {
-*/
-console.debug(`${this.id} "${this.label}": no target node`);
+	automate() {
+		if (!this._ready) return;
 
-//children.slice(1).forEach(p => updateParameter(this, p.name, p.text, p.type));
+		const target = this.target;
+		const automationInterval = getAutomationInterval();
 
-//} // if targetNode
+		this.parameters.forEach(parameter => {
+			const p = target[parameter.name];
+			try {
+				if (parameter.function) {
+					const value = parameter.function(this.audio.currentTime);
 
-// start js-based automation for this element
-// (this starts even if no suitable parameter definitions present; should only start if needed)
-this.start();
-console.debug(`${this.id} added to automation queue`);
+					if (p instanceof AudioParam) {
+						p.exponentialRampToValueAtTime(value, automationInterval);
+					} else {
+						target[parameter.name] = value;
+						console.debug(`parameter ${this.target.id}.${parameter.name} = ${value} at time ${this.audio.currentTime}`);
+					}
+				}
+			} catch (e) {
+				statusMessage(e.toString());
+				parameter.function = null;
+			}
+		});
+	}
 
-}); // childrenReady
-} // connectedCallback
+	start() {
+		addToAutomationQueue(this);
+	}
 
+	stop() {
+		removeFromAutomationQueue(this);
+	}
+}
 
-automate () {
-if (!this._ready) return;
-//if (debugCount <= 0) return;
-//debugCount -= 1;
+customElements.define('audio-control', AudioControl);
 
-const target = this.target;
-this.parameters.forEach(parameter => {
-const p = target[parameter.name];
-try {
-if (parameter.function) {
-const value = parameter.function(this.audio.currentTime);
+// Utility function to update automation parameter
+export function updateParameter(controller, _name, _text, _type) {
+	console.debug(`${controller.id}.updateParameter: ${_name} ${_text}`);
+	if (!_name) return;
 
-if (p instanceof AudioParam) {
-//p.value = value;
-//p.linearRampToValueAtTime(value, audio.currentTime);
-p.exponentialRampToValueAtTime(value, automationInterval);
-//p.setValueAtTime(value, audio.currentTime);
+	const parameters = controller.parameters;
+	console.debug("- parameters: ", parameters);
 
-} else {
-target[parameter.name] = value;
-console.debug(`parameter ${this.target.id}.${parameter.name} = ${value} at time ${this.audio.currentTime}`);
-} // if
+	const index = parameters.findIndex(p => p.name === _name);
+	const parameter = index >= 0 ? parameters[index] : {};
+	parameter.name = _name;
+	parameter.text = _text;
+	parameter.type = _type;
 
-} // if
+	if (parameter.text) {
+		parameter.function = compileFunction(parameter.text, "t");
 
-} catch (e) {
-statusMessage (e);
-parameter.function = null;
-} // try
-}); // forEach parameters
-} // automate
+		if (parameter.function) {
+			parameter.function.bind(controller.target);
+			controller._init = true;
+			console.debug("- function: ", parameter.function);
+		} else {
+			statusMessage(`automation of parameter ${parameter.name} failed; invalid function;\n${parameter.text}`);
+			console.debug("- invalid function");
+		}
+	} else {
+		parameter.function = null;
+		if (controller._init) {
+			statusMessage(`Automation disabled for ${parameter.name}`);
+		}
+	}
 
-start () {
-addToAutomationQueue (this);
-} // start
+	if (index < 0) parameters.push(parameter);
+	console.debug("- - updated ", index, parameter);
+}
 
-stop () {
-removeFromAutomationQueue(this);
-} // stop
+// Compile user-defined function for automation
+export function compileFunction(text, parameter = "t") {
+	try {
+		return new Function(parameter,
+			`with (Math) {
+				function toRange(x, a, b) { return (Math.abs(a-b) * (x+1)/2) + a; }
+				function s(x, l=-1.0, u=1.0) { return toRange(Math.sin(x), l, u); }
+				function c(x, l=-1.0, u=1.0) { return toRange(Math.cos(x), l, u); }
+				function r(a=0, b=1) { return toRange(Math.random(), a, b); }
+				return ${text};
+			}`
+		);
+	} catch (e) {
+		console.error(e);
+		return null;
+	}
+}
 
-} // class AudioControl
-
-customElements.define(module.is, module);
-
-export function updateParameter (controller, _name, _text, _type) {
-console.debug(`${controller.id}.updateParameter: ${_name} ${_text}`);
-if (!_name ) return;
-const parameters = controller.parameters;
-console.debug("- parameters: ", parameters);
-const index = parameters.findIndex(p => p.name === _name);
-const parameter = index >= 0? parameters[index] : {};
-parameter.name = _name;
-parameter.text = _text;
-parameter.type = _type;
-
-
-if (parameter.text) {
-parameter.function = compileFunction(parameter.text, "t");
-
-if (parameter.function) {
-parameter.function.bind(controller.target);
-controller._init = true;
-console.debug("- function: ", parameter.function);
-} else {
-statusMessage(`automation of parameter ${parameter.name} failed; invalid function;\n${parameter.text}`);
-console.debug("- invalid function");
-} // if
-
-} else {
-parameter.function = null;
-if (controller._init) statusMessage(`Automation disabled for ${parameter.name}`);
-} // if
-
-if (index < 0) parameters.push(parameter);
-console.debug("- - updated ", index, parameter);
-} // updateParameter
-
-export function compileFunction (text, parameter = "t") {
-try {
-return new Function (parameter,
-`with (Math) {
-function  toRange (x, a,b) {return (Math.abs(a-b) * (x+1)/2) + a;}
-function s (x, l=-1.0, u=1.0) {return toRange(Math.sin(x), l,u);}
-function c (x, l=-1.0, u=1.0) {return toRange(Math.cos(x), l,u);}
-function r(a=0, b=1) {return toRange(Math.random(), a, b);}
-return ${text};
-} // Math
-`); // new Function
-
-} catch (e) {
-alert (e);
-return null;
-} // try
-} // compileFunction
-
-
+export { AudioControl };

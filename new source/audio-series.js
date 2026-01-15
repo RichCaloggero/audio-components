@@ -1,65 +1,186 @@
-import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {AudioComponent, Series} from "./audio-component.js";
-import {module as _AudioContext_, statusMessage, childrenReady} from "./audio-context.js";
+// audio-series.js
+// Native Web Component for series audio connection
+// Replaces Polymer-based AudioSeries
+
+import { AudioComponentBase, childrenReady } from "./audio-component-base.js";
+import { Series } from "./audio-component.js";
 
 let instanceCount = 0;
 
-const module = class AudioSeries extends _AudioContext_ {
-static get template () {
-return html`
-<fieldset class="audio-series">
-<legend><h2 aria-level$="[[depth]]">[[label]]</h2></legend>
-<ui-boolean label="bypass" value="{{bypass}}"></ui-boolean>
-<ui-number label="mix" value="{{mix}}" min="-1.0" max="1.0" step="0.1"></ui-number>
+class AudioSeries extends AudioComponentBase {
+	static get observedAttributes() {
+		return [
+			'label', 'hide', 'bypass', 'mix', 'silent-bypass', 'hide-on-bypass',
+			'feed-forward', 'feed-back', 'delay', 'gain'
+		];
+	}
 
-<fieldset class="feedback-controls panel">
-<legend><h2 aria-level$="{{depth}}">Feedback Controls</h2></legend>
-<ui-number label="delay" type="number" value="{{delay}}" min="0" step="0.00001"></ui-number>
-<ui-number label="gain" value="{{gain}}" min="-0.99" max="0.99" step="0.01"></ui-number>
-</fieldset>
-</fieldset>
-<slot></slot>
-`; // html
-} // get template
-static get is() { return "audio-series";}
+	constructor() {
+		super();
+		instanceCount++;
+		this.id = `audio-series-${instanceCount}`;
 
-static get properties () {
-return {
-feedForward: Boolean,
-feedBack: {type: Boolean, notify: true, observer: "feedBackChanged"},
-delay: {type: Number, value: 0, notify: true, observer: "delayChanged"},
-gain: {type: Number, value: 0.5, notify: true, observer: "gainChanged"},
-};
-} // static properties
-constructor () {
-super ();
-instanceCount += 1;
-this.id = `${module.is}-${instanceCount}`;
-this.module = module;
-this.container = true;
-} // constructor
+		// Mark as container element
+		this.container = true;
 
-connectedCallback () {
-super.connectedCallback();
-childrenReady(this, children => {
-console.log(`- ${this.id} connecting ${children.length} children`);
-this.component = new Series(this.audio, this.components(children), this.feedForward, this.feedBack, this);
-});
-} // connectedCallback
+		// Series-specific properties
+		this._feedForward = false;
+		this._feedBack = false;
+		this._delay = 0;
+		this._gain = 0.5;
+	}
 
-feedBackChanged (value) {
-if (this._ready && value) {
-this.component.gain = this.gain;
-this.component.delay = this.delay;
-this.showPanel(".feedback-controls");
-} else {
-this.hidePanel(".feedback-controls");
-} // if
-} // feedBackChanged
+	get template() {
+		return `
+			<style>
+				:host { display: block; }
+				fieldset { border: 1px solid #ccc; padding: 1em; margin: 0.5em 0; }
+				legend h2 { margin: 0; font-size: 1.1em; }
+				.feedback-controls[hidden] { display: none; }
+			</style>
+			<fieldset class="audio-series">
+				<legend><h2>${this._label}</h2></legend>
+				<ui-boolean label="bypass"></ui-boolean>
+				<ui-number label="mix" min="-1.0" max="1.0" step="0.1"></ui-number>
 
-delayChanged (value) {if(this._ready && this.feedBack) this.component.delay = value;}
-gainChanged (value) {if(this._ready && this.feedBack) this.component.gain = value;}
+				<fieldset class="feedback-controls panel" hidden>
+					<legend><h3>Feedback Controls</h3></legend>
+					<ui-number label="delay" type="number" min="0" step="0.00001"></ui-number>
+					<ui-number label="gain" min="-0.99" max="0.99" step="0.01"></ui-number>
+				</fieldset>
+			</fieldset>
+			<slot></slot>
+		`;
+	}
 
-} // class AudioSeries
+	connectedCallback() {
+		super.connectedCallback();
 
-customElements.define(module.is, module);
+		// Wait for all child audio components to be ready before building our component
+		// This is critical - we can't connect children in series until they exist
+		childrenReady(this, children => {
+			console.log(`${this.id}: all ${children.length} children ready, building series component`);
+
+			// Build the series component with child components
+			this.component = new Series(
+				this.audio,
+				this.components(children),
+				this._feedForward,
+				this._feedBack,
+				this
+			);
+
+			// Show/hide feedback controls based on feedBack setting
+			this._updateFeedbackUI();
+
+			// Note: isReady will be set to true by childrenReady after this callback returns
+		});
+	}
+
+	_setupEventListeners() {
+		// Bypass control
+		const bypassEl = this.shadowRoot.querySelector('ui-boolean[label="bypass"]');
+		if (bypassEl) {
+			bypassEl.value = this._bypass;
+			bypassEl.addEventListener('value-changed', (e) => {
+				this.bypass = e.detail.value;
+			});
+		}
+
+		// Mix control
+		const mixEl = this.shadowRoot.querySelector('ui-number[label="mix"]');
+		if (mixEl) {
+			mixEl.value = this._mix;
+			mixEl.addEventListener('value-changed', (e) => {
+				this.mix = e.detail.value;
+			});
+		}
+
+		// Delay control (for feedback)
+		const delayEl = this.shadowRoot.querySelector('ui-number[label="delay"]');
+		if (delayEl) {
+			delayEl.value = this._delay;
+			delayEl.addEventListener('value-changed', (e) => {
+				this.delay = e.detail.value;
+			});
+		}
+
+		// Gain control (for feedback)
+		const gainEl = this.shadowRoot.querySelector('.feedback-controls ui-number[label="gain"]');
+		if (gainEl) {
+			gainEl.value = this._gain;
+			gainEl.addEventListener('value-changed', (e) => {
+				this.gain = e.detail.value;
+			});
+		}
+	}
+
+	attributeChangedCallback(name, oldValue, newValue) {
+		if (oldValue === newValue) return;
+
+		switch (name) {
+			case 'feed-forward':
+				this._feedForward = newValue !== null;
+				break;
+			case 'feed-back':
+				this.feedBack = newValue !== null;
+				break;
+			case 'delay':
+				this.delay = Number(newValue) || 0;
+				break;
+			case 'gain':
+				this.gain = Number(newValue) || 0.5;
+				break;
+			default:
+				super.attributeChangedCallback(name, oldValue, newValue);
+		}
+	}
+
+	// Feed forward property
+	get feedForward() { return this._feedForward; }
+	set feedForward(value) {
+		this._feedForward = Boolean(value);
+	}
+
+	// Feed back property
+	get feedBack() { return this._feedBack; }
+	set feedBack(value) {
+		this._feedBack = Boolean(value);
+		if (this._ready) {
+			this._updateFeedbackUI();
+			if (this._feedBack && this.component) {
+				this.component.gain = this._gain;
+				this.component.delay = this._delay;
+			}
+		}
+	}
+
+	// Delay property (for feedback loop)
+	get delay() { return this._delay; }
+	set delay(value) {
+		this._delay = Number(value);
+		if (this._ready && this._feedBack && this.component) {
+			this.component.delay = this._delay;
+		}
+	}
+
+	// Gain property (for feedback loop)
+	get gain() { return this._gain; }
+	set gain(value) {
+		this._gain = Number(value);
+		if (this._ready && this._feedBack && this.component) {
+			this.component.gain = this._gain;
+		}
+	}
+
+	_updateFeedbackUI() {
+		const feedbackControls = this.shadowRoot?.querySelector('.feedback-controls');
+		if (feedbackControls) {
+			feedbackControls.hidden = !this._feedBack;
+		}
+	}
+}
+
+customElements.define('audio-series', AudioSeries);
+
+export { AudioSeries };

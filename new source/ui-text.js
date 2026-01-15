@@ -1,57 +1,110 @@
-import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {UI, defineKey} from "./ui.js";
+// ui-text.js
+// Native Web Component for text input control
+// Replaces Polymer-based UIText
 
-let instanceCount  = 0;
+import { UIBase, defineKey } from "./ui.js";
 
-class UIText extends UI {
-static get template () {
-return html`
-<div class="ui-text">
-<label>[[label]]
-<br><input id="input" type="text" value="{{value::change}}" on-keydown="handleSpecialKeys">
-</label>
-</div>
-`; // html
-} // get template
+let instanceCount = 0;
 
-static get is() { return "ui-text"; }
+class UIText extends UIBase {
+	static get observedAttributes() {
+		return ['label', 'name', 'value', 'shortcut'];
+	}
 
-static get properties () {
-return {
-label: String,
-value: {type: String, value: "", notify: true},
-}; // return
-} // get properties
+	constructor() {
+		super();
+		instanceCount++;
+		this.id = `ui-text-${instanceCount}`;
+		this._value = '';
+	}
 
-constructor () {
-super ();
-instanceCount += 1;
-this.id = `${UIText.is}-${instanceCount}`;
-} // constructor
+	get template() {
+		return `
+			<style>
+				:host { display: block; margin: 0.25em 0; }
+				.ui-text { display: flex; flex-direction: column; }
+				label { font-weight: bold; margin-bottom: 0.25em; }
+				input { padding: 0.25em; }
+			</style>
+			<div class="ui-text">
+				<label for="input">${this._label}</label>
+				<input id="input" type="text" value="${this._value}">
+			</div>
+		`;
+	}
 
-connectedCallback () {
-super.connectedCallback();
-//if (this.shhortcut && this.uiElement) defineKey(this.shortcut, this.uiElement);
-} // connectedCallback
+	connectedCallback() {
+		super.connectedCallback();
+		// Sync value from attribute if present
+		if (this.hasAttribute('value')) {
+			this._value = this.getAttribute('value');
+		}
+		this._updateInputValue();
+	}
 
+	_setupEventListeners() {
+		const input = this.shadowRoot.querySelector('#input');
+		if (input) {
+			input.addEventListener('input', (e) => {
+				this._value = e.target.value;
+				this._notifyValueChange(this._value);
+			});
+			input.addEventListener('change', (e) => {
+				this._value = e.target.value;
+				this._notifyValueChange(this._value);
+			});
+			input.addEventListener('keydown', (e) => this._handleKeydown(e));
+		}
+	}
 
-handleSpecialKeys (e) {
-const key = e.key;
-const input = e.target;
-//console.debug(`${this.id}.handleSpecialKeys: ${e.ctrlKey}, ${e.key}`);
+	attributeChangedCallback(name, oldValue, newValue) {
+		if (oldValue === newValue) return;
 
-if (super.handleSpecialKeys(e)) {
-switch (key) {
-case "Enter": if (e.ctrlKey) return true;
-break;
+		switch (name) {
+			case 'value':
+				this._value = newValue || '';
+				this._updateInputValue();
+				break;
+			default:
+				super.attributeChangedCallback(name, oldValue, newValue);
+		}
+	}
 
-default: return true;
-} // switch
-} // if
+	// Value property
+	get value() { return this._value; }
+	set value(val) {
+		const newValue = val || '';
+		if (this._value !== newValue) {
+			this._value = newValue;
+			this._updateInputValue();
+			this._notifyValueChange(this._value);
+		}
+	}
 
-e.preventDefault();
-e.target.dispatchEvent(new CustomEvent("change"));
-} // handleSpecialKeys
-} // class UIText
+	_updateInputValue() {
+		const input = this.shadowRoot?.querySelector('#input');
+		if (input && input.value !== this._value) {
+			input.value = this._value;
+		}
+	}
 
-customElements.define(UIText.is, UIText);
+	_handleKeydown(e) {
+		// First let parent handle common shortcuts
+		if (super.handleSpecialKeys(e)) {
+			switch (e.key) {
+				case "Enter":
+					if (e.ctrlKey) return; // let parent handle Ctrl+Enter
+					break;
+				default:
+					return; // don't prevent default for unhandled keys
+			}
+		}
+
+		e.preventDefault();
+		e.target.dispatchEvent(new CustomEvent("change"));
+	}
+}
+
+customElements.define('ui-text', UIText);
+
+export { UIText };

@@ -1,38 +1,47 @@
-import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {module as _AudioContext_, statusMessage} from "./audio-context.js";
-import {AudioComponent} from "./audio-component.js";
+// audio-destination.js
+// Native Web Component for audio destination (speakers)
+// Replaces Polymer-based AudioDestination
+
+import { AudioComponentBase } from "./audio-component-base.js";
+import { AudioComponent } from "./audio-component.js";
 
 let instanceCount = 0;
-//let _destination;
-//export function destination () {return _destination;}
 
+class AudioDestination extends AudioComponentBase {
+	static get observedAttributes() {
+		return ['label', 'hide'];
+	}
 
-const module = class AudioDestination extends _AudioContext_ {
-static get template () {
-return html`
-<fieldset class="audio-destination">
-<legend><h2 aria-level$="[[depth]]">{{label}}</h2></legend>
-</fieldset>
-`; // html
-} // get template
+	constructor() {
+		super();
+		instanceCount++;
+		this.id = `audio-destination-${instanceCount}`;
 
-static get is() {return "audio-destination";}
+		// Create the audio component - connects to audio.destination (speakers)
+		this.component = new AudioComponent(this.audio, "speakers");
+		this.component.input.connect(this.audio.destination);
+		this.component.output = null; // No output - this is the end of the chain
+	}
 
-constructor () {
-super ();
-instanceCount += 1;
-this.id = `${module.is}-${instanceCount}`;
-this.module = module;
-this.component = new AudioComponent(this.audio, "speakers");
-this.component.input.connect(this.audio.destination);
-this.component.output = null;
-} // constructor
+	get template() {
+		return `
+			<style>
+				:host { display: block; }
+				fieldset { border: 1px solid #ccc; padding: 1em; margin: 0.5em 0; }
+				legend h2 { margin: 0; font-size: 1.1em; }
+			</style>
+			<fieldset class="audio-destination">
+				<legend><h2>${this._label}</h2></legend>
+			</fieldset>
+		`;
+	}
 
-connectedCallback () {
-super.connectedCallback ();
-this.isReady = true;
-} // connectedCallback
+	connectedCallback() {
+		super.connectedCallback();
+		this.isReady = true;
+	}
+}
 
-} // class AudioDestination
+customElements.define('audio-destination', AudioDestination);
 
-customElements.define(module.is, module);
+export { AudioDestination };

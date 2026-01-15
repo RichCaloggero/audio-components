@@ -1,43 +1,97 @@
-import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {UI} from "./ui.js";
+// ui-boolean.js
+// Native Web Component for checkbox input control
+// Replaces Polymer-based UIBoolean
 
-let instanceCount  = 0;
+import { UIBase, defineKey } from "./ui.js";
 
-class UIBoolean extends UI {
-static get template () {
-return html`
-<div class="ui-boolean">
-<label >[[label]]
-<br><input id="input" type="checkbox" checked="{{value::change}}" on-keydown="handleSpecialKeys">
-</label>
-</div>
-`; // html
-} // get template
+let instanceCount = 0;
 
-static get is() { return "ui-boolean"; }
+class UIBoolean extends UIBase {
+	static get observedAttributes() {
+		return ['label', 'name', 'value', 'shortcut'];
+	}
 
+	constructor() {
+		super();
+		instanceCount++;
+		this.id = `ui-boolean-${instanceCount}`;
+		this._value = false;
+	}
 
-static get properties () {
-return {
-value: {type: Boolean, value: false, notify: true},
-}; // return
-} // get properties
+	get template() {
+		return `
+			<style>
+				:host { display: block; margin: 0.25em 0; }
+				.ui-boolean { display: flex; align-items: center; }
+				label { font-weight: bold; cursor: pointer; }
+				input { margin-right: 0.5em; }
+			</style>
+			<div class="ui-boolean">
+				<label>
+					<input id="input" type="checkbox" ${this._value ? 'checked' : ''}>
+					${this._label}
+				</label>
+			</div>
+		`;
+	}
 
+	connectedCallback() {
+		super.connectedCallback();
+		// Sync value from attribute if present
+		if (this.hasAttribute('value')) {
+			const attrValue = this.getAttribute('value');
+			this._value = attrValue === 'true' || attrValue === '' || attrValue === 'checked';
+		}
+		this._updateInputValue();
+	}
 
-constructor () {
-super ();
-instanceCount += 1;
-this.id = `${UIBoolean.is}-${instanceCount}`;
-} // constructor
+	_setupEventListeners() {
+		const input = this.shadowRoot.querySelector('#input');
+		if (input) {
+			input.addEventListener('change', (e) => {
+				this._value = e.target.checked;
+				this._notifyValueChange(this._value);
+			});
+			input.addEventListener('click', (e) => {
+				this._value = e.target.checked;
+				this._notifyValueChange(this._value);
+			});
+			input.addEventListener('keydown', (e) => this.handleSpecialKeys(e));
+		}
+	}
 
-connectedCallback () {
-super.connectedCallback();
-if (this.shhortcut && this.uiElement) defineKey(this.shortcut, this.uiElement);
-} // connectedCallback
+	attributeChangedCallback(name, oldValue, newValue) {
+		if (oldValue === newValue) return;
 
+		switch (name) {
+			case 'value':
+				this._value = newValue === 'true' || newValue === '' || newValue === 'checked';
+				this._updateInputValue();
+				break;
+			default:
+				super.attributeChangedCallback(name, oldValue, newValue);
+		}
+	}
 
+	// Value property
+	get value() { return this._value; }
+	set value(val) {
+		const newValue = Boolean(val === true || val === 'true' || val === '' || val === 'checked');
+		if (this._value !== newValue) {
+			this._value = newValue;
+			this._updateInputValue();
+			this._notifyValueChange(this._value);
+		}
+	}
 
+	_updateInputValue() {
+		const input = this.shadowRoot?.querySelector('#input');
+		if (input) {
+			input.checked = this._value;
+		}
+	}
+}
 
-} // class UIBoolean
+customElements.define('ui-boolean', UIBoolean);
 
-customElements.define(UIBoolean.is, UIBoolean);
+export { UIBoolean };

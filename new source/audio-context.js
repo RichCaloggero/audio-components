@@ -1,660 +1,427 @@
-// bufferToWave: https://www.russellgood.com/how-to-convert-audiobuffer-to-audio-file/
+// audio-context.js
+// Native Web Component for the root audio-context element
+// Replaces Polymer-based _AudioContext_ module
 
-import {bufferToWave} from "./bufferToWave.js";
-import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {difference} from "./setops.js";
+import { bufferToWave } from "./bufferToWave.js";
+import {
+	AudioComponentBase,
+	getAudio,
+	setAudio,
+	getShadowRoot,
+	setShadowRoot,
+	startAutomation,
+	stopAutomation,
+	addToAutomationQueue,
+	removeFromAutomationQueue,
+	getAutomationInterval,
+	setAutomationInterval,
+	statusMessage,
+	setParam,
+	childrenReady,
+	depth
+} from "./audio-component-base.js";
 
-let audioPlayer;
-export function registerAudioPlayer (x) {if (x) audioPlayer = x; return audioPlayer;}
+// Re-export utilities for other modules
+export {
+	getAudio as audio,
+	getShadowRoot as shadowRoot,
+	startAutomation,
+	stopAutomation,
+	addToAutomationQueue,
+	removeFromAutomationQueue,
+	statusMessage,
+	setParam as _setParam,
+	childrenReady,
+	depth
+};
 
-// audio-context
+let audioPlayer = null;
+export function registerAudioPlayer(x) {
+	if (x) audioPlayer = x;
+	return audioPlayer;
+}
+
 let instanceCount = 0;
-export let shadowRoot = null;
-export let audio;
-export let automationInterval = 0.070; // seconds
-let automationQueue = [];
-let automator = null;
-let _automation = false;
-
-
-export  const module = class _AudioContext_ extends PolymerElement {
-static get template () {
-return html`
-<fieldset class="audio-context">
-<legend><h1>[[label]]</h1></legend>
-<ui-boolean label="enable automation" value="{{enableAutomation}}" shortcut="alt shift a"></ui-boolean>
-<ui-number label="automationInterval" value="{{automationInterval}}" min="0.01" max="3.0" step="0.01"></ui-number>
-<ui-boolean label="enable analyser" value="{{enableAnalyser}}" shortcut="alt shift x"></ui-boolean>
-
-<ui-boolean label="showListener" value="{{showListener}}"></ui-boolean>
-<ui-boolean label="enable record mode" class="enable-record-mode" value="{{recordMode}}"></ui-boolean>
-
-<fieldset class="recorder" hidden>
-<legend><h2>Recorder</h2></legend>
-
-<div id="results-label">Results - right click and choose save from the context menu:</div>
-<audio controls tabindex="0" aria-labelledby="results-label"></audio>
-</fieldset>
-
-<fieldset hidden id="listener">
-<legend><h3>Listener</h3></legend>
-<ui-number label="x" value="{{listenerX}}"></ui-number>
-<ui-number label="y" value="{{listenerY}}"></ui-number>
-<ui-number label="z" value="{{listenerZ}}"></ui-number>
-
-<ui-number label="forwardX" value="{{forwardX}}"></ui-number>
-<ui-number label="forwardY" value="{{forwardY}}"></ui-number>
-<ui-number label="forwardZ" value="{{forwardZ}}"></ui-number>
-
-<ui-number label="upX" value="{{upX}}"></ui-number>
-<ui-number label="upY" value="{{upY}}"></ui-number>
-<ui-number label="upZ" value="{{upZ}}"></ui-number>
-</fieldset>
-
-<!--<div role="dialog" hidden id="defineKeyDialog" aria-labelledby="defineKeyDialog-title">
-<header>
-<h2 id="defineKeyDialog-title">Define Key</h2>
-<button class="close">Close</button>
-</header>
-
-<div class="body">
-<label>Control <input type="checkbox" class="control"></label>
-<label>Alt <input type="checkbox" class="alt"></label>
-<label>Shift <input type="checkbox" class="shift"></label>
-<label>key <input type="text" class="key"></label>
-<button class="ok">OK</button>
-</div>
-</div>
--->
-
-<div role="region" aria-label="status" id="statusMessage" aria-live="polite"></div>
-</fieldset><!-- audio context region -->
-
-<slot></slot>
-`; // html
-} // get template
-
-static get is() { return "audio-context";}
-
-static get properties() {
-return {
-hide: String,
-//hide: {type: String, value: "", observer: "hideChanged"},
-hideOnBypass: Boolean,
-label: String,
-//label: {type: String, value: "", notify: true, /*observer: "labelChanged"*/},
-
-sampleRate: Number,
-depth: {type: Number, notify:true},
-
-mix: {type: Number, value: 1.0, notify: true, observer: "_mix"},
-bypass: {type: Boolean, notify: true, observer: "_bypass"},
-silentBypass: Boolean,
-enableAutomation: {type: Boolean, value: false, notify: true, observer: "_enableAutomation"},
-enableAnalyser: {type: Boolean, value: false, notify: true, observer: "_enableAnalyser"},
-showListener: {type: Boolean, value: false, notify: true, observer: "_showListener"},
-recordMode: {type: Boolean, value: false, notify: true, observer: "_recordMode"},
-shortcuts: {type: String, notify:true, observer: "shortcutsChanged"},
-automationInterval: {type: Number, value: 0.05, notify: true, observer: "automationIntervalChanged"},
-
-listenerX: {type: Number, value: 0, notify: true, observer: "listenerXChanged"},
-listenerY: {type: Number, value: 0, notify: true, observer: "listenerYChanged"},
-listenerZ: {type: Number, value: 0, notify: true, observer: "listenerZChanged"},
-
-forwardX: {type: Number, value: 0, notify: true, observer: "forwardXChanged"},
-forwardY: {type: Number, value: 0, notify: true, observer: "forwardYChanged"},
-forwardZ: {type: Number, value: 0, notify: true, observer: "forwardZChanged"},
-
-upX: {type: Number, value: 0, notify: true, observer: "upXChanged"},
-upY: {type: Number, value: 0, notify: true, observer: "upYChanged"},
-upZ: {type: Number, value: 0, notify: true, observer: "upZChanged"},
-}; // return
-} // get properties
-
-constructor () {
-super ();
-instanceCount += 1;
-this.module = module;
-this._id = this.getAttribute("id");
-this.id = `${module.is}-${instanceCount}`;
-this._ready = false;
-this._hide = [];
-
-if (! AudioContext) {
-alert ("webaudio not available");
-throw new Error("web audio not available");
-return;
-} // if
-
-if (!audio) {
-try {
-audio = new AudioContext();
-} catch (e) {
-throw new Error(`${e}: cannot create a new audio context; aborting`);
-} // try
-
-} else {
-//console.debug(`${this.id}: using ${audio}...`);
-} // if
-
-this.audio = audio;
-} // constructor
-
-get hide () {return this._hide;}
-set hide (value) {
-this._hide = value?
-value.trim().toLowerCase().match(/\w+/g)
-: [];
-} // set hide
-
-
-get isReady () {return this._ready;}
-set isReady (value) {
-if (value) {
-this._ready = true;
-setTimeout(() => runPropertyEffects(this), 0);
-setTimeout(() => signalReady(this), 0);
-} else {
-this._ready = false;
-} // if
-} // set isReady
-
-connectedCallback () {
-super.connectedCallback();
-if (this._id) this.id = this._id;
-
-// when this.shadowRoot becomes set for the first time, store it since it will be shadow root of the audio-context itself
-if (!shadowRoot) shadowRoot = this.shadowRoot;
-
-if (this.label) {
-console.log(`${this.id} connected with label ${this.label}, hide ${this._hide} ${typeof(this._hide[0])}`);
-this.restoreUI();
-this.hideOnly(this._hide);
-} else {
-this.hideUI();
-this.hideOnly([]);
-} // if
-
-// if this is the real top level element in the tree, then wait on all children, add depth info to each legend in all child ui,  and dispatch event when the entire tree is ready
-//if (this.matches("audio-context")) {
-if (this.module.name === module.name) {
-console.log(`audio-context connected...`);
-
-childrenReady(this, children => {
-enumerateNonUi(this)
-.forEach(e => e.depth = depth(e));
-});
-} // if
-} // connectedCallback
-
-labelChanged (value) {
-if (this._ready) {
-console.debug(`${this.id}: labelChanged to "${value}"`);
-if (value) {
-this.restoreUI();
-} else {
-this.hideUI ();
-} // if
-} // if
-} // labelChanged
-
-hideChanged (value) {
-this._hide = value?
-value.trim().toLowerCase().match(/\w+/g)
-: [];
-} // hideChanged
-
-_mix (value) {if (this._ready && this.component) this.component.mix(value);}
-
-_bypass (value) {
-if (this._ready && this.component) {
-this.component.silentBypass(this.silentBypass);
-this.component.bypass(value);
-this._hideOnBypass(value);
-} // if
-} // _bypass
-
-_hideOnBypass (value) {
-if (this._ready && this.label && this.findContext().hideOnBypass) {
-if (value) {
-this.hideAllExcept(["bypass"]);
-if (this.shadowRoot.querySelector("slot")) this.shadowRoot.querySelector("slot").hidden = true;
-} else {
-this.hideOnly(this._hide);
-if (this.shadowRoot.querySelector("slot")) this.shadowRoot.querySelector("slot").hidden = false;
-} // if
-} // if
-} // _hideOnBypass
-
-hideOnly (...labels) {
-// why is this received as an array of arrays rather than a simple array of strings
-// caller passes it as an array of strings
-const hide = labels.flat(Infinity);
-//console.debug(`${this.id}.hideOnly ${hide.length} ${typeof(hide[0])}`);
-
-this.uiControls().forEach(x => {
-const label = x.label? x.label.trim().toLowerCase() : "";
-x.hidden = hide.includes(label.toLowerCase());
-});
-} // hideOnly
-
-hideAllExcept (...labels) {
-// also received array of arrays instead of array of strings
-const hide = labels.flat(Infinity);
-//console.debug(`${this.id}.hideAllExcept ${hide.length} ${typeof(hide[0])}`);
-
-this.uiControls().forEach(x => {
-const label = x.label? x.label.trim().toLowerCase() : "";
-x.hidden = !hide.includes(label)
-});
-} // hideAllExcept
-
-restoreUI () {
-this.uiRoot().forEach(x => x.hidden = false);
-if (this.shadowRoot.querySelector("slot")) this.shadowRoot.querySelector("slot").removeAttribute("hidden");
-} // restoreUI
-
-hideUI (includeDescendents) {
-this.uiRoot().forEach(x => x.hidden = true);
-if (includeDescendents && this.shadowRoot.querySelector("slot")) this.shadowRoot.querySelector("slot").hidden = true;
-} // hideUI
-
-labelsToControls (...labels) {return this.uiControls().filter(x => labels.includes(x.label));}
-
-uiControls () {
-if (this.shadowRoot) {
-const selectors = ".panel,ui-list,ui-text,ui-number,ui-boolean,button";
-return Array.from(this.shadowRoot.querySelectorAll(selectors));
-} // if
-
-return [];
-} // uiControls
-
-
-automationIntervalChanged (value) {if (value && !Number.isNaN(value)) automationInterval = value;}
- 
-listenerXChanged (value) {if (this._ready) this.audio.listener.setPosition(this.listenerX, this.listenerY, this.listenerZ);}
-listenerYChanged (value) {if (this._ready) this.audio.listener.setPosition(this.listenerX, this.listenerY, this.listenerZ);}
-listenerZChanged (value) {if (this._ready) this.audio.listener.setPosition(this.listenerX, this.listenerY, this.listenerZ);}
-
-forwardXChanged (value) {if (this._ready) this.audio.listener.setOrientation(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ);}
-forwardYChanged (value) {if (this._ready) this.audio.listener.setOrientation(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ);}
-forwardZChanged (value) {if (this._ready) this.audio.listener.setOrientation(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ);}
-
-upXChanged (value) {if (this._ready) this.audio.listener.setOrientation(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ);}
-upYChanged (value) {if (this._ready) this.audio.listener.setOrientation(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ);}
-upZChanged (value) {if (this._ready) this.audio.listener.setOrientation(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ);}
-
-shortcutsChanged (value) {
-if (!this.isReady) return;
-if (!value) return;
-	const root = this.shadowRoot;
-if (! root) return;
-
-const parameters = Array.from(root.querySelectorAll("ui-number, ui-boolean, ui-text, ui-list"));
-//console.debug(`- ${parameters.length} parameters found`);
-const shortcuts = parseShortcuts(value);
-//console.debug(`- ${shortcuts.length} shortcuts found`);
-
-parameters.forEach(p => {
-const name = p.name || p.label;
-if (name) {
-const shortcut = shortcuts.find(x => x.parameter.toLowerCase() === name.toLowerCase());
-if (shortcut) {
-//console.debug(`- defining shortcut for ${name} to be ${shortcut.shortcut}`);
-p.shortcut = shortcut.shortcut;
-} // if
-} // if
-}); // forEach
-} // shortcutsChanged
-
-
-components (elements) {
-if (!elements) elements = [];
-return elements.map(e => {
-if (e && e.component) return e.component;
-else throw new Error(`${this.id}: ${e} is null or invalid -- cannot connect`);
-});
-} // components
-
-_enableAutomation (value) {
-if (!this._ready) return;
-if (value) {
-startAutomation();
-this.dispatchEvent(new CustomEvent("startAutomation", {detail: {interval: automationInterval}}));
-//console.debug("automation started");
-} else {
-stopAutomation();
-this.dispatchEvent(new CustomEvent("stopAutomation"));
-//console.debug("automation stopped");
-} // if
-} // _enableAutomation
-
-_enableAnalyser (value) {
-if (!this._ready) return;
-if (audioPlayer) {
-if (value) {
-this.analyser = new Analyser(audio);
-audioPlayer.output.connect(this.analyser);
-} else {
-this.analyser = null;
-} // if
-} // if
-} // _enableAnalyser
-
-_showListener (value) {if (shadowRoot) shadowRoot.querySelector("#listener").hidden = !value;}
-
-_recordMode (value) {
-if (shadowRoot) {
-if (value) {
-shadowRoot.querySelector(".recorder").removeAttribute("hidden");
-this.loadAudio(audioPlayer.src);
-} else {
-shadowRoot.querySelector(".recorder").setAttribute("hidden", "");
-} // if
-} // if
-} // _recordMode
-
-loadAudio (url) {
-statusMessage("Loading...");
-fetch(url)
-.then(response=> {
-if (response.ok) return response.arrayBuffer();
-else throw new Error(response.statusText);
- }).then(data => {
-const audioContext = new AudioContext();
-return audioContext.decodeAudioData(data)
-}).then(buffer => {
-this.render(buffer);
-statusMessage(`${round(buffer.duration/60)} minutes of audio loaded.`);
-}).catch(error => statusMessage(error));
-} // loadAudio
-
-render (buffer) {
-const _audio = audio;
-const _audioPlayer = audioPlayer;
-const recorder = this.shadowRoot.querySelector(".recorder");
-const audioElement = recorder.querySelector("audio");
-const automationEnabled = this.enableAutomation;
-
-audio = new OfflineAudioContext(2, buffer.length, 44100);
-const html = this.outerHTML;
-let container = document.createElement("div");
-container.setAttribute("hidden", "");
-container.innerHTML = html;
-this.parentElement.appendChild(container);
-const newContext = container.children[0];
-const statusMessage = (text) => this.shadowRoot.querySelector("#statusMessage").textContent = text;
-
-
-newContext.addEventListener("elementReady", () => {
-//setTimeout(() => {
-const audioSource = audio.createBufferSource();
-audioSource.buffer = buffer;
-audioPlayer.audioSource = audioSource;
-audioSource.connect(audioPlayer.output);
-
-
-if (automationEnabled) {
-newContext.enableAutomation = true;
-//startAutomation();
-newContext._enableAutomation(true);
-console.debug(`recording: automation enabled for ${automationQueue.length} elements...`);
-} // if
-copyAllValues(this, newContext);
-
-audioSource.start();
-statusMessage("Rendering audio, please wait...");
-
-audio.startRendering()
-.then(buffer => {
-recorder.removeAttribute("hidden");
-audioElement.src = URL.createObjectURL(bufferToWave(buffer, buffer.length));
-audioElement.focus();
-
-// restoring...
-audio = _audio;
-audioPlayer = _audioPlayer;
-audioPlayer.audioSource.connect(audioPlayer.output);
-this.parentElement.removeChild(container);
-container.innerHTML = "";
-container = null;
-this.enableAutomation = automationEnabled;
-
-statusMessage(`Render complete: ${Math.round(10*buffer.duration/60)/10} minutes of audio rendered.`);
-}).catch(error => statusMessage(`render: ${error}\n${error.stack}\n`));
-}); // newContext ready
-//}, 3000);
-} // render
-
-
-findContext () {
-let element = this;
-while (element && element instanceof module && element.module.name !== module.name) element = element.parentElement;
-
-return element && element.module.name === module.name? element : null;
-} // findContext
-
-uiRoot () {
-return this.shadowRoot? Array.from(this.shadowRoot.children).filter(x => !x.matches("slot, style")) : [];
-} // uiRoot
-
-hidePanel (selector) {
-if (this.shadowRoot)
-this.shadowRoot.querySelectorAll(selector).forEach(x => x.hidden = true);
-} //  hidePanel
-
-
-showPanel (selector) {
-if (this.shadowRoot)
-this.shadowRoot.querySelectorAll(selector).forEach(x => x.hidden = false);
-} //  showPanel
-
-
-} // class _AudioContext_
-
-customElements.define(module.is, module);
-
-
-/// utility functions
-
-
-export function _setParam (parameter, value) {
-//console.debug (`_setParameterValue (${parameter}, ${value}`);
-if (! parameter) return;
-
-try {
-if (parameter instanceof AudioParam) {
-if (automator) parameter.linearRampToValueAtTime(value, audio.currentTime);
-else parameter.value = value;
-
-} else {
-parameter = value;
-} // if
-
-return parameter;
-
-} catch (e) {
-let message = `_setParam (${parameter}, ${value}): ${e}`;
-alert(`${message}\n${e.stack}`);
-} // catch
-} // _setParam
-
-
-export function startAutomation () {automator = setInterval(() => automationQueue.forEach(e => e.automate()), 1000*automationInterval);} // startAutomation
-export function stopAutomation () {clearInterval(automator); automator = null;}
-
-/*export function startAutomation () {
-_automation = true;
-const _tick = () => {
-automationQueue.forEach(e => e.automate());
-if (_automation) {
-automator = audio.createOscillator();
-automator.onended = _tick;
-automator.start();
-automator.stop(automationInterval/1000);
-} // if
-}; // _tick
-
-_tick();
-} // startAutomation
-
-export function stopAutomation () {
-_automation = false;
-} // stopAutomation
-*/
-
-
-export function addToAutomationQueue (element) {
-automationQueue.push (element);
-console.debug(`added ${element.label || element.id} to automation queue`);
-} // addToAutomationQueue
-
-export function removeFromAutomationQueue (element) {
-automationQueue = automationQueue.filter(e => e != element);
-} // removeFromAutomationQueue
-
-
-export function statusMessage (message, log = true) {
-const p = document.createElement("p");
-p.appendChild(document.createTextNode(message));
-if (shadowRoot) {
-const status = shadowRoot.querySelector ("#statusMessage");
-
-if (status) {
-if (!log) status.innerHTML = "";
-status.appendChild(p);
-return;
-} // if
-} // if
-
-alert (message);
-} // statusMessage
-
-function parseShortcuts (text) {
-console.debug(`parseShortcuts:  ${text}`);
-return text.split(",").map(definition => {
-//console.debug(`- definition: ${definition}`);
-const tokens = definition.match(/\w+/g);
-if (tokens.length < 3) throw new Error(`${definition}: invalid shortcut definition; must contain a parameter name, followed by at least one key identifier which must include at least one modifier: control, shift, or alt.`);
-return {parameter: tokens[0], shortcut: tokens.slice(1).join(" ")};
-});
-} // parseShortcuts
-
-function copyAllValues (_from, _to) {
-//try {
-_from = findAllControls(_from);
-_to = findAllControls(_to);
-
-const values = _from.map(x => {
-return x.type && x.type === "checkbox"? x.checked : x.value
-});
-
-_to.forEach((x,i) => {
-if (x instanceof HTMLInputElement && x.type=== "checkbox") {
-x.checked = Boolean(values[i]);
-//console.debug("- checkbox: ", x);
-x.dispatchEvent(new Event("click"));
-} else {
-x.value = values[i];
-x.dispatchEvent(new Event("change"));
-} // if
-});
-} // copyAllValues
-
-function findAllControls(root) {
-const enableRecordMode = document.querySelector("audio-context")
-.shadowRoot.querySelector(".enable-record-mode")
-.shadowRoot.querySelector("input");
-return enumerateAll(root).filter(x => 
-x && x.matches && x.matches("input,select") && x !== enableRecordMode
-); // filter
-} // findAllControls
-
-
-function enumerateAll (root) {
-return [
-root,
-Array.from(root.children).map(x => enumerateAll(x)),
-root.shadowRoot? enumerateAll(root.shadowRoot) : []
-].flat(Infinity);
-} // enumerateAll
-
-function enumerateNonUi (root) {
-return enumerateAll(root)
-.filter(x => x instanceof module);
-} // enumerateNonUi
-
-
-/// connection utilities
-
-export function childrenReady(element, callback) {
-let children = Array.from(element.children);
-
-element.addEventListener("elementReady", handleChildReady);
-//statusMessage (`${element.id}: waiting for ${children.length} children`);
-console.debug(`${element.id}: waiting for ${children.length} children`);
-
-function handleChildReady (e) {
-if (!children.includes(e.target)) return;
-
-// remove this child and we're done if no more children left to process
-children = children.filter(x => x !== e.target);
-console.debug(`${element.id}: child ${e.target.id} is ready; ${children.length} remaining`);
-if (children.length > 0) return;
-
-// no more children left, so remove this handler and signal ready on this element
-element.removeEventListener("elementReady", handleChildReady);
-//statusMessage(`${element.id}: all children ready`);
-
-callback.call(element, Array.from(element.children));
-element.isReady = true;
-} // handleChildReady
-} // childrenReady
-
-function signalReady (element) {
-//statusMessage(`${element.module.name}: sent ready signal`, "append");
-element.dispatchEvent(new CustomEvent("elementReady", {bubbles: true}));
-} // signalReady
-
-function runPropertyEffects (element) {
-Object.keys(element.module.properties).forEach(p => runObserver(p, element.module));
-Object.keys(module.properties).forEach(p => runObserver(p, module));
-
-function runObserver (name, module) {
-if (module.properties.hasOwnProperty(name)) {
-const definition = module.properties[name];
-console.debug(`${element.id} in ${module.name}: ${name} = `, definition);
-if (name === "silentBypass") {
-console.debug(`- silentBypass ${element[name]}`);
-} // if
-if (definition.observer && typeof(element[name]) !== "undefined") element[definition.observer].call(element, element[name]);
-} // if
-} // runObserver
-} // runPropertyEffects 
-
-/// random utilities
-
-export function depth (start, top = module) {
-let e = start;
-//while (e && !e.matches("audio-context")) e = e.parentElement;
-
-let _depth = 1;
-while (e && !e.matches("audio-context")) {
-if (!e.container || e.label) _depth += 1;
-e = e.parentElement;
-} // while
-
-return _depth;
-} // depth
-function round (n) {return Math.round(n*10)/10;}
-
-
-function _hide (element) {element.style.display = "none";}
-function _unhide (element) {element.style.display = "block";}
-
-function stringToSet (s = "", separator = ",") {
-return new Set (
-s.split(separator).map(x => x.trim())
-); // new Set
-} // stringToSet
+
+class AudioContext extends AudioComponentBase {
+	static get observedAttributes() {
+		return [
+			'label', 'hide', 'bypass', 'mix', 'silent-bypass', 'hide-on-bypass',
+			'sample-rate', 'enable-automation', 'automation-interval',
+			'enable-analyser', 'show-listener', 'record-mode',
+			'listener-x', 'listener-y', 'listener-z',
+			'forward-x', 'forward-y', 'forward-z',
+			'up-x', 'up-y', 'up-z',
+			'shortcuts'
+		];
+	}
+
+	constructor() {
+		super();
+		instanceCount++;
+		this._id = this.getAttribute("id");
+		this.id = `audio-context-${instanceCount}`;
+
+		// Additional properties for audio-context
+		this._enableAutomation = false;
+		this._enableAnalyser = false;
+		this._showListener = false;
+		this._recordMode = false;
+		this._automationInterval = 0.05;
+
+		// Listener properties
+		this._listenerX = 0;
+		this._listenerY = 0;
+		this._listenerZ = 0;
+		this._forwardX = 0;
+		this._forwardY = 0;
+		this._forwardZ = -1;
+		this._upX = 0;
+		this._upY = 1;
+		this._upZ = 0;
+
+		this._shortcuts = '';
+		this.analyser = null;
+	}
+
+	get template() {
+		return `
+			<style>
+				:host { display: block; }
+				fieldset { border: 1px solid #ccc; padding: 1em; margin: 0.5em 0; }
+				legend h1, legend h2, legend h3 { margin: 0; font-size: 1.2em; }
+				#statusMessage { margin-top: 1em; padding: 0.5em; background: #f5f5f5; min-height: 1.5em; }
+				.recorder[hidden], #listener[hidden] { display: none; }
+			</style>
+			<fieldset class="audio-context">
+				<legend><h1>${this._label}</h1></legend>
+				<ui-boolean label="enable automation" shortcut="alt shift a"></ui-boolean>
+				<ui-number label="automationInterval" min="0.01" max="3.0" step="0.01"></ui-number>
+				<ui-boolean label="enable analyser" shortcut="alt shift x"></ui-boolean>
+				<ui-boolean label="showListener"></ui-boolean>
+				<ui-boolean label="enable record mode" class="enable-record-mode"></ui-boolean>
+
+				<fieldset class="recorder" hidden>
+					<legend><h2>Recorder</h2></legend>
+					<div id="results-label">Results - right click and choose save from the context menu:</div>
+					<audio controls tabindex="0" aria-labelledby="results-label"></audio>
+				</fieldset>
+
+				<fieldset hidden id="listener">
+					<legend><h3>Listener</h3></legend>
+					<ui-number label="x"></ui-number>
+					<ui-number label="y"></ui-number>
+					<ui-number label="z"></ui-number>
+					<ui-number label="forwardX"></ui-number>
+					<ui-number label="forwardY"></ui-number>
+					<ui-number label="forwardZ"></ui-number>
+					<ui-number label="upX"></ui-number>
+					<ui-number label="upY"></ui-number>
+					<ui-number label="upZ"></ui-number>
+				</fieldset>
+
+				<div role="region" aria-label="status" id="statusMessage" aria-live="polite"></div>
+			</fieldset>
+
+			<slot></slot>
+		`;
+	}
+
+	connectedCallback() {
+		super.connectedCallback();
+
+		// Store shadow root for audio-context
+		setShadowRoot(this.shadowRoot);
+
+		// Restore original ID if provided
+		if (this._id) this.id = this._id;
+
+		// Wait for children and set up
+		childrenReady(this, children => {
+			this._enumerateNonUi()
+				.forEach(e => e.depth = depth(e));
+		});
+
+		console.log(`audio-context connected with label ${this._label}`);
+	}
+
+	_setupEventListeners() {
+		// Enable automation checkbox
+		const enableAutomationEl = this.shadowRoot.querySelector('ui-boolean[label="enable automation"]');
+		if (enableAutomationEl) {
+			enableAutomationEl.value = this._enableAutomation;
+			enableAutomationEl.addEventListener('value-changed', (e) => {
+				this.enableAutomation = e.detail.value;
+			});
+		}
+
+		// Automation interval
+		const automationIntervalEl = this.shadowRoot.querySelector('ui-number[label="automationInterval"]');
+		if (automationIntervalEl) {
+			automationIntervalEl.value = this._automationInterval;
+			automationIntervalEl.addEventListener('value-changed', (e) => {
+				this.automationInterval = e.detail.value;
+			});
+		}
+
+		// Enable analyser
+		const enableAnalyserEl = this.shadowRoot.querySelector('ui-boolean[label="enable analyser"]');
+		if (enableAnalyserEl) {
+			enableAnalyserEl.value = this._enableAnalyser;
+			enableAnalyserEl.addEventListener('value-changed', (e) => {
+				this.enableAnalyser = e.detail.value;
+			});
+		}
+
+		// Show listener
+		const showListenerEl = this.shadowRoot.querySelector('ui-boolean[label="showListener"]');
+		if (showListenerEl) {
+			showListenerEl.value = this._showListener;
+			showListenerEl.addEventListener('value-changed', (e) => {
+				this.showListener = e.detail.value;
+			});
+		}
+
+		// Record mode
+		const recordModeEl = this.shadowRoot.querySelector('ui-boolean[label="enable record mode"]');
+		if (recordModeEl) {
+			recordModeEl.value = this._recordMode;
+			recordModeEl.addEventListener('value-changed', (e) => {
+				this.recordMode = e.detail.value;
+			});
+		}
+
+		// Listener position controls
+		this._setupListenerControls();
+	}
+
+	_setupListenerControls() {
+		const listenerControls = [
+			{ label: 'x', prop: '_listenerX', handler: 'listenerX' },
+			{ label: 'y', prop: '_listenerY', handler: 'listenerY' },
+			{ label: 'z', prop: '_listenerZ', handler: 'listenerZ' },
+			{ label: 'forwardX', prop: '_forwardX', handler: 'forwardX' },
+			{ label: 'forwardY', prop: '_forwardY', handler: 'forwardY' },
+			{ label: 'forwardZ', prop: '_forwardZ', handler: 'forwardZ' },
+			{ label: 'upX', prop: '_upX', handler: 'upX' },
+			{ label: 'upY', prop: '_upY', handler: 'upY' },
+			{ label: 'upZ', prop: '_upZ', handler: 'upZ' }
+		];
+
+		const listenerFieldset = this.shadowRoot.querySelector('#listener');
+		if (listenerFieldset) {
+			listenerControls.forEach(ctrl => {
+				const el = listenerFieldset.querySelector(`ui-number[label="${ctrl.label}"]`);
+				if (el) {
+					el.value = this[ctrl.prop];
+					el.addEventListener('value-changed', (e) => {
+						this[ctrl.handler] = e.detail.value;
+					});
+				}
+			});
+		}
+	}
+
+	// Enable automation property
+	get enableAutomation() { return this._enableAutomation; }
+	set enableAutomation(value) {
+		this._enableAutomation = Boolean(value);
+		if (this._ready) {
+			if (this._enableAutomation) {
+				startAutomation();
+				this.dispatchEvent(new CustomEvent("startAutomation", { detail: { interval: getAutomationInterval() } }));
+			} else {
+				stopAutomation();
+				this.dispatchEvent(new CustomEvent("stopAutomation"));
+			}
+		}
+	}
+
+	// Automation interval property
+	get automationInterval() { return this._automationInterval; }
+	set automationInterval(value) {
+		this._automationInterval = Number(value);
+		setAutomationInterval(this._automationInterval);
+	}
+
+	// Enable analyser property
+	get enableAnalyser() { return this._enableAnalyser; }
+	set enableAnalyser(value) {
+		this._enableAnalyser = Boolean(value);
+		if (this._ready && audioPlayer) {
+			if (this._enableAnalyser) {
+				// Create analyser if needed
+				this.analyser = this.audio.createAnalyser();
+				audioPlayer.output?.connect(this.analyser);
+			} else {
+				this.analyser = null;
+			}
+		}
+	}
+
+	// Show listener property
+	get showListener() { return this._showListener; }
+	set showListener(value) {
+		this._showListener = Boolean(value);
+		const listenerEl = this.shadowRoot?.querySelector("#listener");
+		if (listenerEl) {
+			listenerEl.hidden = !this._showListener;
+		}
+	}
+
+	// Record mode property
+	get recordMode() { return this._recordMode; }
+	set recordMode(value) {
+		this._recordMode = Boolean(value);
+		const recorder = this.shadowRoot?.querySelector(".recorder");
+		if (recorder) {
+			if (this._recordMode) {
+				recorder.removeAttribute("hidden");
+				if (audioPlayer?.src) {
+					this.loadAudio(audioPlayer.src);
+				}
+			} else {
+				recorder.setAttribute("hidden", "");
+			}
+		}
+	}
+
+	// Listener position properties
+	get listenerX() { return this._listenerX; }
+	set listenerX(value) {
+		this._listenerX = Number(value);
+		if (this._ready) this._updateListenerPosition();
+	}
+
+	get listenerY() { return this._listenerY; }
+	set listenerY(value) {
+		this._listenerY = Number(value);
+		if (this._ready) this._updateListenerPosition();
+	}
+
+	get listenerZ() { return this._listenerZ; }
+	set listenerZ(value) {
+		this._listenerZ = Number(value);
+		if (this._ready) this._updateListenerPosition();
+	}
+
+	_updateListenerPosition() {
+		this.audio.listener.setPosition(this._listenerX, this._listenerY, this._listenerZ);
+	}
+
+	// Listener orientation properties
+	get forwardX() { return this._forwardX; }
+	set forwardX(value) {
+		this._forwardX = Number(value);
+		if (this._ready) this._updateListenerOrientation();
+	}
+
+	get forwardY() { return this._forwardY; }
+	set forwardY(value) {
+		this._forwardY = Number(value);
+		if (this._ready) this._updateListenerOrientation();
+	}
+
+	get forwardZ() { return this._forwardZ; }
+	set forwardZ(value) {
+		this._forwardZ = Number(value);
+		if (this._ready) this._updateListenerOrientation();
+	}
+
+	get upX() { return this._upX; }
+	set upX(value) {
+		this._upX = Number(value);
+		if (this._ready) this._updateListenerOrientation();
+	}
+
+	get upY() { return this._upY; }
+	set upY(value) {
+		this._upY = Number(value);
+		if (this._ready) this._updateListenerOrientation();
+	}
+
+	get upZ() { return this._upZ; }
+	set upZ(value) {
+		this._upZ = Number(value);
+		if (this._ready) this._updateListenerOrientation();
+	}
+
+	_updateListenerOrientation() {
+		this.audio.listener.setOrientation(
+			this._forwardX, this._forwardY, this._forwardZ,
+			this._upX, this._upY, this._upZ
+		);
+	}
+
+	// Shortcuts property
+	get shortcuts() { return this._shortcuts; }
+	set shortcuts(value) {
+		this._shortcuts = value || '';
+		if (this._ready && value) {
+			this._parseAndApplyShortcuts(value);
+		}
+	}
+
+	_parseAndApplyShortcuts(value) {
+		const parameters = Array.from(this.shadowRoot.querySelectorAll("ui-number, ui-boolean, ui-text, ui-list"));
+		const shortcuts = this._parseShortcuts(value);
+
+		parameters.forEach(p => {
+			const name = p.name || p.label;
+			if (name) {
+				const shortcut = shortcuts.find(x => x.parameter.toLowerCase() === name.toLowerCase());
+				if (shortcut) {
+					p.shortcut = shortcut.shortcut;
+				}
+			}
+		});
+	}
+
+	_parseShortcuts(text) {
+		return text.split(",").map(definition => {
+			const tokens = definition.match(/\w+/g);
+			if (tokens.length < 3) {
+				throw new Error(`${definition}: invalid shortcut definition`);
+			}
+			return { parameter: tokens[0], shortcut: tokens.slice(1).join(" ") };
+		});
+	}
+
+	// Audio loading for recording
+	loadAudio(url) {
+		statusMessage("Loading...");
+		fetch(url)
+			.then(response => {
+				if (response.ok) return response.arrayBuffer();
+				else throw new Error(response.statusText);
+			})
+			.then(data => {
+				const audioContext = new window.AudioContext();
+				return audioContext.decodeAudioData(data);
+			})
+			.then(buffer => {
+				this.render(buffer);
+				statusMessage(`${Math.round(buffer.duration / 60 * 10) / 10} minutes of audio loaded.`);
+			})
+			.catch(error => statusMessage(error.toString()));
+	}
+
+	// Enumerate all non-UI elements
+	_enumerateAll(root) {
+		return [
+			root,
+			Array.from(root.children).map(x => this._enumerateAll(x)),
+			root.shadowRoot ? this._enumerateAll(root.shadowRoot) : []
+		].flat(Infinity);
+	}
+
+	_enumerateNonUi() {
+		return this._enumerateAll(this)
+			.filter(x => x instanceof AudioComponentBase);
+	}
+}
+
+customElements.define('audio-context', AudioContext);
+
+export { AudioContext };
+export { AudioComponentBase } from "./audio-component-base.js";

@@ -1,312 +1,351 @@
-import {PolymerElement} from "./@polymer/polymer/polymer-element.js";
-import {shadowRoot, statusMessage} from "./audio-context.js";
+// ui.js
+// Native Web Component base class for UI elements
+// Replaces Polymer-based UI class
+
+import { getShadowRoot, statusMessage } from "./audio-component-base.js";
 
 const savedValues = new Map();
 const userKeymap = new Map();
 
-export class UI extends PolymerElement {
-static get properties () {
-return {
-label: String,
-defaultModifiers: {type: String, value: "alt shift", notify: true},
-shortcuts: {type: String, notify: true, observer: "shortcutsChanged"},
-shortcut: {type: String, notify: true, observer: "shortcutChanged"},
-}; // return
-} // get properties
+/**
+ * Base class for all UI control elements
+ * Provides:
+ * - Shadow DOM rendering
+ * - Keyboard shortcut handling
+ * - Value save/swap functionality
+ */
+export class UIBase extends HTMLElement {
+	static get observedAttributes() {
+		return ['label', 'name', 'value', 'shortcut'];
+	}
 
-connectedCallback () {
-super.connectedCallback();
-this.uiElement = this.shadowRoot && this.shadowRoot.querySelector("#input");
-if (this.shortcut && this.uiElement) {
-defineKey(this.shortcut, this.uiElement);
-} // if
-} // connectedCallback
+	constructor() {
+		super();
+		this.attachShadow({ mode: 'open' });
 
+		this._label = '';
+		this._name = '';
+		this._value = null;
+		this._shortcut = '';
+		this.defaultModifiers = 'alt shift';
+		this.uiElement = null;
+	}
 
-shortcutChanged (value) {
-//console.debug(`UI.shortcutChanged: ${value}, ${this.uiElement}`);
-defineKey(value, this.uiElement);
-} // shortcutChanged
+	// Template to render - subclasses override this
+	get template() {
+		return `<slot></slot>`;
+	}
 
+	connectedCallback() {
+		this.render();
+		this.uiElement = this.shadowRoot.querySelector("#input");
 
-handleSpecialKeys (e) {
-const key = e.key;
-if (isModifierKey(key)) return true;
-if (handleUserKey(e)) return false;
+		if (this._shortcut && this.uiElement) {
+			defineKey(this._shortcut, this.uiElement);
+		}
+	}
 
-const input = e.target;
-switch (key) {
-case " ": if(e.ctrlKey) swapValues(input);
-else return true;
-break;
+	render() {
+		this.shadowRoot.innerHTML = this.template;
+		this._setupEventListeners();
+	}
 
-case "Enter":
-if (e.ctrlKey && e.altKey && e.shiftKey) {
-defineKey(getKey(input), input);
-} else if(e.ctrlKey) {
-saveValue(input);
-} else {
-return true;
-} // if
-break;
+	// Override in subclasses to set up event listeners
+	_setupEventListeners() {}
 
-default: return true;
-} // switch
+	attributeChangedCallback(name, oldValue, newValue) {
+		if (oldValue === newValue) return;
 
-return false;alert("false man");
+		switch (name) {
+			case 'label':
+				this._label = newValue || '';
+				this._updateLabel();
+				break;
+			case 'name':
+				this._name = newValue || '';
+				break;
+			case 'value':
+				this.value = newValue;
+				break;
+			case 'shortcut':
+				this._shortcut = newValue || '';
+				if (this._shortcut && this.uiElement) {
+					defineKey(this._shortcut, this.uiElement);
+				}
+				break;
+		}
+	}
 
-} // handleSpecialKeys
+	// Label property
+	get label() { return this._label; }
+	set label(value) {
+		this._label = value || '';
+		this._updateLabel();
+	}
 
+	_updateLabel() {
+		const labelEl = this.shadowRoot.querySelector("label");
+		if (labelEl) labelEl.textContent = this._label;
+	}
 
-static processValues (values) {
-if (values instanceof String || typeof(values) === "string") {
-values = values.trim();
-if (values.charAt(0) !== "[" && values.includes(",") && !values.includes('"')) {
-return values.split(",")
-.map (value => value.trim());
-} else {
-try {values = JSON.parse(values);
-} catch (e) {values = [];} // catch
-} // if
-} // if
+	// Name property
+	get name() { return this._name || this._label; }
+	set name(value) { this._name = value || ''; }
 
-if (values && (values instanceof Array)) {
-values = values.map (value => {
-if (typeof(value) !== "object") value = {value: value, text: value};
-else if (value instanceof Array) value = {
-value: value[0],
-text: value.length > 1? value[1] : value[0]
-};
+	// Value property - subclasses should override getter/setter
+	get value() { return this._value; }
+	set value(val) {
+		const oldValue = this._value;
+		this._value = val;
+		if (oldValue !== val) {
+			this._notifyValueChange(val);
+		}
+	}
 
-return value;
-}); // map
-} // if
+	// Shortcut property
+	get shortcut() { return this._shortcut; }
+	set shortcut(value) {
+		this._shortcut = value || '';
+		if (this._shortcut && this.uiElement) {
+			defineKey(this._shortcut, this.uiElement);
+		}
+	}
 
-return values;
-} // processValues
+	// Dispatch value-changed event
+	_notifyValueChange(value) {
+		this.dispatchEvent(new CustomEvent('value-changed', {
+			detail: { value, name: this.name },
+			bubbles: true,
+			composed: true
+		}));
+	}
 
+	// Handle special keyboard shortcuts
+	handleSpecialKeys(e) {
+		const key = e.key;
+		if (isModifierKey(key)) return true;
+		if (handleUserKey(e)) return false;
 
-static addFieldLabels () {
-let groupLabel = (this.shadowRoot || this).querySelector (".label, legend");
-let hide = !(groupLabel && groupLabel.textContent);
-let hideControls = this.hasAttribute ("hide-controls")?
-this.getAttribute("hide-controls").split (" ") : [];
+		const input = e.target;
+		switch (key) {
+			case " ":
+				if (e.ctrlKey) {
+					swapValues(input);
+				} else {
+					return true;
+				}
+				break;
 
-if (groupLabel) {
-let ancestors = this.ancestors()
-.filter ((e) => e && e.hasAttribute("label"))
-.map ((e) => {
-//console.log (`- ancestor: ${this.elementName(e)}`);
-return e;
-});
-let level = ancestors.length;
-//console.log (`ancestors: ${ancestors}`);
-console.log (`addFieldLabels: ${this.constructor.is} (${groupLabel.textContent}): level ${level}, add labels to ${hide? "hidden" : "visible"} fields`);
+			case "Enter":
+				if (e.ctrlKey && e.altKey && e.shiftKey) {
+					getKey(input);
+				} else if (e.ctrlKey) {
+					saveValue(input);
+				} else {
+					return true;
+				}
+				break;
 
-groupLabel.setAttribute ("role", "heading");
-groupLabel.setAttribute ("aria-level", level+1);
-} // if
+			default:
+				return true;
+		}
 
-Array.from((this.shadowRoot || this).querySelectorAll (".field, ui-number, ui-boolean, ui-list"))
-.forEach ((field) => {
-let name = field.getAttribute("data-name") || field.getAttribute("field-name") || field.getAttribute("name");
+		e.preventDefault();
+		return false;
+	}
 
-if (hide || hideControls.includes(name)) field.style.display = "none";
+	// Process values for list controls
+	static processValues(values) {
+		if (values instanceof String || typeof values === "string") {
+			values = values.trim();
+			if (values.charAt(0) !== "[" && values.includes(",") && !values.includes('"')) {
+				return values.split(",").map(value => value.trim());
+			} else {
+				try {
+					values = JSON.parse(values);
+				} catch (e) {
+					values = [];
+				}
+			}
+		}
 
-if (field.matches("div.field")) {
-let name = field.getAttribute("data-name") || field.getAttribute("field-name") || field.getAttribute("name");
-let label = field.querySelector("label");
-let control = field.querySelector("input, select, textarea");
-let id = this._id + "-" + name;
-//console.log(`- field: ${name} ${field} ${control} ${label}`);
-control.setAttribute("id", id);
-label.setAttribute ("for", id);
-} // if
-}); // forEach field
-} // addFieldLabels
+		if (values && values instanceof Array) {
+			values = values.map(value => {
+				if (typeof value !== "object") {
+					value = { value: value, text: value };
+				} else if (value instanceof Array) {
+					value = {
+						value: value[0],
+						text: value.length > 1 ? value[1] : value[0]
+					};
+				}
+				return value;
+			});
+		}
 
-ancestors (top) {
-let result = [];
+		return values;
+	}
+}
 
-let e = this;
-if (! e) throw new Error ("ancestors: no host found");
+// Value save/swap utilities
+export function saveValue(input) {
+	savedValues.set(input, input.value);
+	statusMessage(`${input.value}: value saved.`);
+}
 
-//if (! this.shadowRoot) throw new Error("ancestors: element not connected or -- shadowRoot is null");
-//let e = this.shadowRoot.host;
+export function swapValues(input) {
+	if (savedValues.has(input)) {
+		const old = savedValues.get(input);
+		savedValues.set(input, input.value);
+		input.value = old;
+		statusMessage(old);
+	} else {
+		statusMessage(`No saved value; press Ctrl+Enter to save.`);
+	}
+}
 
+// Keyboard shortcut utilities
+export function getKey(input) {
+	const root = getShadowRoot();
+	if (!root) return;
 
-if (!top || !top.nodeType || top.nodeType !== 1) {
-top = e.closest("audio-context") || document.querySelector("body");
-} // if
+	const dialog = root.querySelector("#defineKeyDialog");
+	if (!dialog) return;
 
+	const ok = dialog.querySelector(".ok");
+	const closeButton = dialog.querySelector(".close");
 
-while (e && e !== top) {
-//console.log (`- ancestors: e=${this.elementName(e)}`);
-result.push (e);
+	dialog.removeAttribute("hidden");
+	dialog.querySelector(".control").focus();
 
-e = e.parentElement || e.parentNode.host;
-} // while
+	closeButton.addEventListener("click", close);
+	ok.addEventListener("click", () => {
+		dialog.setAttribute("hidden", "true");
+		const text = keyToText({
+			ctrlKey: dialog.querySelector(".control").checked,
+			altKey: dialog.querySelector(".alt").checked,
+			shiftKey: dialog.querySelector(".shift").checked,
+			key: dialog.querySelector(".key").value
+		});
+		defineKey(text, input);
+		close();
+	});
 
-//result = (result.length > 0)? result.slice(1) : [];
-return result;
-} // ancestors
+	function close() {
+		dialog.setAttribute("hidden", "true");
+		input.focus();
+	}
+}
 
-} // class UI
+export function handleUserKey(e) {
+	const text = keyToText(eventToKey(e));
+	const elements = userKeymap.get(text);
+	if (!elements) return false;
 
+	if (elements && elements.length && elements.length > 0) {
+		const input = e.target;
+		let focus = elements[0];
+		if (elements.length > 1) {
+			focus = findNextFocus(elements, input);
+		}
 
+		if (focus) {
+			focus.focus();
+			e.preventDefault();
+			return true;
+		}
+	}
 
-export function saveValue (input) {
-savedValues.set(input, input.value);
-statusMessage(`${input.value}: value saved.`);
-} // saveValue
+	return false;
 
-export function swapValues (input) {
-if (savedValues.has(input)) {
-const old = savedValues.get(input);
-savedValues.set(input, input.value);
-input.value = old;
-statusMessage(old);
-} else {
-statusMessage(`No saved value; press enter to save.`);
-} // if
-} // swapValues
+	function findNextFocus(list, item) {
+		const index = list.indexOf(item);
+		if (index < 0) return list[0];
+		else if (index === list.length - 1) return list[0];
+		else return list[index + 1];
+	}
+}
 
-export function getKey (input) {
-const dialog = shadowRoot.querySelector("#defineKeyDialog");
-const ok = dialog.querySelector(".ok");
-const closeButton = dialog.querySelector(".close");
+export function defineKey(text, element) {
+	if (!text || !element) return;
+	text = normalizeKeyText(text);
+	let elements = userKeymap.get(text);
 
-dialog.removeAttribute("hidden");
-dialog.querySelector(".control").focus();
+	if (elements) elements.push(element);
+	else elements = [element];
+	userKeymap.set(text, elements);
+}
 
-closeButton.addEventListener ("click", close);
-ok.addEventListener("click", () => {
-dialog.setAttribute("hidden", true);
-const text = keyToText({
-ctrlKey: dialog.querySelector(".control").checked,
-altKey: dialog.querySelector(".alt").checked,
-shiftKey: dialog.querySelector(".shift").checked,
-key: dialog.querySelector(".key").value
-});
-defineKey(text, input);
-close();
-}); // ok
+export function textToKey(text) {
+	let t = text.split(" ").map(x => x.trim());
+	if (t.length === 1) t = `alt shift ${t[0]}`.split(" ");
 
-function close () {
-dialog.setAttribute("hidden", true);
-input.focus();
-} // close
-} // getKey
+	const key = {};
+	key.ctrlKey = t.includes("control") || t.includes("ctrl");
+	key.altKey = t.includes("alt");
+	key.shiftKey = t.includes("shift");
+	key.key = t[t.length - 1];
 
-export function handleUserKey (e) {
-const text = keyToText(eventToKey(e));
-const elements = userKeymap.get(text);
-if (!elements) return false;
+	if (!key.key) {
+		throw new Error(`textToKey: ${text} is an invalid key descriptor; character must be last component as in "control shift x"`);
+	} else if (key.key.toLowerCase() === "space") {
+		key.key = " ";
+	} else if (key.key.toLowerCase() === "enter") {
+		key.key = "Enter";
+	} else {
+		key.key = key.key.substr(0, 1).toLowerCase();
+	}
+	return key;
+}
 
-if (elements && elements.length && elements.length > 0) {
-//console.debug(`handleUserKeys: found ${elements.length} elements attached to ${text}`);
-const input = e.target;
-let focus = elements[0];
-if (elements.length > 1) {
-focus = findNextFocus(elements, input);
-} // if
+export function keyToText(key) {
+	let text = "";
+	if (key.ctrlKey) text += "control ";
+	if (key.altKey) text += "alt ";
+	if (key.shiftKey) text += "shift ";
+	if (key.key) text += key.key.toLowerCase();
+	return text.trim();
+}
 
-if (focus) {
-focus.focus();
-e.preventDefault();
-return true;
-} // if
-} // if
+export function normalizeKeyText(text) {
+	return keyToText(textToKey(text));
+}
 
-return false;
+function compareKeys(k1, k2) {
+	return (
+		k1.ctrlKey === k2.ctrlKey &&
+		k1.altKey === k2.altKey &&
+		k1.shiftKey === k2.shiftKey &&
+		k1.key.toLowerCase() === k2.key.toLowerCase()
+	);
+}
 
-function findNextFocus (list, item) {
-const index = list.indexOf(item);
-if (index < 0) return list[0];
-else if (index === list.length - 1) return list[0];
-else return list[index+1];
-} // findNextFocus
-} // handleUserKey
+function eventToKey(e) {
+	return { ctrlKey: e.ctrlKey, shiftKey: e.shiftKey, altKey: e.altKey, key: e.key };
+}
 
-export function defineKey (text, element) {
-if (!text || !element) return;
-text = normalizeKeyText(text);
-let elements = userKeymap.get(text);
+export function isModifierKey(key) {
+	return key === "Control" || key === "Alt" || key === "Shift";
+}
 
-if (elements) elements.push(element);
-else elements = [element];
-userKeymap.set(text, elements);
-//console.debug (`define key ${text} maps to ${elements.slice(-1)}`);
-} // defineKey
+export function hasModifierKeys(e) {
+	return e.ctrlKey || e.altKey || e.shiftKey;
+}
 
-export function textToKey (text) {
-let t = text.split(" ").map(x => x.trim());
-if (t.length === 1) t = `${defaultModifiers} ${t[0]}`.split(" ");
+function allowedUnmodified(key) {
+	const allowed = "Enter, Home, End, PageUp, PageDown, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Delete, Backspace"
+		.split(",").map(x => x.trim());
+	return allowed.includes(key);
+}
 
-const key = {};
-key.ctrlKey = (t.includes("control") || t.includes("ctrl"));
-key.altKey = t.includes("alt");
-key.shiftKey = t.includes("shift");
-key.key = t[t.length-1];
-
-if (!key.key) throw new Error(`textToKey: ${text} is an invalid key descriptor; character must be last component as in "control shift x"`);
-else if (key.key.toLowerCase() === "space") key.key = " ";
-else if (key.key.toLowerCase() === "enter") key.key = "Enter";
-else key.key = key.key.substr(0,1).toLowerCase();
-return key;
-} // textToKey
-
-export function keyToText (key) {
-let text = "";
-if (key.cntrlKey) text += "control ";
-if (key.altKey) text += "alt ";
-if (key.shiftKey) text += "shift ";
-if (key.key) text += key.key.toLowerCase();
-return text.trim();
-} keyToText
-
-export function normalizeKeyText (text) {
-return keyToText(textToKey(text));
-} // normalizeKeyText
-
-function compareKeys (k1, k2) {
-return (
-k1.ctrlKey === k2.ctrlKey
-&& k1.altKey === k2.altKey
-&& k1.shiftKey === k2.shiftKey
-&& k1.key.toLowerCase() === k2.key.toLowerCase()
-); // return
-} // compareKeys
-
-
-function eventToKey (e) {
-return {ctrlKey: e.ctrlKey, shiftKey: e.shiftKey, altKey: e.altKey, key: e.key};
-} // eventToKey 
-
-
-export function isModifierKey (key) {
-return key === "Control" || key === "Alt" || key === "Shift";
-} // isModifierKey
-
-export function hasModifierKeys (e) {
-return e.ctrlKey || e.altKey || e.shiftKey;
-} // modifierKeys
-
-function allowedUnmodified (key) {
-const allowed = "Enter, Home, End, PageUp, PageDown, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Delete, Backspace"
-.split(",").map(x => x.trim());
-
-return allowed.includes(key);
-} // allowedUnmodified
-
-export function parseNumber (value) {
-const val = String(value).split(":");
-if (val.length === 2) {
-return {type: val[0], value: Number(val[1])};
-} else if(val.length === 1) {
-return this.value;
-} else {
-statusMessage(`ui-number: bad value - ${value}`);
-return {};
-} // if
-} // parseNumber
+export function parseNumber(value) {
+	const val = String(value).split(":");
+	if (val.length === 2) {
+		return { type: val[0], value: Number(val[1]) };
+	} else if (val.length === 1) {
+		return Number(value);
+	} else {
+		statusMessage(`ui-number: bad value - ${value}`);
+		return {};
+	}
+}
