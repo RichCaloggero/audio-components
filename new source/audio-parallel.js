@@ -10,7 +10,7 @@ let instanceCount = 0;
 class AudioParallel extends AudioComponentBase {
 	static get observedAttributes() {
 		return ['label', 'hide', 'bypass', 'mix', 'silent-bypass', 'hide-on-bypass'];
-	}
+	} // get observedAttributes
 
 	constructor() {
 		super();
@@ -19,7 +19,7 @@ class AudioParallel extends AudioComponentBase {
 
 		// Mark as container element
 		this.container = true;
-	}
+	} // constructor
 
 	get template() {
 		return `
@@ -36,7 +36,7 @@ class AudioParallel extends AudioComponentBase {
 			</fieldset>
 			<slot></slot>
 		`;
-	}
+	} // get template
 
 	connectedCallback() {
 		super.connectedCallback();
@@ -52,9 +52,9 @@ class AudioParallel extends AudioComponentBase {
 			if (this.uiControls().every(x => x.hidden)) {
 				const legend = this.shadowRoot.querySelector("legend");
 				if (legend) legend.hidden = true;
-			}
-		});
-	}
+			} // if all hidden
+		}); // childrenReady
+	} // connectedCallback
 
 	_setupEventListeners() {
 		// Bypass control
@@ -63,8 +63,8 @@ class AudioParallel extends AudioComponentBase {
 			bypassEl.value = this._bypass;
 			bypassEl.addEventListener('value-changed', (e) => {
 				this.bypass = e.detail.value;
-			});
-		}
+			}); // value-changed
+		} // if bypassEl
 
 		// Mix control
 		const mixEl = this.shadowRoot.querySelector('ui-number[label="mix"]');
@@ -72,10 +72,10 @@ class AudioParallel extends AudioComponentBase {
 			mixEl.value = this._mix;
 			mixEl.addEventListener('value-changed', (e) => {
 				this.mix = e.detail.value;
-			});
-		}
-	}
-}
+			}); // value-changed
+		} // if mixEl
+	} // _setupEventListeners
+} // class AudioParallel
 
 customElements.define('audio-parallel', AudioParallel);
 

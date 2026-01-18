@@ -1,41 +1,63 @@
-import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {module as _AudioContext_} from "./audio-context.js";
-import {ChannelSwap} from "./audio-component.js";
+// audio-channelSwap.js
+// Native Web Component for channel swap
+// Replaces Polymer-based AudioChannelSwap
 
-let instanceCount  = 0;
+import { AudioComponentBase } from "./audio-component-base.js";
+import { ChannelSwap } from "./audio-component.js";
 
-const module = class AudioChannelSwap extends _AudioContext_ {
-static get template () {
-return html`
-<fieldset class="channel-swap">
-<legend><h2 aria-level$="[[depth]]">[[label]]</h2></legend>
+let instanceCount = 0;
 
-<ui-boolean label="bypass" value="{{bypass}}"></ui-boolean>
-<ui-number label="mix" value="{{mix}}" min="-1" max="1" step=".1"></ui-number>
+class AudioChannelSwap extends AudioComponentBase {
+	static get observedAttributes() {
+		return ['label', 'hide', 'bypass', 'mix', 'silent-bypass', 'hide-on-bypass'];
+	} // get observedAttributes
 
-</fieldset>
-`;
-} // get template
+	constructor() {
+		super();
+		instanceCount++;
+		this.id = `audio-channelswap-${instanceCount}`;
 
-static get is() { return "audio-channelswap"; }
+		// Create the audio component
+		this.component = new ChannelSwap(this.audio);
+	} // constructor
 
-static get properties () {
-return {};
-} // get properties
+	get template() {
+		return `
+			<style>
+				:host { display: block; }
+				fieldset { border: 1px solid #ccc; padding: 1em; margin: 0.5em 0; }
+				legend h2 { margin: 0; font-size: 1.1em; }
+			</style>
+			<fieldset class="channel-swap">
+				<legend><h2>${this._label}</h2></legend>
+				<ui-boolean label="bypass"></ui-boolean>
+				<ui-number label="mix" min="-1" max="1" step="0.1"></ui-number>
+			</fieldset>
+		`;
+	} // get template
 
-constructor () {
-super ();
-instanceCount += 1;
-this.id = `${module.is}-${instanceCount}`;
-this.module = module;
-this.component = new ChannelSwap(this.audio);
-} // constructor
-
-connectedCallback () {
-super.connectedCallback();
-this.isReady = true;
+	connectedCallback() {
+		super.connectedCallback();
+		this.isReady = true;
 	} // connectedCallback
 
+	_setupEventListeners() {
+		// Bypass control
+		const bypassEl = this.shadowRoot.querySelector('ui-boolean[label="bypass"]');
+		if (bypassEl) {
+			bypassEl.value = this._bypass;
+			bypassEl.addEventListener('value-changed', (e) => this.bypass = e.detail.value);
+		} // if bypassEl
+
+		// Mix control
+		const mixEl = this.shadowRoot.querySelector('ui-number[label="mix"]');
+		if (mixEl) {
+			mixEl.value = this._mix;
+			mixEl.addEventListener('value-changed', (e) => this.mix = e.detail.value);
+		} // if mixEl
+	} // _setupEventListeners
 } // class AudioChannelSwap
 
-customElements.define(module.is, module);
+customElements.define('audio-channelswap', AudioChannelSwap);
+
+export { AudioChannelSwap };

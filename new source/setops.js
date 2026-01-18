@@ -1,6 +1,8 @@
+import { not } from "./utility.js";
+
 export function isSuperset(set, subset) {
 for (let elem of subset) {
-if (!set.has(elem)) {
+if (not(set.has(elem))) {
 return false
 }
 }

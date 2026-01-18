@@ -10,7 +10,7 @@ let instanceCount = 0;
 class AudioDelay extends AudioComponentBase {
 	static get observedAttributes() {
 		return ['label', 'hide', 'bypass', 'mix', 'silent-bypass', 'hide-on-bypass', 'delay', 'step'];
-	}
+	} // get observedAttributes
 
 	constructor() {
 		super();
@@ -23,7 +23,7 @@ class AudioDelay extends AudioComponentBase {
 
 		// Create the audio component
 		this.component = new Delay(this.audio);
-	}
+	} // constructor
 
 	get template() {
 		return `
@@ -39,12 +39,12 @@ class AudioDelay extends AudioComponentBase {
 				<ui-number label="delay" type="number" min="0.0" max="1.0" step="${this._step}"></ui-number>
 			</fieldset>
 		`;
-	}
+	} // get template
 
 	connectedCallback() {
 		super.connectedCallback();
 		this.isReady = true;
-	}
+	} // connectedCallback
 
 	_setupEventListeners() {
 		// Bypass control
@@ -52,22 +52,22 @@ class AudioDelay extends AudioComponentBase {
 		if (bypassEl) {
 			bypassEl.value = this._bypass;
 			bypassEl.addEventListener('value-changed', (e) => this.bypass = e.detail.value);
-		}
+		} // if bypassEl
 
 		// Mix control
 		const mixEl = this.shadowRoot.querySelector('ui-number[label="mix"]');
 		if (mixEl) {
 			mixEl.value = this._mix;
 			mixEl.addEventListener('value-changed', (e) => this.mix = e.detail.value);
-		}
+		} // if mixEl
 
 		// Delay control
 		const delayEl = this.shadowRoot.querySelector('ui-number[label="delay"]');
 		if (delayEl) {
 			delayEl.value = this._delay;
 			delayEl.addEventListener('value-changed', (e) => this.delay = e.detail.value);
-		}
-	}
+		} // if delayEl
+	} // _setupEventListeners
 
 	attributeChangedCallback(name, oldValue, newValue) {
 		if (oldValue === newValue) return;
@@ -75,14 +75,14 @@ class AudioDelay extends AudioComponentBase {
 		switch (name) {
 			case 'delay':
 				this.delay = Number(newValue) || 0;
-				break;
+				break; // case delay
 			case 'step':
 				this._step = Number(newValue) || 0.00001;
-				break;
+				break; // case step
 			default:
 				super.attributeChangedCallback(name, oldValue, newValue);
-		}
-	}
+		} // switch name
+	} // attributeChangedCallback
 
 	// Delay property
 	get delay() { return this._delay; }
@@ -90,15 +90,15 @@ class AudioDelay extends AudioComponentBase {
 		this._delay = Number(value);
 		if (this._ready && this.component?.delay) {
 			this.component.delay.delayTime.value = this._delay;
-		}
-	}
+		} // if ready
+	} // set delay
 
 	// Step property
 	get step() { return this._step; }
 	set step(value) {
 		this._step = Number(value);
-	}
-}
+	} // set step
+} // class AudioDelay
 
 customElements.define('audio-delay', AudioDelay);
 

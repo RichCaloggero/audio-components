@@ -2,7 +2,7 @@
 // Native Web Component for series audio connection
 // Replaces Polymer-based AudioSeries
 
-import { AudioComponentBase, childrenReady } from "./audio-component-base.js";
+import { AudioComponentBase, childrenReady, not } from "./audio-component-base.js";
 import { Series } from "./audio-component.js";
 
 let instanceCount = 0;
@@ -13,7 +13,7 @@ class AudioSeries extends AudioComponentBase {
 			'label', 'hide', 'bypass', 'mix', 'silent-bypass', 'hide-on-bypass',
 			'feed-forward', 'feed-back', 'delay', 'gain'
 		];
-	}
+	} // get observedAttributes
 
 	constructor() {
 		super();
@@ -28,7 +28,7 @@ class AudioSeries extends AudioComponentBase {
 		this._feedBack = false;
 		this._delay = 0;
 		this._gain = 0.5;
-	}
+	} // constructor
 
 	get template() {
 		return `
@@ -51,7 +51,7 @@ class AudioSeries extends AudioComponentBase {
 			</fieldset>
 			<slot></slot>
 		`;
-	}
+	} // get template
 
 	connectedCallback() {
 		super.connectedCallback();
@@ -74,8 +74,8 @@ class AudioSeries extends AudioComponentBase {
 			this._updateFeedbackUI();
 
 			// Note: isReady will be set to true by childrenReady after this callback returns
-		});
-	}
+		}); // childrenReady
+	} // connectedCallback
 
 	_setupEventListeners() {
 		// Bypass control
@@ -84,8 +84,8 @@ class AudioSeries extends AudioComponentBase {
 			bypassEl.value = this._bypass;
 			bypassEl.addEventListener('value-changed', (e) => {
 				this.bypass = e.detail.value;
-			});
-		}
+			}); // value-changed
+		} // if bypassEl
 
 		// Mix control
 		const mixEl = this.shadowRoot.querySelector('ui-number[label="mix"]');
@@ -93,8 +93,8 @@ class AudioSeries extends AudioComponentBase {
 			mixEl.value = this._mix;
 			mixEl.addEventListener('value-changed', (e) => {
 				this.mix = e.detail.value;
-			});
-		}
+			}); // value-changed
+		} // if mixEl
 
 		// Delay control (for feedback)
 		const delayEl = this.shadowRoot.querySelector('ui-number[label="delay"]');
@@ -102,8 +102,8 @@ class AudioSeries extends AudioComponentBase {
 			delayEl.value = this._delay;
 			delayEl.addEventListener('value-changed', (e) => {
 				this.delay = e.detail.value;
-			});
-		}
+			}); // value-changed
+		} // if delayEl
 
 		// Gain control (for feedback)
 		const gainEl = this.shadowRoot.querySelector('.feedback-controls ui-number[label="gain"]');
@@ -111,9 +111,9 @@ class AudioSeries extends AudioComponentBase {
 			gainEl.value = this._gain;
 			gainEl.addEventListener('value-changed', (e) => {
 				this.gain = e.detail.value;
-			});
-		}
-	}
+			}); // value-changed
+		} // if gainEl
+	} // _setupEventListeners
 
 	attributeChangedCallback(name, oldValue, newValue) {
 		if (oldValue === newValue) return;
@@ -121,26 +121,26 @@ class AudioSeries extends AudioComponentBase {
 		switch (name) {
 			case 'feed-forward':
 				this._feedForward = newValue !== null;
-				break;
+				break; // case feed-forward
 			case 'feed-back':
 				this.feedBack = newValue !== null;
-				break;
+				break; // case feed-back
 			case 'delay':
 				this.delay = Number(newValue) || 0;
-				break;
+				break; // case delay
 			case 'gain':
 				this.gain = Number(newValue) || 0.5;
-				break;
+				break; // case gain
 			default:
 				super.attributeChangedCallback(name, oldValue, newValue);
-		}
-	}
+		} // switch name
+	} // attributeChangedCallback
 
 	// Feed forward property
 	get feedForward() { return this._feedForward; }
 	set feedForward(value) {
 		this._feedForward = Boolean(value);
-	}
+	} // set feedForward
 
 	// Feed back property
 	get feedBack() { return this._feedBack; }
@@ -151,9 +151,9 @@ class AudioSeries extends AudioComponentBase {
 			if (this._feedBack && this.component) {
 				this.component.gain = this._gain;
 				this.component.delay = this._delay;
-			}
-		}
-	}
+			} // if feedBack
+		} // if ready
+	} // set feedBack
 
 	// Delay property (for feedback loop)
 	get delay() { return this._delay; }
@@ -161,8 +161,8 @@ class AudioSeries extends AudioComponentBase {
 		this._delay = Number(value);
 		if (this._ready && this._feedBack && this.component) {
 			this.component.delay = this._delay;
-		}
-	}
+		} // if ready
+	} // set delay
 
 	// Gain property (for feedback loop)
 	get gain() { return this._gain; }
@@ -170,16 +170,16 @@ class AudioSeries extends AudioComponentBase {
 		this._gain = Number(value);
 		if (this._ready && this._feedBack && this.component) {
 			this.component.gain = this._gain;
-		}
-	}
+		} // if ready
+	} // set gain
 
 	_updateFeedbackUI() {
 		const feedbackControls = this.shadowRoot?.querySelector('.feedback-controls');
 		if (feedbackControls) {
-			feedbackControls.hidden = !this._feedBack;
-		}
-	}
-}
+			feedbackControls.hidden = not(this._feedBack);
+		} // if feedbackControls
+	} // _updateFeedbackUI
+} // class AudioSeries
 
 customElements.define('audio-series', AudioSeries);
 

@@ -2,7 +2,7 @@
 // Native Web Component for oscillator node
 // Replaces Polymer-based AudioOscillator
 
-import { AudioComponentBase, statusMessage } from "./audio-component-base.js";
+import { AudioComponentBase, statusMessage, not } from "./audio-component-base.js";
 import { Oscillator } from "./audio-component.js";
 
 let instanceCount = 0;
@@ -166,7 +166,7 @@ class AudioOscillator extends AudioComponentBase {
 	}
 
 	_updateOscillator() {
-		if (!this._ready) return;
+		if (not(this._ready)) return;
 		this.options = {
 			type: this._type,
 			frequency: this._frequency,

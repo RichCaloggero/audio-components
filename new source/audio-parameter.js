@@ -2,7 +2,7 @@
 // Native Web Component for parameter automation definition
 // Replaces Polymer-based AudioParameter
 
-import { AudioComponentBase, statusMessage } from "./audio-component-base.js";
+import { AudioComponentBase, statusMessage, not } from "./audio-component-base.js";
 import { updateParameter } from "./audio-control.js";
 
 let instanceCount = 0;
@@ -100,11 +100,11 @@ class AudioParameter extends AudioComponentBase {
 
 	_update() {
 		const controller = this.parentElement;
-		if (!controller) return;
+		if (not(controller)) return;
 
 		console.debug(`${this.id}: requesting update for ${this._paramName}, ${this._function}, ${this._paramType}...`);
 
-		if (!this._paramName) return;
+		if (not(this._paramName)) return;
 
 		if (this._function && this._paramType) {
 			statusMessage(`${this.id}: parameter ${this._paramName} - cannot set both function and type; not updating...`);

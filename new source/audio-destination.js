@@ -10,7 +10,7 @@ let instanceCount = 0;
 class AudioDestination extends AudioComponentBase {
 	static get observedAttributes() {
 		return ['label', 'hide'];
-	}
+	} // get observedAttributes
 
 	constructor() {
 		super();
@@ -21,7 +21,7 @@ class AudioDestination extends AudioComponentBase {
 		this.component = new AudioComponent(this.audio, "speakers");
 		this.component.input.connect(this.audio.destination);
 		this.component.output = null; // No output - this is the end of the chain
-	}
+	} // constructor
 
 	get template() {
 		return `
@@ -34,13 +34,13 @@ class AudioDestination extends AudioComponentBase {
 				<legend><h2>${this._label}</h2></legend>
 			</fieldset>
 		`;
-	}
+	} // get template
 
 	connectedCallback() {
 		super.connectedCallback();
 		this.isReady = true;
-	}
-}
+	} // connectedCallback
+} // class AudioDestination
 
 customElements.define('audio-destination', AudioDestination);
 

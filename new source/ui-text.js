@@ -9,14 +9,14 @@ let instanceCount = 0;
 class UIText extends UIBase {
 	static get observedAttributes() {
 		return ['label', 'name', 'value', 'shortcut'];
-	}
+	} // get observedAttributes
 
 	constructor() {
 		super();
 		instanceCount++;
 		this.id = `ui-text-${instanceCount}`;
 		this._value = '';
-	}
+	} // constructor
 
 	get template() {
 		return `
@@ -31,31 +31,30 @@ class UIText extends UIBase {
 				<input id="input" type="text" value="${this._value}">
 			</div>
 		`;
-	}
+	} // get template
 
 	connectedCallback() {
 		super.connectedCallback();
 		// Sync value from attribute if present
 		if (this.hasAttribute('value')) {
 			this._value = this.getAttribute('value');
-		}
+		} // if has value
 		this._updateInputValue();
-	}
+	} // connectedCallback
 
 	_setupEventListeners() {
 		const input = this.shadowRoot.querySelector('#input');
 		if (input) {
-			input.addEventListener('input', (e) => {
-				this._value = e.target.value;
-				this._notifyValueChange(this._value);
-			});
+			// Only notify on 'change' event (blur or Enter), not on every keystroke
+			// This prevents partial values from being sent (e.g., "t", "t.", "t.m" when typing "t.mp3")
 			input.addEventListener('change', (e) => {
 				this._value = e.target.value;
 				this._notifyValueChange(this._value);
-			});
-			input.addEventListener('keydown', (e) => this._handleKeydown(e));
-		}
-	}
+			}); // change
+			// Keyboard handling is done by document-level handler in ui.js
+			// Native text input handles all typing
+		} // if input
+	} // _setupEventListeners
 
 	attributeChangedCallback(name, oldValue, newValue) {
 		if (oldValue === newValue) return;
@@ -64,11 +63,11 @@ class UIText extends UIBase {
 			case 'value':
 				this._value = newValue || '';
 				this._updateInputValue();
-				break;
+				break; // case value
 			default:
 				super.attributeChangedCallback(name, oldValue, newValue);
-		}
-	}
+		} // switch name
+	} // attributeChangedCallback
 
 	// Value property
 	get value() { return this._value; }
@@ -78,32 +77,16 @@ class UIText extends UIBase {
 			this._value = newValue;
 			this._updateInputValue();
 			this._notifyValueChange(this._value);
-		}
-	}
+		} // if changed
+	} // set value
 
 	_updateInputValue() {
 		const input = this.shadowRoot?.querySelector('#input');
 		if (input && input.value !== this._value) {
 			input.value = this._value;
-		}
-	}
-
-	_handleKeydown(e) {
-		// First let parent handle common shortcuts
-		if (super.handleSpecialKeys(e)) {
-			switch (e.key) {
-				case "Enter":
-					if (e.ctrlKey) return; // let parent handle Ctrl+Enter
-					break;
-				default:
-					return; // don't prevent default for unhandled keys
-			}
-		}
-
-		e.preventDefault();
-		e.target.dispatchEvent(new CustomEvent("change"));
-	}
-}
+		} // if input
+	} // _updateInputValue
+} // class UIText
 
 customElements.define('ui-text', UIText);
 

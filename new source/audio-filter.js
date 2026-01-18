@@ -24,7 +24,7 @@ class AudioFilter extends AudioComponentBase {
 			'label', 'hide', 'bypass', 'mix', 'silent-bypass', 'hide-on-bypass',
 			'type', 'frequency', 'q', 'gain', 'detune'
 		];
-	}
+	} // get observedAttributes
 
 	constructor() {
 		super();
@@ -40,7 +40,7 @@ class AudioFilter extends AudioComponentBase {
 
 		// Create the audio component
 		this.component = new Filter(this.audio);
-	}
+	} // constructor
 
 	get template() {
 		const typeOptions = JSON.stringify(FILTER_TYPES);
@@ -65,12 +65,12 @@ class AudioFilter extends AudioComponentBase {
 				<ui-number label="detune" min="0.0" max="100.0" step="1"></ui-number>
 			</fieldset>
 		`;
-	}
+	} // get template
 
 	connectedCallback() {
 		super.connectedCallback();
 		this.isReady = true;
-	}
+	} // connectedCallback
 
 	_setupEventListeners() {
 		// Bypass control
@@ -78,50 +78,50 @@ class AudioFilter extends AudioComponentBase {
 		if (bypassEl) {
 			bypassEl.value = this._bypass;
 			bypassEl.addEventListener('value-changed', (e) => this.bypass = e.detail.value);
-		}
+		} // if bypassEl
 
 		// Mix control
 		const mixEl = this.shadowRoot.querySelector('ui-number[label="mix"]');
 		if (mixEl) {
 			mixEl.value = this._mix;
 			mixEl.addEventListener('value-changed', (e) => this.mix = e.detail.value);
-		}
+		} // if mixEl
 
 		// Type control
 		const typeEl = this.shadowRoot.querySelector('ui-list[label="type"]');
 		if (typeEl) {
 			typeEl.value = this._type;
 			typeEl.addEventListener('value-changed', (e) => this.type = e.detail.value);
-		}
+		} // if typeEl
 
 		// Frequency control
 		const freqEl = this.shadowRoot.querySelector('ui-number[label="frequency"]');
 		if (freqEl) {
 			freqEl.value = this._frequency;
 			freqEl.addEventListener('value-changed', (e) => this.frequency = e.detail.value);
-		}
+		} // if freqEl
 
 		// Q control
 		const qEl = this.shadowRoot.querySelector('ui-number[label="Q"]');
 		if (qEl) {
 			qEl.value = this._q;
 			qEl.addEventListener('value-changed', (e) => this.q = e.detail.value);
-		}
+		} // if qEl
 
 		// Gain control
 		const gainEl = this.shadowRoot.querySelector('ui-number[label="gain"]');
 		if (gainEl) {
 			gainEl.value = this._filterGain;
 			gainEl.addEventListener('value-changed', (e) => this.filterGain = e.detail.value);
-		}
+		} // if gainEl
 
 		// Detune control
 		const detuneEl = this.shadowRoot.querySelector('ui-number[label="detune"]');
 		if (detuneEl) {
 			detuneEl.value = this._detune;
 			detuneEl.addEventListener('value-changed', (e) => this.detune = e.detail.value);
-		}
-	}
+		} // if detuneEl
+	} // _setupEventListeners
 
 	attributeChangedCallback(name, oldValue, newValue) {
 		if (oldValue === newValue) return;
@@ -129,23 +129,23 @@ class AudioFilter extends AudioComponentBase {
 		switch (name) {
 			case 'type':
 				this.type = newValue || 'lowpass';
-				break;
+				break; // case type
 			case 'frequency':
 				this.frequency = Number(newValue) || 350;
-				break;
+				break; // case frequency
 			case 'q':
 				this.q = Number(newValue) || 1;
-				break;
+				break; // case q
 			case 'gain':
 				this.filterGain = Number(newValue) || 1;
-				break;
+				break; // case gain
 			case 'detune':
 				this.detune = Number(newValue) || 0;
-				break;
+				break; // case detune
 			default:
 				super.attributeChangedCallback(name, oldValue, newValue);
-		}
-	}
+		} // switch name
+	} // attributeChangedCallback
 
 	// Type property
 	get type() { return this._type; }
@@ -153,8 +153,8 @@ class AudioFilter extends AudioComponentBase {
 		this._type = value;
 		if (this._ready && this.component) {
 			this.component.type = value;
-		}
-	}
+		} // if ready
+	} // set type
 
 	// Frequency property
 	get frequency() { return this._frequency; }
@@ -162,8 +162,8 @@ class AudioFilter extends AudioComponentBase {
 		this._frequency = Number(value);
 		if (this._ready && this.component) {
 			this.component.frequency = this._frequency;
-		}
-	}
+		} // if ready
+	} // set frequency
 
 	// Q property
 	get q() { return this._q; }
@@ -171,8 +171,8 @@ class AudioFilter extends AudioComponentBase {
 		this._q = Number(value);
 		if (this._ready && this.component) {
 			this.component.q = this._q;
-		}
-	}
+		} // if ready
+	} // set q
 
 	// Filter gain property (separate from mix gain)
 	get filterGain() { return this._filterGain; }
@@ -180,8 +180,8 @@ class AudioFilter extends AudioComponentBase {
 		this._filterGain = Number(value);
 		if (this._ready && this.component) {
 			this.component.gain = this._filterGain;
-		}
-	}
+		} // if ready
+	} // set filterGain
 
 	// Detune property
 	get detune() { return this._detune; }
@@ -189,9 +189,9 @@ class AudioFilter extends AudioComponentBase {
 		this._detune = Number(value);
 		if (this._ready && this.component) {
 			this.component.detune = this._detune;
-		}
-	}
-}
+		} // if ready
+	} // set detune
+} // class AudioFilter
 
 customElements.define('audio-filter', AudioFilter);
 

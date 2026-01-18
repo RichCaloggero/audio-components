@@ -9,14 +9,14 @@ let instanceCount = 0;
 class UIBoolean extends UIBase {
 	static get observedAttributes() {
 		return ['label', 'name', 'value', 'shortcut'];
-	}
+	} // get observedAttributes
 
 	constructor() {
 		super();
 		instanceCount++;
 		this.id = `ui-boolean-${instanceCount}`;
 		this._value = false;
-	}
+	} // constructor
 
 	get template() {
 		return `
@@ -33,7 +33,7 @@ class UIBoolean extends UIBase {
 				</label>
 			</div>
 		`;
-	}
+	} // get template
 
 	connectedCallback() {
 		super.connectedCallback();
@@ -41,9 +41,9 @@ class UIBoolean extends UIBase {
 		if (this.hasAttribute('value')) {
 			const attrValue = this.getAttribute('value');
 			this._value = attrValue === 'true' || attrValue === '' || attrValue === 'checked';
-		}
+		} // if has value
 		this._updateInputValue();
-	}
+	} // connectedCallback
 
 	_setupEventListeners() {
 		const input = this.shadowRoot.querySelector('#input');
@@ -51,14 +51,15 @@ class UIBoolean extends UIBase {
 			input.addEventListener('change', (e) => {
 				this._value = e.target.checked;
 				this._notifyValueChange(this._value);
-			});
+			}); // change
 			input.addEventListener('click', (e) => {
 				this._value = e.target.checked;
 				this._notifyValueChange(this._value);
-			});
-			input.addEventListener('keydown', (e) => this.handleSpecialKeys(e));
-		}
-	}
+			}); // click
+			// Keyboard handling is done by document-level handler in ui.js
+			// Native checkbox handles Space toggle
+		} // if input
+	} // _setupEventListeners
 
 	attributeChangedCallback(name, oldValue, newValue) {
 		if (oldValue === newValue) return;
@@ -67,11 +68,11 @@ class UIBoolean extends UIBase {
 			case 'value':
 				this._value = newValue === 'true' || newValue === '' || newValue === 'checked';
 				this._updateInputValue();
-				break;
+				break; // case value
 			default:
 				super.attributeChangedCallback(name, oldValue, newValue);
-		}
-	}
+		} // switch name
+	} // attributeChangedCallback
 
 	// Value property
 	get value() { return this._value; }
@@ -81,16 +82,16 @@ class UIBoolean extends UIBase {
 			this._value = newValue;
 			this._updateInputValue();
 			this._notifyValueChange(this._value);
-		}
-	}
+		} // if changed
+	} // set value
 
 	_updateInputValue() {
 		const input = this.shadowRoot?.querySelector('#input');
 		if (input) {
 			input.checked = this._value;
-		}
-	}
-}
+		} // if input
+	} // _updateInputValue
+} // class UIBoolean
 
 customElements.define('ui-boolean', UIBoolean);
 

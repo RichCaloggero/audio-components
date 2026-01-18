@@ -8,7 +8,8 @@ import {
 	addToAutomationQueue,
 	removeFromAutomationQueue,
 	getAutomationInterval,
-	statusMessage
+	statusMessage,
+	not
 } from "./audio-component-base.js";
 import { AudioComponent } from "./audio-component.js";
 
@@ -73,7 +74,7 @@ class AudioControl extends AudioComponentBase {
 	}
 
 	automate() {
-		if (!this._ready) return;
+		if (not(this._ready)) return;
 
 		const target = this.target;
 		const automationInterval = getAutomationInterval();
@@ -112,7 +113,7 @@ customElements.define('audio-control', AudioControl);
 // Utility function to update automation parameter
 export function updateParameter(controller, _name, _text, _type) {
 	console.debug(`${controller.id}.updateParameter: ${_name} ${_text}`);
-	if (!_name) return;
+	if (not(_name)) return;
 
 	const parameters = controller.parameters;
 	console.debug("- parameters: ", parameters);

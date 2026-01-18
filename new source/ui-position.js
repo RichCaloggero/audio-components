@@ -1,63 +1,98 @@
-import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
-import {UI} from "./ui.js";
+// ui-position.js
+// Native Web Component for 3D position input control
+// Replaces Polymer-based UIPosition
 
-let instanceCount  = 0;
+import { UIBase } from "./ui.js";
 
-class UIPosition extends UI {
-static get template () {
-return html`
-<div class="ui-position">
-<label id="label">[[label]]</label>
-<span role="application" tabindex="0" aria-labelledby="label" role="group">
-{{value::change}}
-</span>
-</div>
-`; // html
-} // get template
+let instanceCount = 0;
 
-static get is() { return "ui-position"; }
+function clamp(value, min = -1000, max = 1000) {
+	if (value < min) return min;
+	if (value > max) return max;
+	return value;
+} // clamp
 
+class UIPosition extends UIBase {
+	static get observedAttributes() {
+		return ['label', 'name', 'value', 'shortcut'];
+	} // get observedAttributes
 
-static get properties () {
-return {
-label: String,
-value: {type: String, notify: true},
-}; // return
-} // get properties
+	constructor() {
+		super();
+		instanceCount++;
+		this.id = `ui-position-${instanceCount}`;
+		this._value = '0, 0, 0';
+	} // constructor
 
+	get template() {
+		return `
+			<style>
+				:host { display: block; margin: 0.25em 0; }
+				.ui-position { display: flex; flex-direction: column; }
+				label { font-weight: bold; margin-bottom: 0.25em; }
+				span[role="application"] {
+					padding: 0.25em;
+					border: 1px solid #ccc;
+					min-width: 100px;
+					display: inline-block;
+				}
+				span[role="application"]:focus {
+					outline: 2px solid #007bff;
+					border-color: #007bff;
+				}
+			</style>
+			<div class="ui-position">
+				<label id="label">${this._label}</label>
+				<span id="input" role="application" tabindex="0" aria-labelledby="label">${this._value}</span>
+			</div>
+		`;
+	} // get template
 
-constructor () {
-super ();
-instanceCount += 1;
-this.id = `UIPosition.is}-${instanceCount}`;
-} // constructor
+	connectedCallback() {
+		super.connectedCallback();
+	} // connectedCallback
 
+	_setupEventListeners() {
+		// Keyboard handling is done by document-level handler in ui.js
+		// No per-component listeners needed
+	} // _setupEventListeners
 
+	// Value property
+	get value() { return this._value; }
+	set value(val) {
+		if (this._value !== val) {
+			this._value = val || '0, 0, 0';
+			this._updateDisplay();
+			this._notifyValueChange(this._value);
+		} // if changed
+	} // set value
 
-handleKeydown (e) {
-let text = e.target.textContent.trim();
-const vector = text.split(",").map(x => Number(x.trim()));
-console.log(`vector: ${vector}`);
-switch (e.key) {
-case "ArrowRight": vector[0] = clamp(vector[0]+1); break;
-case "ArrowLeft": vector[0] = clamp(vector[0]-1); break;
+	_updateDisplay() {
+		const input = this.shadowRoot?.querySelector('#input');
+		if (input) {
+			input.textContent = this._value;
+		} // if input
+	} // _updateDisplay
 
-case "ArrowUp": vector[2] = clamp(vector[2]+1); break;
-case "ArrowDown": vector[2] = clamp(vector[2]-1); break;
+	// Handler method called by table-driven keyboard dispatcher in ui.js
+	// axisIndex: 0=X, 1=Y, 2=Z
+	// delta: 1 or -1 for direction
+	adjustAxis(axisIndex, delta) {
+		const text = this._value || "0, 0, 0";
+		const vector = text.split(",").map(x => Number(x.trim()));
 
-case "u": vector[1] = clamp(vector[1]+1); break;
-case "d": vector[1] = clamp(vector[1]-1); break;
+		// Ensure we have 3 components
+		while (vector.length < 3) vector.push(0);
 
-case "Tab": case "Escape": return true;
+		// Adjust the specified axis
+		vector[axisIndex] = clamp(vector[axisIndex] + delta);
 
-default: return false;
-} // switch
-
-e.target.textContent = vector.join(",");
-e.target.dispatchEvent(new CustomEvent("change"));
-return false;
-} // handleKeydown
-
+		this._value = vector.join(", ");
+		this._updateDisplay();
+		this._notifyValueChange(this._value);
+	} // adjustAxis
 } // class UIPosition
 
-customElements.define(UIPosition.is, UIPosition);
+customElements.define('ui-position', UIPosition);
+
+export { UIPosition };

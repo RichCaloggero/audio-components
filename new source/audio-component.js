@@ -1,9 +1,10 @@
 import {_setParam, statusMessage} from "./audio-context.js";
+import { not } from "./utility.js";
 
 const registry = {};
 function registerComponent (name, parent) {
 const value = registry[name];
-if (! value) registry[name] = 1;
+if (not(value)) registry[name] = 1;
 else registry[name] += 1;
 return `${parent? parent.id + "." : ""}${name}-${registry[name]}`;
 } // registerComponent
@@ -54,7 +55,7 @@ return this;
 } // mix
 
 bypass (value) {
-if (!this.output) return this;
+if (not(this.output)) return this;
 //console.debug(`${this.name}.bypass ${value} ${this.wet.gain.value} ${this.dry.gain.value} ${this._bypass}`);
 if (value) {
 this.dry.disconnect();
@@ -288,7 +289,7 @@ console.debug(`Oscillator.set: ${options.toSource()}`);
 } // set
 
 start () {
-if (this.oscillator && !this.isPlaying) {
+if (this.oscillator && not(this.isPlaying)) {
 this.oscillator.start();
 this.isPlaying = true;
 } // if
@@ -321,7 +322,7 @@ set delay (value) {this._delay.delayTime.value = value;}
 
 bypass (value) {
 super.bypass (value);
-if (!value && this.wet && this._delay && this._gain) this.connectFeedback();
+if (not(value) && this.wet && this._delay && this._gain) this.connectFeedback();
 } // bypass
 
 connectFeedback () {this.wet.connect(this._delay).connect(this._gain).connect(this.input);}

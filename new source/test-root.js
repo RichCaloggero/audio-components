@@ -1,4 +1,5 @@
 import {PolymerElement, html} from "./@polymer/polymer/polymer-element.js";
+import { not } from "./utility.js";
 let instanceCount = 0;
 let shadowRoot;
 const logAppend = true;
@@ -48,7 +49,7 @@ this._ready = false;
 connectedCallback () {
 super.connectedCallback();
 this.id = this.id || this._id;
-if (!shadowRoot) shadowRoot = this.shadowRoot;
+if (not(shadowRoot)) shadowRoot = this.shadowRoot;
 
 statusMessage(`${this.id} connected with hideOnBypass ${this.hideOnBypass}`);
 
@@ -99,7 +100,7 @@ const p = document.createElement("p");
 p.appendChild(document.createTextNode(text));
 if (shadowRoot) {
 const status = shadowRoot.querySelector("#status");
-if (!append) status.innerHTML = "";
+if (not(append)) status.innerHTML = "";
 status.appendChild(p);
 } else {
 //alert (text);
@@ -114,7 +115,7 @@ element.addEventListener("elementReady", handleChildReady);
 //statusMessage (`${element.id}: waiting for ${children.length} children`);
 
 function handleChildReady (e) {
-if (!children.includes(e.target)) return;
+if (not(children.includes(e.target))) return;
 //statusMessage(`${element.id}: child ${e.target.id} is ready`);
 
 // remove this child and we're done if no more children left to process

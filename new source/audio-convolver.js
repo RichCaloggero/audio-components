@@ -2,7 +2,7 @@
 // Native Web Component for convolver (reverb) node
 // Replaces Polymer-based AudioConvolver
 
-import { AudioComponentBase, statusMessage, getAudio } from "./audio-component-base.js";
+import { AudioComponentBase, statusMessage, getAudio, not } from "./audio-component-base.js";
 import { Convolver } from "./audio-component.js";
 
 let instanceCount = 0;
@@ -91,7 +91,7 @@ class AudioConvolver extends AudioComponentBase {
 		super.connectedCallback();
 
 		// Set default impulse if not already set
-		if (this._impulses.length > 0 && !this._impulse) {
+		if (this._impulses.length > 0 && not(this._impulse)) {
 			this._impulse = this._impulses[0];
 		}
 

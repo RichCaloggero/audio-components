@@ -2,6 +2,11 @@
 // Native Web Component base class for all audio elements
 // Replaces Polymer's PolymerElement
 
+import { not } from "./utility.js";
+
+// Re-export for convenience
+export { not };
+
 let audio = null;
 let shadowRoot = null;
 let automationInterval = 0.070; // seconds
@@ -10,50 +15,50 @@ let automator = null;
 
 // Shared AudioContext getter/setter
 export function getAudio() {
-	if (!audio) {
+	if (not(audio)) {
 		audio = new AudioContext();
-	}
+	} // if
 	return audio;
-}
+} // getAudio
 
 export function setAudio(ctx) {
 	audio = ctx;
-}
+} // setAudio
 
 export function getShadowRoot() {
 	return shadowRoot;
-}
+} // getShadowRoot
 
 export function setShadowRoot(root) {
-	if (!shadowRoot) shadowRoot = root;
-}
+	if (not(shadowRoot)) shadowRoot = root;
+} // setShadowRoot
 
 // Automation functions
 export function startAutomation() {
 	automator = setInterval(() => automationQueue.forEach(e => e.automate()), 1000 * automationInterval);
-}
+} // startAutomation
 
 export function stopAutomation() {
 	clearInterval(automator);
 	automator = null;
-}
+} // stopAutomation
 
 export function addToAutomationQueue(element) {
 	automationQueue.push(element);
 	console.debug(`added ${element.label || element.id} to automation queue`);
-}
+} // addToAutomationQueue
 
 export function removeFromAutomationQueue(element) {
 	automationQueue = automationQueue.filter(e => e !== element);
-}
+} // removeFromAutomationQueue
 
 export function getAutomationInterval() {
 	return automationInterval;
-}
+} // getAutomationInterval
 
 export function setAutomationInterval(value) {
-	if (value && !Number.isNaN(value)) automationInterval = value;
-}
+	if (value && not(Number.isNaN(value))) automationInterval = value;
+} // setAutomationInterval
 
 // Status message utility
 export function statusMessage(message, log = true) {
@@ -62,29 +67,40 @@ export function statusMessage(message, log = true) {
 	if (shadowRoot) {
 		const status = shadowRoot.querySelector("#statusMessage");
 		if (status) {
-			if (!log) status.innerHTML = "";
+			if (not(log)) status.innerHTML = "";
 			status.appendChild(p);
 			return;
-		}
-	}
+		} // if status
+	} // if shadowRoot
 	console.log(message);
-}
+} // statusMessage
 
 // Set audio parameter with optional ramping
 export function setParam(parameter, value) {
-	if (!parameter) return;
+	if (not(parameter)) return;
 	try {
 		if (parameter instanceof AudioParam) {
 			if (automator) parameter.linearRampToValueAtTime(value, audio.currentTime);
 			else parameter.value = value;
 		} else {
 			parameter = value;
-		}
+		} // if AudioParam
 		return parameter;
 	} catch (e) {
 		console.error(`setParam (${parameter}, ${value}): ${e}`);
-	}
-}
+	} // try
+} // setParam
+
+/**
+ * Check if an element is an audio component (by tag name).
+ * We use tag name because custom elements may not be upgraded yet
+ * when connectedCallback runs on parent elements.
+ */
+function isAudioComponent(element) {
+	if (not(element) || not(element.tagName)) return false;
+	const tagName = element.tagName.toLowerCase();
+	return tagName.startsWith('audio-') && tagName !== 'audio';
+} // isAudioComponent
 
 /**
  * Wait for all children to be ready before proceeding.
@@ -95,13 +111,14 @@ export function setParam(parameter, value) {
  *
  * The pattern works as follows:
  * 1. Container element calls childrenReady() in connectedCallback
- * 2. childrenReady listens for 'elementReady' events bubbling from children
- * 3. Each child element sets isReady=true when its component is fully built
- * 4. Setting isReady=true triggers signalReady() on the next event loop pass
- * 5. signalReady dispatches 'elementReady' event that bubbles up
- * 6. When all children have signaled ready, callback is invoked
- * 7. Container then builds its component using the child components
- * 8. Container sets isReady=true, signaling to its parent
+ * 2. childrenReady waits for all child custom elements to be defined/upgraded
+ * 3. childrenReady listens for 'elementReady' events bubbling from children
+ * 4. Each child element sets isReady=true when its component is fully built
+ * 5. Setting isReady=true triggers signalReady() on the next event loop pass
+ * 6. signalReady dispatches 'elementReady' event that bubbles up
+ * 7. When all children have signaled ready, callback is invoked
+ * 8. Container then builds its component using the child components
+ * 9. Container sets isReady=true, signaling to its parent
  *
  * The setTimeout in isReady setter is essential - it ensures that events
  * aren't dropped when signalReady is called directly from the setter.
@@ -110,10 +127,8 @@ export function setParam(parameter, value) {
  * @param {Function} callback - Called with array of children when all are ready
  */
 export function childrenReady(element, callback) {
-	let children = Array.from(element.children).filter(child =>
-		// Only wait for audio component children, not text nodes or other elements
-		child instanceof AudioComponentBase
-	);
+	// Get audio component children by tag name (not instanceof, as they may not be upgraded yet)
+	let children = Array.from(element.children).filter(isAudioComponent);
 
 	if (children.length === 0) {
 		// No audio component children - we're ready immediately
@@ -123,14 +138,31 @@ export function childrenReady(element, callback) {
 			element.isReady = true;
 		}, 0);
 		return;
-	}
+	} // if no children
 
-	element.addEventListener("elementReady", handleChildReady);
-	console.debug(`${element.id}: waiting for ${children.length} children`);
+	// Wait for all child custom elements to be defined before listening for ready events
+	const tagNames = [...new Set(children.map(c => c.tagName.toLowerCase()))];
+	const definePromises = tagNames.map(name => customElements.whenDefined(name));
+
+	Promise.all(definePromises).then(() => {
+		// Re-filter children now that elements are upgraded
+		children = Array.from(element.children).filter(isAudioComponent);
+
+		if (children.length === 0) {
+			setTimeout(() => {
+				callback.call(element, []);
+				element.isReady = true;
+			}, 0);
+			return;
+		} // if no children
+
+		element.addEventListener("elementReady", handleChildReady);
+		console.debug(`${element.id}: waiting for ${children.length} children`);
+	}); // then
 
 	function handleChildReady(e) {
 		// Only handle events from direct children
-		if (!children.includes(e.target)) return;
+		if (not(children.includes(e.target))) return;
 
 		// Stop propagation to prevent parent from processing this event
 		e.stopPropagation();
@@ -141,36 +173,34 @@ export function childrenReady(element, callback) {
 
 		// All children ready - clean up listener and invoke callback
 		element.removeEventListener("elementReady", handleChildReady);
-		callback.call(element, Array.from(element.children).filter(child =>
-			child instanceof AudioComponentBase
-		));
+		callback.call(element, Array.from(element.children).filter(isAudioComponent));
 		element.isReady = true;
-	}
-}
+	} // handleChildReady
+} // childrenReady
 
 // Signal that element is ready
 function signalReady(element) {
 	element.dispatchEvent(new CustomEvent("elementReady", { bubbles: true }));
-}
+} // signalReady
 
 // Calculate depth in the component tree
 export function depth(start) {
 	let e = start;
 	let _depth = 1;
-	while (e && !e.matches("audio-context")) {
-		if (!e.container || e.label) _depth += 1;
+	while (e && not(e.matches("audio-context"))) {
+		if (not(e.container) || e.label) _depth += 1;
 		e = e.parentElement;
-	}
+	} // while
 	return _depth;
-}
+} // depth
 
 // Instance counter for unique IDs
 const instanceCounts = {};
 function getInstanceId(tagName) {
-	if (!instanceCounts[tagName]) instanceCounts[tagName] = 0;
+	if (not(instanceCounts[tagName])) instanceCounts[tagName] = 0;
 	instanceCounts[tagName]++;
 	return `${tagName}-${instanceCounts[tagName]}`;
-}
+} // getInstanceId
 
 /**
  * Base class for all audio component elements
@@ -185,7 +215,7 @@ export class AudioComponentBase extends HTMLElement {
 	// Subclasses should override this
 	static get observedAttributes() {
 		return ['label', 'hide', 'bypass', 'mix', 'silent-bypass', 'hide-on-bypass'];
-	}
+	} // get observedAttributes
 
 	constructor() {
 		super();
@@ -212,12 +242,12 @@ export class AudioComponentBase extends HTMLElement {
 
 		// Container flag (for series/parallel)
 		this.container = false;
-	}
+	} // constructor
 
 	// Template to render - subclasses override this
 	get template() {
 		return `<slot></slot>`;
-	}
+	} // get template
 
 	connectedCallback() {
 		// Restore original ID if provided
@@ -226,7 +256,7 @@ export class AudioComponentBase extends HTMLElement {
 		// Store shadow root reference for audio-context
 		if (this.tagName.toLowerCase() === 'audio-context') {
 			setShadowRoot(this.shadowRoot);
-		}
+		} // if audio-context
 
 		// Render template
 		this.render();
@@ -240,13 +270,13 @@ export class AudioComponentBase extends HTMLElement {
 			this.hideOnly(this._hide);
 		} else {
 			this.hideUI();
-		}
-	}
+		} // if label
+	} // connectedCallback
 
 	render() {
 		this.shadowRoot.innerHTML = this.template;
 		this._setupEventListeners();
-	}
+	} // render
 
 	// Override in subclasses to set up event listeners
 	_setupEventListeners() {}
@@ -261,16 +291,16 @@ export class AudioComponentBase extends HTMLElement {
 		switch (name) {
 			case 'hide':
 				this.hide = newValue;
-				break;
+				break; // case hide
 			case 'bypass':
 			case 'silent-bypass':
 			case 'hide-on-bypass':
 				this[propName] = newValue !== null;
-				break;
+				break; // case bypass, silent-bypass, hide-on-bypass
 			default:
 				this[propName] = newValue;
-		}
-	}
+		} // switch name
+	} // attributeChangedCallback
 
 	// Ready state management
 	get isReady() { return this._ready; }
@@ -282,12 +312,12 @@ export class AudioComponentBase extends HTMLElement {
 			setTimeout(() => signalReady(this), 0);
 		} else {
 			this._ready = false;
-		}
-	}
+		} // if value
+	} // set isReady
 
 	_runPropertyEffects() {
 		// Subclasses can override to run observers after ready
-	}
+	} // _runPropertyEffects
 
 	// Label property
 	get label() { return this._label; }
@@ -298,25 +328,25 @@ export class AudioComponentBase extends HTMLElement {
 				this.restoreUI();
 			} else {
 				this.hideUI();
-			}
-		}
+			} // if value
+		} // if ready
 		this._updateLegend();
-	}
+	} // set label
 
 	_updateLegend() {
 		const legend = this.shadowRoot.querySelector('legend h1, legend h2, legend h3');
 		if (legend) {
 			legend.textContent = this._label;
 			legend.setAttribute('aria-level', this._depth);
-		}
-	}
+		} // if legend
+	} // _updateLegend
 
 	// Depth property
 	get depth() { return this._depth; }
 	set depth(value) {
 		this._depth = value;
 		this._updateLegend();
-	}
+	} // set depth
 
 	// Hide property (comma-separated list of field names to hide)
 	get hide() { return this._hide; }
@@ -324,8 +354,8 @@ export class AudioComponentBase extends HTMLElement {
 		this._hide = value ? value.trim().toLowerCase().match(/\w+/g) || [] : [];
 		if (this._ready) {
 			this.hideOnly(this._hide);
-		}
-	}
+		} // if ready
+	} // set hide
 
 	// Bypass property
 	get bypass() { return this._bypass; }
@@ -335,20 +365,20 @@ export class AudioComponentBase extends HTMLElement {
 			this.component.silentBypass(this._silentBypass);
 			this.component.bypass(this._bypass);
 			this._handleHideOnBypass(this._bypass);
-		}
-	}
+		} // if ready
+	} // set bypass
 
 	// Silent bypass property
 	get silentBypass() { return this._silentBypass; }
 	set silentBypass(value) {
 		this._silentBypass = Boolean(value);
-	}
+	} // set silentBypass
 
 	// Hide on bypass property
 	get hideOnBypass() { return this._hideOnBypass; }
 	set hideOnBypass(value) {
 		this._hideOnBypass = Boolean(value);
-	}
+	} // set hideOnBypass
 
 	_handleHideOnBypass(bypassed) {
 		if (this._ready && this.label && this.findContext()?.hideOnBypass) {
@@ -359,9 +389,9 @@ export class AudioComponentBase extends HTMLElement {
 			} else {
 				this.hideOnly(this._hide);
 				if (slot) slot.hidden = false;
-			}
-		}
-	}
+			} // if bypassed
+		} // if ready
+	} // _handleHideOnBypass
 
 	// Mix property
 	get mix() { return this._mix; }
@@ -369,86 +399,86 @@ export class AudioComponentBase extends HTMLElement {
 		this._mix = Number(value);
 		if (this._ready && this.component) {
 			this.component.mix(this._mix);
-		}
-	}
+		} // if ready
+	} // set mix
 
 	// UI visibility utilities
 	uiRoot() {
 		return this.shadowRoot ?
-			Array.from(this.shadowRoot.children).filter(x => !x.matches("slot, style")) : [];
-	}
+			Array.from(this.shadowRoot.children).filter(x => not(x.matches("slot, style"))) : [];
+	} // uiRoot
 
 	uiControls() {
 		if (this.shadowRoot) {
 			const selectors = ".panel,ui-list,ui-text,ui-number,ui-boolean,button";
 			return Array.from(this.shadowRoot.querySelectorAll(selectors));
-		}
+		} // if shadowRoot
 		return [];
-	}
+	} // uiControls
 
 	hideOnly(...labels) {
 		const hide = labels.flat(Infinity);
 		this.uiControls().forEach(x => {
 			const label = x.label ? x.label.trim().toLowerCase() : "";
 			x.hidden = hide.includes(label.toLowerCase());
-		});
-	}
+		}); // forEach
+	} // hideOnly
 
 	hideAllExcept(...labels) {
 		const show = labels.flat(Infinity);
 		this.uiControls().forEach(x => {
 			const label = x.label ? x.label.trim().toLowerCase() : "";
-			x.hidden = !show.includes(label);
-		});
-	}
+			x.hidden = not(show.includes(label));
+		}); // forEach
+	} // hideAllExcept
 
 	restoreUI() {
 		this.uiRoot().forEach(x => x.hidden = false);
 		const slot = this.shadowRoot.querySelector("slot");
 		if (slot) slot.removeAttribute("hidden");
-	}
+	} // restoreUI
 
 	hideUI(includeDescendents) {
 		this.uiRoot().forEach(x => x.hidden = true);
 		if (includeDescendents) {
 			const slot = this.shadowRoot.querySelector("slot");
 			if (slot) slot.hidden = true;
-		}
-	}
+		} // if includeDescendents
+	} // hideUI
 
 	hidePanel(selector) {
 		if (this.shadowRoot) {
 			this.shadowRoot.querySelectorAll(selector).forEach(x => x.hidden = true);
-		}
-	}
+		} // if shadowRoot
+	} // hidePanel
 
 	showPanel(selector) {
 		if (this.shadowRoot) {
 			this.shadowRoot.querySelectorAll(selector).forEach(x => x.hidden = false);
-		}
-	}
+		} // if shadowRoot
+	} // showPanel
 
 	labelsToControls(...labels) {
 		return this.uiControls().filter(x => labels.includes(x.label));
-	}
+	} // labelsToControls
 
 	// Find the audio-context ancestor
 	findContext() {
 		let element = this;
 		while (element && element.tagName.toLowerCase() !== 'audio-context') {
 			element = element.parentElement;
-		}
+		} // while
 		return element;
-	}
+	} // findContext
 
 	// Get components from child elements
 	components(elements) {
-		if (!elements) elements = [];
+		if (not(elements)) elements = [];
 		return elements.map(e => {
 			if (e && e.component) return e.component;
 			else throw new Error(`${this.id}: ${e} is null or invalid -- cannot connect`);
-		});
-	}
+		}); // map
+	} // components
 
 	// Dispatch custom event for property changes
 	_notifyPropertyChange(name, value) {
@@ -457,13 +487,13 @@ export class AudioComponentBase extends HTMLElement {
 			bubbles: true,
 			composed: true
 		}));
-	}
+	} // _notifyPropertyChange
 
 	// Update UI element with new value
 	_updateUI(label, value) {
 		const control = this.shadowRoot.querySelector(`ui-number[label="${label}"], ui-boolean[label="${label}"], ui-list[label="${label}"], ui-text[label="${label}"]`);
 		if (control && control.value !== value) {
 			control.value = value;
-		}
-	}
-}
+		} // if control
+	} // _updateUI
+} // class AudioComponentBase

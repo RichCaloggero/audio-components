@@ -2,7 +2,7 @@
 // Native Web Component for 3D panner node
 // Replaces Polymer-based AudioPanner
 
-import { AudioComponentBase } from "./audio-component-base.js";
+import { AudioComponentBase, not } from "./audio-component-base.js";
 import { Panner } from "./audio-component.js";
 
 let instanceCount = 0;
@@ -211,7 +211,7 @@ class AudioPanner extends AudioComponentBase {
 		return `${this._x}, ${this._y}, ${this._z}`;
 	}
 	set position(value) {
-		if (!this._ready) return;
+		if (not(this._ready)) return;
 		const coords = value.split(",").map(x => Number(x.trim()));
 		this.x = coords[0] || 0;
 		this.y = coords[1] || 0;
